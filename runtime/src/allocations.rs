@@ -1,12 +1,6 @@
-/// A runtime module template with necessary imports
-
-/// Feel free to remove or edit this file as needed.
-/// If you change the name of this file, make sure to update its references in runtime/src/lib.rs
-/// If you remove this file, you can remove those references
-
-
-/// For more guidance on Substrate modules, see the example module
-/// https://github.com/paritytech/substrate/blob/master/srml/example/src/lib.rs
+/// A runtime module to handle Nodle Cash allocations to network
+/// contributors, has a list of oracles that can submit Merkle
+/// Root Hashes to be paid for.
 
 use support::{decl_module, decl_storage, decl_event, StorageValue, dispatch::Result};
 use system::ensure_signed;
@@ -102,7 +96,7 @@ mod tests {
 	impl Trait for Test {
 		type Event = ();
 	}
-	type TemplateModule = Module<Test>;
+	type AllocationModule = Module<Test>;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
@@ -115,9 +109,9 @@ mod tests {
 		with_externalities(&mut new_test_ext(), || {
 			// Just a dummy test for the dummy funtion `do_something`
 			// calling the `do_something` function with a value 42
-			assert_ok!(TemplateModule::do_something(Origin::signed(1), 42));
+			assert_ok!(AllocationModule::do_something(Origin::signed(1), 42));
 			// asserting that the stored value is equal to what we stored
-			assert_eq!(TemplateModule::something(), Some(42));
+			assert_eq!(AllocationModule::something(), Some(42));
 		});
 	}
 }
