@@ -55,9 +55,9 @@ decl_event!(
 );
 
 impl<T: Trait> Module<T> {
-    pub fn is_oracle(who: T::AccountId) -> bool {
-        Self::oracles().contains(&who)
-    }
+	pub fn is_oracle(who: T::AccountId) -> bool {
+		Self::oracles().contains(&who)
+	}
 }
 
 /// tests for this module
@@ -129,7 +129,7 @@ mod tests {
 		with_externalities(&mut new_test_ext(), || {
 			assert_ok!(AllocationsModule::remove_oracle(ORACLE));
 			assert!(!AllocationsModule::is_oracle(ORACLE));
-			
+
 			assert_ok!(AllocationsModule::add_oracle(ORACLE));
 			assert!(AllocationsModule::is_oracle(ORACLE));
 		})
@@ -138,9 +138,7 @@ mod tests {
 	#[test]
 	fn can_not_add_oracle_twice() {
 		with_externalities(&mut new_test_ext(), || {
-			assert_noop!(
-				AllocationsModule::add_oracle(ORACLE),
-				errors::ALLOCATIONS_ALREADY_ORACLE
+			assert_noop!(AllocationsModule::add_oracle(ORACLE), errors::ALLOCATIONS_ALREADY_ORACLE
 			);
         })
 	}
@@ -149,9 +147,7 @@ mod tests {
 	fn can_not_remove_oracle_twice() {
 		with_externalities(&mut new_test_ext(), || {
 			AllocationsModule::remove_oracle(ORACLE);
-			assert_noop!(
-				AllocationsModule::remove_oracle(ORACLE),
-				errors::ALLOCATIONS_NOT_ORACLE
+			assert_noop!(AllocationsModule::remove_oracle(ORACLE), errors::ALLOCATIONS_NOT_ORACLE
 			);
         })
 	}
