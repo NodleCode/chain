@@ -2,47 +2,46 @@
 /// contributors, has a list of oracles that can submit Merkle
 /// Root Hashes to be paid for.
 
-use support::{decl_module, decl_storage, decl_event, StorageValue, dispatch::Result};
+use support::{decl_module, decl_storage, decl_event, ensure, StorageValue, dispatch::Result};
 use system::ensure_signed;
+
+use crate::errors;
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
-	// TODO: Add other types and constants required configure this module.
-
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
 
 /// This module's storage items.
 decl_storage! {
-	trait Store for Module<T: Trait> as TemplateModule {
-		// Just a dummy storage item. 
-		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Something get(something): Option<u32>;
+	trait Store for Module<T: Trait> as AllocationsModule {
+		Oracles get(oracles) config(): Vec<T::AccountId>;
 	}
 }
 
 decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		// Initializing events
-		// this is needed only if you are using events in your module
 		fn deposit_event<T>() = default;
 
-		// Just a dummy entry point.
-		// function that can be called by the external world as an extrinsics call
-		// takes a parameter of the type `AccountId`, stores it and emits an event
-		pub fn do_something(origin, something: u32) -> Result {
-			// TODO: You only need this if you want to check it was signed.
-			let who = ensure_signed(origin)?;
+		// Add an oracle to the list, sudo only
+		pub fn add_oracle(oracle: T::AccountId) -> Result {
+			ensure!(!Self::is_oracle(oracle.clone()), errors::ALLOCATIONS_ALREADY_ORACLE);
 
-			// TODO: Code to execute when something calls this.
-			// For example: the following line stores the passed in u32 in the storage
-			<Something<T>>::put(something);
+			<Oracles<T>>::mutate(|mem| mem.push(oracle.clone()));
+			Self::deposit_event(RawEvent::OracleAdded(oracle));
 
-			// here we are raising the Something event
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
+			Ok(())
+		}
+
+		// Remove an oracle to the list, sudo only
+		pub fn remove_oracle(oracle: T::AccountId) -> Result {
+			ensure!(Self::is_oracle(oracle.clone()), errors::ALLOCATIONS_NOT_ORACLE);
+
+			<Oracles<T>>::mutate(|mem| mem.retain(|m| m != &oracle));
+			Self::deposit_event(RawEvent::OracleRemoved(oracle));
+
 			Ok(())
 		}
 	}
@@ -50,12 +49,16 @@ decl_module! {
 
 decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
-		// Just a dummy event.
-		// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
-		// To emit this event, we call the deposit funtion, from our runtime funtions
-		SomethingStored(u32, AccountId),
+		OracleAdded(AccountId),
+		OracleRemoved(AccountId),
 	}
 );
+
+impl<T: Trait> Module<T> {
+    pub fn is_oracle(who: T::AccountId) -> bool {
+        Self::oracles().contains(&who)
+    }
+}
 
 /// tests for this module
 #[cfg(test)]
@@ -64,7 +67,7 @@ mod tests {
 
 	use runtime_io::with_externalities;
 	use primitives::{H256, Blake2Hasher};
-	use support::{impl_outer_origin, assert_ok};
+	use support::{impl_outer_origin, assert_ok, assert_noop};
 	use runtime_primitives::{
 		BuildStorage,
 		traits::{BlakeTwo256, IdentityLookup},
@@ -96,22 +99,60 @@ mod tests {
 	impl Trait for Test {
 		type Event = ();
 	}
-	type AllocationModule = Module<Test>;
+	type AllocationsModule = Module<Test>;
+
+	pub const ORACLE: u64 = 0;
+	pub const NOT_ORACLE: u64 = 1;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
 	fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
-		system::GenesisConfig::<Test>::default().build_storage().unwrap().0.into()
+		let mut genesis = system::GenesisConfig::<Test>::default()
+			.build_storage()
+			.unwrap()
+			.0;
+
+		genesis.extend(
+			GenesisConfig::<Test> {
+				oracles: vec![ORACLE],
+			}
+			.build_storage()
+			.unwrap()
+			.0,
+		);
+
+		genesis.into()
 	}
 
 	#[test]
-	fn it_works_for_default_value() {
+	fn remove_add_oracle() {
 		with_externalities(&mut new_test_ext(), || {
-			// Just a dummy test for the dummy funtion `do_something`
-			// calling the `do_something` function with a value 42
-			assert_ok!(AllocationModule::do_something(Origin::signed(1), 42));
-			// asserting that the stored value is equal to what we stored
-			assert_eq!(AllocationModule::something(), Some(42));
-		});
+			assert_ok!(AllocationsModule::remove_oracle(ORACLE));
+			assert!(!AllocationsModule::is_oracle(ORACLE));
+			
+			assert_ok!(AllocationsModule::add_oracle(ORACLE));
+			assert!(AllocationsModule::is_oracle(ORACLE));
+		})
+	}
+
+	#[test]
+	fn can_not_add_oracle_twice() {
+		with_externalities(&mut new_test_ext(), || {
+			assert_noop!(
+				AllocationsModule::add_oracle(ORACLE),
+				errors::ALLOCATIONS_ALREADY_ORACLE
+			);
+        })
+	}
+
+	#[test]
+	fn can_not_remove_oracle_twice() {
+		with_externalities(&mut new_test_ext(), || {
+			AllocationsModule::remove_oracle(ORACLE);
+			assert_noop!(
+				AllocationsModule::remove_oracle(ORACLE),
+				errors::ALLOCATIONS_NOT_ORACLE
+			);
+        })
 	}
 }

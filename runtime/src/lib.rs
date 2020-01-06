@@ -54,6 +54,7 @@ pub type BlockNumber = u64;
 pub type Nonce = u64;
 
 // Custom modules installed
+mod errors;
 mod allocations;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
