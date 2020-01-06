@@ -28,6 +28,12 @@ Build all native code:
 cargo build
 ```
 
+# Test
+
+```bash
+cargo test -p nodle-chain-runtime
+```
+
 # Run
 
 You can start a development chain with:
