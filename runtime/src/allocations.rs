@@ -22,7 +22,6 @@ pub trait Trait: system::Trait {
 	type Reward: OnUnbalanced<PositiveImbalanceOf<Self>>;
 }
 
-/// This module's storage items.
 decl_storage! {
 	trait Store for Module<T: Trait> as AllocationsModule {
 		Oracles get(oracles) config(): Vec<T::AccountId>;
@@ -59,8 +58,8 @@ decl_module! {
 			Self::ensure_oracle(origin)?;
 
 			let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
-			let r = T::Currency::deposit_into_existing(&who, amount).ok();
-			total_imbalance.maybe_subsume(r);
+			let r = T::Currency::deposit_creating(&who, amount);
+			total_imbalance.subsume(r);
 			T::Reward::on_unbalanced(total_imbalance);
 
 			Self::deposit_event(RawEvent::RewardAllocated(who, amount, merkle_root_hash));
@@ -151,6 +150,8 @@ mod tests {
 	}
 	type AllocationsModule = Module<Test>;
 
+	pub type Balances = balances::Module<Test>;
+
 	pub const ORACLE: u64 = 0;
 	pub const NON_ORACLE: u64 = 1;
 
@@ -214,12 +215,10 @@ mod tests {
 
 	#[test]
 	fn oracle_submit_reward() {
-		// Init balance check
-
 		with_externalities(&mut new_test_ext(), || {
+			assert_eq!(Balances::free_balance(REWARD_TARGET), 0);
 			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT));
+			assert_eq!(Balances::free_balance(REWARD_TARGET), REWARD_AMOUNT);
 		})
-
-		// Verify balance
 	}
 }
