@@ -22,6 +22,8 @@ use version::RuntimeVersion;
 #[cfg(feature = "std")]
 use version::NativeVersion;
 
+use balances;
+
 // A few exports that help ease life for downstream crates.
 #[cfg(any(feature = "std", test))]
 pub use runtime_primitives::BuildStorage;
@@ -188,6 +190,9 @@ impl sudo::Trait for Runtime {
 
 impl allocations::Trait for Runtime {
 	type Event = Event;
+
+	type Currency = balances::Module<Runtime>;
+	type Reward = (); // rewards are minted from the void
 }
 
 construct_runtime!(
@@ -205,7 +210,7 @@ construct_runtime!(
 		Sudo: sudo,
 
 		// Setup custom modules
-		AllocationsModule: allocations::{Module, Call, Storage, Event<T>},
+		AllocationsModule: allocations::{Module, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

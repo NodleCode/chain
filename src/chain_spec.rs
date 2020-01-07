@@ -1,7 +1,7 @@
 use primitives::{ed25519, sr25519, Pair};
 use nodle_chain_runtime::{
 	AccountId, GenesisConfig, ConsensusConfig, TimestampConfig, BalancesConfig,
-	SudoConfig, IndicesConfig,
+	SudoConfig, IndicesConfig, AllocationsModuleConfig
 };
 use substrate_service;
 
@@ -48,7 +48,8 @@ impl Alternative {
 				], vec![
 					account_key("Alice")
 				],
-					account_key("Alice")
+					account_key("Alice"),
+					vec![account_key("Ferdie")],
 				),
 				vec![],
 				None,
@@ -71,6 +72,7 @@ impl Alternative {
 					account_key("Ferdie"),
 				],
 					account_key("Alice"),
+					vec![account_key("Ferdie")],
 				),
 				vec![],
 				None,
@@ -90,8 +92,11 @@ impl Alternative {
 	}
 }
 
-fn testnet_genesis(initial_authorities: Vec<AuthorityId>, endowed_accounts: Vec<AccountId>, root_key: AccountId) -> GenesisConfig {
+fn testnet_genesis(initial_authorities: Vec<AuthorityId>, endowed_accounts: Vec<AccountId>, root_key: AccountId, initial_oracles: Vec<AccountId>) -> GenesisConfig {
 	GenesisConfig {
+		allocations: Some(AllocationsModuleConfig {
+			oracles: initial_oracles,
+		}),
 		consensus: Some(ConsensusConfig {
 			code: include_bytes!("../runtime/wasm/target/wasm32-unknown-unknown/release/nodle_chain_runtime_wasm.compact.wasm").to_vec(),
 			authorities: initial_authorities.clone(),
@@ -115,5 +120,6 @@ fn testnet_genesis(initial_authorities: Vec<AuthorityId>, endowed_accounts: Vec<
 		sudo: Some(SudoConfig {
 			key: root_key,
 		}),
+
 	}
 }
