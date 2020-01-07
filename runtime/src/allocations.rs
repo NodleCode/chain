@@ -44,6 +44,13 @@ decl_module! {
 
 			Ok(())
 		}
+
+		// As an oracle, submit a merkle root for reward
+		pub fn submit_reward(origin, merkle_root_hash: Vec<u8>, who: T::AccountId, amount: u64) -> Result {
+			Self::ensure_oracle(origin)?;
+
+			Ok(())
+		}
 	}
 }
 
@@ -57,6 +64,13 @@ decl_event!(
 impl<T: Trait> Module<T> {
 	pub fn is_oracle(who: T::AccountId) -> bool {
 		Self::oracles().contains(&who)
+	}
+
+	fn ensure_oracle(origin: T::Origin) -> Result {
+		let sender = ensure_signed(origin)?;
+		ensure!(Self::is_oracle(sender), errors::ALLOCATIONS_ORACLE_ACCESS_DENIED);
+
+		Ok(())
 	}
 }
 
@@ -102,7 +116,10 @@ mod tests {
 	type AllocationsModule = Module<Test>;
 
 	pub const ORACLE: u64 = 0;
-	pub const NOT_ORACLE: u64 = 1;
+	pub const NON_ORACLE: u64 = 1;
+
+	pub const REWARD_TARGET: u64 = 2;
+	pub const REWARD_AMOUNT: u64 = 100;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
@@ -138,17 +155,31 @@ mod tests {
 	#[test]
 	fn can_not_add_oracle_twice() {
 		with_externalities(&mut new_test_ext(), || {
-			assert_noop!(AllocationsModule::add_oracle(ORACLE), errors::ALLOCATIONS_ALREADY_ORACLE
-			);
-        })
+			assert_noop!(AllocationsModule::add_oracle(ORACLE), errors::ALLOCATIONS_ALREADY_ORACLE);
+		})
 	}
 
 	#[test]
 	fn can_not_remove_oracle_twice() {
 		with_externalities(&mut new_test_ext(), || {
-			AllocationsModule::remove_oracle(ORACLE);
-			assert_noop!(AllocationsModule::remove_oracle(ORACLE), errors::ALLOCATIONS_NOT_ORACLE
+			assert_noop!(AllocationsModule::remove_oracle(NON_ORACLE), errors::ALLOCATIONS_NOT_ORACLE);
+		})
+	}
+
+	#[test]
+	fn non_oracle_can_not_submit_reward() {
+		with_externalities(&mut new_test_ext(), || {
+			assert_noop!(
+				AllocationsModule::submit_reward(Origin::signed(NON_ORACLE), (0..10).collect(), REWARD_TARGET, REWARD_AMOUNT),
+				errors::ALLOCATIONS_ORACLE_ACCESS_DENIED
 			);
-        })
+		})
+	}
+
+	#[test]
+	fn oracle_submit_reward() {
+		with_externalities(&mut new_test_ext(), || {
+			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), (0..10).collect(), REWARD_TARGET, REWARD_AMOUNT));
+		})
 	}
 }
