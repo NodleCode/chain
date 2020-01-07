@@ -2,15 +2,24 @@
 /// contributors, has a list of oracles that can submit Merkle
 /// Root Hashes to be paid for.
 
+use rstd::prelude::Vec;
 use support::{decl_module, decl_storage, decl_event, ensure, StorageValue, dispatch::Result};
+use support::traits::{Currency, OnUnbalanced, Imbalance};
 use system::ensure_signed;
 
 use crate::errors;
+
+type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+type PositiveImbalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+
+	// Currency minting
+	type Currency: Currency<Self::AccountId>;
+	type Reward: OnUnbalanced<PositiveImbalanceOf<Self>>;
 }
 
 /// This module's storage items.
@@ -46,8 +55,15 @@ decl_module! {
 		}
 
 		// As an oracle, submit a merkle root for reward
-		pub fn submit_reward(origin, merkle_root_hash: Vec<u8>, who: T::AccountId, amount: u64) -> Result {
+		pub fn submit_reward(origin, merkle_root_hash: T::Hash, who: T::AccountId, amount: BalanceOf<T>) -> Result {
 			Self::ensure_oracle(origin)?;
+
+			let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
+			let r = T::Currency::deposit_into_existing(&who, amount).ok();
+			total_imbalance.maybe_subsume(r);
+			T::Reward::on_unbalanced(total_imbalance);
+
+			Self::deposit_event(RawEvent::RewardAllocated(who, amount, merkle_root_hash));
 
 			Ok(())
 		}
@@ -55,9 +71,16 @@ decl_module! {
 }
 
 decl_event!(
-	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
+	pub enum Event<T>
+	where
+		AccountId = <T as system::Trait>::AccountId,
+		Balance = BalanceOf<T>,
+		Hash = <T as system::Trait>::Hash,
+	{
 		OracleAdded(AccountId),
 		OracleRemoved(AccountId),
+
+		RewardAllocated(AccountId, Balance, Hash),
 	}
 );
 
@@ -79,6 +102,7 @@ impl<T: Trait> Module<T> {
 mod tests {
 	use super::*;
 
+	use balances;
 	use runtime_io::with_externalities;
 	use primitives::{H256, Blake2Hasher};
 	use support::{impl_outer_origin, assert_ok, assert_noop};
@@ -110,8 +134,20 @@ mod tests {
 		type Event = ();
 		type Log = DigestItem;
 	}
+	impl balances::Trait for Test {
+		type Balance = u64;
+		type OnFreeBalanceZero = ();
+		type OnNewAccount = ();
+		type Event = ();
+		type TransferPayment = ();
+		type TransactionPayment = ();
+		type DustRemoval = ();
+	}
 	impl Trait for Test {
 		type Event = ();
+
+		type Currency = balances::Module<Self>;
+		type Reward = ();
 	}
 	type AllocationsModule = Module<Test>;
 
@@ -170,7 +206,7 @@ mod tests {
 	fn non_oracle_can_not_submit_reward() {
 		with_externalities(&mut new_test_ext(), || {
 			assert_noop!(
-				AllocationsModule::submit_reward(Origin::signed(NON_ORACLE), (0..10).collect(), REWARD_TARGET, REWARD_AMOUNT),
+				AllocationsModule::submit_reward(Origin::signed(NON_ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT),
 				errors::ALLOCATIONS_ORACLE_ACCESS_DENIED
 			);
 		})
@@ -178,8 +214,12 @@ mod tests {
 
 	#[test]
 	fn oracle_submit_reward() {
+		// Init balance check
+
 		with_externalities(&mut new_test_ext(), || {
-			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), (0..10).collect(), REWARD_TARGET, REWARD_AMOUNT));
+			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT));
 		})
+
+		// Verify balance
 	}
 }
