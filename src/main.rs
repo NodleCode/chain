@@ -11,7 +11,7 @@ pub use substrate_cli::{VersionInfo, IntoExit, error};
 
 fn run() -> cli::error::Result<()> {
 	let version = VersionInfo {
-		name: "Substrate Node",
+		name: "Nodle Node",
 		commit: env!("VERGEN_SHA_SHORT"),
 		version: env!("CARGO_PKG_VERSION"),
 		executable_name: "nodle-chain",
