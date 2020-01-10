@@ -1,8 +1,22 @@
 extern crate clap; 
 #[macro_use] extern crate nickel;
 
+extern crate substrate_subxt;
+extern crate futures;
+extern crate sp_keyring;
+extern crate sp_core;
+
 use clap::{Arg, App, SubCommand};
 use nickel::{Nickel, HttpRouter};
+
+use futures::future::Future;
+use sp_keyring::sr25519::sr25519::Pair as SrPair;
+use sp_core::crypto::Pair;
+use substrate_subxt::{
+	balances,
+    system::System,
+    DefaultNodeRuntime as Runtime,
+};
 
 fn main() {
 	let matches = App::new("nodle-chain-bridge")
@@ -13,7 +27,7 @@ fn main() {
 			.short("k")
 			.long("key")
 			.value_name("SECRET_KEY")
-			.help("Set secret key to use to send transactions")
+			.help("Set secret key to use to send transactions (sr25519)")
 			.takes_value(true))
 		.arg(Arg::with_name("host")
 			.short("h")
@@ -31,10 +45,16 @@ fn main() {
 			.default_value("ws://127.0.0.1:9944"))
 		.get_matches();
 
+	let maybe_bridge_seed = matches.value_of("secret-key");
 	let mut server = Nickel::new();
 
 	// If a secret key was configured, enable oracle paths
-	//server.post("/oracle/reward")
+	if maybe_bridge_seed.is_some() {
+		let bridge_signer = SrPair::from_string(maybe_bridge_seed.unwrap(), None)
+			.expect("couldn't load secret key");
+		println!("Bridge is using address {}", bridge_signer.public());
+		//server.post("/oracle/reward")
+	}
 
 	// TX builder helpers
 	//server.post("/tx/transfer")
