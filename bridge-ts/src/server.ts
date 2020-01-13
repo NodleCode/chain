@@ -2,10 +2,10 @@ import express from "express"
 import { Keyring } from '@polkadot/api'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 
-const port = 8080
-const host = "localhost"
+const port = process.env.PORT || "8080"
+const host = process.env.HOST || "localhost"
 
-const oracleSk = "0xf66143bce8f196f74cf7686b32afcad8a09a6f6f2d0bf5ef50fb724b6ce37350"
+const oracleSk = process.env.ORACLE || ""
 const hasOracleSk = oracleSk.length > 0
 
 export async function startServer(chainApi: any) {
@@ -24,7 +24,7 @@ export async function startServer(chainApi: any) {
 		})
 	}
 	
-	app.listen(port, host, () => {
+	app.listen(parseInt(port, 10), host, () => {
 		console.log(`Listening on http://${host}:${port}`)
 	})
 }
