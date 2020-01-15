@@ -1,11 +1,11 @@
-/// A runtime module to handle Nodle Cash allocations to network
-/// contributors, has a list of oracles that can submit Merkle
-/// Root Hashes to be paid for.
+//! A runtime module to handle Nodle Cash allocations to network
+//! contributors, has a list of oracles that can submit Merkle
+//! Root Hashes to be paid for.
 
-use rstd::prelude::Vec;
-use support::{decl_module, decl_storage, decl_event, ensure, StorageValue, dispatch::Result};
-use support::traits::{Currency, OnUnbalanced, Imbalance};
-use system::ensure_signed;
+use frame_support::{decl_module, decl_storage, decl_event, dispatch::DispatchResult, ensure};
+use frame_support::traits::{Currency, OnUnbalanced, Imbalance};
+use sp_std::prelude::Vec;
+use system::{ensure_signed, ensure_root};
 
 use crate::errors;
 
@@ -31,10 +31,11 @@ decl_storage! {
 decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		fn deposit_event<T>() = default;
+		fn deposit_event() = default;
 
 		// Add an oracle to the list, sudo only
-		pub fn add_oracle(oracle: T::AccountId) -> Result {
+		pub fn add_oracle(origin, oracle: T::AccountId) -> DispatchResult {
+			ensure_root(origin)?;
 			ensure!(!Self::is_oracle(oracle.clone()), errors::ALLOCATIONS_ALREADY_ORACLE);
 
 			<Oracles<T>>::mutate(|mem| mem.push(oracle.clone()));
@@ -44,7 +45,8 @@ decl_module! {
 		}
 
 		// Remove an oracle to the list, sudo only
-		pub fn remove_oracle(oracle: T::AccountId) -> Result {
+		pub fn remove_oracle(origin, oracle: T::AccountId) -> DispatchResult {
+			ensure_root(origin)?;
 			ensure!(Self::is_oracle(oracle.clone()), errors::ALLOCATIONS_NOT_ORACLE);
 
 			<Oracles<T>>::mutate(|mem| mem.retain(|m| m != &oracle));
@@ -54,7 +56,7 @@ decl_module! {
 		}
 
 		// As an oracle, submit a merkle root for reward
-		pub fn submit_reward(origin, merkle_root_hash: T::Hash, who: T::AccountId, amount: BalanceOf<T>) -> Result {
+		pub fn submit_reward(origin, merkle_root_hash: T::Hash, who: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
 			Self::ensure_oracle(origin)?;
 
 			let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
@@ -88,7 +90,7 @@ impl<T: Trait> Module<T> {
 		Self::oracles().contains(&who)
 	}
 
-	fn ensure_oracle(origin: T::Origin) -> Result {
+	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
 		let sender = ensure_signed(origin)?;
 		ensure!(Self::is_oracle(sender), errors::ALLOCATIONS_ORACLE_ACCESS_DENIED);
 
@@ -101,14 +103,10 @@ impl<T: Trait> Module<T> {
 mod tests {
 	use super::*;
 
-	use balances;
-	use runtime_io::with_externalities;
-	use primitives::{H256, Blake2Hasher};
-	use support::{impl_outer_origin, assert_ok, assert_noop};
-	use runtime_primitives::{
-		BuildStorage,
-		traits::{BlakeTwo256, IdentityLookup},
-		testing::{Digest, DigestItem, Header}
+	use sp_core::H256;
+	use frame_support::{impl_outer_origin, assert_ok, assert_noop, parameter_types, weights::Weight};
+	use sp_runtime::{
+		traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 	};
 
 	impl_outer_origin! {
@@ -120,27 +118,40 @@ mod tests {
 	// configuration traits of modules we want to use.
 	#[derive(Clone, Eq, PartialEq)]
 	pub struct Test;
+	parameter_types! {
+		pub const BlockHashCount: u64 = 250;
+		pub const MaximumBlockWeight: Weight = 1024;
+		pub const MaximumBlockLength: u32 = 2 * 1024;
+		pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
+	}
 	impl system::Trait for Test {
 		type Origin = Origin;
+		type Call = ();
 		type Index = u64;
 		type BlockNumber = u64;
 		type Hash = H256;
 		type Hashing = BlakeTwo256;
-		type Digest = Digest;
 		type AccountId = u64;
 		type Lookup = IdentityLookup<Self::AccountId>;
 		type Header = Header;
 		type Event = ();
-		type Log = DigestItem;
+		type BlockHashCount = BlockHashCount;
+		type MaximumBlockWeight = MaximumBlockWeight;
+		type MaximumBlockLength = MaximumBlockLength;
+		type AvailableBlockRatio = AvailableBlockRatio;
+		type Version = ();
+		type ModuleToIndex = ();
 	}
 	impl balances::Trait for Test {
 		type Balance = u64;
-		type OnFreeBalanceZero = ();
 		type OnNewAccount = ();
+		type OnFreeBalanceZero = ();
 		type Event = ();
 		type TransferPayment = ();
-		type TransactionPayment = ();
 		type DustRemoval = ();
+		type ExistentialDeposit = ();
+		type TransferFee = ();
+		type CreationFee = ();
 	}
 	impl Trait for Test {
 		type Event = ();
@@ -160,52 +171,42 @@ mod tests {
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
-	fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
-		let mut genesis = system::GenesisConfig::<Test>::default()
-			.build_storage()
-			.unwrap()
-			.0;
-
-		genesis.extend(
-			GenesisConfig::<Test> {
-				oracles: vec![ORACLE],
-			}
-			.build_storage()
-			.unwrap()
-			.0,
-		);
-
-		genesis.into()
+	fn new_test_ext() -> sp_io::TestExternalities {
+		let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
+		GenesisConfig::<Test>{
+			oracles: vec![ORACLE],
+		}.assimilate_storage(&mut t).unwrap();
+		t.into()
 	}
 
 	#[test]
 	fn remove_add_oracle() {
-		with_externalities(&mut new_test_ext(), || {
-			assert_ok!(AllocationsModule::remove_oracle(ORACLE));
+		new_test_ext().execute_with(|| {
+			assert_ok!(AllocationsModule::remove_oracle(Origin::ROOT, ORACLE));
 			assert!(!AllocationsModule::is_oracle(ORACLE));
 
-			assert_ok!(AllocationsModule::add_oracle(ORACLE));
+			assert_ok!(AllocationsModule::add_oracle(Origin::ROOT, ORACLE));
 			assert!(AllocationsModule::is_oracle(ORACLE));
 		})
 	}
 
 	#[test]
 	fn can_not_add_oracle_twice() {
-		with_externalities(&mut new_test_ext(), || {
-			assert_noop!(AllocationsModule::add_oracle(ORACLE), errors::ALLOCATIONS_ALREADY_ORACLE);
+		new_test_ext().execute_with(|| {
+			assert_noop!(AllocationsModule::add_oracle(Origin::ROOT, ORACLE), errors::ALLOCATIONS_ALREADY_ORACLE);
 		})
 	}
 
 	#[test]
 	fn can_not_remove_oracle_twice() {
-		with_externalities(&mut new_test_ext(), || {
-			assert_noop!(AllocationsModule::remove_oracle(NON_ORACLE), errors::ALLOCATIONS_NOT_ORACLE);
+		new_test_ext().execute_with(|| {
+			assert_noop!(AllocationsModule::remove_oracle(Origin::ROOT, NON_ORACLE), errors::ALLOCATIONS_NOT_ORACLE);
 		})
 	}
 
 	#[test]
 	fn non_oracle_can_not_submit_reward() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 			assert_noop!(
 				AllocationsModule::submit_reward(Origin::signed(NON_ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT),
 				errors::ALLOCATIONS_ORACLE_ACCESS_DENIED
@@ -215,7 +216,7 @@ mod tests {
 
 	#[test]
 	fn oracle_submit_reward() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 			assert_eq!(Balances::free_balance(REWARD_TARGET), 0);
 			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT));
 			assert_eq!(Balances::free_balance(REWARD_TARGET), REWARD_AMOUNT);
