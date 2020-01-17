@@ -2,12 +2,12 @@
 //! contributors, has a list of oracles that can submit Merkle
 //! Root Hashes to be paid for.
 
-use frame_support::{decl_module, decl_storage, decl_event, dispatch::DispatchResult, ensure};
+use frame_support::{
+	decl_module, decl_storage, decl_event, decl_error, dispatch::DispatchResult, ensure
+};
 use frame_support::traits::{Currency, OnUnbalanced, Imbalance};
 use sp_std::prelude::Vec;
 use system::{ensure_signed, ensure_root};
-
-use crate::errors;
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 type PositiveImbalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
@@ -22,6 +22,18 @@ pub trait Trait: system::Trait {
 	type Reward: OnUnbalanced<PositiveImbalanceOf<Self>>;
 }
 
+decl_error! {
+	pub enum Error for Module<T: Trait> {
+		/// Address is already registered as an oracle
+		AlreadyAnOracle,
+		/// Address is not an oracle
+		NotAnOracle,
+		/// Function is restricted to oracles only
+		OracleAccessDenied,
+	}
+}
+
+
 decl_storage! {
 	trait Store for Module<T: Trait> as AllocationsModule {
 		Oracles get(oracles) config(): Vec<T::AccountId>;
@@ -31,12 +43,13 @@ decl_storage! {
 decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+		type Error = Error<T>;
 		fn deposit_event() = default;
 
 		// Add an oracle to the list, sudo only
 		pub fn add_oracle(origin, oracle: T::AccountId) -> DispatchResult {
 			ensure_root(origin)?;
-			ensure!(!Self::is_oracle(oracle.clone()), errors::ALLOCATIONS_ALREADY_ORACLE);
+			ensure!(!Self::is_oracle(oracle.clone()), Error::<T>::AlreadyAnOracle);
 
 			<Oracles<T>>::mutate(|mem| mem.push(oracle.clone()));
 			Self::deposit_event(RawEvent::OracleAdded(oracle));
@@ -47,7 +60,7 @@ decl_module! {
 		// Remove an oracle to the list, sudo only
 		pub fn remove_oracle(origin, oracle: T::AccountId) -> DispatchResult {
 			ensure_root(origin)?;
-			ensure!(Self::is_oracle(oracle.clone()), errors::ALLOCATIONS_NOT_ORACLE);
+			ensure!(Self::is_oracle(oracle.clone()), Error::<T>::NotAnOracle);
 
 			<Oracles<T>>::mutate(|mem| mem.retain(|m| m != &oracle));
 			Self::deposit_event(RawEvent::OracleRemoved(oracle));
@@ -92,7 +105,7 @@ impl<T: Trait> Module<T> {
 
 	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
 		let sender = ensure_signed(origin)?;
-		ensure!(Self::is_oracle(sender), errors::ALLOCATIONS_ORACLE_ACCESS_DENIED);
+		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 
 		Ok(())
 	}
@@ -193,14 +206,14 @@ mod tests {
 	#[test]
 	fn can_not_add_oracle_twice() {
 		new_test_ext().execute_with(|| {
-			assert_noop!(AllocationsModule::add_oracle(Origin::ROOT, ORACLE), errors::ALLOCATIONS_ALREADY_ORACLE);
+			assert_noop!(AllocationsModule::add_oracle(Origin::ROOT, ORACLE), Error::<Test>::AlreadyAnOracle);
 		})
 	}
 
 	#[test]
 	fn can_not_remove_oracle_twice() {
 		new_test_ext().execute_with(|| {
-			assert_noop!(AllocationsModule::remove_oracle(Origin::ROOT, NON_ORACLE), errors::ALLOCATIONS_NOT_ORACLE);
+			assert_noop!(AllocationsModule::remove_oracle(Origin::ROOT, NON_ORACLE), Error::<Test>::NotAnOracle);
 		})
 	}
 
@@ -209,7 +222,7 @@ mod tests {
 		new_test_ext().execute_with(|| {
 			assert_noop!(
 				AllocationsModule::submit_reward(Origin::signed(NON_ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT),
-				errors::ALLOCATIONS_ORACLE_ACCESS_DENIED
+				Error::<Test>::OracleAccessDenied
 			);
 		})
 	}
