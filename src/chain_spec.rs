@@ -70,6 +70,7 @@ impl Alternative {
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
 				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Ferdie"),

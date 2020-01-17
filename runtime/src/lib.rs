@@ -63,6 +63,7 @@ pub type Hash = sp_core::H256;
 pub type DigestItem = generic::DigestItem<Hash>;
 
 mod allocations;
+mod mandate;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -251,6 +252,13 @@ impl allocations::Trait for Runtime {
 	type Reward = (); // rewards are minted from the void
 }
 
+impl mandate::Trait for Runtime {
+	type Proposal = Call;
+
+	// A majority of the committee can dispatch root calls
+	type ExternalOrigin = collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -272,6 +280,7 @@ construct_runtime!(
 		// Governance
 		TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
+		Mandate: mandate::{Module, Call},
 
 		// Nodle
 		Allocations: allocations::{Module, Config<T>, Call, Storage, Event<T>},
