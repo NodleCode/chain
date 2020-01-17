@@ -1,8 +1,8 @@
 use sp_core::{Pair, Public, sr25519};
 use nodle_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
-	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, Signature,
-	AllocationsModuleConfig
+	IndicesConfig, SystemConfig, WASM_BINARY, Signature, TechnicalMembershipConfig,
+	AllocationsConfig,
 };
 use sp_consensus_aura::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
@@ -60,7 +60,11 @@ impl Alternative {
 				|| testnet_genesis(vec![
 					get_authority_keys_from_seed("Alice"),
 				],
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie")
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -84,7 +88,11 @@ impl Alternative {
 					get_authority_keys_from_seed("Alice"),
 					get_authority_keys_from_seed("Bob"),
 				],
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie")
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -122,7 +130,7 @@ impl Alternative {
 }
 
 fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
-	root_key: AccountId,
+	roots: Vec<AccountId>,
 	endowed_accounts: Vec<AccountId>,
 	oracles: Vec<AccountId>,
 	_enable_println: bool) -> GenesisConfig {
@@ -138,16 +146,18 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
 			vesting: vec![],
 		}),
-		sudo: Some(SudoConfig {
-			key: root_key,
-		}),
 		aura: Some(AuraConfig {
 			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
 		}),
 		grandpa: Some(GrandpaConfig {
 			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
 		}),
-		allocations: Some(AllocationsModuleConfig {
+		collective_Instance2: Some(Default::default()),
+		membership_Instance1: Some(TechnicalMembershipConfig {
+			members: roots,
+			phantom: Default::default(),
+		}),
+		allocations: Some(AllocationsConfig {
 			oracles: oracles,
 		}),
 	}
