@@ -2,7 +2,7 @@ use sp_core::{crypto::Ss58Codec, ed25519, Pair, Public, sr25519};
 use nodle_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
 	IndicesConfig, SystemConfig, WASM_BINARY, Signature, TechnicalMembershipConfig,
-	AllocationsConfig,
+	OraclesSetConfig,
 };
 use sp_consensus_aura::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
@@ -162,8 +162,9 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			members: roots,
 			phantom: Default::default(),
 		}),
-		allocations: Some(AllocationsConfig {
-			oracles: oracles,
+		membership_Instance2: Some(OraclesSetConfig {
+			members: oracles,
+			phantom: Default::default(),
 		}),
 	}
 }

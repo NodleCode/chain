@@ -246,10 +246,21 @@ impl membership::Trait<membership::Instance1> for Runtime {
 	type MembershipChanged = TechnicalCommittee;
 }
 
+type AllocationsModule = Allocations;
 impl allocations::Trait for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type Reward = (); // rewards are minted from the void
+}
+
+impl membership::Trait<membership::Instance2> for Runtime {
+	type Event = Event;
+	type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type RemoveOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type MembershipInitialized = AllocationsModule;
+	type MembershipChanged = AllocationsModule;
 }
 
 impl mandate::Trait for Runtime {
@@ -283,7 +294,8 @@ construct_runtime!(
 		Mandate: mandate::{Module, Call},
 
 		// Nodle
-		Allocations: allocations::{Module, Config<T>, Call, Storage, Event<T>},
+		Allocations: allocations::{Module, Call, Storage, Event<T>},
+		OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

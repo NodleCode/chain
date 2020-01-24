@@ -5,9 +5,9 @@
 use frame_support::{
 	decl_module, decl_storage, decl_event, decl_error, dispatch::DispatchResult, ensure
 };
-use frame_support::traits::{Currency, OnUnbalanced, Imbalance};
+use frame_support::traits::{Currency, OnUnbalanced, Imbalance, ChangeMembers, InitializeMembers};
 use sp_std::prelude::Vec;
-use system::{ensure_signed, ensure_root};
+use system::ensure_signed;
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 type PositiveImbalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
@@ -24,10 +24,6 @@ pub trait Trait: system::Trait {
 
 decl_error! {
 	pub enum Error for Module<T: Trait> {
-		/// Address is already registered as an oracle
-		AlreadyAnOracle,
-		/// Address is not an oracle
-		NotAnOracle,
 		/// Function is restricted to oracles only
 		OracleAccessDenied,
 	}
@@ -36,7 +32,7 @@ decl_error! {
 
 decl_storage! {
 	trait Store for Module<T: Trait> as AllocationsModule {
-		Oracles get(oracles) config(): Vec<T::AccountId>;
+		Oracles get(oracles): Vec<T::AccountId>;
 	}
 }
 
@@ -45,28 +41,6 @@ decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		type Error = Error<T>;
 		fn deposit_event() = default;
-
-		// Add an oracle to the list, sudo only
-		pub fn add_oracle(origin, oracle: T::AccountId) -> DispatchResult {
-			ensure_root(origin)?;
-			ensure!(!Self::is_oracle(oracle.clone()), Error::<T>::AlreadyAnOracle);
-
-			<Oracles<T>>::mutate(|mem| mem.push(oracle.clone()));
-			Self::deposit_event(RawEvent::OracleAdded(oracle));
-
-			Ok(())
-		}
-
-		// Remove an oracle to the list, sudo only
-		pub fn remove_oracle(origin, oracle: T::AccountId) -> DispatchResult {
-			ensure_root(origin)?;
-			ensure!(Self::is_oracle(oracle.clone()), Error::<T>::NotAnOracle);
-
-			<Oracles<T>>::mutate(|mem| mem.retain(|m| m != &oracle));
-			Self::deposit_event(RawEvent::OracleRemoved(oracle));
-
-			Ok(())
-		}
 
 		// As an oracle, submit a merkle root for reward
 		pub fn submit_reward(origin, merkle_root_hash: T::Hash, who: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
@@ -91,9 +65,6 @@ decl_event!(
 		Balance = BalanceOf<T>,
 		Hash = <T as system::Trait>::Hash,
 	{
-		OracleAdded(AccountId),
-		OracleRemoved(AccountId),
-
 		RewardAllocated(AccountId, Balance, Hash),
 	}
 );
@@ -108,6 +79,18 @@ impl<T: Trait> Module<T> {
 		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 
 		Ok(())
+	}
+}
+
+impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
+	fn change_members_sorted(_incoming: &[T::AccountId], _outgoing: &[T::AccountId], new: &[T::AccountId]) {
+		<Oracles<T>>::put(new);
+	}
+}
+
+impl<T: Trait> InitializeMembers<T::AccountId> for Module<T> {
+	fn initialize_members(init: &[T::AccountId]) {
+		<Oracles<T>>::put(init);
 	}
 }
 
@@ -185,36 +168,7 @@ mod tests {
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
 	fn new_test_ext() -> sp_io::TestExternalities {
-		let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
-		GenesisConfig::<Test>{
-			oracles: vec![ORACLE],
-		}.assimilate_storage(&mut t).unwrap();
-		t.into()
-	}
-
-	#[test]
-	fn remove_add_oracle() {
-		new_test_ext().execute_with(|| {
-			assert_ok!(AllocationsModule::remove_oracle(Origin::ROOT, ORACLE));
-			assert!(!AllocationsModule::is_oracle(ORACLE));
-
-			assert_ok!(AllocationsModule::add_oracle(Origin::ROOT, ORACLE));
-			assert!(AllocationsModule::is_oracle(ORACLE));
-		})
-	}
-
-	#[test]
-	fn can_not_add_oracle_twice() {
-		new_test_ext().execute_with(|| {
-			assert_noop!(AllocationsModule::add_oracle(Origin::ROOT, ORACLE), Error::<Test>::AlreadyAnOracle);
-		})
-	}
-
-	#[test]
-	fn can_not_remove_oracle_twice() {
-		new_test_ext().execute_with(|| {
-			assert_noop!(AllocationsModule::remove_oracle(Origin::ROOT, NON_ORACLE), Error::<Test>::NotAnOracle);
-		})
+		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 	}
 
 	#[test]
@@ -230,9 +184,54 @@ mod tests {
 	#[test]
 	fn oracle_submit_reward() {
 		new_test_ext().execute_with(|| {
+			AllocationsModule::initialize_members(&[ORACLE]);
+			assert_eq!(AllocationsModule::is_oracle(ORACLE), true);
+
 			assert_eq!(Balances::free_balance(REWARD_TARGET), 0);
 			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT));
 			assert_eq!(Balances::free_balance(REWARD_TARGET), REWARD_AMOUNT);
+		})
+	}
+
+	#[test]
+	fn oracle_management_initialize_members() {
+		new_test_ext().execute_with(|| {
+			// Start with no oracles
+			assert_eq!(AllocationsModule::is_oracle(ORACLE), false);
+			AllocationsModule::initialize_members(&[ORACLE]);
+			assert_eq!(AllocationsModule::is_oracle(ORACLE), true);
+		})
+	}
+
+	#[test]
+	fn oracle_management_change_members_sorted_remove_oracle() {
+		new_test_ext().execute_with(|| {
+			AllocationsModule::initialize_members(&[ORACLE]);
+			
+			AllocationsModule::change_members_sorted(&[], &[], &[]);
+			assert_eq!(AllocationsModule::is_oracle(ORACLE), false);
+		})
+	}
+
+	#[test]
+	fn oracle_management_change_members_sorted_add_oracle() {
+		new_test_ext().execute_with(|| {
+			AllocationsModule::initialize_members(&[ORACLE]);
+			
+			AllocationsModule::change_members_sorted(&[], &[], &[ORACLE, NON_ORACLE]);
+			assert_eq!(AllocationsModule::is_oracle(ORACLE), true);
+			assert_eq!(AllocationsModule::is_oracle(NON_ORACLE), true);
+		})
+	}
+
+	#[test]
+	fn oracle_management_change_members_sorted_swap_oracle() {
+		new_test_ext().execute_with(|| {
+			AllocationsModule::initialize_members(&[ORACLE]);
+			
+			AllocationsModule::change_members_sorted(&[], &[], &[NON_ORACLE]);
+			assert_eq!(AllocationsModule::is_oracle(ORACLE), false);
+			assert_eq!(AllocationsModule::is_oracle(NON_ORACLE), true);
 		})
 	}
 }
