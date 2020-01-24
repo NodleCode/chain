@@ -42,4 +42,4 @@ USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]
 
-CMD ["./entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
