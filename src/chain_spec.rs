@@ -104,13 +104,17 @@ impl Alternative {
 					)
 				],
 				vec![
-					get_account_id_from_addr::<sr25519::Public>("5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd")
+					get_account_id_from_addr::<sr25519::Public>("5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd"),
+					get_account_id_from_addr::<sr25519::Public>("5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch"),
+					get_account_id_from_addr::<sr25519::Public>("5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR"),
 				],
 				vec![
 					get_account_id_from_addr::<sr25519::Public>("5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd"), // Root
 					get_account_id_from_addr::<ed25519::Public>("5CLAMY86UHqR4DYFL1ss3mPQJPJVBHxRyNFKHwwitNjK2KRM"), // Validator stash
 					get_account_id_from_addr::<sr25519::Public>("5CFUAAW7umifCuzdvH5KKjWHM5dKP2ADnL54b9fbjECpgXEM"), // Validtor hot wallet
-					get_account_id_from_addr::<sr25519::Public>("5EaAaHrJaegsiSNgKJch1QjwCE8DFXRKxxg2tdVQhBHTWsC5")  // Oracle
+					get_account_id_from_addr::<sr25519::Public>("5EaAaHrJaegsiSNgKJch1QjwCE8DFXRKxxg2tdVQhBHTWsC5"), // Oracle
+					get_account_id_from_addr::<sr25519::Public>("5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch"),
+					get_account_id_from_addr::<sr25519::Public>("5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR"),
 				],
 				vec![
 					get_account_id_from_addr::<sr25519::Public>("5EaAaHrJaegsiSNgKJch1QjwCE8DFXRKxxg2tdVQhBHTWsC5")
