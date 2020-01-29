@@ -65,6 +65,7 @@ pub type DigestItem = generic::DigestItem<Hash>;
 mod allocations;
 mod mandate;
 mod validators_session_helper;
+mod vesting_manager;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -249,7 +250,7 @@ impl membership::Trait<membership::Instance1> for Runtime {
 
 impl allocations::Trait for Runtime {
 	type Event = Event;
-	type Currency = Balances;
+	type Currency = balances::Module<Runtime>;
 	type Reward = (); // rewards are minted from the void
 }
 
@@ -300,6 +301,11 @@ impl session::Trait for Runtime {
 	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
 
+impl vesting_manager::Trait for Runtime {
+	type Currency = balances::Module<Runtime>;
+	type ExternalOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+} 
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -322,6 +328,7 @@ construct_runtime!(
 		TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
 		TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
 		Mandate: mandate::{Module, Call},
+		VestingManager: vesting_manager::{Module, Call},
 
 		// Nodle
 		Allocations: allocations::{Module, Call, Storage, Event<T>},
