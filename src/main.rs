@@ -18,7 +18,7 @@ fn main() -> Result<(), cli::error::Error> {
 		executable_name: "nodle-chain",
 		author: "Anonymous",
 		description: "Nodle Chain Node",
-		support_url: "support.anonymous.an",
+		support_url: "eliott@nodle.co",
 	};
 
 	cli::run(std::env::args(), cli::Exit, version)

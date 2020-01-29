@@ -14,7 +14,7 @@ use sp_runtime::{
 	impl_opaque_keys, MultiSignature
 };
 use sp_runtime::traits::{
-	NumberFor, BlakeTwo256, Block as BlockT, StaticLookup, Verify, ConvertInto, IdentifyAccount
+	NumberFor, BlakeTwo256, Block as BlockT, StaticLookup, Verify, ConvertInto, IdentifyAccount, OpaqueKeys
 };
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -64,6 +64,7 @@ pub type DigestItem = generic::DigestItem<Hash>;
 
 mod allocations;
 mod mandate;
+mod validators_session_helper;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -246,7 +247,6 @@ impl membership::Trait<membership::Instance1> for Runtime {
 	type MembershipChanged = TechnicalCommittee;
 }
 
-type AllocationsModule = Allocations;
 impl allocations::Trait for Runtime {
 	type Event = Event;
 	type Currency = Balances;
@@ -259,8 +259,8 @@ impl membership::Trait<membership::Instance2> for Runtime {
 	type RemoveOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 	type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 	type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-	type MembershipInitialized = AllocationsModule;
-	type MembershipChanged = AllocationsModule;
+	type MembershipInitialized = Allocations;
+	type MembershipChanged = Allocations;
 }
 
 impl mandate::Trait for Runtime {
@@ -268,6 +268,36 @@ impl mandate::Trait for Runtime {
 
 	// A majority of the committee can dispatch root calls
 	type ExternalOrigin = collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
+}
+
+impl validators_session_helper::Trait for Runtime {}
+
+impl membership::Trait<membership::Instance3> for Runtime {
+	type Event = Event;
+	type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type RemoveOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type MembershipInitialized = ValidatorsSessionHelper;
+	type MembershipChanged = ValidatorsSessionHelper;
+}
+
+parameter_types! {
+	// Parameter copied directly from Kusama
+	// TODO figure out consequences of exceeding the threshold
+	pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
+}
+
+impl session::Trait for Runtime {
+	type OnSessionEnding = ValidatorsSessionHelper;
+	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type ShouldEndSession = ValidatorsSessionHelper;
+	type Event = Event;
+	type Keys = opaque::SessionKeys;
+	type ValidatorId = <Self as system::Trait>::AccountId;
+	type ValidatorIdOf = ConvertInto;
+	type SelectInitialValidators = ValidatorsSessionHelper;
+	type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
 
 construct_runtime!(
@@ -296,6 +326,11 @@ construct_runtime!(
 		// Nodle
 		Allocations: allocations::{Module, Call, Storage, Event<T>},
 		OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
+
+		// Validators management
+		ValidatorsSessionHelper: validators_session_helper::{Module, Storage},
+		ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
+		Session: session::{Module, Call, Storage, Event, Config<T>},
 	}
 );
 

@@ -2,7 +2,7 @@ use sp_core::{crypto::Ss58Codec, ed25519, Pair, Public, sr25519};
 use nodle_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
 	IndicesConfig, SystemConfig, WASM_BINARY, Signature, TechnicalMembershipConfig,
-	OraclesSetConfig,
+	OraclesSetConfig, SessionConfig, ValidatorsSetConfig, opaque::SessionKeys
 };
 use sp_consensus_aura::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
@@ -62,6 +62,11 @@ pub fn get_authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
 	)
 }
 
+// Return a `SessionKeys` structure with the specified IDs
+pub fn session_keys(aura: AuraId, grandpa: GrandpaId) -> SessionKeys {
+	SessionKeys { aura, grandpa }
+}
+
 impl Alternative {
 	/// Get an actual chain config from one of the alternatives.
 	pub(crate) fn load(self) -> Result<ChainSpec, String> {
@@ -70,7 +75,13 @@ impl Alternative {
 				"Development",
 				"dev",
 				|| testnet_genesis(vec![
-					get_authority_keys_from_seed("Alice"),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						session_keys(
+							get_authority_keys_from_seed("Alice").0,
+							get_authority_keys_from_seed("Alice").1
+						)
+					)
 				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -99,8 +110,11 @@ impl Alternative {
 				"nergal",
 				|| testnet_genesis(vec![
 					(
-						get_from_addr::<AuraId>("5CFUAAW7umifCuzdvH5KKjWHM5dKP2ADnL54b9fbjECpgXEM"),
-						get_from_addr::<GrandpaId>("5CLAMY86UHqR4DYFL1ss3mPQJPJVBHxRyNFKHwwitNjK2KRM")
+						get_account_id_from_addr::<sr25519::Public>("5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd"),
+						session_keys(
+							get_from_addr::<AuraId>("5CFUAAW7umifCuzdvH5KKjWHM5dKP2ADnL54b9fbjECpgXEM"),
+							get_from_addr::<GrandpaId>("5CLAMY86UHqR4DYFL1ss3mPQJPJVBHxRyNFKHwwitNjK2KRM")
+						)
 					)
 				],
 				vec![
@@ -138,7 +152,7 @@ impl Alternative {
 	}
 }
 
-fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
+fn testnet_genesis(initial_authorities: Vec<(AccountId, SessionKeys)>,
 	roots: Vec<AccountId>,
 	endowed_accounts: Vec<AccountId>,
 	oracles: Vec<AccountId>,
@@ -155,20 +169,33 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			balances: endowed_accounts.iter().cloned().map(|k|(k, 1 << 60)).collect(),
 			vesting: vec![],
 		}),
-		aura: Some(AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
-		}),
-		grandpa: Some(GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
-		}),
+
+		// Governance
 		collective_Instance2: Some(Default::default()),
 		membership_Instance1: Some(TechnicalMembershipConfig {
 			members: roots,
 			phantom: Default::default(),
 		}),
+
+		// Allocations
 		membership_Instance2: Some(OraclesSetConfig {
 			members: oracles,
 			phantom: Default::default(),
 		}),
+
+		// Validators permissioning
+		aura: Some(AuraConfig {
+			authorities: vec![],
+		}),
+		grandpa: Some(GrandpaConfig {
+			authorities: vec![],
+		}),
+		membership_Instance3: Some(ValidatorsSetConfig {
+			members: initial_authorities.iter().map(|(id, _session)| id.clone()).collect::<Vec<_>>(),
+			phantom: Default::default(),
+		}),
+		session: Some(SessionConfig {
+			keys: initial_authorities,
+		})
 	}
 }

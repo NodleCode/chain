@@ -16,7 +16,7 @@ pub fn run<I, T, E>(args: I, exit: E, version: VersionInfo) -> error::Result<()>
 	E: IntoExit,
 {
 	type Config<T> = Configuration<(), T>;
-	match parse_and_prepare::<NoCustom, NoCustom, _>(&version, "substrate-node", args) {
+	match parse_and_prepare::<NoCustom, NoCustom, _>(&version, "nodle-chain-node", args) {
 		ParseAndPrepare::Run(cmd) => cmd.run(load_spec, exit,
 		|exit, _cli_args, _custom_args, config: Config<_>| {
 			info!("{}", version.name);
