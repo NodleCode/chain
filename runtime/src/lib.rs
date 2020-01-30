@@ -346,7 +346,7 @@ construct_runtime!(
 		CompanyReserve: company_reserve::{Module, Call, Event<T>},
 
 		// Nodle
-		Allocations: allocations::{Module, Call, Storage, Event<T>},
+		Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
 		OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
 
 		// Validators management

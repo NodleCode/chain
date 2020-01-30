@@ -6,6 +6,7 @@ use frame_support::{
 	decl_module, decl_storage, decl_event, decl_error, dispatch::DispatchResult, ensure
 };
 use frame_support::traits::{Currency, OnUnbalanced, Imbalance, ChangeMembers, InitializeMembers};
+use sp_runtime::traits::CheckedSub;
 use sp_std::prelude::Vec;
 use system::ensure_signed;
 
@@ -26,6 +27,10 @@ decl_error! {
 	pub enum Error for Module<T: Trait> {
 		/// Function is restricted to oracles only
 		OracleAccessDenied,
+		/// We are trying to allocate 0 coins
+		ZeroAllocation,
+		/// We are trying to allocate more coins than we can
+		TooManyCoinsToAllocate,
 	}
 }
 
@@ -33,6 +38,7 @@ decl_error! {
 decl_storage! {
 	trait Store for Module<T: Trait> as AllocationsModule {
 		Oracles get(oracles): Vec<T::AccountId>;
+		CoinsLeft get(coins_left) config(): BalanceOf<T>;
 	}
 }
 
@@ -45,6 +51,14 @@ decl_module! {
 		// As an oracle, submit a merkle root for reward
 		pub fn submit_reward(origin, merkle_root_hash: T::Hash, who: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
 			Self::ensure_oracle(origin)?;
+
+			ensure!(amount > 0.into(), Error::<T>::ZeroAllocation);
+			ensure!(<CoinsLeft<T>>::get() >= amount, Error::<T>::TooManyCoinsToAllocate);
+
+			// Record the coins as spent
+			<CoinsLeft<T>>::put(
+				<CoinsLeft<T>>::get().checked_sub(&amount).ok_or("Underflow computing coins left")?
+			);
 
 			let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
 			let r = T::Currency::deposit_creating(&who, amount);
@@ -162,13 +176,19 @@ mod tests {
 	pub const ORACLE: u64 = 0;
 	pub const NON_ORACLE: u64 = 1;
 
+	pub const INITIAL_COINS: u64 = 200;
 	pub const REWARD_TARGET: u64 = 2;
 	pub const REWARD_AMOUNT: u64 = 100;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
 	fn new_test_ext() -> sp_io::TestExternalities {
-		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+		GenesisConfig::<Test> {
+			coins_left: INITIAL_COINS,
+		}
+		.build_storage()
+		.unwrap()
+		.into()
 	}
 
 	#[test]
@@ -190,6 +210,9 @@ mod tests {
 			assert_eq!(Balances::free_balance(REWARD_TARGET), 0);
 			assert_ok!(AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, REWARD_AMOUNT));
 			assert_eq!(Balances::free_balance(REWARD_TARGET), REWARD_AMOUNT);
+
+			// Record coins left
+			assert_eq!(AllocationsModule::coins_left(), INITIAL_COINS - REWARD_AMOUNT);
 		})
 	}
 
@@ -232,6 +255,30 @@ mod tests {
 			AllocationsModule::change_members_sorted(&[], &[], &[NON_ORACLE]);
 			assert_eq!(AllocationsModule::is_oracle(ORACLE), false);
 			assert_eq!(AllocationsModule::is_oracle(NON_ORACLE), true);
+		})
+	}
+
+	#[test]
+	fn cannot_allocate_zero_coins() {
+		new_test_ext().execute_with(|| {
+			AllocationsModule::initialize_members(&[ORACLE]);
+
+			assert_noop!(
+				AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, 0),
+				Error::<Test>::ZeroAllocation
+			);
+		})
+	}
+
+	#[test]
+	fn cannot_allocate_more_than_coins_left() {
+		new_test_ext().execute_with(|| {
+			AllocationsModule::initialize_members(&[ORACLE]);
+			
+			assert_noop!(
+				AllocationsModule::submit_reward(Origin::signed(ORACLE), H256::random(), REWARD_TARGET, INITIAL_COINS + 1),
+				Error::<Test>::TooManyCoinsToAllocate
+			);
 		})
 	}
 }
