@@ -2,7 +2,7 @@ use sp_core::{crypto::Ss58Codec, ed25519, Pair, Public, sr25519};
 use nodle_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
 	IndicesConfig, SystemConfig, WASM_BINARY, Signature, TechnicalMembershipConfig,
-	OraclesSetConfig, SessionConfig, ValidatorsSetConfig, opaque::SessionKeys
+	OraclesSetConfig, SessionConfig, ValidatorsSetConfig, opaque::SessionKeys, FundAccount
 };
 use sp_consensus_aura::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
@@ -89,6 +89,7 @@ impl Alternative {
 					get_account_id_from_seed::<sr25519::Public>("Charlie")
 				],
 				vec![
+					FundAccount::get(),
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
@@ -123,6 +124,7 @@ impl Alternative {
 					get_account_id_from_addr::<sr25519::Public>("5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR"),
 				],
 				vec![
+					FundAccount::get(),
 					get_account_id_from_addr::<sr25519::Public>("5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd"), // Root
 					get_account_id_from_addr::<ed25519::Public>("5CLAMY86UHqR4DYFL1ss3mPQJPJVBHxRyNFKHwwitNjK2KRM"), // Validator stash
 					get_account_id_from_addr::<sr25519::Public>("5CFUAAW7umifCuzdvH5KKjWHM5dKP2ADnL54b9fbjECpgXEM"), // Validtor hot wallet

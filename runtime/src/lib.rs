@@ -11,10 +11,11 @@ use sp_core::OpaqueMetadata;
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::{
 	ApplyExtrinsicResult, transaction_validity::TransactionValidity, generic, create_runtime_str,
-	impl_opaque_keys, MultiSignature
+	impl_opaque_keys, MultiSignature, ModuleId,
 };
 use sp_runtime::traits::{
-	NumberFor, BlakeTwo256, Block as BlockT, StaticLookup, Verify, ConvertInto, IdentifyAccount, OpaqueKeys
+	NumberFor, BlakeTwo256, Block as BlockT, StaticLookup, Verify, ConvertInto, IdentifyAccount, OpaqueKeys,
+	AccountIdConversion
 };
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -63,6 +64,7 @@ pub type Hash = sp_core::H256;
 pub type DigestItem = generic::DigestItem<Hash>;
 
 mod allocations;
+mod company_reserve;
 mod mandate;
 mod validators_session_helper;
 mod vesting_manager;
@@ -304,7 +306,19 @@ impl session::Trait for Runtime {
 impl vesting_manager::Trait for Runtime {
 	type Currency = balances::Module<Runtime>;
 	type ExternalOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-} 
+}
+
+parameter_types! {
+	// Hardcoded account for which we don't know the secret key, string must be 8 chars
+	pub const FundAccount: AccountId = ModuleId(*b"ndlresrv").into_account();
+}
+
+impl company_reserve::Trait for Runtime {
+	type Event = Event;
+	type Currency = balances::Module<Runtime>;
+	type ExternalOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+	type FundAccount = FundAccount;
+}
 
 construct_runtime!(
 	pub enum Runtime where
@@ -329,6 +343,7 @@ construct_runtime!(
 		TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
 		Mandate: mandate::{Module, Call},
 		VestingManager: vesting_manager::{Module, Call},
+		CompanyReserve: company_reserve::{Module, Call, Event<T>},
 
 		// Nodle
 		Allocations: allocations::{Module, Call, Storage, Event<T>},
