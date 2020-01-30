@@ -18,12 +18,10 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 FROM phusion/baseimage:0.11
 
 ARG PROFILE=release
-ARG NETWORK=nergal
 
 COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
 COPY ./docker/entrypoint.sh .
 COPY ./docker/load_keys.sh .
-COPY ./networks/$NETWORK/spec_raw.json .
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
