@@ -205,7 +205,7 @@ impl balances::Trait for Runtime {
     /// The type for recording an account's balance.
     type Balance = Balance;
     /// What to do if an account's free balance gets zeroed.
-    type OnFreeBalanceZero = ();
+    type OnFreeBalanceZero = Session;
     /// What to do if a new account is created.
     type OnNewAccount = Indices;
     /// The ubiquitous event type.
@@ -325,39 +325,39 @@ impl company_reserve::Trait for Runtime {
 }
 
 construct_runtime!(
-	pub enum Runtime where
-		Block = Block,
-		NodeBlock = opaque::Block,
-		UncheckedExtrinsic = UncheckedExtrinsic
-	{
-		// System
-		System: system::{Module, Call, Storage, Config, Event},
-		Timestamp: timestamp::{Module, Call, Storage, Inherent},
-		Indices: indices,
-		Balances: balances,
-		TransactionPayment: transaction_payment::{Module, Storage},
-		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
-		
-		// Consensus
-		Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
-		Grandpa: grandpa::{Module, Call, Storage, Config, Event},
+    pub enum Runtime where
+        Block = Block,
+        NodeBlock = opaque::Block,
+        UncheckedExtrinsic = UncheckedExtrinsic
+    {
+        // System
+        System: system::{Module, Call, Storage, Config, Event},
+        Timestamp: timestamp::{Module, Call, Storage, Inherent},
+        Indices: indices,
+        Balances: balances,
+        TransactionPayment: transaction_payment::{Module, Storage},
+        RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
+        
+        // Consensus
+        Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
+        Grandpa: grandpa::{Module, Call, Storage, Config, Event},
 
-		// Governance
-		TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
-		Mandate: mandate::{Module, Call},
-		VestingManager: vesting_manager::{Module, Call},
-		CompanyReserve: company_reserve::{Module, Call, Event<T>},
+        // Governance
+        TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
+        Mandate: mandate::{Module, Call},
+        VestingManager: vesting_manager::{Module, Call},
+        CompanyReserve: company_reserve::{Module, Call, Event<T>},
 
-		// Nodle
-		Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
-		OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
+        // Nodle
+        Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
+        OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
 
-		// Validators management
-		ValidatorsSessionHelper: validators_session_helper::{Module, Storage},
-		ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
-		Session: session::{Module, Call, Storage, Event, Config<T>},
-	}
+        // Validators management
+        ValidatorsSessionHelper: validators_session_helper::{Module, Storage},
+        ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
+        Session: session::{Module, Call, Storage, Event, Config<T>},
+    }
 );
 
 /// The address format for describing accounts.
