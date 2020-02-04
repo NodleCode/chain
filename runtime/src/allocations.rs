@@ -164,12 +164,10 @@ mod tests {
         type Balance = u64;
         type OnNewAccount = ();
         type OnReapAccount = ();
-        type OnFreeBalanceZero = ();
         type Event = ();
         type TransferPayment = ();
         type DustRemoval = ();
         type ExistentialDeposit = ();
-        type TransferFee = ();
         type CreationFee = ();
     }
     impl Trait for Test {

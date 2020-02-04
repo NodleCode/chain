@@ -65,7 +65,6 @@ mod allocations;
 mod company_reserve;
 mod mandate;
 mod validators_session_helper;
-mod vesting_manager;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -204,10 +203,8 @@ parameter_types! {
 impl balances::Trait for Runtime {
     /// The type for recording an account's balance.
     type Balance = Balance;
-    /// What to do if an account's free balance gets zeroed.
-    type OnFreeBalanceZero = Session;
     /// What to do if an account is fully reaped from the system.
-    type OnReapAccount = System;
+    type OnReapAccount = (Session, System);
     /// What to do if a new account is created.
     type OnNewAccount = Indices;
     /// The ubiquitous event type.
@@ -215,8 +212,13 @@ impl balances::Trait for Runtime {
     type DustRemoval = ();
     type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
-    type TransferFee = TransferFee;
     type CreationFee = CreationFee;
+}
+
+impl vesting::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type BlockNumberToBalance = ConvertInto;
 }
 
 parameter_types! {
@@ -306,12 +308,6 @@ impl session::Trait for Runtime {
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
 
-impl vesting_manager::Trait for Runtime {
-    type Currency = balances::Module<Runtime>;
-    type ExternalOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-}
-
 parameter_types! {
     // Hardcoded account for which we don't know the secret key, string must be 8 chars
     pub const FundAccount: AccountId = ModuleId(*b"ndlresrv").into_account();
@@ -338,6 +334,7 @@ construct_runtime!(
         Balances: balances,
         TransactionPayment: transaction_payment::{Module, Storage},
         RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
+        Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
         
         // Consensus
         Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
@@ -347,7 +344,6 @@ construct_runtime!(
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: mandate::{Module, Call},
-        VestingManager: vesting_manager::{Module, Call},
         CompanyReserve: company_reserve::{Module, Call, Event<T>},
 
         // Nodle
@@ -459,6 +455,12 @@ impl_runtime_apis! {
     impl sp_session::SessionKeys<Block> for Runtime {
         fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
             opaque::SessionKeys::generate(seed)
+        }
+
+        fn decode_session_keys(
+            encoded: Vec<u8>,
+        ) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
+            opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
         }
     }
 

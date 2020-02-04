@@ -200,7 +200,6 @@ fn testnet_genesis(
                 .cloned()
                 .map(|k| (k, 1 << 60))
                 .collect(),
-            vesting: vec![],
         }),
 
         // Governance
@@ -236,5 +235,13 @@ fn testnet_genesis(
         session: Some(SessionConfig {
             keys: initial_authorities,
         }),
+        vesting: Some(Default::default()),
     }
+}
+
+pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
+    Ok(match Alternative::from(id) {
+        Some(spec) => Some(spec.load()?),
+        None => None,
+    })
 }

@@ -1,20 +1,24 @@
 //! A runtime module to manage vested grants, allows `ExternalOrigin` to create or delete
 //! grants.
+//!
+//! **This module is currently disabled and removed from the runtime**
 
 use frame_support::{
     decl_module,
     dispatch::DispatchResult,
-    traits::{Currency, VestingCurrency},
+    traits::{Currency, VestingSchedule},
 };
 use sp_runtime::traits::EnsureOrigin;
 
-type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+type VestingOf<T> = <T as Trait>::Vesting;
+type CurrencyOf<T> = <VestingOf<T> as VestingSchedule<<T as system::Trait>::AccountId>>::Currency;
+type BalanceOf<T> = <CurrencyOf<T> as Currency<<T as system::Trait>::AccountId>>::Balance;
+type MomentOf<T> = <VestingOf<T> as VestingSchedule<<T as system::Trait>::AccountId>>::Moment;
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
+    type Vesting: VestingSchedule<Self::AccountId>;
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
-    type Currency: Currency<Self::AccountId>
-        + VestingCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 }
 
 decl_module! {
@@ -25,16 +29,16 @@ decl_module! {
             who: T::AccountId,
             locked: BalanceOf<T>,
             per_block: BalanceOf<T>,
-            starting_block: T::BlockNumber
+            starting_block: MomentOf<T>,
         ) -> DispatchResult {
             T::ExternalOrigin::ensure_origin(origin)?;
-            T::Currency::add_vesting_schedule(&who, locked, per_block, starting_block)
+            T::Vesting::add_vesting_schedule(&who, locked, per_block, starting_block)
         }
 
         /// Remove a vesting schedule for a given account.
         fn remove_vesting_schedule(origin, who: T::AccountId) {
             T::ExternalOrigin::ensure_origin(origin)?;
-            T::Currency::remove_vesting_schedule(&who)
+            T::Vesting::remove_vesting_schedule(&who)
         }
     }
 }
@@ -102,12 +106,18 @@ mod tests {
         type TransferFee = ();
         type CreationFee = ();
     }
+    impl vesting::Trait for Test {
+        type Event = ();
+        type Currency = balances::Module<Test>;
+        type BlockNumberToBalance = ConvertInto;
+    }
 
     ord_parameter_types! {
         pub const Admin: u64 = 1;
     }
     impl Trait for Test {
         type Currency = balances::Module<Self>;
+        type Vesting = vesting::Module<Self>;
         type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     }
     type TestModule = Module<Test>;
