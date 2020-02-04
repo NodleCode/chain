@@ -204,7 +204,7 @@ impl balances::Trait for Runtime {
     /// The type for recording an account's balance.
     type Balance = Balance;
     /// What to do if an account is fully reaped from the system.
-    type OnReapAccount = (Session, System);
+    type OnReapAccount = (System, Session);
     /// What to do if a new account is created.
     type OnNewAccount = Indices;
     /// The ubiquitous event type.
@@ -340,6 +340,11 @@ construct_runtime!(
         Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
         Grandpa: grandpa::{Module, Call, Storage, Config, Event},
 
+        // Validators management
+        ValidatorsSessionHelper: validators_session_helper::{Module, Storage},
+        ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
+        Session: session::{Module, Call, Storage, Event, Config<T>},
+
         // Governance
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
@@ -349,11 +354,6 @@ construct_runtime!(
         // Nodle
         Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
         OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
-
-        // Validators management
-        ValidatorsSessionHelper: validators_session_helper::{Module, Storage},
-        ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
-        Session: session::{Module, Call, Storage, Event, Config<T>},
     }
 );
 
