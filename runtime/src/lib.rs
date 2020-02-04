@@ -13,8 +13,8 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::u32_trait::{_1, _2};
 use sp_core::OpaqueMetadata;
 use sp_runtime::traits::{
-    AccountIdConversion, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, NumberFor,
-    OpaqueKeys, StaticLookup, Verify,
+    AccountIdConversion, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys,
+    StaticLookup, Verify,
 };
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
@@ -206,6 +206,8 @@ impl balances::Trait for Runtime {
     type Balance = Balance;
     /// What to do if an account's free balance gets zeroed.
     type OnFreeBalanceZero = Session;
+    /// What to do if an account is fully reaped from the system.
+    type OnReapAccount = System;
     /// What to do if a new account is created.
     type OnNewAccount = Indices;
     /// The ubiquitous event type.
@@ -294,14 +296,13 @@ parameter_types! {
 }
 
 impl session::Trait for Runtime {
-    type OnSessionEnding = ValidatorsSessionHelper;
+    type SessionManager = ValidatorsSessionHelper;
     type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = ValidatorsSessionHelper;
     type Event = Event;
     type Keys = opaque::SessionKeys;
     type ValidatorId = <Self as system::Trait>::AccountId;
     type ValidatorIdOf = ConvertInto;
-    type SelectInitialValidators = ValidatorsSessionHelper;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
 
@@ -440,8 +441,8 @@ impl_runtime_apis! {
     }
 
     impl sp_offchain::OffchainWorkerApi<Block> for Runtime {
-        fn offchain_worker(number: NumberFor<Block>) {
-            Executive::offchain_worker(number)
+        fn offchain_worker(header: &<Block as BlockT>::Header) {
+            Executive::offchain_worker(header)
         }
     }
 

@@ -163,6 +163,7 @@ mod tests {
     impl balances::Trait for Test {
         type Balance = u64;
         type OnNewAccount = ();
+        type OnReapAccount = ();
         type OnFreeBalanceZero = ();
         type Event = ();
         type TransferPayment = ();

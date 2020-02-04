@@ -45,7 +45,8 @@ mod tests {
     use super::*;
 
     use frame_support::{
-        assert_noop, assert_ok, impl_outer_origin, parameter_types, weights::Weight,
+        assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
+        weights::Weight,
     };
     use sp_core::H256;
     use sp_runtime::{
@@ -92,6 +93,7 @@ mod tests {
     impl balances::Trait for Test {
         type Balance = u64;
         type OnNewAccount = ();
+        type OnReapAccount = ();
         type OnFreeBalanceZero = ();
         type Event = ();
         type TransferPayment = ();
@@ -101,7 +103,7 @@ mod tests {
         type CreationFee = ();
     }
 
-    parameter_types! {
+    ord_parameter_types! {
         pub const Admin: u64 = 1;
     }
     impl Trait for Test {

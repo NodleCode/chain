@@ -3,7 +3,7 @@
 
 use frame_support::traits::{ChangeMembers, InitializeMembers};
 use frame_support::{decl_module, decl_storage};
-use session::{OnSessionEnding, SelectInitialValidators, ShouldEndSession};
+use session::{SessionManager, ShouldEndSession};
 use sp_std::prelude::Vec;
 
 /// The module's configuration trait.
@@ -47,21 +47,12 @@ impl<T: Trait> InitializeMembers<T::AccountId> for Module<T> {
 }
 
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
-impl<T: Trait> OnSessionEnding<T::AccountId> for Module<T> {
-    /// Session is ending, we are being queried for the next validators, in our case this will
-    /// return all the added validators
-    fn on_session_ending(_: SessionIndex, _: SessionIndex) -> Option<Vec<T::AccountId>> {
+impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
+    fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
         Some(<Validators<T>>::get())
     }
-}
 
-impl<T: Trait> SelectInitialValidators<T::AccountId> for Module<T> {
-    /// Called by the session module when it starts to initialize its validators set,
-    /// we return the validators as configured by the membership module through
-    /// `initialize_members`.
-    fn select_initial_validators() -> Option<Vec<T::AccountId>> {
-        Some(<Validators<T>>::get())
-    }
+    fn end_session(_: SessionIndex) {}
 }
 
 impl<T: Trait> ShouldEndSession<T::BlockNumber> for Module<T> {
@@ -137,14 +128,13 @@ mod tests {
         fn on_genesis_session<Ks: OpaqueKeys>(_validators: &[(AuthorityId, Ks)]) {}
     }
     impl session::Trait for Test {
-        type OnSessionEnding = TestModule;
+        type SessionManager = Module<Test>;
         type SessionHandler = TestSessionHandler;
-        type ShouldEndSession = TestModule;
+        type ShouldEndSession = Module<Test>;
         type Event = ();
         type Keys = UintAuthorityId;
         type ValidatorId = <Test as system::Trait>::AccountId;
         type ValidatorIdOf = ConvertInto;
-        type SelectInitialValidators = TestModule;
         type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     }
     impl Trait for Test {}
@@ -180,21 +170,10 @@ mod tests {
     }
 
     #[test]
-    fn select_initial_validators_return_members() {
+    fn new_session_return_members() {
         new_test_ext().execute_with(|| {
             TestModule::initialize_members(&[VALIDATOR]);
-            assert_eq!(
-                TestModule::select_initial_validators(),
-                Some(vec![VALIDATOR])
-            );
-        })
-    }
-
-    #[test]
-    fn on_session_ending_return_members() {
-        new_test_ext().execute_with(|| {
-            TestModule::initialize_members(&[VALIDATOR]);
-            assert_eq!(TestModule::on_session_ending(0, 0), Some(vec![VALIDATOR]));
+            assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
         })
     }
 }
