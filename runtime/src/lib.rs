@@ -61,7 +61,6 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-mod allocations;
 mod company_reserve;
 mod mandate;
 mod validators_session_helper;

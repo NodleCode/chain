@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 //! A runtime module to handle Nodle Cash allocations to network
 //! contributors, has a list of oracles that can submit Merkle
 //! Root Hashes to be paid for.
