@@ -61,8 +61,6 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-mod company_reserve;
-
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
 /// of data like extrinsics, allowing for them to continue syncing the network through upgrades
@@ -310,7 +308,7 @@ parameter_types! {
     pub const FundAccount: AccountId = ModuleId(*b"ndlresrv").into_account();
 }
 
-impl company_reserve::Trait for Runtime {
+impl reserve::Trait for Runtime {
     type Event = Event;
     type Currency = balances::Module<Runtime>;
     type ExternalOrigin =
@@ -346,7 +344,7 @@ construct_runtime!(
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: mandate::{Module, Call},
-        CompanyReserve: company_reserve::{Module, Call, Event<T>},
+        CompanyReserve: reserve::{Module, Call, Event<T>},
 
         // Nodle
         Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},

@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 //! A module that is called by the `collective` and is in charge of holding
 //! the company funds.
 
