@@ -6,11 +6,18 @@
 use frame_support::{
     decl_event, decl_module,
     dispatch::DispatchResult,
-    traits::{Currency, ExistenceRequirement, Get},
+    traits::{Currency, ExistenceRequirement, Imbalance, OnUnbalanced},
 };
-use sp_runtime::traits::EnsureOrigin;
+use sp_runtime::{
+    traits::{AccountIdConversion, EnsureOrigin},
+    ModuleId,
+};
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+type NegativeImbalanceOf<T> =
+    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+
+const MODULE_ID: ModuleId = ModuleId(*b"py/resrv");
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
@@ -18,9 +25,6 @@ pub trait Trait: system::Trait {
 
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
     type Currency: Currency<Self::AccountId>;
-
-    /// AccountId holding the reserve's funds
-    type FundAccount: Get<Self::AccountId>;
 }
 
 decl_module! {
@@ -32,7 +36,7 @@ decl_module! {
             T::ExternalOrigin::ensure_origin(origin)?;
 
             // TODO: we currently `AllowDeath` for our source account, shall we use `KeepAlive` instead?
-            let _ = T::Currency::transfer(&T::FundAccount::get(), &to, amount, ExistenceRequirement::AllowDeath);
+            let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::AllowDeath);
 
             Self::deposit_event(RawEvent::SpentFunds(to, amount));
 
@@ -47,9 +51,27 @@ decl_event!(
         AccountId = <T as system::Trait>::AccountId,
         Balance = BalanceOf<T>,
     {
+        Deposit(Balance),
         SpentFunds(AccountId, Balance),
     }
 );
+
+impl<T: Trait> Module<T> {
+    pub fn account_id() -> T::AccountId {
+        MODULE_ID.into_account()
+    }
+}
+
+impl<T: Trait> OnUnbalanced<NegativeImbalanceOf<T>> for Module<T> {
+    fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<T>) {
+        let numeric_amount = amount.peek();
+
+        // Must resolve into existing but better to be safe.
+        let _ = T::Currency::resolve_creating(&Self::account_id(), amount);
+
+        Self::deposit_event(RawEvent::Deposit(numeric_amount));
+    }
+}
 
 /// tests for this module
 #[cfg(test)]
@@ -115,13 +137,11 @@ mod tests {
 
     ord_parameter_types! {
         pub const Admin: u64 = 1;
-        pub const FundAccount: u64 = 2;
     }
     impl Trait for Test {
         type Event = ();
         type Currency = balances::Module<Self>;
         type ExternalOrigin = EnsureSignedBy<Admin, u64>;
-        type FundAccount = FundAccount;
     }
     type TestModule = Module<Test>;
     type Balances = balances::Module<Test>;
@@ -149,14 +169,14 @@ mod tests {
     fn spend_funds_to_target() {
         new_test_ext().execute_with(|| {
             let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
-            let r = <Test as Trait>::Currency::deposit_creating(&FundAccount::get(), 100);
+            let r = <Test as Trait>::Currency::deposit_creating(&TestModule::account_id(), 100);
             total_imbalance.subsume(r);
 
-            assert_eq!(Balances::free_balance(FundAccount::get()), 100);
+            assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
             assert_eq!(Balances::free_balance(3), 0);
             assert_ok!(TestModule::spend(Origin::signed(Admin::get()), 3, 100));
             assert_eq!(Balances::free_balance(3), 100);
-            assert_eq!(Balances::free_balance(FundAccount::get()), 0);
+            assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
         })
     }
 }
