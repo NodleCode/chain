@@ -62,7 +62,6 @@ pub type Hash = sp_core::H256;
 pub type DigestItem = generic::DigestItem<Hash>;
 
 mod company_reserve;
-mod validators_session_helper;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -276,7 +275,7 @@ impl mandate::Trait for Runtime {
         collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
 }
 
-impl validators_session_helper::Trait for Runtime {}
+impl poa::Trait for Runtime {}
 
 impl membership::Trait<membership::Instance3> for Runtime {
     type Event = Event;
@@ -285,8 +284,8 @@ impl membership::Trait<membership::Instance3> for Runtime {
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = ValidatorsSessionHelper;
-    type MembershipChanged = ValidatorsSessionHelper;
+    type MembershipInitialized = PoaSessions;
+    type MembershipChanged = PoaSessions;
 }
 
 parameter_types! {
@@ -296,9 +295,9 @@ parameter_types! {
 }
 
 impl session::Trait for Runtime {
-    type SessionManager = ValidatorsSessionHelper;
+    type SessionManager = PoaSessions;
     type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-    type ShouldEndSession = ValidatorsSessionHelper;
+    type ShouldEndSession = PoaSessions;
     type Event = Event;
     type Keys = opaque::SessionKeys;
     type ValidatorId = <Self as system::Trait>::AccountId;
@@ -339,7 +338,7 @@ construct_runtime!(
         Grandpa: grandpa::{Module, Call, Storage, Config, Event},
 
         // Validators management
-        ValidatorsSessionHelper: validators_session_helper::{Module, Storage},
+        PoaSessions: poa::{Module, Storage},
         ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: session::{Module, Call, Storage, Event, Config<T>},
 

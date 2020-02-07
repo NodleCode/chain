@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 //! A runtime module to handle help managing validators through the `membership`,
 //! support the deletion and addition of validators by a root authority n.
 
