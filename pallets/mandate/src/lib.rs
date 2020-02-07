@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 //! Any entity (such as the committee) with access to the "root mandate" (this module)
 //! can use the `apply` function to dispatch calls as root. Think of this module as an
 //! other `sudo` module controlled by another module (ex: a multisig).

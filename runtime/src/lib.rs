@@ -62,7 +62,6 @@ pub type Hash = sp_core::H256;
 pub type DigestItem = generic::DigestItem<Hash>;
 
 mod company_reserve;
-mod mandate;
 mod validators_session_helper;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
