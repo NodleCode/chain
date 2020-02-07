@@ -14,7 +14,7 @@ cargo build
 
 ## Testing
 ```
-cargo test -p nodle-chain-runtime
+cargo test --all
 ```
 
 ## Installing
