@@ -13,12 +13,11 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::u32_trait::{_1, _2};
 use sp_core::OpaqueMetadata;
 use sp_runtime::traits::{
-    AccountIdConversion, BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys,
-    StaticLookup, Verify,
+    BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys, StaticLookup, Verify,
 };
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
-    ApplyExtrinsicResult, ModuleId, MultiSignature,
+    ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -303,17 +302,11 @@ impl session::Trait for Runtime {
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
 
-parameter_types! {
-    // Hardcoded account for which we don't know the secret key, string must be 8 chars
-    pub const FundAccount: AccountId = ModuleId(*b"ndlresrv").into_account();
-}
-
 impl reserve::Trait for Runtime {
     type Event = Event;
     type Currency = balances::Module<Runtime>;
     type ExternalOrigin =
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type FundAccount = FundAccount;
 }
 
 construct_runtime!(

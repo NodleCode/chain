@@ -1,8 +1,8 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use nodle_chain_runtime::{
-    opaque::SessionKeys, AccountId, AllocationsConfig, AuraConfig, BalancesConfig, FundAccount,
-    GenesisConfig, GrandpaConfig, IndicesConfig, OraclesSetConfig, SessionConfig, Signature,
-    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+    opaque::SessionKeys, AccountId, AllocationsConfig, AuraConfig, BalancesConfig, GenesisConfig,
+    GrandpaConfig, IndicesConfig, OraclesSetConfig, SessionConfig, Signature, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use sc_service;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -88,7 +88,6 @@ impl Alternative {
                             get_account_id_from_seed::<sr25519::Public>("Charlie"),
                         ],
                         vec![
-                            FundAccount::get(),
                             get_account_id_from_seed::<sr25519::Public>("Alice"),
                             get_account_id_from_seed::<sr25519::Public>("Bob"),
                             get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
@@ -135,7 +134,6 @@ impl Alternative {
                             ),
                         ],
                         vec![
-                            FundAccount::get(),
                             get_account_id_from_addr::<sr25519::Public>(
                                 "5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd",
                             ), // Root
