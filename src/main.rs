@@ -15,7 +15,7 @@ fn main() -> Result<(), error::Error> {
         name: "Nodle Chain Node",
         commit: env!("VERGEN_SHA_SHORT"),
         version: env!("CARGO_PKG_VERSION"),
-        executable_name: "node-chain",
+        executable_name: "nodle-chain",
         author: "Eliott Teissonniere",
         description: "Nodle Chain Node",
         support_url: "eliott@nodle.co",
