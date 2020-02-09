@@ -51,6 +51,7 @@ impl<T: Trait> InitializeMembers<T::AccountId> for Module<T> {
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
+        Flag::put(false);
         Some(<Validators<T>>::get())
     }
 
@@ -172,10 +173,12 @@ mod tests {
     }
 
     #[test]
-    fn new_session_return_members() {
+    fn new_session_return_members_and_set_flag() {
         new_test_ext().execute_with(|| {
             TestModule::initialize_members(&[VALIDATOR]);
+            Flag::put(true);
             assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
+            assert_eq!(Flag::get(), false);
         })
     }
 }
