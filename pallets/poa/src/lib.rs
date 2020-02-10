@@ -5,7 +5,7 @@
 
 use frame_support::traits::{ChangeMembers, InitializeMembers};
 use frame_support::{decl_module, decl_storage};
-use session::{SessionManager, ShouldEndSession};
+use session::SessionManager;
 use sp_std::prelude::Vec;
 
 /// The module's configuration trait.
@@ -56,13 +56,6 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     }
 
     fn end_session(_: SessionIndex) {}
-}
-
-impl<T: Trait> ShouldEndSession<T::BlockNumber> for Module<T> {
-    /// We end the session when validators need to be updated
-    fn should_end_session(_now: T::BlockNumber) -> bool {
-        Flag::get()
-    }
 }
 
 /// tests for this module
@@ -160,15 +153,6 @@ mod tests {
         new_test_ext().execute_with(|| {
             TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
             assert_eq!(Flag::get(), true);
-        })
-    }
-
-    #[test]
-    fn should_end_session_return_flag() {
-        new_test_ext().execute_with(|| {
-            assert_eq!(TestModule::should_end_session(0), false); // Flag is false by default
-            Flag::put(true);
-            assert_eq!(TestModule::should_end_session(0), true);
         })
     }
 
