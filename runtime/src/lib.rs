@@ -6,83 +6,45 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use grandpa::fg_primitives;
-use grandpa::AuthorityList as GrandpaAuthorityList;
-use sp_api::impl_runtime_apis;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::u32_trait::{_1, _2};
+use grandpa::{fg_primitives, AuthorityId as GrandpaId};
+use im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
+
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+use sp_core::u32_trait::{_1, _2, _4};
 use sp_core::OpaqueMetadata;
-use sp_runtime::traits::{
-    BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys, StaticLookup, Verify,
-};
+use sp_runtime::traits::{BlakeTwo256, Block as BlockT, ConvertInto, OpaqueKeys, StaticLookup};
 use sp_runtime::{
-    create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
-    ApplyExtrinsicResult, MultiSignature,
+    create_runtime_str, generic, transaction_validity::TransactionValidity, ApplyExtrinsicResult,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+use system::offchain::TransactionSubmitter;
 
 // A few exports that help ease life for downstream crates.
 pub use balances::Call as BalancesCall;
 pub use frame_support::{
-    construct_runtime, parameter_types, traits::Randomness, weights::Weight, StorageValue,
+    construct_runtime, parameter_types,
+    traits::{Currency, Randomness, SplitTwoWays},
+    weights::Weight,
+    StorageValue,
 };
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 pub use timestamp::Call as TimestampCall;
 
-/// An index to a block.
-pub type BlockNumber = u32;
+mod constants;
+mod implementations;
+mod opaque_primitives;
 
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
+use implementations::{TargetedFeeAdjustment, ToAuthor, WeightToFee};
+pub use opaque_primitives::*;
 
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// The type for looking up accounts. We don't expect more than 4 billion of them, but you
-/// never know...
-pub type AccountIndex = u32;
-
-/// Balance of an account.
-pub type Balance = u128;
-
-/// Index of a transaction in the chain.
-pub type Index = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
-
-/// Digest item type.
-pub type DigestItem = generic::DigestItem<Hash>;
-
-/// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
-/// the specifics of the runtime. They can then be made to be agnostic over specific formats
-/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
-/// to even the core datastructures.
-pub mod opaque {
-    use super::*;
-
-    pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
-
-    /// Opaque block header type.
-    pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-    /// Opaque block type.
-    pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-    /// Opaque block identifier type.
-    pub type BlockId = generic::BlockId<Block>;
-
-    impl_opaque_keys! {
-        pub struct SessionKeys {
-            pub aura: Aura,
-            pub grandpa: Grandpa,
-        }
-    }
-}
+type NegativeImbalance<T> =
+    <balances::Module<T> as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
@@ -90,18 +52,9 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     impl_name: create_runtime_str!("nodle-chain"),
     authoring_version: 1,
     spec_version: 1,
-    impl_version: 1,
+    impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
 };
-
-pub const MILLISECS_PER_BLOCK: u64 = 6000;
-
-pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
-
-// These time units are defined in number of blocks.
-pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
-pub const HOURS: BlockNumber = MINUTES * 60;
-pub const DAYS: BlockNumber = HOURS * 24;
 
 /// The version infromation used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
@@ -121,92 +74,123 @@ parameter_types! {
 }
 
 impl system::Trait for Runtime {
-    /// The identifier used to distinguish between accounts.
     type AccountId = AccountId;
-    /// The aggregated dispatch type that is available for extrinsics.
     type Call = Call;
-    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
     type Lookup = Indices;
-    /// The index type for storing how many extrinsics an account has signed.
     type Index = Index;
-    /// The index type for blocks.
     type BlockNumber = BlockNumber;
-    /// The type for hashing blocks and tries.
     type Hash = Hash;
-    /// The hashing algorithm used.
     type Hashing = BlakeTwo256;
-    /// The header type.
     type Header = generic::Header<BlockNumber, BlakeTwo256>;
-    /// The ubiquitous event type.
     type Event = Event;
-    /// The ubiquitous origin type.
     type Origin = Origin;
-    /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
     type BlockHashCount = BlockHashCount;
-    /// Maximum weight of each block.
     type MaximumBlockWeight = MaximumBlockWeight;
-    /// Maximum size of all encoded transactions (in bytes) that are allowed in one block.
     type MaximumBlockLength = MaximumBlockLength;
-    /// Portion of the block weight that is available to all normal transactions.
     type AvailableBlockRatio = AvailableBlockRatio;
-    /// Version of the runtime.
     type Version = Version;
-    /// Converts a module to the index of the module in `construct_runtime!`.
-    ///
-    /// This type is being generated by `construct_runtime!`.
     type ModuleToIndex = ModuleToIndex;
 }
 
-impl aura::Trait for Runtime {
-    type AuthorityId = AuraId;
+parameter_types! {
+    pub const EpochDuration: u64 = constants::EPOCH_DURATION_IN_BLOCKS as u64;
+    pub const ExpectedBlockTime: u64 = constants::MILLISECS_PER_BLOCK;
+}
+
+impl babe::Trait for Runtime {
+    type EpochDuration = EpochDuration;
+    type ExpectedBlockTime = ExpectedBlockTime;
+
+    // session module is the trigger
+    type EpochChangeTrigger = babe::ExternalTrigger;
 }
 
 impl grandpa::Trait for Runtime {
     type Event = Event;
 }
 
+impl authority_discovery::Trait for Runtime {}
+
+// TODO: substrate#2986 implement this properly
+impl authorship::Trait for Runtime {
+    type FindAuthor = session::FindAccountFromAuthorIndex<Self, Babe>;
+    type UncleGenerations = UncleGenerations;
+    type FilterUncle = ();
+    type EventHandler = ImOnline;
+}
+
+type SubmitTransaction = TransactionSubmitter<ImOnlineId, Runtime, UncheckedExtrinsic>;
+
+parameter_types! {
+    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_BLOCKS as _;
+}
+
+impl im_online::Trait for Runtime {
+    type AuthorityId = ImOnlineId;
+    type Event = Event;
+    type Call = Call;
+    type SubmitTransaction = SubmitTransaction;
+    type SessionDuration = SessionDuration;
+    type ReportUnresponsiveness = Offences;
+}
+
+impl offences::Trait for Runtime {
+    type Event = Event;
+    type IdentificationTuple = session::historical::IdentificationTuple<Self>;
+    // TODO: as of now, we don't execute any slashing, however offences are logged
+    // so that we could decide to remove validators later
+    type OnOffenceHandler = ();
+}
+
 impl indices::Trait for Runtime {
-    /// The type for recording indexing into the account enumeration. If this ever overflows, there
-    /// will be problems!
     type AccountIndex = AccountIndex;
-    /// Use the standard means of resolving an index hint from an id.
     type ResolveHint = indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
-    /// Determine whether an account is dead.
     type IsDeadAccount = Balances;
-    /// The ubiquitous event type.
     type Event = Event;
 }
 
 parameter_types! {
-    pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
+    pub const ExistentialDeposit: Balance = 100 * constants::CENTS;
+    pub const CreationFee: Balance = 1 * constants::CENTS;
 }
 
-impl timestamp::Trait for Runtime {
-    /// A timestamp: milliseconds since the unix epoch.
-    type Moment = u64;
-    type OnTimestampSet = Aura;
-    type MinimumPeriod = MinimumPeriod;
-}
-
-parameter_types! {
-    pub const ExistentialDeposit: u128 = 500;
-    pub const TransferFee: u128 = 0;
-    pub const CreationFee: u128 = 0;
-}
+/// Splits fees 20/80 between reserve and block author.
+pub type DealWithFees = SplitTwoWays<
+    Balance,
+    NegativeImbalance<Runtime>,
+    _1,
+    CompanyReserve, // 1/5 to the company reserve
+    _4,
+    ToAuthor<Runtime>, // 4/5 to the block author
+>;
 
 impl balances::Trait for Runtime {
-    /// The type for recording an account's balance.
     type Balance = Balance;
-    /// What to do if an account is fully reaped from the system.
-    type OnReapAccount = (System, Session);
-    /// What to do if a new account is created.
+    type OnReapAccount = (Session, System);
     type OnNewAccount = Indices;
-    /// The ubiquitous event type.
     type Event = Event;
+    // TODO: for now dust is destroyed thus reducing the supply
     type DustRemoval = ();
     type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
     type CreationFee = CreationFee;
+}
+
+parameter_types! {
+    pub const TransactionBaseFee: Balance = 1 * constants::CENTS;
+    pub const TransactionByteFee: Balance = 10 * constants::MILLICENTS;
+    // For a sane configuration, this should always be less than `AvailableBlockRatio`.
+    // Fees raises after a fullness of 25%
+    pub const TargetBlockFullness: Perbill = constants::TARGET_BLOCK_FULLNESS;
+}
+
+impl transaction_payment::Trait for Runtime {
+    type Currency = Balances;
+    type OnTransactionPayment = DealWithFees;
+    type TransactionBaseFee = TransactionBaseFee;
+    type TransactionByteFee = TransactionByteFee;
+    type WeightToFee = WeightToFee;
+    type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness, Self>;
 }
 
 impl vesting::Trait for Runtime {
@@ -216,25 +200,53 @@ impl vesting::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const TransactionBaseFee: Balance = 0;
-    pub const TransactionByteFee: Balance = 1;
+    pub const MinimumPeriod: u64 = constants::SLOT_DURATION / 2;
 }
 
-impl transaction_payment::Trait for Runtime {
-    type Currency = balances::Module<Runtime>;
-    type OnTransactionPayment = ();
-    type TransactionBaseFee = TransactionBaseFee;
-    type TransactionByteFee = TransactionByteFee;
-    type WeightToFee = ConvertInto;
-    type FeeMultiplierUpdate = ();
+impl timestamp::Trait for Runtime {
+    type Moment = u64;
+    type OnTimestampSet = Babe;
+    type MinimumPeriod = MinimumPeriod;
 }
 
-type TechnicalCollective = collective::Instance2;
-impl collective::Trait<TechnicalCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
+parameter_types! {
+    pub const UncleGenerations: u32 = 0;
+}
+
+parameter_types! {
+    // When this percentage is reached the module will force a new era, we never
+    // call `session.disable()` so this should never be used.
+    pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
+}
+
+impl session::Trait for Runtime {
+    type SessionManager = PoaSessions;
+    type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type ShouldEndSession = Babe;
     type Event = Event;
+    type Keys = SessionKeys;
+    type ValidatorId = AccountId;
+    type ValidatorIdOf = ConvertInto;
+    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
+
+impl session::historical::Trait for Runtime {
+    type FullIdentification = poa::FullIdentification;
+    type FullIdentificationOf = poa::FullIdentificationOf<Runtime>;
+}
+
+impl membership::Trait<membership::Instance3> for Runtime {
+    type Event = Event;
+    type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RemoveOrigin =
+        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type MembershipInitialized = PoaSessions;
+    type MembershipChanged = PoaSessions;
+}
+
+impl poa::Trait for Runtime {}
 
 impl membership::Trait<membership::Instance1> for Runtime {
     type Event = Event;
@@ -247,10 +259,11 @@ impl membership::Trait<membership::Instance1> for Runtime {
     type MembershipChanged = TechnicalCommittee;
 }
 
-impl allocations::Trait for Runtime {
+type TechnicalCollective = collective::Instance2;
+impl collective::Trait<TechnicalCollective> for Runtime {
+    type Origin = Origin;
+    type Proposal = Call;
     type Event = Event;
-    type Currency = balances::Module<Runtime>;
-    type Reward = (); // rewards are minted from the void
 }
 
 impl membership::Trait<membership::Instance2> for Runtime {
@@ -264,42 +277,18 @@ impl membership::Trait<membership::Instance2> for Runtime {
     type MembershipChanged = Allocations;
 }
 
+impl allocations::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type Reward = (); // rewards are minted from the void
+}
+
 impl mandate::Trait for Runtime {
     type Proposal = Call;
 
     // A majority of the committee can dispatch root calls
     type ExternalOrigin =
         collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
-}
-
-impl poa::Trait for Runtime {}
-
-impl membership::Trait<membership::Instance3> for Runtime {
-    type Event = Event;
-    type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = PoaSessions;
-    type MembershipChanged = PoaSessions;
-}
-
-parameter_types! {
-    // Parameter copied directly from Kusama
-    // TODO figure out consequences of exceeding the threshold
-    pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
-}
-
-impl session::Trait for Runtime {
-    type SessionManager = PoaSessions;
-    type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-    type ShouldEndSession = PoaSessions;
-    type Event = Event;
-    type Keys = opaque::SessionKeys;
-    type ValidatorId = <Self as system::Trait>::AccountId;
-    type ValidatorIdOf = ConvertInto;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
 
 impl reserve::Trait for Runtime {
@@ -312,7 +301,7 @@ impl reserve::Trait for Runtime {
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
-        NodeBlock = opaque::Block,
+        NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
@@ -325,13 +314,15 @@ construct_runtime!(
         Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
         
         // Consensus
-        Aura: aura::{Module, Config<T>, Inherent(Timestamp)},
+        Babe: babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
         Grandpa: grandpa::{Module, Call, Storage, Config, Event},
-
-        // Validators management
+        Authorship: authorship::{Module, Call, Storage},
+        ImOnline: im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+        Offences: offences::{Module, Call, Storage, Event},
         PoaSessions: poa::{Module, Storage},
         ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: session::{Module, Call, Storage, Event, Config<T>},
+        AuthorityDiscovery: authority_discovery::{Module, Call, Config},
 
         // Governance
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
@@ -372,7 +363,7 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExt
 pub type Executive =
     frame_executive::Executive<Runtime, Block, system::ChainContext<Runtime>, Runtime, AllModules>;
 
-impl_runtime_apis! {
+sp_api::impl_runtime_apis! {
     impl sp_api::Core<Block> for Runtime {
         fn version() -> RuntimeVersion {
             VERSION
@@ -430,31 +421,61 @@ impl_runtime_apis! {
         }
     }
 
-    impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
-        fn slot_duration() -> u64 {
-            Aura::slot_duration()
+    impl fg_primitives::GrandpaApi<Block> for Runtime {
+        fn grandpa_authorities() -> Vec<(GrandpaId, u64)> {
+            Grandpa::grandpa_authorities()
         }
+    }
 
-        fn authorities() -> Vec<AuraId> {
-            Aura::authorities()
+    impl sp_consensus_babe::BabeApi<Block> for Runtime {
+        fn configuration() -> sp_consensus_babe::BabeConfiguration {
+            // The choice of `c` parameter (where `1 - c` represents the
+            // probability of a slot being empty), is done in accordance to the
+            // slot duration and expected target block time, for safely
+            // resisting network delays of maximum two seconds.
+            // <https://research.web3.foundation/en/latest/polkadot/BABE/Babe/#6-practical-results>
+            sp_consensus_babe::BabeConfiguration {
+                slot_duration: Babe::slot_duration(),
+                epoch_length: EpochDuration::get(),
+                c: constants::PRIMARY_PROBABILITY,
+                genesis_authorities: Babe::authorities(),
+                randomness: Babe::randomness(),
+                secondary_slots: true,
+            }
+        }
+    }
+
+    impl sp_authority_discovery::AuthorityDiscoveryApi<Block> for Runtime {
+        fn authorities() -> Vec<AuthorityDiscoveryId> {
+            AuthorityDiscovery::authorities()
         }
     }
 
     impl sp_session::SessionKeys<Block> for Runtime {
         fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-            opaque::SessionKeys::generate(seed)
+            SessionKeys::generate(seed)
         }
 
         fn decode_session_keys(
             encoded: Vec<u8>,
         ) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
-            opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
+            SessionKeys::decode_into_raw_public_keys(&encoded)
         }
     }
 
-    impl fg_primitives::GrandpaApi<Block> for Runtime {
-        fn grandpa_authorities() -> GrandpaAuthorityList {
-            Grandpa::grandpa_authorities()
+    impl system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
+        fn account_nonce(account: AccountId) -> Index {
+            System::account_nonce(account)
+        }
+    }
+
+    impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<
+        Block,
+        Balance,
+        UncheckedExtrinsic,
+    > for Runtime {
+        fn query_info(uxt: UncheckedExtrinsic, len: u32) -> RuntimeDispatchInfo<Balance> {
+            TransactionPayment::query_info(uxt, len)
         }
     }
 }
