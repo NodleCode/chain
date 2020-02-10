@@ -6,6 +6,7 @@
 use frame_support::traits::{ChangeMembers, InitializeMembers};
 use frame_support::{decl_module, decl_storage};
 use session::SessionManager;
+use sp_runtime::traits::Convert;
 use sp_std::prelude::Vec;
 
 /// The module's configuration trait.
@@ -48,6 +49,16 @@ impl<T: Trait> InitializeMembers<T::AccountId> for Module<T> {
     }
 }
 
+/// Compatibility code for the session historical code
+pub type FullIdentification = u32;
+pub struct FullIdentificationOf<T>(sp_std::marker::PhantomData<T>);
+
+impl<T: Trait> Convert<T::AccountId, Option<FullIdentification>> for FullIdentificationOf<T> {
+    fn convert(_validator: T::AccountId) -> Option<FullIdentification> {
+        Some(0)
+    }
+}
+
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
@@ -56,6 +67,24 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     }
 
     fn end_session(_: SessionIndex) {}
+}
+
+impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentification> for Module<T> {
+    fn new_session(new_index: SessionIndex) -> Option<Vec<(T::AccountId, FullIdentification)>> {
+        <Self as session::SessionManager<_>>::new_session(new_index).map(|validators| {
+            validators
+                .into_iter()
+                .map(|v| {
+                    let full_identification =
+                        FullIdentificationOf::<T>::convert(v.clone()).unwrap_or(0);
+                    (v, full_identification)
+                })
+                .collect()
+        })
+    }
+    fn end_session(end_index: SessionIndex) {
+        <Self as session::SessionManager<_>>::end_session(end_index)
+    }
 }
 
 /// tests for this module
