@@ -34,9 +34,6 @@ impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
     ) {
         <Validators<T>>::put(new);
 
-        // Queue the new keys
-        <session::Module<T>>::rotate_session();
-
         // Trigger another rotation so that the queued keys take effect
         Flag::put(true);
     }
