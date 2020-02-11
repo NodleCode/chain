@@ -152,10 +152,15 @@ mod tests {
 
         fn on_genesis_session<Ks: OpaqueKeys>(_validators: &[(AuthorityId, Ks)]) {}
     }
+    impl session::ShouldEndSession<u64> for TestSessionHandler {
+        fn should_end_session(_now: u64) -> bool {
+            false
+        }
+    }
     impl session::Trait for Test {
         type SessionManager = Module<Test>;
         type SessionHandler = TestSessionHandler;
-        type ShouldEndSession = Module<Test>;
+        type ShouldEndSession = TestSessionHandler;
         type Event = ();
         type Keys = UintAuthorityId;
         type ValidatorId = <Test as system::Trait>::AccountId;
