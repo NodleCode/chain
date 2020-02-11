@@ -81,6 +81,7 @@ decl_event!(
         Balance = BalanceOf<T>,
         Hash = <T as system::Trait>::Hash,
     {
+        /// Some rewards were allocated to a network contributor.
         RewardAllocated(AccountId, Balance, Hash),
     }
 );

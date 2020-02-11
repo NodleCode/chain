@@ -51,7 +51,9 @@ decl_event!(
         AccountId = <T as system::Trait>::AccountId,
         Balance = BalanceOf<T>,
     {
+        /// Some amount was deposited (e.g. for transaction fees).
         Deposit(Balance),
+        /// Some funds were spent from the reserve.
         SpentFunds(AccountId, Balance),
     }
 );
