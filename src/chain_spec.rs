@@ -150,7 +150,7 @@ pub fn testnet_genesis(
         ]
     });
 
-    const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+    const ENDOWMENT: Balance = 100 * NODL;
 
     GenesisConfig {
         // Core
