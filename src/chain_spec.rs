@@ -37,10 +37,10 @@ pub type ChainSpec = sc_service::ChainSpec<GenesisConfig, Extensions>;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Alternative {
     /// Whatever the current runtime is, with just Alice as an auth and
-    // Ferdie as oracle.
+    /// Ferdie as oracle.
     Development,
     /// Whatever the current runtime is, with simple Alice/Bob auths and
-    // Ferdie as oracle.
+    /// Ferdie as oracle.
     LocalTestnet,
 }
 
