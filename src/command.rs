@@ -18,7 +18,6 @@ use crate::chain_spec;
 use crate::cli::Cli;
 use crate::service;
 use sc_cli::{error, VersionInfo};
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 
 /// Parse and run command line arguments
 pub fn run(version: VersionInfo) -> error::Result<()> {

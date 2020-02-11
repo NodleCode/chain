@@ -13,7 +13,7 @@ pub use frame_support::{
 use sp_runtime::traits::{IdentifyAccount, Verify};
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-use sp_runtime::{generic, impl_opaque_keys, traits::BlakeTwo256, MultiSignature};
+use sp_runtime::{generic, impl_opaque_keys, MultiSignature};
 pub use sp_runtime::{Perbill, Permill};
 use sp_std::prelude::*;
 pub use timestamp::Call as TimestampCall;

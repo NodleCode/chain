@@ -1,29 +1,86 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
+use im_online::sr25519::AuthorityId as ImOnlineId;
+use nodle_chain_runtime::constants::*;
+use nodle_chain_runtime::opaque_primitives::{AccountId, Balance, Signature};
+use nodle_chain_runtime::Block;
+use nodle_chain_runtime::GenesisConfig;
 use nodle_chain_runtime::{
-    opaque::SessionKeys, AccountId, AllocationsConfig, AuraConfig, BalancesConfig, GenesisConfig,
-    GrandpaConfig, IndicesConfig, OraclesSetConfig, SessionConfig, Signature, SystemConfig,
+    AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, GrandpaConfig,
+    ImOnlineConfig, IndicesConfig, OraclesSetConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
-use sc_service;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{crypto::Ss58Codec, ed25519, sr25519, Pair, Public};
+use sc_chain_spec::ChainSpecExtension;
+use serde::{Deserialize, Serialize};
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+use sp_consensus_babe::AuthorityId as BabeId;
+use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
-// Note this is the URL for the telemetry server
-//const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+type AccountPublic = <Signature as Verify>::Signer;
 
-/// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
+/// Node `ChainSpec` extensions.
+///
+/// Additional parameters for some Substrate core modules,
+/// customizable from the chain spec.
+#[derive(Default, Clone, Serialize, Deserialize, ChainSpecExtension)]
+#[serde(rename_all = "camelCase")]
+pub struct Extensions {
+    /// Block numbers with known hashes.
+    pub fork_blocks: sc_client::ForkBlocks<Block>,
+    /// Known bad block hashes.
+    pub bad_blocks: sc_client::BadBlocks<Block>,
+}
 
-/// The chain specification option. This is expected to come in from the CLI and
-/// is little more than one of a number of alternatives which can easily be converted
-/// from a string (`--chain=...`) into a `ChainSpec`.
-#[derive(Clone, Debug)]
+pub type ChainSpec = sc_service::ChainSpec<GenesisConfig, Extensions>;
+
+/// The chain specification option.
+#[derive(Clone, Debug, PartialEq)]
 pub enum Alternative {
-    /// Whatever the current runtime is, with just Alice as an auth.
+    /// Whatever the current runtime is, with just Alice as an auth and
+    // Ferdie as oracle.
     Development,
+    /// Whatever the current runtime is, with simple Alice/Bob auths and
+    // Ferdie as oracle.
+    LocalTestnet,
+}
 
-    Nergal,
+/// Get a chain config from a spec setting.
+impl Alternative {
+    pub(crate) fn load(self) -> Result<ChainSpec, String> {
+        Ok(match self {
+            Alternative::Development => development_config(),
+            Alternative::LocalTestnet => local_testnet_config(),
+        })
+    }
+
+    pub(crate) fn from(s: &str) -> Option<Self> {
+        match s {
+            "dev" => Some(Alternative::Development),
+            "local" => Some(Alternative::LocalTestnet),
+            _ => None,
+        }
+    }
+}
+
+pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
+    Ok(match Alternative::from(id) {
+        Some(spec) => Some(spec.load()?),
+        None => None,
+    })
+}
+
+fn session_keys(
+    grandpa: GrandpaId,
+    babe: BabeId,
+    im_online: ImOnlineId,
+    authority_discovery: AuthorityDiscoveryId,
+) -> SessionKeys {
+    SessionKeys {
+        grandpa,
+        babe,
+        im_online,
+        authority_discovery,
+    }
 }
 
 /// Helper function to generate a crypto pair from seed
@@ -33,13 +90,6 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
         .public()
 }
 
-/// Helper function to generate a crypto pair from an address
-pub fn get_from_addr<TPublic: Public>(addr: &str) -> TPublic {
-    TPublic::from_string(addr).expect("static values are valid; qed")
-}
-
-type AccountPublic = <Signature as Verify>::Signer;
-
 /// Helper function to generate an account ID from seed
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
@@ -48,156 +98,109 @@ where
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Helper function to generate an account ID from an address
-pub fn get_account_id_from_addr<TPublic: Public>(addr: &str) -> AccountId
-where
-    AccountPublic: From<TPublic>,
-{
-    AccountPublic::from(get_from_addr::<TPublic>(addr)).into_account()
+/// Helper function to generate stash, controller and session key from seed
+pub fn get_authority_keys_from_seed(
+    seed: &str,
+) -> (
+    AccountId,
+    AccountId,
+    GrandpaId,
+    BabeId,
+    ImOnlineId,
+    AuthorityDiscoveryId,
+) {
+    (
+        get_account_id_from_seed::<sr25519::Public>(&format!("{}//stash", seed)),
+        get_account_id_from_seed::<sr25519::Public>(seed),
+        get_from_seed::<GrandpaId>(seed),
+        get_from_seed::<BabeId>(seed),
+        get_from_seed::<ImOnlineId>(seed),
+        get_from_seed::<AuthorityDiscoveryId>(seed),
+    )
 }
 
-/// Helper function to generate an authority key for Aura
-pub fn get_authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
-    (get_from_seed::<AuraId>(s), get_from_seed::<GrandpaId>(s))
-}
-
-// Return a `SessionKeys` structure with the specified IDs
-pub fn session_keys(aura: AuraId, grandpa: GrandpaId) -> SessionKeys {
-    SessionKeys { aura, grandpa }
-}
-
-impl Alternative {
-    /// Get an actual chain config from one of the alternatives.
-    pub(crate) fn load(self) -> Result<ChainSpec, String> {
-        Ok(match self {
-            Alternative::Development => ChainSpec::from_genesis(
-                "Development",
-                "dev",
-                || {
-                    testnet_genesis(
-                        vec![(
-                            get_account_id_from_seed::<sr25519::Public>("Alice"),
-                            session_keys(
-                                get_authority_keys_from_seed("Alice").0,
-                                get_authority_keys_from_seed("Alice").1,
-                            ),
-                        )],
-                        vec![
-                            get_account_id_from_seed::<sr25519::Public>("Alice"),
-                            get_account_id_from_seed::<sr25519::Public>("Bob"),
-                            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-                        ],
-                        vec![
-                            get_account_id_from_seed::<sr25519::Public>("Alice"),
-                            get_account_id_from_seed::<sr25519::Public>("Bob"),
-                            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-                            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-                            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-                        ],
-                        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
-                        true,
-                    )
-                },
-                vec![],
-                None,
-                None,
-                None,
-                None,
-            ),
-            Alternative::Nergal => ChainSpec::from_genesis(
-                "Nergal",
-                "nergal",
-                || {
-                    testnet_genesis(
-                        vec![(
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd",
-                            ),
-                            session_keys(
-                                get_from_addr::<AuraId>(
-                                    "5CFUAAW7umifCuzdvH5KKjWHM5dKP2ADnL54b9fbjECpgXEM",
-                                ),
-                                get_from_addr::<GrandpaId>(
-                                    "5CLAMY86UHqR4DYFL1ss3mPQJPJVBHxRyNFKHwwitNjK2KRM",
-                                ),
-                            ),
-                        )],
-                        vec![
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd",
-                            ),
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch",
-                            ),
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR",
-                            ),
-                        ],
-                        vec![
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5F6sSf67EXUcqxsZcjx9A5hgTmXFpHA4F2XJa65Q8ZmWVPXd",
-                            ), // Root
-                            get_account_id_from_addr::<ed25519::Public>(
-                                "5CLAMY86UHqR4DYFL1ss3mPQJPJVBHxRyNFKHwwitNjK2KRM",
-                            ), // Validator stash
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5CFUAAW7umifCuzdvH5KKjWHM5dKP2ADnL54b9fbjECpgXEM",
-                            ), // Validtor hot wallet
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5EaAaHrJaegsiSNgKJch1QjwCE8DFXRKxxg2tdVQhBHTWsC5",
-                            ), // Oracle
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch",
-                            ),
-                            get_account_id_from_addr::<sr25519::Public>(
-                                "5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR",
-                            ),
-                        ],
-                        vec![get_account_id_from_addr::<sr25519::Public>(
-                            "5EaAaHrJaegsiSNgKJch1QjwCE8DFXRKxxg2tdVQhBHTWsC5",
-                        )],
-                        true,
-                    )
-                },
-                vec![],
-                None,
-                None,
-                None,
-                None,
-            ),
-        })
-    }
-
-    pub(crate) fn from(s: &str) -> Option<Self> {
-        match s {
-            "dev" => Some(Alternative::Development),
-            "" | "nergal" => Some(Alternative::Nergal),
-            _ => None,
-        }
-    }
-}
-
-fn testnet_genesis(
-    initial_authorities: Vec<(AccountId, SessionKeys)>,
+/// Helper function to create GenesisConfig for testing
+pub fn testnet_genesis(
+    initial_authorities: Vec<(
+        AccountId,
+        AccountId,
+        GrandpaId,
+        BabeId,
+        ImOnlineId,
+        AuthorityDiscoveryId,
+    )>,
     roots: Vec<AccountId>,
-    endowed_accounts: Vec<AccountId>,
     oracles: Vec<AccountId>,
-    _enable_println: bool,
+    endowed_accounts: Option<Vec<AccountId>>,
 ) -> GenesisConfig {
+    let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
+        vec![
+            get_account_id_from_seed::<sr25519::Public>("Alice"),
+            get_account_id_from_seed::<sr25519::Public>("Bob"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+            get_account_id_from_seed::<sr25519::Public>("Dave"),
+            get_account_id_from_seed::<sr25519::Public>("Eve"),
+            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+        ]
+    });
+
+    const ENDOWMENT: Balance = 10_000_000 * DOLLARS;
+
     GenesisConfig {
+        // Core
         system: Some(SystemConfig {
             code: WASM_BINARY.to_vec(),
             changes_trie_config: Default::default(),
-        }),
-        indices: Some(IndicesConfig {
-            ids: endowed_accounts.clone(),
         }),
         balances: Some(BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, 1 << 60))
+                .map(|k| (k, ENDOWMENT))
+                .chain(initial_authorities.iter().map(|x| (x.0.clone(), ENDOWMENT)))
                 .collect(),
+        }),
+        indices: Some(IndicesConfig {
+            ids: endowed_accounts
+                .iter()
+                .cloned()
+                .chain(initial_authorities.iter().map(|x| x.0.clone()))
+                .collect::<Vec<_>>(),
+        }),
+        vesting: Some(Default::default()),
+
+        // Consensus
+        session: Some(SessionConfig {
+            keys: initial_authorities
+                .iter()
+                .map(|x| {
+                    (
+                        x.0.clone(),
+                        session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
+                    )
+                })
+                .collect::<Vec<_>>(),
+        }),
+        babe: Some(BabeConfig {
+            authorities: vec![],
+        }),
+        im_online: Some(ImOnlineConfig { keys: vec![] }),
+        authority_discovery: Some(AuthorityDiscoveryConfig { keys: vec![] }),
+        grandpa: Some(GrandpaConfig {
+            authorities: vec![],
+        }),
+        membership_Instance3: Some(ValidatorsSetConfig {
+            members: initial_authorities
+                .iter()
+                .map(|x| x.0.clone())
+                .collect::<Vec<_>>(),
+            phantom: Default::default(),
         }),
 
         // Governance
@@ -207,7 +210,7 @@ fn testnet_genesis(
             phantom: Default::default(),
         }),
 
-        // Allocations
+        // Nodle Core
         membership_Instance2: Some(OraclesSetConfig {
             members: oracles,
             phantom: Default::default(),
@@ -215,31 +218,58 @@ fn testnet_genesis(
         allocations: Some(AllocationsConfig {
             coins_left: 10000000000000,
         }),
-
-        // Validators permissioning
-        aura: Some(AuraConfig {
-            authorities: vec![],
-        }),
-        grandpa: Some(GrandpaConfig {
-            authorities: vec![],
-        }),
-        membership_Instance3: Some(ValidatorsSetConfig {
-            members: initial_authorities
-                .iter()
-                .map(|(id, _session)| id.clone())
-                .collect::<Vec<_>>(),
-            phantom: Default::default(),
-        }),
-        session: Some(SessionConfig {
-            keys: initial_authorities,
-        }),
-        vesting: Some(Default::default()),
     }
 }
 
-pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
-    Ok(match Alternative::from(id) {
-        Some(spec) => Some(spec.load()?),
-        None => None,
-    })
+fn development_config_genesis() -> GenesisConfig {
+    testnet_genesis(
+        vec![get_authority_keys_from_seed("Alice")],
+        vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
+        None,
+    )
+}
+
+/// Development config (single validator Alice)
+pub fn development_config() -> ChainSpec {
+    ChainSpec::from_genesis(
+        "Development",
+        "dev",
+        development_config_genesis,
+        vec![],
+        None,
+        None,
+        None,
+        Default::default(),
+    )
+}
+
+fn local_testnet_genesis() -> GenesisConfig {
+    testnet_genesis(
+        vec![
+            get_authority_keys_from_seed("Alice"),
+            get_authority_keys_from_seed("Bob"),
+        ],
+        vec![
+            get_account_id_from_seed::<sr25519::Public>("Alice"),
+            get_account_id_from_seed::<sr25519::Public>("Bob"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+        ],
+        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
+        None,
+    )
+}
+
+/// Local testnet config (multivalidator Alice + Bob)
+pub fn local_testnet_config() -> ChainSpec {
+    ChainSpec::from_genesis(
+        "Local Testnet",
+        "local_testnet",
+        local_testnet_genesis,
+        vec![],
+        None,
+        None,
+        None,
+        Default::default(),
+    )
 }

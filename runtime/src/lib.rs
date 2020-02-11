@@ -36,9 +36,9 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 pub use timestamp::Call as TimestampCall;
 
-mod constants;
+pub mod constants;
 mod implementations;
-mod opaque_primitives;
+pub mod opaque_primitives;
 
 use implementations::{TargetedFeeAdjustment, ToAuthor, WeightToFee};
 pub use opaque_primitives::*;

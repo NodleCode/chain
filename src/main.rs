@@ -1,16 +1,14 @@
-//! Substrate Node Template CLI library.
-
-#![warn(missing_docs)]
-
 mod chain_spec;
+
 #[macro_use]
 mod service;
 mod cli;
 mod command;
+mod executor;
 
-pub use sc_cli::{error, VersionInfo};
+use sc_cli::VersionInfo;
 
-fn main() -> Result<(), error::Error> {
+fn main() -> Result<(), sc_cli::error::Error> {
     let version = VersionInfo {
         name: "Nodle Chain Node",
         commit: env!("VERGEN_SHA_SHORT"),
