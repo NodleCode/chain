@@ -22,8 +22,8 @@ ARG NETWORK=testnet
 
 COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
 
-COPY ./docker/entrypoint.sh .
-COPY ./docker/load_keys.sh .
+COPY ./.maintain/docker/entrypoint.sh .
+COPY ./.maintain/docker/load_keys.sh .
 COPY ./networks/$NETWORK/chain_spec_raw.json ./chain_spec_raw.json
 
 RUN apt-get update && \
