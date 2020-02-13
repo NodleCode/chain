@@ -18,5 +18,7 @@ while ! nc -z localhost 9933; do
   sleep 0.1 # wait for 1/10 of the second before check again
 done
 
-insert_key "aura" $1 $2
-insert_key "gran" $3 $4
+insert_key "babe" $BABE_SK $BABE_PK
+insert_key "gran" $GRANDPA_SK $GRANDPA_PK
+insert_key "imon" $IM_ONLINE_SK $IM_ONLINE_PK
+insert_key "auth" $AUTHORITY_DISCOVERY_SK $AUTHORITY_DISCOVERY_PK

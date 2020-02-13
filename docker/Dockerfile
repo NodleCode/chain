@@ -18,10 +18,13 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 FROM phusion/baseimage:0.11
 
 ARG PROFILE=release
+ARG NETWORK=testnet
 
 COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
+
 COPY ./docker/entrypoint.sh .
 COPY ./docker/load_keys.sh .
+COPY ./networks/$NETWORK/chain_spec_raw.json ./chain_spec_raw.json
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
@@ -40,4 +43,4 @@ USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh", "--chain", "./chain_spec_raw.json"]
