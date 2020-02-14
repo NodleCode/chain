@@ -328,7 +328,7 @@ construct_runtime!(
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: mandate::{Module, Call},
-        CompanyReserve: reserve::{Module, Call, Event<T>},
+        CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
 
         // Nodle
         Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},

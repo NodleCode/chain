@@ -4,7 +4,7 @@
 //! the company funds.
 
 use frame_support::{
-    decl_event, decl_module,
+    decl_event, decl_module, decl_storage,
     dispatch::DispatchResult,
     traits::{Currency, ExistenceRequirement, Imbalance, OnUnbalanced},
 };
@@ -12,6 +12,7 @@ use sp_runtime::{
     traits::{AccountIdConversion, EnsureOrigin},
     ModuleId,
 };
+use system::ensure_signed;
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 type NegativeImbalanceOf<T> =
@@ -27,11 +28,25 @@ pub trait Trait: system::Trait {
     type Currency: Currency<Self::AccountId>;
 }
 
+decl_storage! {
+    trait Store for Module<T: Trait> as Reserve {}
+    add_extra_genesis {
+        build(|_config| {
+            // Create account
+            let _ = T::Currency::make_free_balance_be(
+                &<Module<T>>::account_id(),
+                T::Currency::minimum_balance(),
+            );
+        });
+    }
+}
+
 decl_module! {
     /// The module declaration.
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
+        /// Spend `amount` funds from the reserve account to `to`.
         pub fn spend(origin, to: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
             T::ExternalOrigin::ensure_origin(origin)?;
 
@@ -39,6 +54,17 @@ decl_module! {
             let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::AllowDeath);
 
             Self::deposit_event(RawEvent::SpentFunds(to, amount));
+
+            Ok(())
+        }
+
+        /// Deposit `amount` tokens in the treasure account
+        pub fn tip(origin, amount: BalanceOf<T>) -> DispatchResult {
+            let tipper = ensure_signed(origin)?;
+
+            let _ = T::Currency::transfer(&tipper, &Self::account_id(), amount, ExistenceRequirement::AllowDeath);
+
+            Self::deposit_event(RawEvent::TipReceived(tipper, amount));
 
             Ok(())
         }
@@ -55,6 +81,8 @@ decl_event!(
         Deposit(Balance),
         /// Some funds were spent from the reserve.
         SpentFunds(AccountId, Balance),
+        /// Someone tipped the company reserve
+        TipReceived(AccountId, Balance),
     }
 );
 
@@ -179,6 +207,19 @@ mod tests {
             assert_ok!(TestModule::spend(Origin::signed(Admin::get()), 3, 100));
             assert_eq!(Balances::free_balance(3), 100);
             assert_eq!(Balances::free_balance(TestModule::account_id()), 0);
+        })
+    }
+
+    #[test]
+    fn tip() {
+        new_test_ext().execute_with(|| {
+            let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
+            let r = <Test as Trait>::Currency::deposit_creating(&999, 100);
+            total_imbalance.subsume(r);
+
+            assert_ok!(TestModule::tip(Origin::signed(999), 50));
+            assert_eq!(Balances::free_balance(999), 50);
+            assert_eq!(Balances::free_balance(TestModule::account_id()), 50);
         })
     }
 }
