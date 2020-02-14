@@ -170,7 +170,7 @@ impl balances::Trait for Runtime {
     type OnNewAccount = Indices;
     type Event = Event;
     // TODO: for now dust is destroyed thus reducing the supply
-    type DustRemoval = ();
+    type DustRemoval = CompanyReserve;
     type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
     type CreationFee = CreationFee;
