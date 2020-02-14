@@ -51,8 +51,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("nodle-chain"),
     impl_name: create_runtime_str!("nodle-chain"),
     authoring_version: 1,
-    spec_version: 1,
-    impl_version: 1,
+    spec_version: 2,
+    impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
 };
 
@@ -170,7 +170,7 @@ impl balances::Trait for Runtime {
     type OnNewAccount = Indices;
     type Event = Event;
     // TODO: for now dust is destroyed thus reducing the supply
-    type DustRemoval = ();
+    type DustRemoval = CompanyReserve;
     type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
     type CreationFee = CreationFee;
