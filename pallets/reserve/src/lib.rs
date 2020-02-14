@@ -4,7 +4,7 @@
 //! the company funds.
 
 use frame_support::{
-    decl_event, decl_module,
+    decl_event, decl_module, decl_storage,
     dispatch::DispatchResult,
     traits::{Currency, ExistenceRequirement, Imbalance, OnUnbalanced},
 };
@@ -26,6 +26,19 @@ pub trait Trait: system::Trait {
 
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
     type Currency: Currency<Self::AccountId>;
+}
+
+decl_storage! {
+    trait Store for Module<T: Trait> as Reserve {}
+    add_extra_genesis {
+        build(|_config| {
+            // Create account
+            let _ = T::Currency::make_free_balance_be(
+                &<Module<T>>::account_id(),
+                T::Currency::minimum_balance(),
+            );
+        });
+    }
 }
 
 decl_module! {

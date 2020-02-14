@@ -209,6 +209,7 @@ pub fn testnet_genesis(
             members: roots,
             phantom: Default::default(),
         }),
+        reserve: Some(Default::default()),
 
         // Nodle Core
         membership_Instance2: Some(OraclesSetConfig {
