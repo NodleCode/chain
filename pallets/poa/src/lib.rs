@@ -15,7 +15,6 @@ pub trait Trait: system::Trait + session::Trait {}
 decl_storage! {
     trait Store for Module<T: Trait> as AllocationsModule {
         Validators get(validators): Vec<T::AccountId>;
-        Flag: bool;
     }
 }
 
@@ -33,9 +32,6 @@ impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
         new: &[T::AccountId],
     ) {
         <Validators<T>>::put(new);
-
-        // Trigger another rotation so that the queued keys take effect
-        Flag::put(true);
     }
 }
 
@@ -59,7 +55,6 @@ impl<T: Trait> Convert<T::AccountId, Option<FullIdentification>> for FullIdentif
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
-        Flag::put(false);
         Some(<Validators<T>>::get())
     }
 
@@ -166,6 +161,7 @@ mod tests {
     }
     impl Trait for Test {}
 
+    type SessionModule = session::Module<Test>;
     type TestModule = Module<Test>;
 
     pub const VALIDATOR: u64 = 1;
@@ -180,20 +176,33 @@ mod tests {
     }
 
     #[test]
-    fn change_members_sorted_set_flag() {
+    fn validators_update_propagate() {
         new_test_ext().execute_with(|| {
             TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
-            assert_eq!(Flag::get(), true);
+
+            SessionModule::rotate_session();
+            let queued_keys = SessionModule::queued_keys();
+            assert_eq!(queued_keys.len(), 1);
+            assert_eq!(queued_keys[0].0, VALIDATOR);
+
+            SessionModule::rotate_session();
+            assert_eq!(SessionModule::validators(), vec![VALIDATOR]);
         })
     }
 
     #[test]
-    fn new_session_return_members_and_set_flag() {
+    fn change_members_sorted() {
+        new_test_ext().execute_with(|| {
+            TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
+            assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
+        })
+    }
+
+    #[test]
+    fn new_session_return_members() {
         new_test_ext().execute_with(|| {
             TestModule::initialize_members(&[VALIDATOR]);
-            Flag::put(true);
             assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
-            assert_eq!(Flag::get(), false);
         })
     }
 }
