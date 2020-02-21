@@ -75,7 +75,23 @@ impl session::Trait for Test {
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
 }
-impl Trait for Test {}
+impl balances::Trait for Test {
+    type Balance = u64;
+    type OnNewAccount = ();
+    type OnReapAccount = ();
+    type Event = ();
+    type TransferPayment = ();
+    type DustRemoval = ();
+    type ExistentialDeposit = ();
+    type CreationFee = ();
+}
+parameter_types! {
+    pub const MinimumStash: u64 = 100;
+}
+impl Trait for Test {
+    type Currency = balances::Module<Self>;
+    type MinimumStash = MinimumStash;
+}
 
 type SessionModule = session::Module<Test>;
 type TestModule = Module<Test>;
