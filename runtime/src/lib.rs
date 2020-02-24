@@ -231,8 +231,8 @@ impl session::Trait for Runtime {
 }
 
 impl session::historical::Trait for Runtime {
-    type FullIdentification = poa::FullIdentification;
-    type FullIdentificationOf = poa::FullIdentificationOf<Runtime>;
+    type FullIdentification = poa::Stash<Balance>;
+    type FullIdentificationOf = poa::StashOf<Runtime>;
 }
 
 impl membership::Trait<membership::Instance3> for Runtime {
@@ -246,7 +246,13 @@ impl membership::Trait<membership::Instance3> for Runtime {
     type MembershipChanged = PoaSessions;
 }
 
-impl poa::Trait for Runtime {}
+parameter_types! {
+    pub const MinimumStash: Balance = constants::NODL;
+}
+impl poa::Trait for Runtime {
+    type Currency = Balances;
+    type MinimumStash = MinimumStash;
+}
 
 impl membership::Trait<membership::Instance1> for Runtime {
     type Event = Event;
@@ -293,7 +299,7 @@ impl mandate::Trait for Runtime {
 
 impl reserve::Trait for Runtime {
     type Event = Event;
-    type Currency = balances::Module<Runtime>;
+    type Currency = Balances;
     type ExternalOrigin =
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 }
