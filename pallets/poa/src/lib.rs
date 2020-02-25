@@ -290,12 +290,16 @@ where
 
                 // Rewrite stash entry
                 match stash.total.checked_sub(&to_slash) {
-                    None => Self::kill_stash(account.clone()),
+                    None => {
+                        Self::kill_stash(account.clone());
+                        drop(<session::Module<T>>::disable(&account));
+                    }
                     Some(new_stash) => {
                         if new_stash == 0.into() {
-                            Self::kill_stash(account.clone())
+                            Self::kill_stash(account.clone());
+                            drop(<session::Module<T>>::disable(&account));
                         } else {
-                            Self::execute_lock_stash(account.clone(), Stash { total: new_stash })
+                            Self::execute_lock_stash(account.clone(), Stash { total: new_stash });
                         }
                     }
                 };
