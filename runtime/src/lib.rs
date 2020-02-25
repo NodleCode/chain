@@ -52,7 +52,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     impl_name: create_runtime_str!("nodle-chain"),
     authoring_version: 1,
     spec_version: 3,
-    impl_version: 0,
+    impl_version: 1,
     apis: RUNTIME_API_VERSIONS,
 };
 
@@ -291,6 +291,7 @@ impl allocations::Trait for Runtime {
 }
 
 impl mandate::Trait for Runtime {
+    type Event = Event;
     type Proposal = Call;
 
     // A majority of the committee can dispatch root calls
@@ -334,7 +335,7 @@ construct_runtime!(
         // Governance
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
-        Mandate: mandate::{Module, Call},
+        Mandate: mandate::{Module, Call, Event},
         CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
 
         // Nodle
