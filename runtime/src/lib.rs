@@ -291,6 +291,7 @@ impl allocations::Trait for Runtime {
 }
 
 impl mandate::Trait for Runtime {
+    type Event = Event;
     type Proposal = Call;
 
     // A majority of the committee can dispatch root calls
@@ -334,7 +335,7 @@ construct_runtime!(
         // Governance
         TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
-        Mandate: mandate::{Module, Call},
+        Mandate: mandate::{Module, Call, Event},
         CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
 
         // Nodle
