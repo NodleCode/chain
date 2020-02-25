@@ -289,20 +289,13 @@ where
                 T::RemainingSlashCollector::on_unbalanced(coins_left);
 
                 // Rewrite stash entry
-                match stash.total.checked_sub(&to_slash) {
-                    None => {
-                        Self::kill_stash(account.clone());
-                        drop(<session::Module<T>>::disable(&account));
-                    }
-                    Some(new_stash) => {
-                        if new_stash == 0.into() {
-                            Self::kill_stash(account.clone());
-                            drop(<session::Module<T>>::disable(&account));
-                        } else {
-                            Self::execute_lock_stash(account.clone(), Stash { total: new_stash });
-                        }
-                    }
-                };
+                let new_stash = stash.total.checked_sub(&to_slash).unwrap_or(0.into());
+                if new_stash == 0.into() {
+                    Self::kill_stash(account.clone());
+                    drop(<session::Module<T>>::disable(&account));
+                } else {
+                    Self::execute_lock_stash(account.clone(), Stash { total: new_stash });
+                }
             } else {
                 // Cannot slash account, but we can kick it out anyways
                 drop(<session::Module<T>>::disable(&account));
