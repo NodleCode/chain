@@ -64,6 +64,14 @@ decl_storage! {
         Stashes get(stashes): map hasher(blake2_256) T::AccountId => Stash<BalanceOf<T>>;
         PendingUnstaking get(pending_unstaking): Vec<(T::AccountId, BalanceOf<T>)>;
     }
+    add_extra_genesis {
+        config(members_and_stakes): Vec<(T::AccountId, BalanceOf<T>)>;
+        build(|config: &Self| {
+            config.members_and_stakes.clone().into_iter().for_each(|(m, s)| {
+                drop(Module::<T>::do_stake(m, s));
+            });
+        })
+    }
 }
 
 decl_event!(
@@ -89,17 +97,7 @@ decl_module! {
         pub fn stake(origin, amount: BalanceOf<T>) -> DispatchResult {
             let signer = ensure_signed(origin)?;
 
-            if <Stashes<T>>::exists(signer.clone()) {
-                Err(Error::<T>::StashAlreadyExists)?
-            }
-
-            // reject a bond which is considered to be _dust_.
-            if amount <= T::Currency::minimum_balance() {
-                Err(Error::<T>::InsufficientValue)?
-            }
-
-            let stash = Stash { total: amount };
-            Self::lock_stash(signer, stash)
+            Self::do_stake(signer, amount)
         }
 
         /// Add more stake in an existing stash
@@ -156,6 +154,21 @@ impl<T: Trait> Module<T> {
     fn kill_stash(who: T::AccountId) {
         <Stashes<T>>::remove(who.clone());
         T::Currency::remove_lock(POA_LOCK_ID, &who);
+    }
+
+    // Put here to be used in the genesis config
+    fn do_stake(signer: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
+        if <Stashes<T>>::exists(signer.clone()) {
+            Err(Error::<T>::StashAlreadyExists)?
+        }
+
+        // reject a bond which is considered to be _dust_.
+        if amount <= T::Currency::minimum_balance() {
+            Err(Error::<T>::InsufficientValue)?
+        }
+
+        let stash = Stash { total: amount };
+        Self::lock_stash(signer, stash)
     }
 }
 

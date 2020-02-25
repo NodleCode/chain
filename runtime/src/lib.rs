@@ -326,7 +326,7 @@ construct_runtime!(
         Authorship: authorship::{Module, Call, Storage},
         ImOnline: im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
         Offences: offences::{Module, Call, Storage, Event},
-        PoaSessions: poa::{Module, Storage, Call, Event<T>},
+        PoaSessions: poa::{Module, Storage, Call, Event<T>, Config<T>},
         ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: session::{Module, Call, Storage, Event, Config<T>},
         AuthorityDiscovery: authority_discovery::{Module, Call, Config},
