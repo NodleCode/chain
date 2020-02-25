@@ -89,11 +89,14 @@ impl balances::Trait for Test {
 }
 parameter_types! {
     pub const MinimumStash: u64 = 100;
+    pub const SlashReward: Perbill = Perbill::from_percent(75);
 }
 impl Trait for Test {
     type Event = ();
     type Currency = balances::Module<Self>;
     type MinimumStash = MinimumStash;
+    type SlashReward = SlashReward;
+    type RemainingSlashCollector = ();
 }
 
 type SessionModule = session::Module<Test>;

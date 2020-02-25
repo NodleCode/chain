@@ -8,14 +8,18 @@ mod tests;
 
 use codec::{Decode, Encode};
 use frame_support::traits::{
-    ChangeMembers, Currency, Get, InitializeMembers, LockIdentifier, LockableCurrency,
-    WithdrawReasons,
+    ChangeMembers, Currency, Get, Imbalance, InitializeMembers, LockIdentifier, LockableCurrency,
+    OnUnbalanced, WithdrawReasons,
 };
 use frame_support::{decl_error, decl_event, decl_module, decl_storage, dispatch::DispatchResult};
 use session::SessionManager;
 use sp_runtime::{
     traits::{CheckedAdd, CheckedSub, Convert},
-    RuntimeDebug,
+    Perbill, RuntimeDebug,
+};
+use sp_staking::{
+    offence::{OffenceDetails, OnOffenceHandler},
+    SessionIndex,
 };
 use sp_std::prelude::Vec;
 use system::ensure_signed;
@@ -25,17 +29,21 @@ const POA_LOCK_ID: LockIdentifier = *b"poastake";
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
 // type PositiveImbalanceOf<T> =
 //     <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
-// type NegativeImbalanceOf<T> =
-//     <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+type NegativeImbalanceOf<T> =
+    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
 //type MomentOf<T> = <<T as Trait>::Time as Time>::Moment;
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
+pub trait Trait: system::Trait + session::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
     type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 
     /// Minimum amount of coins in stash needed for the validators to validate
     type MinimumStash: Get<BalanceOf<Self>>;
+    /// Percentage of slashes distributed to reporters
+    type SlashReward: Get<Perbill>;
+    /// Where to send the remaining coins that were slashed but not rewarded
+    type RemainingSlashCollector: OnUnbalanced<NegativeImbalanceOf<Self>>;
 }
 
 decl_error! {
@@ -147,6 +155,11 @@ impl<T: Trait> Module<T> {
         T::Currency::set_lock(POA_LOCK_ID, &who, stash.total, WithdrawReasons::all());
         <Stashes<T>>::insert(who, stash);
     }
+
+    fn kill_stash(who: T::AccountId) {
+        <Stashes<T>>::remove(who.clone());
+        T::Currency::remove_lock(POA_LOCK_ID, &who);
+    }
 }
 
 impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
@@ -179,11 +192,10 @@ impl<T: Trait> Convert<T::AccountId, Option<Stash<BalanceOf<T>>>> for StashOf<T>
     }
 }
 
-type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
         // First of all, we unstake the coins that are pending
-        <PendingUnstaking<T>>::get()
+        <PendingUnstaking<T>>::take()
             .into_iter()
             .for_each(|(acc, bal)| {
                 // Attempt to reduce stash, if it doesn't work we log the failure
@@ -193,9 +205,7 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
                         // If the new stash would be 0 we delete the stash,
                         // else we update it
                         if new_stash == 0.into() {
-                            <Stashes<T>>::remove(acc.clone());
-                            T::Currency::remove_lock(POA_LOCK_ID, &acc);
-
+                            Self::kill_stash(acc.clone());
                             Self::deposit_event(RawEvent::StashKilled(acc.clone()));
                         } else {
                             Self::execute_lock_stash(acc.clone(), Stash { total: new_stash });
@@ -206,8 +216,6 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
                     None => Self::deposit_event(RawEvent::UnstakeFailure(acc, bal)),
                 };
             });
-
-        <PendingUnstaking<T>>::kill();
 
         Some(
             <Validators<T>>::get()
@@ -237,5 +245,67 @@ impl<T: Trait> session::historical::SessionManager<T::AccountId, Stash<BalanceOf
 
     fn end_session(end_index: SessionIndex) {
         <Self as session::SessionManager<_>>::end_session(end_index)
+    }
+}
+
+impl<T: Trait> OnOffenceHandler<T::AccountId, session::historical::IdentificationTuple<T>>
+    for Module<T>
+where
+    T: session::Trait<ValidatorId = <T as system::Trait>::AccountId>,
+    T: session::historical::Trait<
+        FullIdentification = Stash<BalanceOf<T>>,
+        FullIdentificationOf = StashOf<T>,
+    >,
+    T::SessionHandler: session::SessionHandler<<T as system::Trait>::AccountId>,
+    T::SessionManager: session::SessionManager<<T as system::Trait>::AccountId>,
+    T::ValidatorIdOf:
+        Convert<<T as system::Trait>::AccountId, Option<<T as system::Trait>::AccountId>>,
+{
+    fn on_offence(
+        offenders: &[OffenceDetails<T::AccountId, session::historical::IdentificationTuple<T>>],
+        slash_fraction: &[Perbill],
+        _slash_session: SessionIndex,
+    ) {
+        for (details, slash_fraction) in offenders.iter().zip(slash_fraction) {
+            let account = &details.offender.0;
+            let stash = &details.offender.1;
+
+            let to_slash: BalanceOf<T> = *slash_fraction * stash.total;
+            if T::Currency::can_slash(account, to_slash) {
+                // Slash and retrieve coins taken away
+                let (coins_slashed, _unslashed_coins) = T::Currency::slash(account, to_slash);
+
+                // Distribute part of the coins to the reporters
+                let share_reporters = T::SlashReward::get() * coins_slashed.peek();
+                let (mut coins_to_reporters, mut coins_left) = coins_slashed.split(share_reporters);
+                let per_reporter =
+                    coins_to_reporters.peek() / (details.reporters.len() as u32).into();
+                for reporter in details.reporters.clone() {
+                    let (reporter_reward, rest) = coins_to_reporters.split(per_reporter);
+                    coins_to_reporters = rest;
+
+                    T::Currency::resolve_creating(&reporter, reporter_reward);
+                }
+
+                // In case there are some remainder, add them together
+                coins_left.subsume(coins_to_reporters);
+                T::RemainingSlashCollector::on_unbalanced(coins_left);
+
+                // Rewrite stash entry
+                match stash.total.checked_sub(&to_slash) {
+                    None => Self::kill_stash(account.clone()),
+                    Some(new_stash) => {
+                        if new_stash == 0.into() {
+                            Self::kill_stash(account.clone())
+                        } else {
+                            Self::execute_lock_stash(account.clone(), Stash { total: new_stash })
+                        }
+                    }
+                };
+            } else {
+                // Cannot slash account, but we can kick it out anyways
+                drop(<session::Module<T>>::disable(&account));
+            }
+        }
     }
 }
