@@ -27,11 +27,8 @@ use system::ensure_signed;
 const POA_LOCK_ID: LockIdentifier = *b"poastake";
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
-// type PositiveImbalanceOf<T> =
-//     <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
 type NegativeImbalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
-//type MomentOf<T> = <<T as Trait>::Time as Time>::Moment;
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait + session::Trait {
