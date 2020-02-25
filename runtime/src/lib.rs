@@ -51,7 +51,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("nodle-chain"),
     impl_name: create_runtime_str!("nodle-chain"),
     authoring_version: 1,
-    spec_version: 2,
+    spec_version: 3,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
 };
@@ -137,9 +137,7 @@ impl im_online::Trait for Runtime {
 impl offences::Trait for Runtime {
     type Event = Event;
     type IdentificationTuple = session::historical::IdentificationTuple<Self>;
-    // TODO: as of now, we don't execute any slashing, however offences are logged
-    // so that we could decide to remove validators later
-    type OnOffenceHandler = ();
+    type OnOffenceHandler = PoaSessions;
 }
 
 impl indices::Trait for Runtime {
@@ -169,7 +167,6 @@ impl balances::Trait for Runtime {
     type OnReapAccount = (Session, System);
     type OnNewAccount = Indices;
     type Event = Event;
-    // TODO: for now dust is destroyed thus reducing the supply
     type DustRemoval = CompanyReserve;
     type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
@@ -231,8 +228,8 @@ impl session::Trait for Runtime {
 }
 
 impl session::historical::Trait for Runtime {
-    type FullIdentification = poa::FullIdentification;
-    type FullIdentificationOf = poa::FullIdentificationOf<Runtime>;
+    type FullIdentification = poa::Stash<Balance>;
+    type FullIdentificationOf = poa::StashOf<Runtime>;
 }
 
 impl membership::Trait<membership::Instance3> for Runtime {
@@ -246,7 +243,17 @@ impl membership::Trait<membership::Instance3> for Runtime {
     type MembershipChanged = PoaSessions;
 }
 
-impl poa::Trait for Runtime {}
+parameter_types! {
+    pub const MinimumStash: Balance = constants::NODL;
+    pub const SlashReward: Perbill = Perbill::from_percent(75);
+}
+impl poa::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type MinimumStash = MinimumStash;
+    type SlashReward = SlashReward;
+    type RemainingSlashCollector = CompanyReserve;
+}
 
 impl membership::Trait<membership::Instance1> for Runtime {
     type Event = Event;
@@ -293,7 +300,7 @@ impl mandate::Trait for Runtime {
 
 impl reserve::Trait for Runtime {
     type Event = Event;
-    type Currency = balances::Module<Runtime>;
+    type Currency = Balances;
     type ExternalOrigin =
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 }
@@ -319,7 +326,7 @@ construct_runtime!(
         Authorship: authorship::{Module, Call, Storage},
         ImOnline: im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
         Offences: offences::{Module, Call, Storage, Event},
-        PoaSessions: poa::{Module, Storage},
+        PoaSessions: poa::{Module, Storage, Call, Event<T>, Config<T>},
         ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: session::{Module, Call, Storage, Event, Config<T>},
         AuthorityDiscovery: authority_discovery::{Module, Call, Config},
