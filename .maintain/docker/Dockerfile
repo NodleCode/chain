@@ -43,4 +43,4 @@ USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]
 
-ENTRYPOINT ["./entrypoint.sh", "--chain", "./chain_spec.json"]
+ENTRYPOINT ["./entrypoint.sh"]
