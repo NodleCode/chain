@@ -11,13 +11,29 @@ use nodle_chain_runtime::{
     SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use sc_chain_spec::ChainSpecExtension;
+use sc_telemetry::TelemetryEndpoints;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
+
+const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+const DEFAULT_PROTOCOL_ID: &str = "nodl";
+
+/// Build a `Properties` for a `ChainSpec` which will use the defined
+/// `token_symbol`.
+pub fn build_properties(token_symbol: &str) -> sc_service::Properties {
+    let mut props = sc_service::Properties::new();
+    props.insert("ss58Format".to_string(), json!(2));
+    props.insert("tokenDecimals".to_string(), json!(12));
+    props.insert("tokenSymbol".to_string(), json!(token_symbol));
+
+    props
+}
 
 /// Node `ChainSpec` extensions.
 ///
@@ -320,14 +336,19 @@ fn public_testnet_genesis() -> GenesisConfig {
 }
 
 pub fn public_testnet_config() -> ChainSpec {
+    let boot_nodes = vec![];
+
     ChainSpec::from_genesis(
         "Nodle Chain Testnet",
         "testnet",
         public_testnet_genesis,
-        vec![],
-        None,
-        None,
-        None,
+        boot_nodes,
+        Some(TelemetryEndpoints::new(vec![(
+            STAGING_TELEMETRY_URL.to_string(),
+            0,
+        )])),
+        Some(DEFAULT_PROTOCOL_ID),
+        Some(build_properties("tNODL")),
         Default::default(),
     )
 }
