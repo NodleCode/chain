@@ -172,6 +172,7 @@ pub fn testnet_genesis(
                         .iter()
                         .map(|x| (x.0.clone(), ENDOWMENT * 2)),
                 )
+                .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .collect(),
         }),
         indices: Some(IndicesConfig {
@@ -179,6 +180,7 @@ pub fn testnet_genesis(
                 .iter()
                 .cloned()
                 .chain(initial_authorities.iter().map(|x| x.0.clone()))
+                .chain(oracles.clone())
                 .collect::<Vec<_>>(),
         }),
         vesting: Some(Default::default()),
