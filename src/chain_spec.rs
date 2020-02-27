@@ -1,4 +1,5 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
+use hex_literal::hex;
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::opaque_primitives::{AccountId, Balance, Signature};
@@ -13,7 +14,7 @@ use sc_chain_spec::ChainSpecExtension;
 use serde::{Deserialize, Serialize};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
@@ -42,6 +43,8 @@ pub enum Alternative {
     /// Whatever the current runtime is, with simple Alice/Bob auths and
     /// Ferdie as oracle.
     LocalTestnet,
+
+    PublicTestnet,
 }
 
 /// Get a chain config from a spec setting.
@@ -50,6 +53,7 @@ impl Alternative {
         Ok(match self {
             Alternative::Development => development_config(),
             Alternative::LocalTestnet => local_testnet_config(),
+            Alternative::PublicTestnet => public_testnet_config(),
         })
     }
 
@@ -57,7 +61,7 @@ impl Alternative {
         match s {
             "dev" => Some(Alternative::Development),
             "local" => Some(Alternative::LocalTestnet),
-            _ => None,
+            "testnet" | _ => Some(Alternative::PublicTestnet),
         }
     }
 }
@@ -168,6 +172,7 @@ pub fn testnet_genesis(
                         .iter()
                         .map(|x| (x.0.clone(), ENDOWMENT * 2)),
                 )
+                .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .collect(),
         }),
         indices: Some(IndicesConfig {
@@ -175,6 +180,7 @@ pub fn testnet_genesis(
                 .iter()
                 .cloned()
                 .chain(initial_authorities.iter().map(|x| x.0.clone()))
+                .chain(oracles.clone())
                 .collect::<Vec<_>>(),
         }),
         vesting: Some(Default::default()),
@@ -277,6 +283,47 @@ pub fn local_testnet_config() -> ChainSpec {
         "Local Testnet",
         "local_testnet",
         local_testnet_genesis,
+        vec![],
+        None,
+        None,
+        None,
+        Default::default(),
+    )
+}
+
+fn public_testnet_genesis() -> GenesisConfig {
+    // hex!["32a5718e87d16071756d4b1370c411bbbb947eb62f0e6e0b937d5cbfc0ea633b"].into(),
+    let initial_authorities = vec![(
+        // 5CB5B5dW14sF3cNakCZtA5gGMdxKzaopgsBBrrU5qYT5xj3F
+        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(),
+        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(),
+        // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+        // 5GutzsbjWqB4PFvzS5gpLvXTerJKnQ5ubyHu3T7ujfbgcEAU
+        hex!["d67576cff120e5d812e1046b8dced579be1cf2c4d36f440a5d6e4a9e6bc97d3e"].unchecked_into(),
+        // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+    )];
+    let roots = vec![
+        // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
+        hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(),
+        // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
+        hex!["088b9603f874bf7a35155a4d6f55a580896a8635102b36ad0c0150a09f02242e"].into(),
+        // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
+        hex!["e20b3e7084955505dc8cd0c51181850f41eaac7901c81bdee01a5361a8c22e32"].into(),
+    ];
+    let oracles = vec![];
+    let other_endowed_accounts = None;
+
+    testnet_genesis(initial_authorities, roots, oracles, other_endowed_accounts)
+}
+
+pub fn public_testnet_config() -> ChainSpec {
+    ChainSpec::from_genesis(
+        "Nodle Chain Testnet",
+        "testnet",
+        public_testnet_genesis,
         vec![],
         None,
         None,
