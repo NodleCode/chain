@@ -7,8 +7,8 @@ use nodle_chain_runtime::Block;
 use nodle_chain_runtime::GenesisConfig;
 use nodle_chain_runtime::{
     AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, GrandpaConfig,
-    ImOnlineConfig, IndicesConfig, OraclesSetConfig, PoaSessionsConfig, SessionConfig, SessionKeys,
-    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+    ImOnlineConfig, IndicesConfig, OraclesSetConfig, SessionConfig, SessionKeys, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use sc_chain_spec::ChainSpecExtension;
 use sc_telemetry::TelemetryEndpoints;
@@ -183,12 +183,8 @@ pub fn testnet_genesis(
                 .iter()
                 .cloned()
                 .map(|k| (k, ENDOWMENT))
-                .chain(
-                    initial_authorities
-                        .iter()
-                        .map(|x| (x.0.clone(), ENDOWMENT * 2)),
-                )
                 .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
+                .chain(initial_authorities.iter().map(|x| (x.0.clone(), ENDOWMENT)))
                 .collect(),
         }),
         indices: Some(IndicesConfig {
@@ -227,12 +223,6 @@ pub fn testnet_genesis(
                 .map(|x| x.0.clone())
                 .collect::<Vec<_>>(),
             phantom: Default::default(),
-        }),
-        poa: Some(PoaSessionsConfig {
-            members_and_stakes: initial_authorities
-                .iter()
-                .map(|x| (x.0.clone(), ENDOWMENT))
-                .collect::<Vec<_>>(),
         }),
 
         // Governance
