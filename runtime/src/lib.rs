@@ -90,6 +90,9 @@ impl system::Trait for Runtime {
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = Version;
     type ModuleToIndex = ModuleToIndex;
+    type AccountData = balances::AccountData<Balance>;
+    type OnNewAccount = ();
+    type OnKilledAccount = ();
 }
 
 parameter_types! {
@@ -142,10 +145,14 @@ impl offences::Trait for Runtime {
     type OnOffenceHandler = ();
 }
 
+parameter_types! {
+    pub const IndexDeposit: Balance = 1 * constants::DOLLARS;
+}
+
 impl indices::Trait for Runtime {
     type AccountIndex = AccountIndex;
-    type ResolveHint = indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
-    type IsDeadAccount = Balances;
+    type Currency = Balances;
+    type Deposit = IndexDeposit;
     type Event = Event;
 }
 
@@ -166,14 +173,10 @@ pub type DealWithFees = SplitTwoWays<
 
 impl balances::Trait for Runtime {
     type Balance = Balance;
-    type OnReapAccount = (Session, System);
-    type OnNewAccount = Indices;
     type Event = Event;
-    // TODO: for now dust is destroyed thus reducing the supply
     type DustRemoval = CompanyReserve;
-    type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
-    type CreationFee = CreationFee;
+    type AccountStore = System;
 }
 
 parameter_types! {
@@ -285,7 +288,7 @@ impl allocations::Trait for Runtime {
 
 impl mandate::Trait for Runtime {
     type Event = Event;
-    type Proposal = Call;
+    type Call = Call;
 
     // A majority of the committee can dispatch root calls
     type ExternalOrigin =
@@ -306,10 +309,10 @@ construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: system::{Module, Call, Storage, Config, Event},
+        System: system::{Module, Call, Storage, Config, Event<T>},
         Timestamp: timestamp::{Module, Call, Storage, Inherent},
-        Indices: indices,
-        Balances: balances,
+        Indices: indices::{Module, Call, Storage, Config<T>, Event<T>},
+        Balances: balances::{Module, Call, Storage, Config<T>, Event<T>},
         TransactionPayment: transaction_payment::{Module, Storage},
         RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
         Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
@@ -390,6 +393,10 @@ sp_api::impl_runtime_apis! {
             Executive::apply_extrinsic(extrinsic)
         }
 
+        fn apply_trusted_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
+            Executive::apply_trusted_extrinsic(extrinsic)
+        }
+
         fn finalize_block() -> <Block as BlockT>::Header {
             Executive::finalize_block()
         }
@@ -443,6 +450,10 @@ sp_api::impl_runtime_apis! {
                 randomness: Babe::randomness(),
                 secondary_slots: true,
             }
+        }
+
+        fn current_epoch_start() -> sp_consensus_babe::SlotNumber {
+            Babe::current_epoch_start()
         }
     }
 
