@@ -318,6 +318,8 @@ fn public_testnet_genesis() -> GenesisConfig {
         hex!["088b9603f874bf7a35155a4d6f55a580896a8635102b36ad0c0150a09f02242e"].into(),
         // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
         hex!["e20b3e7084955505dc8cd0c51181850f41eaac7901c81bdee01a5361a8c22e32"].into(),
+        // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
+        hex!["5aa336fd5f8a6cd73b096bb43f6c60b7c6814307374aa53b6fbece28d7a0a535"].into(),
     ];
     let oracles = vec![];
     let other_endowed_accounts = None;
