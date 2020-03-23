@@ -62,7 +62,6 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     }
 
     fn end_session(_: SessionIndex) {}
-    fn start_session(_: SessionIndex) {}
 }
 
 impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentification> for Module<T> {
@@ -81,9 +80,5 @@ impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentificat
 
     fn end_session(end_index: SessionIndex) {
         <Self as session::SessionManager<_>>::end_session(end_index)
-    }
-
-    fn start_session(start_index: SessionIndex) {
-        <Self as session::SessionManager<_>>::start_session(start_index)
     }
 }
