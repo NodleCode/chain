@@ -300,7 +300,11 @@ fn arcadia_genesis() -> GenesisConfig {
 }
 
 pub fn arcadia_config() -> ChainSpec {
-    let boot_nodes = vec![];
+    let boot_nodes = vec![
+        "/ip4/35.200.78.9/tcp/30333/p2p/QmWZ3CfMuZ8U15SWoGSnRZ1cpzDsVHqmuvi4ThCB5zQVGg".to_string(),
+        "/ip4/34.73.134.186/tcp/30333/p2p/QmZcst3MYHxJXoW5RgHnLrfz1ZZB9C7KgaJ6P69pABRJav"
+            .to_string(),
+    ];
 
     ChainSpec::from_genesis(
         "Arcadia Nodle Network",
