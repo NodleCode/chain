@@ -3,16 +3,13 @@ use hex_literal::hex;
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::opaque_primitives::{AccountId, Balance, Signature};
-use nodle_chain_runtime::Block;
 use nodle_chain_runtime::GenesisConfig;
 use nodle_chain_runtime::{
     AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, GrandpaConfig,
     ImOnlineConfig, IndicesConfig, OraclesSetConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
-use sc_chain_spec::ChainSpecExtension;
 use sc_telemetry::TelemetryEndpoints;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
@@ -35,20 +32,7 @@ pub fn build_properties(token_symbol: &str) -> sc_service::Properties {
     props
 }
 
-/// Node `ChainSpec` extensions.
-///
-/// Additional parameters for some Substrate core modules,
-/// customizable from the chain spec.
-#[derive(Default, Clone, Serialize, Deserialize, ChainSpecExtension)]
-#[serde(rename_all = "camelCase")]
-pub struct Extensions {
-    /// Block numbers with known hashes.
-    pub fork_blocks: sc_client::ForkBlocks<Block>,
-    /// Known bad block hashes.
-    pub bad_blocks: sc_client::BadBlocks<Block>,
-}
-
-pub type ChainSpec = sc_service::ChainSpec<GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
 
 /// The chain specification option.
 #[derive(Clone, Debug, PartialEq)]
@@ -187,14 +171,7 @@ pub fn testnet_genesis(
                 .chain(initial_authorities.iter().map(|x| (x.0.clone(), ENDOWMENT)))
                 .collect(),
         }),
-        indices: Some(IndicesConfig {
-            ids: endowed_accounts
-                .iter()
-                .cloned()
-                .chain(initial_authorities.iter().map(|x| x.0.clone()))
-                .chain(oracles.clone())
-                .collect::<Vec<_>>(),
-        }),
+        indices: Some(IndicesConfig { indices: vec![] }),
         vesting: Some(Default::default()),
 
         // Consensus
@@ -203,6 +180,7 @@ pub fn testnet_genesis(
                 .iter()
                 .map(|x| {
                     (
+                        x.0.clone(),
                         x.0.clone(),
                         session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
                     )

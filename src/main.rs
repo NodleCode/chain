@@ -1,15 +1,11 @@
 mod chain_spec;
-
 #[macro_use]
 mod service;
 mod cli;
 mod command;
-mod executor;
 
-use sc_cli::VersionInfo;
-
-fn main() -> Result<(), sc_cli::error::Error> {
-    let version = VersionInfo {
+fn main() -> sc_cli::Result<()> {
+    let version = sc_cli::VersionInfo {
         name: "Nodle Chain Node",
         commit: env!("VERGEN_SHA_SHORT"),
         version: env!("CARGO_PKG_VERSION"),
