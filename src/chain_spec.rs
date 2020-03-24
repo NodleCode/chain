@@ -168,6 +168,7 @@ pub fn testnet_genesis(
                 .map(|k| (k, ENDOWMENT))
                 .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .chain(initial_authorities.iter().map(|x| (x.0.clone(), ENDOWMENT)))
+                .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .collect(),
         }),
         indices: Some(IndicesConfig { indices: vec![] }),
