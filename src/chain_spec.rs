@@ -25,7 +25,6 @@ const DEFAULT_PROTOCOL_ID: &str = "nodl";
 /// `token_symbol`.
 pub fn build_properties(token_symbol: &str) -> sc_service::Properties {
     let mut props = sc_service::Properties::new();
-    props.insert("ss58Format".to_string(), json!(2));
     props.insert("tokenDecimals".to_string(), json!(12));
     props.insert("tokenSymbol".to_string(), json!(token_symbol));
 
