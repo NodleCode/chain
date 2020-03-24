@@ -77,6 +77,7 @@ impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentificat
                 .collect()
         })
     }
+
     fn end_session(end_index: SessionIndex) {
         <Self as session::SessionManager<_>>::end_session(end_index)
     }

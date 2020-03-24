@@ -51,7 +51,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     spec_name: create_runtime_str!("nodle-chain"),
     impl_name: create_runtime_str!("nodle-chain"),
     authoring_version: 1,
-    spec_version: 4,
+    spec_version: 5,
     impl_version: 0,
     apis: RUNTIME_API_VERSIONS,
 };
@@ -90,6 +90,9 @@ impl system::Trait for Runtime {
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = Version;
     type ModuleToIndex = ModuleToIndex;
+    type AccountData = balances::AccountData<Balance>;
+    type OnNewAccount = ();
+    type OnKilledAccount = ();
 }
 
 parameter_types! {
@@ -142,10 +145,14 @@ impl offences::Trait for Runtime {
     type OnOffenceHandler = ();
 }
 
+parameter_types! {
+    pub const IndexDeposit: Balance = 1 * constants::DOLLARS;
+}
+
 impl indices::Trait for Runtime {
     type AccountIndex = AccountIndex;
-    type ResolveHint = indices::SimpleResolveHint<Self::AccountId, Self::AccountIndex>;
-    type IsDeadAccount = Balances;
+    type Currency = Balances;
+    type Deposit = IndexDeposit;
     type Event = Event;
 }
 
@@ -166,14 +173,10 @@ pub type DealWithFees = SplitTwoWays<
 
 impl balances::Trait for Runtime {
     type Balance = Balance;
-    type OnReapAccount = (Session, System);
-    type OnNewAccount = Indices;
     type Event = Event;
-    // TODO: for now dust is destroyed thus reducing the supply
     type DustRemoval = CompanyReserve;
-    type TransferPayment = ();
     type ExistentialDeposit = ExistentialDeposit;
-    type CreationFee = CreationFee;
+    type AccountStore = System;
 }
 
 parameter_types! {
@@ -285,7 +288,7 @@ impl allocations::Trait for Runtime {
 
 impl mandate::Trait for Runtime {
     type Event = Event;
-    type Proposal = Call;
+    type Call = Call;
 
     // A majority of the committee can dispatch root calls
     type ExternalOrigin =
@@ -299,6 +302,23 @@ impl reserve::Trait for Runtime {
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 }
 
+parameter_types! {
+    // One storage item; value is size 4+4+16+32 bytes = 56 bytes.
+    pub const MultisigDepositBase: Balance = 30 * constants::CENTS;
+    // Additional storage item size of 32 bytes.
+    pub const MultisigDepositFactor: Balance = 5 * constants::CENTS;
+    pub const MaxSignatories: u16 = 100;
+}
+
+impl utility::Trait for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type Currency = Balances;
+    type MultisigDepositBase = MultisigDepositBase;
+    type MultisigDepositFactor = MultisigDepositFactor;
+    type MaxSignatories = MaxSignatories;
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -306,10 +326,10 @@ construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: system::{Module, Call, Storage, Config, Event},
+        System: system::{Module, Call, Storage, Config, Event<T>},
         Timestamp: timestamp::{Module, Call, Storage, Inherent},
-        Indices: indices,
-        Balances: balances,
+        Indices: indices::{Module, Call, Storage, Config<T>, Event<T>},
+        Balances: balances::{Module, Call, Storage, Config<T>, Event<T>},
         TransactionPayment: transaction_payment::{Module, Storage},
         RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
         Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
@@ -334,6 +354,9 @@ construct_runtime!(
         // Nodle
         Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
         OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
+
+        // Neat things
+        Utility: utility::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -390,6 +413,10 @@ sp_api::impl_runtime_apis! {
             Executive::apply_extrinsic(extrinsic)
         }
 
+        fn apply_trusted_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
+            Executive::apply_trusted_extrinsic(extrinsic)
+        }
+
         fn finalize_block() -> <Block as BlockT>::Header {
             Executive::finalize_block()
         }
@@ -443,6 +470,10 @@ sp_api::impl_runtime_apis! {
                 randomness: Babe::randomness(),
                 secondary_slots: true,
             }
+        }
+
+        fn current_epoch_start() -> sp_consensus_babe::SlotNumber {
+            Babe::current_epoch_start()
         }
     }
 

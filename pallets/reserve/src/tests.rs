@@ -45,16 +45,16 @@ impl system::Trait for Test {
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type ModuleToIndex = ();
+    type AccountData = balances::AccountData<u64>;
+    type OnNewAccount = ();
+    type OnKilledAccount = ();
 }
 impl balances::Trait for Test {
     type Balance = u64;
-    type OnNewAccount = ();
-    type OnReapAccount = ();
     type Event = ();
-    type TransferPayment = ();
     type DustRemoval = ();
     type ExistentialDeposit = ();
-    type CreationFee = ();
+    type AccountStore = system::Module<Test>;
 }
 
 ord_parameter_types! {

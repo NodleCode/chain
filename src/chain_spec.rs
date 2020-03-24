@@ -3,16 +3,13 @@ use hex_literal::hex;
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::opaque_primitives::{AccountId, Balance, Signature};
-use nodle_chain_runtime::Block;
 use nodle_chain_runtime::GenesisConfig;
 use nodle_chain_runtime::{
     AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, GrandpaConfig,
     ImOnlineConfig, IndicesConfig, OraclesSetConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
-use sc_chain_spec::ChainSpecExtension;
 use sc_telemetry::TelemetryEndpoints;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
@@ -35,20 +32,7 @@ pub fn build_properties(token_symbol: &str) -> sc_service::Properties {
     props
 }
 
-/// Node `ChainSpec` extensions.
-///
-/// Additional parameters for some Substrate core modules,
-/// customizable from the chain spec.
-#[derive(Default, Clone, Serialize, Deserialize, ChainSpecExtension)]
-#[serde(rename_all = "camelCase")]
-pub struct Extensions {
-    /// Block numbers with known hashes.
-    pub fork_blocks: sc_client::ForkBlocks<Block>,
-    /// Known bad block hashes.
-    pub bad_blocks: sc_client::BadBlocks<Block>,
-}
-
-pub type ChainSpec = sc_service::ChainSpec<GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
 
 /// The chain specification option.
 #[derive(Clone, Debug, PartialEq)]
@@ -60,7 +44,7 @@ pub enum Alternative {
     /// Ferdie as oracle.
     LocalTestnet,
 
-    PublicTestnet,
+    Samurai,
 }
 
 /// Get a chain config from a spec setting.
@@ -69,7 +53,7 @@ impl Alternative {
         Ok(match self {
             Alternative::Development => development_config(),
             Alternative::LocalTestnet => local_testnet_config(),
-            Alternative::PublicTestnet => public_testnet_config(),
+            Alternative::Samurai => samurai_config(),
         })
     }
 
@@ -77,7 +61,7 @@ impl Alternative {
         match s {
             "dev" => Some(Alternative::Development),
             "local" => Some(Alternative::LocalTestnet),
-            "testnet" | _ => Some(Alternative::PublicTestnet),
+            "samurai" | _ => Some(Alternative::Samurai),
         }
     }
 }
@@ -187,14 +171,7 @@ pub fn testnet_genesis(
                 .chain(initial_authorities.iter().map(|x| (x.0.clone(), ENDOWMENT)))
                 .collect(),
         }),
-        indices: Some(IndicesConfig {
-            ids: endowed_accounts
-                .iter()
-                .cloned()
-                .chain(initial_authorities.iter().map(|x| x.0.clone()))
-                .chain(oracles.clone())
-                .collect::<Vec<_>>(),
-        }),
+        indices: Some(IndicesConfig { indices: vec![] }),
         vesting: Some(Default::default()),
 
         // Consensus
@@ -203,6 +180,7 @@ pub fn testnet_genesis(
                 .iter()
                 .map(|x| {
                     (
+                        x.0.clone(),
                         x.0.clone(),
                         session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
                     )
@@ -297,7 +275,12 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
-fn public_testnet_genesis() -> GenesisConfig {
+fn samurai_genesis() -> GenesisConfig {
+    let e = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
+    let l = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
+    let g = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
+    let m = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
+
     // hex!["32a5718e87d16071756d4b1370c411bbbb947eb62f0e6e0b937d5cbfc0ea633b"].into(),
     let initial_authorities = vec![(
         // 5CB5B5dW14sF3cNakCZtA5gGMdxKzaopgsBBrrU5qYT5xj3F
@@ -311,34 +294,27 @@ fn public_testnet_genesis() -> GenesisConfig {
         hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
         hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
     )];
-    let roots = vec![
-        // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
-        hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(),
-        // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
-        hex!["088b9603f874bf7a35155a4d6f55a580896a8635102b36ad0c0150a09f02242e"].into(),
-        // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
-        hex!["e20b3e7084955505dc8cd0c51181850f41eaac7901c81bdee01a5361a8c22e32"].into(),
-    ];
+    let roots = vec![e, l, g, m];
     let oracles = vec![];
     let other_endowed_accounts = None;
 
     testnet_genesis(initial_authorities, roots, oracles, other_endowed_accounts)
 }
 
-pub fn public_testnet_config() -> ChainSpec {
+pub fn samurai_config() -> ChainSpec {
     let boot_nodes = vec![];
 
     ChainSpec::from_genesis(
-        "Nodle Chain Testnet",
-        "testnet",
-        public_testnet_genesis,
+        "Samurai Nodle Network",
+        "samurai",
+        samurai_genesis,
         boot_nodes,
         Some(TelemetryEndpoints::new(vec![(
             STAGING_TELEMETRY_URL.to_string(),
             0,
         )])),
         Some(DEFAULT_PROTOCOL_ID),
-        Some(build_properties("tNODL")),
+        Some(build_properties("sNODL")),
         Default::default(),
     )
 }
