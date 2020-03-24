@@ -294,7 +294,7 @@ fn arcadia_genesis() -> GenesisConfig {
     )];
     let roots = vec![e, l, g, m];
     let oracles = vec![];
-    let other_endowed_accounts = None;
+    let other_endowed_accounts = Some(vec![]);
 
     testnet_genesis(initial_authorities, roots, oracles, other_endowed_accounts)
 }
