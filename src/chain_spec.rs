@@ -283,15 +283,14 @@ fn arcadia_genesis() -> GenesisConfig {
 
     let initial_authorities = vec![(
         // 5CB5B5dW14sF3cNakCZtA5gGMdxKzaopgsBBrrU5qYT5xj3F
-        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(),
-        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(),
-        // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(), // AccountId
+        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(), // AccountId / ValidatorId
         // 5GutzsbjWqB4PFvzS5gpLvXTerJKnQ5ubyHu3T7ujfbgcEAU
-        hex!["d67576cff120e5d812e1046b8dced579be1cf2c4d36f440a5d6e4a9e6bc97d3e"].unchecked_into(),
+        hex!["d67576cff120e5d812e1046b8dced579be1cf2c4d36f440a5d6e4a9e6bc97d3e"].unchecked_into(), // GrandPa
         // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // Babe
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // ImOnline
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // AuthorityDiscovery
     )];
     let roots = vec![e, l, g, m];
     let oracles = vec![];
