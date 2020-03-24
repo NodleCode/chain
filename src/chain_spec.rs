@@ -44,7 +44,7 @@ pub enum Alternative {
     /// Ferdie as oracle.
     LocalTestnet,
 
-    Samurai,
+    Arcadia,
 }
 
 /// Get a chain config from a spec setting.
@@ -53,7 +53,7 @@ impl Alternative {
         Ok(match self {
             Alternative::Development => development_config(),
             Alternative::LocalTestnet => local_testnet_config(),
-            Alternative::Samurai => samurai_config(),
+            Alternative::Arcadia => arcadia_config(),
         })
     }
 
@@ -61,7 +61,7 @@ impl Alternative {
         match s {
             "dev" => Some(Alternative::Development),
             "local" => Some(Alternative::LocalTestnet),
-            "samurai" | _ => Some(Alternative::Samurai),
+            "arcadia" | _ => Some(Alternative::Arcadia),
         }
     }
 }
@@ -275,7 +275,7 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
-fn samurai_genesis() -> GenesisConfig {
+fn arcadia_genesis() -> GenesisConfig {
     let e = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
     let l = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
     let g = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
@@ -301,20 +301,20 @@ fn samurai_genesis() -> GenesisConfig {
     testnet_genesis(initial_authorities, roots, oracles, other_endowed_accounts)
 }
 
-pub fn samurai_config() -> ChainSpec {
+pub fn arcadia_config() -> ChainSpec {
     let boot_nodes = vec![];
 
     ChainSpec::from_genesis(
-        "Samurai Nodle Network",
-        "samurai",
-        samurai_genesis,
+        "Arcadia Nodle Network",
+        "arcadia",
+        arcadia_genesis,
         boot_nodes,
         Some(TelemetryEndpoints::new(vec![(
             STAGING_TELEMETRY_URL.to_string(),
             0,
         )])),
         Some(DEFAULT_PROTOCOL_ID),
-        Some(build_properties("sNODL")),
+        Some(build_properties("aNODL")),
         Default::default(),
     )
 }
