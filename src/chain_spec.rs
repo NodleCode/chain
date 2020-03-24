@@ -44,7 +44,7 @@ pub enum Alternative {
     /// Ferdie as oracle.
     LocalTestnet,
 
-    PublicTestnet,
+    Acardia,
 }
 
 /// Get a chain config from a spec setting.
@@ -53,7 +53,7 @@ impl Alternative {
         Ok(match self {
             Alternative::Development => development_config(),
             Alternative::LocalTestnet => local_testnet_config(),
-            Alternative::PublicTestnet => public_testnet_config(),
+            Alternative::Acardia => arcadia_config(),
         })
     }
 
@@ -61,7 +61,7 @@ impl Alternative {
         match s {
             "dev" => Some(Alternative::Development),
             "local" => Some(Alternative::LocalTestnet),
-            "testnet" | _ => Some(Alternative::PublicTestnet),
+            "acardia" | _ => Some(Alternative::Acardia),
         }
     }
 }
@@ -275,7 +275,12 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
-fn public_testnet_genesis() -> GenesisConfig {
+fn arcadia_genesis() -> GenesisConfig {
+    let e = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
+    let l = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
+    let g = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
+    let m = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
+
     // hex!["32a5718e87d16071756d4b1370c411bbbb947eb62f0e6e0b937d5cbfc0ea633b"].into(),
     let initial_authorities = vec![(
         // 5CB5B5dW14sF3cNakCZtA5gGMdxKzaopgsBBrrU5qYT5xj3F
@@ -289,36 +294,27 @@ fn public_testnet_genesis() -> GenesisConfig {
         hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
         hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
     )];
-    let roots = vec![
-        // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
-        hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(),
-        // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
-        hex!["088b9603f874bf7a35155a4d6f55a580896a8635102b36ad0c0150a09f02242e"].into(),
-        // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
-        hex!["e20b3e7084955505dc8cd0c51181850f41eaac7901c81bdee01a5361a8c22e32"].into(),
-        // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
-        hex!["5aa336fd5f8a6cd73b096bb43f6c60b7c6814307374aa53b6fbece28d7a0a535"].into(),
-    ];
+    let roots = vec![e, l, g, m];
     let oracles = vec![];
     let other_endowed_accounts = None;
 
     testnet_genesis(initial_authorities, roots, oracles, other_endowed_accounts)
 }
 
-pub fn public_testnet_config() -> ChainSpec {
+pub fn arcadia_config() -> ChainSpec {
     let boot_nodes = vec![];
 
     ChainSpec::from_genesis(
-        "Nodle Chain Testnet",
-        "testnet",
-        public_testnet_genesis,
+        "Arcadia Nodle Network",
+        "arcadia",
+        arcadia_genesis,
         boot_nodes,
         Some(TelemetryEndpoints::new(vec![(
             STAGING_TELEMETRY_URL.to_string(),
             0,
         )])),
         Some(DEFAULT_PROTOCOL_ID),
-        Some(build_properties("tNODL")),
+        Some(build_properties("aNODL")),
         Default::default(),
     )
 }
