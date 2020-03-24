@@ -277,22 +277,20 @@ pub fn local_testnet_config() -> ChainSpec {
 
 fn arcadia_genesis() -> GenesisConfig {
     let e = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
-    let l = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
-    let g = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
-    let m = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
+    let l = hex!["088b9603f874bf7a35155a4d6f55a580896a8635102b36ad0c0150a09f02242e"].into(); // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
+    let g = hex!["e20b3e7084955505dc8cd0c51181850f41eaac7901c81bdee01a5361a8c22e32"].into(); // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
+    let m = hex!["5aa336fd5f8a6cd73b096bb43f6c60b7c6814307374aa53b6fbece28d7a0a535"].into(); // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
 
-    // hex!["32a5718e87d16071756d4b1370c411bbbb947eb62f0e6e0b937d5cbfc0ea633b"].into(),
     let initial_authorities = vec![(
         // 5CB5B5dW14sF3cNakCZtA5gGMdxKzaopgsBBrrU5qYT5xj3F
-        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(),
-        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(),
-        // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(), // AccountId
+        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(), // AccountId / ValidatorId
         // 5GutzsbjWqB4PFvzS5gpLvXTerJKnQ5ubyHu3T7ujfbgcEAU
-        hex!["d67576cff120e5d812e1046b8dced579be1cf2c4d36f440a5d6e4a9e6bc97d3e"].unchecked_into(),
+        hex!["d67576cff120e5d812e1046b8dced579be1cf2c4d36f440a5d6e4a9e6bc97d3e"].unchecked_into(), // GrandPa
         // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(),
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // Babe
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // ImOnline
+        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // AuthorityDiscovery
     )];
     let roots = vec![e, l, g, m];
     let oracles = vec![];
