@@ -2,7 +2,7 @@
 
 A Blockchain node for the Nodle Chain to connect and secure the next trillion things.
 
-> Built on [Substrate](substrate.dev).
+> Built on [Substrate](https://substrate.dev).
 
 
 # Development
