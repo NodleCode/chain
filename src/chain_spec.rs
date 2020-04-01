@@ -1,5 +1,4 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
-use hex_literal::hex;
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::opaque_primitives::{AccountId, Balance, Signature};
@@ -9,28 +8,12 @@ use nodle_chain_runtime::{
     ImOnlineConfig, IndicesConfig, OraclesSetConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
-use sc_telemetry::TelemetryEndpoints;
-use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
+use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
-
-const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
-const DEFAULT_PROTOCOL_ID: &str = "nodl";
-
-/// Build a `Properties` for a `ChainSpec` which will use the defined
-/// `token_symbol`.
-pub fn build_properties(token_symbol: &str) -> sc_service::Properties {
-    let mut props = sc_service::Properties::new();
-    props.insert("tokenDecimals".to_string(), json!(12));
-    props.insert("tokenSymbol".to_string(), json!(token_symbol));
-
-    props
-}
-
 pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
 
 /// The chain specification option.
@@ -42,8 +25,6 @@ pub enum Alternative {
     /// Whatever the current runtime is, with simple Alice/Bob auths and
     /// Ferdie as oracle.
     LocalTestnet,
-
-    Arcadia,
 }
 
 /// Get a chain config from a spec setting.
@@ -52,15 +33,14 @@ impl Alternative {
         Ok(match self {
             Alternative::Development => development_config(),
             Alternative::LocalTestnet => local_testnet_config(),
-            Alternative::Arcadia => arcadia_config(),
         })
     }
 
     pub(crate) fn from(s: &str) -> Option<Self> {
         match s {
             "dev" => Some(Alternative::Development),
-            "local" => Some(Alternative::LocalTestnet),
-            "arcadia" | _ => Some(Alternative::Arcadia),
+            "" | "local" => Some(Alternative::LocalTestnet),
+            _ => None,
         }
     }
 }
@@ -68,7 +48,7 @@ impl Alternative {
 pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
     Ok(match Alternative::from(id) {
         Some(spec) => Some(spec.load()?),
-        None => None,
+        None => Some(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
     })
 }
 
@@ -271,52 +251,6 @@ pub fn local_testnet_config() -> ChainSpec {
         None,
         None,
         None,
-        Default::default(),
-    )
-}
-
-fn arcadia_genesis() -> GenesisConfig {
-    let e = hex!["728462774923165b6d8a0f578432ec423745d0cd471af33eeda2d830b343467f"].into(); // 5EereDWgaMi7dPFFnBUq2nqJWMaRTWsNVUcac2x868PV3GCA
-    let l = hex!["088b9603f874bf7a35155a4d6f55a580896a8635102b36ad0c0150a09f02242e"].into(); // 5CFuhu3AKYieoeRZtMBaYb2ad1LwDMuFzLFi6aQiXLFss4SR
-    let g = hex!["e20b3e7084955505dc8cd0c51181850f41eaac7901c81bdee01a5361a8c22e32"].into(); // 5HB624ynh6mL5TD4z9BfgpDKLsJcdV7HeGuFk79KThCqsDch
-    let m = hex!["5aa336fd5f8a6cd73b096bb43f6c60b7c6814307374aa53b6fbece28d7a0a535"].into(); // 5E7YekbgySR9cbCxFwocUxgzhJ2y6TgFVPh4FWgE5J29qjbN
-
-    let initial_authorities = vec![(
-        // 5CB5B5dW14sF3cNakCZtA5gGMdxKzaopgsBBrrU5qYT5xj3F
-        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(), // AccountId
-        hex!["04db3bbca0a736d460974b34f8f2281d8a627dcca42705da8a5fac12c0af3172"].into(), // AccountId / ValidatorId
-        // 5GutzsbjWqB4PFvzS5gpLvXTerJKnQ5ubyHu3T7ujfbgcEAU
-        hex!["d67576cff120e5d812e1046b8dced579be1cf2c4d36f440a5d6e4a9e6bc97d3e"].unchecked_into(), // GrandPa
-        // 5G9FBgaEJzkpuaS86mm1wVENhzaUVuBpguimGkJorZwXmC87
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // Babe
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // ImOnline
-        hex!["b4675fd3551f71fb3da347c820e54fd09fa04a7e554983d4d4623f5ce8c20d36"].unchecked_into(), // AuthorityDiscovery
-    )];
-    let roots = vec![e, l, g, m];
-    let oracles = vec![];
-    let other_endowed_accounts = Some(vec![]);
-
-    testnet_genesis(initial_authorities, roots, oracles, other_endowed_accounts)
-}
-
-pub fn arcadia_config() -> ChainSpec {
-    let boot_nodes = vec![
-        "/ip4/35.200.78.9/tcp/30333/p2p/QmWZ3CfMuZ8U15SWoGSnRZ1cpzDsVHqmuvi4ThCB5zQVGg".to_string(),
-        "/ip4/34.73.134.186/tcp/30333/p2p/QmZcst3MYHxJXoW5RgHnLrfz1ZZB9C7KgaJ6P69pABRJav"
-            .to_string(),
-    ];
-
-    ChainSpec::from_genesis(
-        "Arcadia Nodle Network",
-        "arcadia",
-        arcadia_genesis,
-        boot_nodes,
-        Some(TelemetryEndpoints::new(vec![(
-            STAGING_TELEMETRY_URL.to_string(),
-            0,
-        )])),
-        Some(DEFAULT_PROTOCOL_ID),
-        Some(build_properties("aNODL")),
         Default::default(),
     )
 }
