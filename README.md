@@ -5,6 +5,16 @@ A Blockchain node for the Nodle Chain to connect and secure the next trillion th
 > Built on [Substrate](https://substrate.dev).
 
 
+# Live networks
+
+## Arcadia
+This repository come with Arcadia's chain spec JSON file included. You can connect to the chain easily
+by running the following command.
+```
+cargo run -- --chain networks/arcadia.json
+```
+
+
 # Development
 
 ## Building
