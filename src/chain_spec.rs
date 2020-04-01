@@ -60,7 +60,8 @@ impl Alternative {
         match s {
             "dev" => Some(Alternative::Development),
             "local" => Some(Alternative::LocalTestnet),
-            "arcadia" | _ => Some(Alternative::Arcadia),
+            "arcadia" => Some(Alternative::Arcadia),
+            _ => None,
         }
     }
 }
@@ -68,7 +69,7 @@ impl Alternative {
 pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
     Ok(match Alternative::from(id) {
         Some(spec) => Some(spec.load()?),
-        None => None,
+        None => Some(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
     })
 }
 
