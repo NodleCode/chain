@@ -1,12 +1,11 @@
 use grandpa_primitives::AuthorityId as GrandpaId;
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
-use nodle_chain_runtime::opaque_primitives::{AccountId, Balance, Signature};
-use nodle_chain_runtime::GenesisConfig;
 use nodle_chain_runtime::{
-    AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, GrandpaConfig,
-    ImOnlineConfig, IndicesConfig, OraclesSetConfig, SessionConfig, SessionKeys, SystemConfig,
-    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+    opaque::SessionKeys, AccountId, AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig,
+    Balance, BalancesConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
+    OraclesSetConfig, SessionConfig, Signature, SystemConfig, TechnicalMembershipConfig,
+    ValidatorsSetConfig, WASM_BINARY,
 };
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;

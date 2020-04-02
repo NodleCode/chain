@@ -2,7 +2,7 @@
 
 use futures::stream::StreamExt;
 use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
-use nodle_chain_runtime::{self, Block, GenesisConfig, RuntimeApi};
+use nodle_chain_runtime::{self, opaque::Block, GenesisConfig, RuntimeApi};
 use sc_client::LongestChain;
 use sc_consensus_babe;
 use sc_executor::native_executor_instance;
@@ -31,7 +31,7 @@ macro_rules! new_full_start {
         let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
         let builder = sc_service::ServiceBuilder::new_full::<
-            nodle_chain_runtime::Block,
+            nodle_chain_runtime::opaque::Block,
             nodle_chain_runtime::RuntimeApi,
             crate::service::Executor,
         >($config)?

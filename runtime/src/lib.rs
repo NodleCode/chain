@@ -13,9 +13,12 @@ use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::u32_trait::{_1, _2, _4};
 use sp_core::OpaqueMetadata;
-use sp_runtime::traits::{BlakeTwo256, Block as BlockT, ConvertInto, OpaqueKeys, StaticLookup};
+use sp_runtime::traits::{
+    BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys, StaticLookup, Verify,
+};
 use sp_runtime::{
-    create_runtime_str, generic, transaction_validity::TransactionValidity, ApplyExtrinsicResult,
+    create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
+    ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -38,13 +41,63 @@ pub use timestamp::Call as TimestampCall;
 
 pub mod constants;
 mod implementations;
-pub mod opaque_primitives;
 
 use implementations::{TargetedFeeAdjustment, ToAuthor, WeightToFee};
-pub use opaque_primitives::*;
 
 type NegativeImbalance<T> =
     <balances::Module<T> as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+
+/// An index to a block.
+pub type BlockNumber = u32;
+
+/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
+pub type Signature = MultiSignature;
+
+/// Some way of identifying an account on the chain. We intentionally make it equivalent
+/// to the public key of our transaction signing scheme.
+pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+
+/// The type for looking up accounts. We don't expect more than 4 billion of them, but you
+/// never know...
+pub type AccountIndex = u32;
+
+/// Balance of an account.
+pub type Balance = u128;
+
+/// Index of a transaction in the chain.
+pub type Index = u32;
+
+/// A hash of some data used by the chain.
+pub type Hash = sp_core::H256;
+
+/// Digest item type.
+pub type DigestItem = generic::DigestItem<Hash>;
+
+/// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
+/// the specifics of the runtime. They can then be made to be agnostic over specific formats
+/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
+/// to even the core data structures.
+pub mod opaque {
+    use super::*;
+
+    pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
+
+    /// Opaque block header type.
+    pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+    /// Opaque block type.
+    pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+    /// Opaque block identifier type.
+    pub type BlockId = generic::BlockId<Block>;
+
+    impl_opaque_keys! {
+        pub struct SessionKeys {
+            pub babe: Babe,
+            pub grandpa: Grandpa,
+            pub im_online: ImOnline,
+            pub authority_discovery: AuthorityDiscovery,
+        }
+    }
+}
 
 /// This runtime version.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
@@ -52,7 +105,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     impl_name: create_runtime_str!("nodle-chain"),
     authoring_version: 1,
     spec_version: 5,
-    impl_version: 0,
+    impl_version: 2,
     apis: RUNTIME_API_VERSIONS,
 };
 
@@ -224,10 +277,10 @@ parameter_types! {
 
 impl session::Trait for Runtime {
     type SessionManager = PoaSessions;
-    type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
     type Event = Event;
-    type Keys = SessionKeys;
+    type Keys = opaque::SessionKeys;
     type ValidatorId = AccountId;
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
@@ -322,7 +375,7 @@ impl utility::Trait for Runtime {
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
-        NodeBlock = Block,
+        NodeBlock = opaque::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
@@ -485,13 +538,13 @@ sp_api::impl_runtime_apis! {
 
     impl sp_session::SessionKeys<Block> for Runtime {
         fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-            SessionKeys::generate(seed)
+            opaque::SessionKeys::generate(seed)
         }
 
         fn decode_session_keys(
             encoded: Vec<u8>,
         ) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
-            SessionKeys::decode_into_raw_public_keys(&encoded)
+            opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
         }
     }
 
