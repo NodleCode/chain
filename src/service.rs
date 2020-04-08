@@ -19,9 +19,10 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use futures::stream::StreamExt;
-use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
-use nodle_chain_runtime::{self, opaque::Block, GenesisConfig, RuntimeApi};
+use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider, StorageAndProofProvider};
+use nodle_chain_runtime::{self, opaque::Block, RuntimeApi};
 use sc_client::LongestChain;
+use sc_client_api::call_executor::ExecutorProvider;
 use sc_consensus_babe;
 use sc_executor::native_executor_instance;
 pub use sc_executor::NativeExecutor;
@@ -45,6 +46,8 @@ native_executor_instance!(
 /// be able to perform chain operations.
 macro_rules! new_full_start {
     ($config:expr) => {{
+        use std::sync::Arc;
+
         let mut import_setup = None;
         let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
@@ -67,7 +70,7 @@ macro_rules! new_full_start {
                 .ok_or_else(|| sc_service::Error::SelectChainRequired)?;
 
             let (grandpa_block_import, grandpa_link) =
-                grandpa::block_import(client.clone(), &*client, select_chain)?;
+                grandpa::block_import(client.clone(), &(client.clone() as Arc<_>), select_chain)?;
 
             let justification_import = grandpa_block_import.clone();
 
@@ -96,7 +99,7 @@ macro_rules! new_full_start {
 
 /// Builds a new service for a full client.
 pub fn new_full(
-    config: Configuration<GenesisConfig>,
+    config: Configuration,
 ) -> Result<impl AbstractService, ServiceError> {
     let is_authority = config.roles.is_authority();
     let force_authoring = config.force_authoring;
@@ -117,7 +120,8 @@ pub fn new_full(
 
     let service = builder
         .with_finality_proof_provider(|client, backend| {
-            Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, client)) as _)
+            let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
+            Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
         })?
         .build()?;
 
@@ -160,6 +164,7 @@ pub fn new_full(
             sentry_nodes,
             service.keystore(),
             dht_event_stream,
+            service.prometheus_registry(),
         );
 
         service.spawn_task("authority-discovery", authority_discovery);
@@ -174,7 +179,6 @@ pub fn new_full(
     };
 
     let grandpa_config = grandpa::Config {
-        // FIXME #1578 make this available through chainspec
         gossip_duration: Duration::from_millis(333),
         justification_period: 512,
         name: Some(name),
@@ -196,9 +200,9 @@ pub fn new_full(
             link: grandpa_link,
             network: service.network(),
             inherent_data_providers: inherent_data_providers.clone(),
-            on_exit: service.on_exit(),
             telemetry_on_connect: Some(service.telemetry_on_connect_stream()),
             voting_rule: grandpa::VotingRulesBuilder::default().build(),
+            prometheus_registry: service.prometheus_registry(),
         };
 
         // the GRANDPA voter task is considered infallible, i.e.
@@ -217,7 +221,7 @@ pub fn new_full(
 
 /// Builds a new service for a light client.
 pub fn new_light(
-    config: Configuration<GenesisConfig>,
+    config: Configuration,
 ) -> Result<impl AbstractService, ServiceError> {
     let inherent_data_providers = InherentDataProviders::new();
 
@@ -245,7 +249,7 @@ pub fn new_light(
                 let grandpa_block_import = grandpa::light_block_import(
                     client.clone(),
                     backend,
-                    &*client.clone(),
+                    &(client.clone() as Arc<_>),
                     Arc::new(fetch_checker),
                 )?;
                 let finality_proof_import = grandpa_block_import.clone();
@@ -271,7 +275,8 @@ pub fn new_light(
             },
         )?
         .with_finality_proof_provider(|client, backend| {
-            Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, client)) as _)
+            let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
+            Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
         })?
         .build()
 }

@@ -31,7 +31,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
-pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
 /// The chain specification option.
 #[derive(Clone, Debug, PartialEq)]
@@ -62,10 +62,10 @@ impl Alternative {
     }
 }
 
-pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
+pub fn load_spec(id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
     Ok(match Alternative::from(id) {
-        Some(spec) => Some(spec.load()?),
-        None => Some(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
+        Some(spec) => Box::new(spec.load()?),
+        None => Box::new(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
     })
 }
 
