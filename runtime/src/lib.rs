@@ -333,7 +333,7 @@ impl session::historical::Trait for Runtime {
     type FullIdentificationOf = poa::FullIdentificationOf<Runtime>;
 }
 
-impl membership::Trait<membership::Instance3> for Runtime {
+impl membership::Trait<membership::Instance2> for Runtime {
     type Event = Event;
     type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type RemoveOrigin =
@@ -369,24 +369,6 @@ impl collective::Trait<TechnicalCollective> for Runtime {
     type Proposal = Call;
     type Event = Event;
     type MotionDuration = MotionDuration;
-}
-
-impl membership::Trait<membership::Instance2> for Runtime {
-    type Event = Event;
-    type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = Allocations;
-    type MembershipChanged = Allocations;
-}
-
-impl allocations::Trait for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type Reward = (); // rewards are minted from the void
 }
 
 impl mandate::Trait for Runtime {
@@ -444,7 +426,7 @@ construct_runtime!(
         ImOnline: im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
         Offences: offences::{Module, Call, Storage, Event},
         PoaSessions: poa::{Module, Storage},
-        ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
+        ValidatorsSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: session::{Module, Call, Storage, Event, Config<T>},
         AuthorityDiscovery: authority_discovery::{Module, Call, Config},
 
@@ -453,10 +435,6 @@ construct_runtime!(
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: mandate::{Module, Call, Event},
         CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
-
-        // Nodle
-        Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
-        OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
 
         // Neat things
         Utility: utility::{Module, Call, Storage, Event<T>},
