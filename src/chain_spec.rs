@@ -20,10 +20,9 @@ use grandpa_primitives::AuthorityId as GrandpaId;
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::{
-    opaque::SessionKeys, AccountId, AllocationsConfig, AuthorityDiscoveryConfig, BabeConfig,
-    Balance, BalancesConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
-    OraclesSetConfig, SessionConfig, Signature, SystemConfig, TechnicalMembershipConfig,
-    ValidatorsSetConfig, WASM_BINARY,
+    opaque::SessionKeys, AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig,
+    GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, SessionConfig, Signature,
+    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
@@ -31,7 +30,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
-pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
 /// The chain specification option.
 #[derive(Clone, Debug, PartialEq)]
@@ -62,10 +61,10 @@ impl Alternative {
     }
 }
 
-pub fn load_spec(id: &str) -> Result<Option<ChainSpec>, String> {
+pub fn load_spec(id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
     Ok(match Alternative::from(id) {
-        Some(spec) => Some(spec.load()?),
-        None => Some(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
+        Some(spec) => Box::new(spec.load()?),
+        None => Box::new(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
     })
 }
 
@@ -192,7 +191,7 @@ pub fn testnet_genesis(
         grandpa: Some(GrandpaConfig {
             authorities: vec![],
         }),
-        membership_Instance3: Some(ValidatorsSetConfig {
+        membership_Instance2: Some(ValidatorsSetConfig {
             members: initial_authorities
                 .iter()
                 .map(|x| x.0.clone())
@@ -207,15 +206,6 @@ pub fn testnet_genesis(
             phantom: Default::default(),
         }),
         reserve: Some(Default::default()),
-
-        // Nodle Core
-        membership_Instance2: Some(OraclesSetConfig {
-            members: oracles,
-            phantom: Default::default(),
-        }),
-        allocations: Some(AllocationsConfig {
-            coins_left: 10000000000000,
-        }),
     }
 }
 

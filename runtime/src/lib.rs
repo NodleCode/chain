@@ -133,7 +133,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 6,
+    spec_version: 7,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -286,10 +286,15 @@ impl transaction_payment::Trait for Runtime {
     type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness, Self>;
 }
 
+parameter_types! {
+    pub const MinVestedTransfer: Balance = 1 * constants::DOLLARS;
+}
+
 impl vesting::Trait for Runtime {
     type Event = Event;
     type Currency = Balances;
     type BlockNumberToBalance = ConvertInto;
+    type MinVestedTransfer = MinVestedTransfer;
 }
 
 parameter_types! {
@@ -328,13 +333,14 @@ impl session::historical::Trait for Runtime {
     type FullIdentificationOf = poa::FullIdentificationOf<Runtime>;
 }
 
-impl membership::Trait<membership::Instance3> for Runtime {
+impl membership::Trait<membership::Instance2> for Runtime {
     type Event = Event;
     type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type RemoveOrigin =
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = PoaSessions;
     type MembershipChanged = PoaSessions;
 }
@@ -348,8 +354,13 @@ impl membership::Trait<membership::Instance1> for Runtime {
         collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
+}
+
+parameter_types! {
+    pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
 }
 
 type TechnicalCollective = collective::Instance2;
@@ -357,23 +368,7 @@ impl collective::Trait<TechnicalCollective> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
     type Event = Event;
-}
-
-impl membership::Trait<membership::Instance2> for Runtime {
-    type Event = Event;
-    type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = Allocations;
-    type MembershipChanged = Allocations;
-}
-
-impl allocations::Trait for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type Reward = (); // rewards are minted from the void
+    type MotionDuration = MotionDuration;
 }
 
 impl mandate::Trait for Runtime {
@@ -431,7 +426,7 @@ construct_runtime!(
         ImOnline: im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
         Offences: offences::{Module, Call, Storage, Event},
         PoaSessions: poa::{Module, Storage},
-        ValidatorsSet: membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
+        ValidatorsSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: session::{Module, Call, Storage, Event, Config<T>},
         AuthorityDiscovery: authority_discovery::{Module, Call, Config},
 
@@ -440,10 +435,6 @@ construct_runtime!(
         TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: mandate::{Module, Call, Event},
         CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
-
-        // Nodle
-        Allocations: allocations::{Module, Call, Storage, Event<T>, Config<T>},
-        OraclesSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
 
         // Neat things
         Utility: utility::{Module, Call, Storage, Event<T>},
@@ -501,10 +492,6 @@ sp_api::impl_runtime_apis! {
     impl sp_block_builder::BlockBuilder<Block> for Runtime {
         fn apply_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
             Executive::apply_extrinsic(extrinsic)
-        }
-
-        fn apply_trusted_extrinsic(extrinsic: <Block as BlockT>::Extrinsic) -> ApplyExtrinsicResult {
-            Executive::apply_trusted_extrinsic(extrinsic)
         }
 
         fn finalize_block() -> <Block as BlockT>::Header {

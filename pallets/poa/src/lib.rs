@@ -79,6 +79,7 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
         Some(<Validators<T>>::get())
     }
 
+    fn start_session(_: SessionIndex) {}
     fn end_session(_: SessionIndex) {}
 }
 
@@ -94,6 +95,10 @@ impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentificat
                 })
                 .collect()
         })
+    }
+
+    fn start_session(start_index: SessionIndex) {
+        <Self as session::SessionManager<_>>::start_session(start_index)
     }
 
     fn end_session(end_index: SessionIndex) {
