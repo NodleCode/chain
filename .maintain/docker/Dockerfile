@@ -23,7 +23,7 @@ COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
 
 COPY ./.maintain/docker/entrypoint.sh .
 COPY ./.maintain/docker/load_keys.sh .
-COPY ./networks/* .
+COPY ./networks/* ./
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
