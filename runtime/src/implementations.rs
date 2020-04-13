@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Polkadot.  If not, see <http://www.gnu.org/licenses/>.
 
+// Modified by Eliott Teissonniere (Nodle International) to contain
+// only the useful code for the Nodle Chain project.
+
 //! Auxillary struct/enums for polkadot runtime.
 
 use crate::{AccountId, Balance, MaximumBlockWeight, NegativeImbalance};
