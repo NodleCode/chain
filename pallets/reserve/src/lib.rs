@@ -27,12 +27,10 @@ mod tests;
 use frame_support::{
     decl_event, decl_module, decl_storage,
     dispatch::DispatchResult,
-    traits::{Currency, ExistenceRequirement, Imbalance, OnUnbalanced},
+    traits::{Currency, EnsureOrigin, ExistenceRequirement, Imbalance, OnUnbalanced},
+    weights::SimpleDispatchInfo,
 };
-use sp_runtime::{
-    traits::{AccountIdConversion, EnsureOrigin},
-    ModuleId,
-};
+use sp_runtime::{traits::AccountIdConversion, ModuleId};
 use system::ensure_signed;
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
@@ -68,6 +66,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Spend `amount` funds from the reserve account to `to`.
+        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
         pub fn spend(origin, to: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
             T::ExternalOrigin::ensure_origin(origin)?;
 
@@ -80,6 +79,7 @@ decl_module! {
         }
 
         /// Deposit `amount` tokens in the treasure account
+        #[weight = SimpleDispatchInfo::FixedNormal(50_000)]
         pub fn tip(origin, amount: BalanceOf<T>) -> DispatchResult {
             let tipper = ensure_signed(origin)?;
 
