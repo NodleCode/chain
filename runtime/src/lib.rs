@@ -641,6 +641,36 @@ sp_api::impl_runtime_apis! {
             TransactionPayment::query_info(uxt, len)
         }
     }
+
+    #[cfg(feature = "runtime-benchmarks")]
+    impl frame_benchmarking::Benchmark<Block> for Runtime {
+        fn dispatch_benchmark(
+            pallet: Vec<u8>,
+            benchmark: Vec<u8>,
+            lowest_range_values: Vec<u32>,
+            highest_range_values: Vec<u32>,
+            steps: Vec<u32>,
+            repeat: u32,
+        ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
+            // We did not include the offences and sessions benchmarks as they are parity
+            // specific and were causing some issues at compile time.
+
+            use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark};
+
+            let mut batches = Vec::<BenchmarkBatch>::new();
+            let params = (&pallet, &benchmark, &lowest_range_values, &highest_range_values, &steps, repeat);
+
+            add_benchmark!(params, batches, b"balances", Balances);
+            add_benchmark!(params, batches, b"collective", TechnicalCommittee);
+            add_benchmark!(params, batches, b"im-online", ImOnline);
+            add_benchmark!(params, batches, b"timestamp", Timestamp);
+            add_benchmark!(params, batches, b"utility", Utility);
+            add_benchmark!(params, batches, b"vesting", Vesting);
+
+            if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
+            Ok(batches)
+        }
+    }
 }
 
 #[cfg(test)]
