@@ -228,3 +228,19 @@ pub fn local_testnet_config() -> ChainSpec {
         Default::default(),
     )
 }
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use super::*;
+    use sp_runtime::BuildStorage;
+
+    #[test]
+    fn test_create_development_chain_spec() {
+        development_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_create_local_testnet_chain_spec() {
+        local_testnet_config().build_storage().unwrap();
+    }
+}
