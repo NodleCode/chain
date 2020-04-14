@@ -31,11 +31,13 @@ use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::u32_trait::{_1, _2, _4};
 use sp_core::OpaqueMetadata;
-use sp_runtime::traits::{
-    BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys, StaticLookup, Verify,
-};
 use sp_runtime::{
-    create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
+    create_runtime_str, generic, impl_opaque_keys,
+    traits::{
+        BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys, StaticLookup,
+        Verify,
+    },
+    transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
@@ -133,7 +135,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 7,
+    spec_version: 8,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -215,7 +217,8 @@ impl authorship::Trait for Runtime {
 type SubmitTransaction = TransactionSubmitter<ImOnlineId, Runtime, UncheckedExtrinsic>;
 
 parameter_types! {
-    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_BLOCKS as _;
+    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_SLOTS as _;
+    pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 }
 
 impl im_online::Trait for Runtime {
@@ -225,6 +228,7 @@ impl im_online::Trait for Runtime {
     type SubmitTransaction = SubmitTransaction;
     type SessionDuration = SessionDuration;
     type ReportUnresponsiveness = Offences;
+    type UnsignedPriority = ImOnlineUnsignedPriority;
 }
 
 impl offences::Trait for Runtime {
@@ -326,6 +330,7 @@ impl session::Trait for Runtime {
     type ValidatorId = AccountId;
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
+    type NextSessionRotation = Babe;
 }
 
 impl session::historical::Trait for Runtime {
@@ -515,8 +520,8 @@ sp_api::impl_runtime_apis! {
     }
 
     impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
-        fn validate_transaction(tx: <Block as BlockT>::Extrinsic) -> TransactionValidity {
-            Executive::validate_transaction(tx)
+        fn validate_transaction(source: TransactionSource, tx: <Block as BlockT>::Extrinsic) -> TransactionValidity {
+            Executive::validate_transaction(source, tx)
         }
     }
 
