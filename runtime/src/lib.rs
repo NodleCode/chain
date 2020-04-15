@@ -27,15 +27,16 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 use grandpa::{fg_primitives, AuthorityId as GrandpaId};
 use im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
-
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::u32_trait::{_1, _2, _4};
 use sp_core::OpaqueMetadata;
-use sp_runtime::traits::{
-    BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys, StaticLookup, Verify,
-};
 use sp_runtime::{
-    create_runtime_str, generic, impl_opaque_keys, transaction_validity::TransactionValidity,
+    create_runtime_str, generic, impl_opaque_keys,
+    traits::{
+        BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys,
+        SaturatedConversion, StaticLookup, Verify,
+    },
+    transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
@@ -47,7 +48,7 @@ use system::offchain::TransactionSubmitter;
 // A few exports that help ease life for downstream crates.
 pub use balances::Call as BalancesCall;
 pub use frame_support::{
-    construct_runtime, parameter_types,
+    construct_runtime, debug, parameter_types,
     traits::{Currency, Randomness, SplitTwoWays},
     weights::Weight,
     StorageValue,
@@ -133,7 +134,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 7,
+    spec_version: 8,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -145,6 +146,56 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 
     apis: RUNTIME_API_VERSIONS,
 };
+
+/// A transaction submitter with the given key type.
+pub type TransactionSubmitterOf<KeyType> =
+    TransactionSubmitter<KeyType, Runtime, UncheckedExtrinsic>;
+
+/// Submits transaction with the node's public and signature type. Adheres to the signed extension
+/// format of the chain.
+impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtime {
+    type Public = <Signature as sp_runtime::traits::Verify>::Signer;
+    type Signature = Signature;
+
+    fn create_transaction<TSigner: system::offchain::Signer<Self::Public, Self::Signature>>(
+        call: Call,
+        public: Self::Public,
+        account: AccountId,
+        index: Index,
+    ) -> Option<(
+        Call,
+        <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
+    )> {
+        // take the biggest period possible.
+        let period = BlockHashCount::get()
+            .checked_next_power_of_two()
+            .map(|c| c / 2)
+            .unwrap_or(2) as u64;
+        let current_block = System::block_number()
+            .saturated_into::<u64>()
+            // The `System::block_number` is initialized with `n+1`,
+            // so the actual block number is `n`.
+            .saturating_sub(1);
+        let tip = 0;
+        let extra: SignedExtra = (
+            system::CheckVersion::<Runtime>::new(),
+            system::CheckGenesis::<Runtime>::new(),
+            system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
+            system::CheckNonce::<Runtime>::from(index),
+            system::CheckWeight::<Runtime>::new(),
+            transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+        );
+        let raw_payload = SignedPayload::new(call, extra)
+            .map_err(|e| {
+                debug::warn!("Unable to create signed payload: {:?}", e);
+            })
+            .ok()?;
+        let signature = TSigner::sign(public, &raw_payload)?;
+        let address = Indices::unlookup(account);
+        let (call, extra, _) = raw_payload.deconstruct();
+        Some((call, (address, signature, extra)))
+    }
+}
 
 /// The version infromation used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
@@ -212,19 +263,19 @@ impl authorship::Trait for Runtime {
     type EventHandler = ImOnline;
 }
 
-type SubmitTransaction = TransactionSubmitter<ImOnlineId, Runtime, UncheckedExtrinsic>;
-
 parameter_types! {
-    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_BLOCKS as _;
+    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_SLOTS as _;
+    pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 }
 
 impl im_online::Trait for Runtime {
     type AuthorityId = ImOnlineId;
     type Event = Event;
     type Call = Call;
-    type SubmitTransaction = SubmitTransaction;
+    type SubmitTransaction = TransactionSubmitterOf<ImOnlineId>;
     type SessionDuration = SessionDuration;
     type ReportUnresponsiveness = Offences;
+    type UnsignedPriority = ImOnlineUnsignedPriority;
 }
 
 impl offences::Trait for Runtime {
@@ -283,7 +334,7 @@ impl transaction_payment::Trait for Runtime {
     type TransactionBaseFee = TransactionBaseFee;
     type TransactionByteFee = TransactionByteFee;
     type WeightToFee = WeightToFee;
-    type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness, Self>;
+    type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness>;
 }
 
 parameter_types! {
@@ -326,6 +377,7 @@ impl session::Trait for Runtime {
     type ValidatorId = AccountId;
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
+    type NextSessionRotation = Babe;
 }
 
 impl session::historical::Trait for Runtime {
@@ -462,6 +514,8 @@ pub type SignedExtra = (
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+/// The payload being signed in transactions.
+pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
@@ -515,8 +569,8 @@ sp_api::impl_runtime_apis! {
     }
 
     impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
-        fn validate_transaction(tx: <Block as BlockT>::Extrinsic) -> TransactionValidity {
-            Executive::validate_transaction(tx)
+        fn validate_transaction(source: TransactionSource, tx: <Block as BlockT>::Extrinsic) -> TransactionValidity {
+            Executive::validate_transaction(source, tx)
         }
     }
 
@@ -586,5 +640,67 @@ sp_api::impl_runtime_apis! {
         fn query_info(uxt: UncheckedExtrinsic, len: u32) -> RuntimeDispatchInfo<Balance> {
             TransactionPayment::query_info(uxt, len)
         }
+    }
+
+    #[cfg(feature = "runtime-benchmarks")]
+    impl frame_benchmarking::Benchmark<Block> for Runtime {
+        fn dispatch_benchmark(
+            pallet: Vec<u8>,
+            benchmark: Vec<u8>,
+            lowest_range_values: Vec<u32>,
+            highest_range_values: Vec<u32>,
+            steps: Vec<u32>,
+            repeat: u32,
+        ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
+            // We did not include the offences and sessions benchmarks as they are parity
+            // specific and were causing some issues at compile time.
+
+            use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark};
+
+            let mut batches = Vec::<BenchmarkBatch>::new();
+            let params = (&pallet, &benchmark, &lowest_range_values, &highest_range_values, &steps, repeat);
+
+            add_benchmark!(params, batches, b"balances", Balances);
+            add_benchmark!(params, batches, b"collective", TechnicalCommittee);
+            add_benchmark!(params, batches, b"im-online", ImOnline);
+            add_benchmark!(params, batches, b"timestamp", Timestamp);
+            add_benchmark!(params, batches, b"utility", Utility);
+            add_benchmark!(params, batches, b"vesting", Vesting);
+
+            add_benchmark!(params, batches, b"reserve", CompanyReserve);
+
+            if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
+            Ok(batches)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use system::offchain::{SignAndSubmitTransaction, SubmitSignedTransaction};
+
+    #[test]
+    fn validate_transaction_submitter_bounds() {
+        fn is_submit_signed_transaction<T>()
+        where
+            T: SubmitSignedTransaction<Runtime, Call>,
+        {
+        }
+
+        fn is_sign_and_submit_transaction<T>()
+        where
+            T: SignAndSubmitTransaction<
+                Runtime,
+                Call,
+                Extrinsic = UncheckedExtrinsic,
+                CreateTransaction = Runtime,
+                Signer = ImOnlineId,
+            >,
+        {
+        }
+
+        is_submit_signed_transaction::<TransactionSubmitterOf<ImOnlineId>>();
+        is_sign_and_submit_transaction::<TransactionSubmitterOf<ImOnlineId>>();
     }
 }

@@ -24,6 +24,7 @@ use nodle_chain_runtime::{
     GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, SessionConfig, Signature,
     SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
+use sc_service::ChainType;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public};
@@ -31,42 +32,6 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
-
-/// The chain specification option.
-#[derive(Clone, Debug, PartialEq)]
-pub enum Alternative {
-    /// Whatever the current runtime is, with just Alice as an auth and
-    /// Ferdie as oracle.
-    Development,
-    /// Whatever the current runtime is, with simple Alice/Bob auths and
-    /// Ferdie as oracle.
-    LocalTestnet,
-}
-
-/// Get a chain config from a spec setting.
-impl Alternative {
-    pub(crate) fn load(self) -> Result<ChainSpec, String> {
-        Ok(match self {
-            Alternative::Development => development_config(),
-            Alternative::LocalTestnet => local_testnet_config(),
-        })
-    }
-
-    pub(crate) fn from(s: &str) -> Option<Self> {
-        match s {
-            "dev" => Some(Alternative::Development),
-            "" | "local" => Some(Alternative::LocalTestnet),
-            _ => None,
-        }
-    }
-}
-
-pub fn load_spec(id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
-    Ok(match Alternative::from(id) {
-        Some(spec) => Box::new(spec.load()?),
-        None => Box::new(ChainSpec::from_json_file(std::path::PathBuf::from(id))?),
-    })
-}
 
 fn session_keys(
     grandpa: GrandpaId,
@@ -223,6 +188,7 @@ pub fn development_config() -> ChainSpec {
     ChainSpec::from_genesis(
         "Development",
         "dev",
+        ChainType::Development,
         development_config_genesis,
         vec![],
         None,
@@ -253,6 +219,7 @@ pub fn local_testnet_config() -> ChainSpec {
     ChainSpec::from_genesis(
         "Local Testnet",
         "local_testnet",
+        ChainType::Local,
         local_testnet_genesis,
         vec![],
         None,
@@ -260,4 +227,20 @@ pub fn local_testnet_config() -> ChainSpec {
         None,
         Default::default(),
     )
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use super::*;
+    use sp_runtime::BuildStorage;
+
+    #[test]
+    fn test_create_development_chain_spec() {
+        development_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_create_local_testnet_chain_spec() {
+        local_testnet_config().build_storage().unwrap();
+    }
 }

@@ -24,8 +24,10 @@
 #[cfg(test)]
 mod tests;
 
-use frame_support::traits::{ChangeMembers, InitializeMembers};
-use frame_support::{decl_module, decl_storage};
+use frame_support::{
+    decl_module, decl_storage,
+    traits::{ChangeMembers, InitializeMembers},
+};
 use session::SessionManager;
 use sp_runtime::traits::Convert;
 use sp_std::prelude::Vec;

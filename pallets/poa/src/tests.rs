@@ -90,6 +90,7 @@ impl session::Trait for Test {
     type SessionManager = Module<Test>;
     type SessionHandler = TestSessionHandler;
     type ShouldEndSession = TestSessionHandler;
+    type NextSessionRotation = ();
     type Event = ();
     type Keys = UintAuthorityId;
     type ValidatorId = <Test as system::Trait>::AccountId;
