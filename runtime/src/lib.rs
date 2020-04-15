@@ -667,6 +667,8 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"utility", Utility);
             add_benchmark!(params, batches, b"vesting", Vesting);
 
+            add_benchmark!(params, batches, b"reserve", CompanyReserve);
+
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)
         }
