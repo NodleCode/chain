@@ -84,6 +84,7 @@ impl Trait for Test {
     type Event = ();
     type Currency = balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
+    type Call = frame_system::Call<Test>;
 }
 type TestModule = Module<Test>;
 type Balances = balances::Module<Test>;

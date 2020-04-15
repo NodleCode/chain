@@ -30,10 +30,15 @@ use frame_support::{
     decl_event, decl_module, decl_storage,
     dispatch::DispatchResult,
     traits::{Currency, EnsureOrigin, ExistenceRequirement, Imbalance, OnUnbalanced},
-    weights::SimpleDispatchInfo,
+    weights::{FunctionOf, GetDispatchInfo, SimpleDispatchInfo},
+    Parameter,
 };
 use frame_system::{self as system, ensure_signed};
-use sp_runtime::{traits::AccountIdConversion, ModuleId};
+use sp_runtime::{
+    traits::{AccountIdConversion, Dispatchable},
+    ModuleId,
+};
+use sp_std::prelude::Box;
 
 type BalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
@@ -48,6 +53,7 @@ pub trait Trait: frame_system::Trait {
 
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
     type Currency: Currency<Self::AccountId>;
+    type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
 }
 
 decl_storage! {
@@ -92,6 +98,27 @@ decl_module! {
 
             Ok(())
         }
+
+        /// Dispatch a call as coming from the reserve account
+        #[weight = FunctionOf(
+            |args: (&Box<<T as Trait>::Call>,)| args.0.get_dispatch_info().weight + 10_000,
+            |args: (&Box<<T as Trait>::Call>,)| args.0.get_dispatch_info().class,
+            true
+        )]
+        pub fn apply_as(origin, call: Box<<T as Trait>::Call>) -> DispatchResult {
+            T::ExternalOrigin::ensure_origin(origin)?;
+
+            let res = match call.dispatch(system::RawOrigin::Signed(Self::account_id()).into()) {
+                Ok(_) => true,
+                Err(e) => {
+                    sp_runtime::print(e);
+                    false
+                }
+            };
+
+            Self::deposit_event(RawEvent::ReserveOp(res));
+            Ok(())
+        }
     }
 }
 
@@ -107,6 +134,8 @@ decl_event!(
         SpentFunds(AccountId, Balance),
         /// Someone tipped the company reserve
         TipReceived(AccountId, Balance),
+        /// We executed a call coming from the company reserve account
+        ReserveOp(bool),
     }
 );
 
