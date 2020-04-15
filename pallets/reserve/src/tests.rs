@@ -16,12 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#![cfg(test)]
+
 use super::*;
 
 use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
     traits::Imbalance, weights::Weight,
 };
+use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -29,7 +32,6 @@ use sp_runtime::{
     DispatchError::BadOrigin,
     Perbill,
 };
-use system::EnsureSignedBy;
 
 impl_outer_origin! {
     pub enum Origin for Test {}
@@ -46,7 +48,7 @@ parameter_types! {
     pub const MaximumBlockLength: u32 = 2 * 1024;
     pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl system::Trait for Test {
+impl frame_system::Trait for Test {
     type Origin = Origin;
     type Call = ();
     type Index = u64;
@@ -72,7 +74,7 @@ impl balances::Trait for Test {
     type Event = ();
     type DustRemoval = ();
     type ExistentialDeposit = ();
-    type AccountStore = system::Module<Test>;
+    type AccountStore = frame_system::Module<Test>;
 }
 
 ord_parameter_types! {
@@ -87,12 +89,12 @@ type TestModule = Module<Test>;
 type Balances = balances::Module<Test>;
 
 type PositiveImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
+    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::PositiveImbalance;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default()
+pub fn new_test_ext() -> sp_io::TestExternalities {
+    frame_system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap()
         .into()

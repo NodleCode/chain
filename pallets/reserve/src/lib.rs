@@ -21,6 +21,8 @@
 //! A module that is called by the `collective` and is in charge of holding
 //! the company funds.
 
+mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -30,18 +32,19 @@ use frame_support::{
     traits::{Currency, EnsureOrigin, ExistenceRequirement, Imbalance, OnUnbalanced},
     weights::SimpleDispatchInfo,
 };
+use frame_system::{self as system, ensure_signed};
 use sp_runtime::{traits::AccountIdConversion, ModuleId};
-use system::ensure_signed;
 
-type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+type BalanceOf<T> =
+    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 type NegativeImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::NegativeImbalance;
 
 const MODULE_ID: ModuleId = ModuleId(*b"py/resrv");
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
-    type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+pub trait Trait: frame_system::Trait {
+    type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
 
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
     type Currency: Currency<Self::AccountId>;
@@ -95,7 +98,7 @@ decl_module! {
 decl_event!(
     pub enum Event<T>
     where
-        AccountId = <T as system::Trait>::AccountId,
+        AccountId = <T as frame_system::Trait>::AccountId,
         Balance = BalanceOf<T>,
     {
         /// Some amount was deposited (e.g. for transaction fees).
