@@ -32,6 +32,7 @@ use sp_runtime::{
     DispatchError::BadOrigin,
     Perbill,
 };
+use sp_std::prelude::Box;
 
 impl_outer_origin! {
     pub enum Origin for Test {}
@@ -84,6 +85,7 @@ impl Trait for Test {
     type Event = ();
     type Currency = balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
+    type Call = frame_system::Call<Test>;
 }
 type TestModule = Module<Test>;
 type Balances = balances::Module<Test>;
@@ -132,5 +134,29 @@ fn tip() {
         assert_ok!(TestModule::tip(Origin::signed(999), 50));
         assert_eq!(Balances::free_balance(999), 50);
         assert_eq!(Balances::free_balance(TestModule::account_id()), 50);
+    })
+}
+
+fn make_call(value: u8) -> Box<frame_system::Call<Test>> {
+    Box::new(frame_system::Call::<Test>::remark(vec![value]))
+}
+
+#[test]
+fn apply_as_error_if_bad_origin() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            TestModule::apply_as(Origin::signed(0), make_call(1)),
+            BadOrigin
+        );
+    })
+}
+
+#[test]
+fn apply_as_works() {
+    new_test_ext().execute_with(|| {
+        assert_ok!(TestModule::apply_as(
+            Origin::signed(Admin::get()),
+            make_call(1)
+        ));
     })
 }
