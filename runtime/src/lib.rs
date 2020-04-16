@@ -134,7 +134,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 9,
+    spec_version: 10,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -441,6 +441,23 @@ impl reserve::Trait for Runtime {
 }
 
 parameter_types! {
+    pub const ConfigDepositBase: Balance = 5 * constants::DOLLARS;
+    pub const FriendDepositFactor: Balance = 50 * constants::CENTS;
+    pub const MaxFriends: u16 = 9;
+    pub const RecoveryDeposit: Balance = 5 * constants::DOLLARS;
+}
+
+impl pallet_recovery::Trait for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type Currency = Balances;
+    type ConfigDepositBase = ConfigDepositBase;
+    type FriendDepositFactor = FriendDepositFactor;
+    type MaxFriends = MaxFriends;
+    type RecoveryDeposit = RecoveryDeposit;
+}
+
+parameter_types! {
     // One storage item; value is size 4+4+16+32 bytes = 56 bytes.
     pub const MultisigDepositBase: Balance = 30 * constants::CENTS;
     // Additional storage item size of 32 bytes.
@@ -490,6 +507,7 @@ construct_runtime!(
         CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
 
         // Neat things
+        Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
         Utility: utility::{Module, Call, Storage, Event<T>},
     }
 );
