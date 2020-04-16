@@ -231,7 +231,7 @@ pub fn local_testnet_config() -> ChainSpec {
 
 /// Arcadia config, from json chainspec
 pub fn arcadia_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../networks/arcadia_alpha_6_raw.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../../networks/arcadia.json")[..]).unwrap()
 }
 
 #[cfg(test)]
