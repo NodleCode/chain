@@ -134,7 +134,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 9,
+    spec_version: 11,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -441,6 +441,44 @@ impl reserve::Trait for Runtime {
 }
 
 parameter_types! {
+    pub const BasicDeposit: Balance = 10 * constants::DOLLARS;       // 258 bytes on-chain
+    pub const FieldDeposit: Balance = 250 * constants::CENTS;        // 66 bytes on-chain
+    pub const SubAccountDeposit: Balance = 2 * constants::DOLLARS;   // 53 bytes on-chain
+    pub const MaxSubAccounts: u32 = 100;
+    pub const MaxAdditionalFields: u32 = 100;
+}
+
+impl pallet_identity::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type BasicDeposit = BasicDeposit;
+    type FieldDeposit = FieldDeposit;
+    type SubAccountDeposit = SubAccountDeposit;
+    type MaxSubAccounts = MaxSubAccounts;
+    type MaxAdditionalFields = MaxAdditionalFields;
+    type Slashed = CompanyReserve;
+    type ForceOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RegistrarOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+}
+
+parameter_types! {
+    pub const ConfigDepositBase: Balance = 5 * constants::DOLLARS;
+    pub const FriendDepositFactor: Balance = 50 * constants::CENTS;
+    pub const MaxFriends: u16 = 9;
+    pub const RecoveryDeposit: Balance = 5 * constants::DOLLARS;
+}
+
+impl pallet_recovery::Trait for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type Currency = Balances;
+    type ConfigDepositBase = ConfigDepositBase;
+    type FriendDepositFactor = FriendDepositFactor;
+    type MaxFriends = MaxFriends;
+    type RecoveryDeposit = RecoveryDeposit;
+}
+
+parameter_types! {
     // One storage item; value is size 4+4+16+32 bytes = 56 bytes.
     pub const MultisigDepositBase: Balance = 30 * constants::CENTS;
     // Additional storage item size of 32 bytes.
@@ -490,6 +528,8 @@ construct_runtime!(
         CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
 
         // Neat things
+        Identity: pallet_identity::{Module, Call, Storage, Event<T>},
+        Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
         Utility: utility::{Module, Call, Storage, Event<T>},
     }
 );
@@ -667,6 +707,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"timestamp", Timestamp);
             add_benchmark!(params, batches, b"utility", Utility);
             add_benchmark!(params, batches, b"vesting", Vesting);
+            add_benchmark!(params, batches, b"identity", Identity);
 
             add_benchmark!(params, batches, b"reserve", CompanyReserve);
 
