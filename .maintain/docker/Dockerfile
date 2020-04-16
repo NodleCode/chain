@@ -11,7 +11,7 @@ RUN apt-get update && \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
         export PATH=$PATH:$HOME/.cargo/bin && \
         scripts/init.sh && \
-        cargo build --$PROFILE
+        cargo build -p nodle-chain --$PROFILE
 
 # ===== SECOND STAGE ======
 
