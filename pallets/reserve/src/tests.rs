@@ -66,11 +66,11 @@ impl frame_system::Trait for Test {
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type ModuleToIndex = ();
-    type AccountData = balances::AccountData<u64>;
+    type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
 }
-impl balances::Trait for Test {
+impl pallet_balances::Trait for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
@@ -83,12 +83,12 @@ ord_parameter_types! {
 }
 impl Trait for Test {
     type Event = ();
-    type Currency = balances::Module<Self>;
+    type Currency = pallet_balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = frame_system::Call<Test>;
 }
 type TestModule = Module<Test>;
-type Balances = balances::Module<Test>;
+type Balances = pallet_balances::Module<Test>;
 
 type PositiveImbalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::PositiveImbalance;

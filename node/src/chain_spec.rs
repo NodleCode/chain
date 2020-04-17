@@ -16,18 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use grandpa_primitives::AuthorityId as GrandpaId;
-use im_online::sr25519::AuthorityId as ImOnlineId;
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::{
     opaque::SessionKeys, AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig,
     GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, SessionConfig, Signature,
     SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public};
+use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
@@ -118,11 +118,11 @@ pub fn testnet_genesis(
 
     GenesisConfig {
         // Core
-        system: Some(SystemConfig {
+        frame_system: Some(SystemConfig {
             code: WASM_BINARY.to_vec(),
             changes_trie_config: Default::default(),
         }),
-        balances: Some(BalancesConfig {
+        pallet_balances: Some(BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
@@ -132,11 +132,11 @@ pub fn testnet_genesis(
                 .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .collect(),
         }),
-        indices: Some(IndicesConfig { indices: vec![] }),
-        vesting: Some(Default::default()),
+        pallet_indices: Some(IndicesConfig { indices: vec![] }),
+        pallet_vesting: Some(Default::default()),
 
         // Consensus
-        session: Some(SessionConfig {
+        pallet_session: Some(SessionConfig {
             keys: initial_authorities
                 .iter()
                 .map(|x| {
@@ -148,15 +148,15 @@ pub fn testnet_genesis(
                 })
                 .collect::<Vec<_>>(),
         }),
-        babe: Some(BabeConfig {
+        pallet_babe: Some(BabeConfig {
             authorities: vec![],
         }),
-        im_online: Some(ImOnlineConfig { keys: vec![] }),
-        authority_discovery: Some(AuthorityDiscoveryConfig { keys: vec![] }),
-        grandpa: Some(GrandpaConfig {
+        pallet_im_online: Some(ImOnlineConfig { keys: vec![] }),
+        pallet_authority_discovery: Some(AuthorityDiscoveryConfig { keys: vec![] }),
+        pallet_grandpa: Some(GrandpaConfig {
             authorities: vec![],
         }),
-        membership_Instance2: Some(ValidatorsSetConfig {
+        pallet_membership_Instance2: Some(ValidatorsSetConfig {
             members: initial_authorities
                 .iter()
                 .map(|x| x.0.clone())
@@ -165,12 +165,12 @@ pub fn testnet_genesis(
         }),
 
         // Governance
-        collective_Instance2: Some(Default::default()),
-        membership_Instance1: Some(TechnicalMembershipConfig {
+        pallet_collective_Instance2: Some(Default::default()),
+        pallet_membership_Instance1: Some(TechnicalMembershipConfig {
             members: roots,
             phantom: Default::default(),
         }),
-        reserve: Some(Default::default()),
+        pallet_reserve: Some(Default::default()),
     }
 }
 
@@ -231,7 +231,7 @@ pub fn local_testnet_config() -> ChainSpec {
 
 /// Arcadia config, from json chainspec
 pub fn arcadia_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../networks/arcadia.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../res/arcadia.json")[..]).unwrap()
 }
 
 #[cfg(test)]
@@ -253,5 +253,4 @@ pub(crate) mod tests {
     fn test_create_arcadia_chain_spec() {
         arcadia_config().build_storage().unwrap();
     }
-
 }

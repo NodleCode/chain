@@ -7,10 +7,10 @@ assignees: ''
 
 ---
 
-**Describe the enhancement**
+## Describe the enhancement
 A clear and concise description of what you would like to propose.
 
-**(Optional) Suggest a solution**
+## (Optional) Suggest a solution
 Describe how you would propose to implement this.
 - technical details.
 - tradeoffs made in your implementation.

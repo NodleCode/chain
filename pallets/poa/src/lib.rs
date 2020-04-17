@@ -28,12 +28,13 @@ use frame_support::{
     decl_module, decl_storage,
     traits::{ChangeMembers, InitializeMembers},
 };
-use session::SessionManager;
+use frame_system as system;
+use pallet_session::SessionManager;
 use sp_runtime::traits::Convert;
 use sp_std::prelude::Vec;
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait + session::Trait {}
+pub trait Trait: system::Trait + pallet_session::Trait {}
 
 decl_storage! {
     trait Store for Module<T: Trait> as AllocationsModule {
@@ -85,9 +86,11 @@ impl<T: Trait> SessionManager<T::AccountId> for Module<T> {
     fn end_session(_: SessionIndex) {}
 }
 
-impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentification> for Module<T> {
+impl<T: Trait> pallet_session::historical::SessionManager<T::AccountId, FullIdentification>
+    for Module<T>
+{
     fn new_session(new_index: SessionIndex) -> Option<Vec<(T::AccountId, FullIdentification)>> {
-        <Self as session::SessionManager<_>>::new_session(new_index).map(|validators| {
+        <Self as pallet_session::SessionManager<_>>::new_session(new_index).map(|validators| {
             validators
                 .into_iter()
                 .map(|v| {
@@ -100,10 +103,10 @@ impl<T: Trait> session::historical::SessionManager<T::AccountId, FullIdentificat
     }
 
     fn start_session(start_index: SessionIndex) {
-        <Self as session::SessionManager<_>>::start_session(start_index)
+        <Self as pallet_session::SessionManager<_>>::start_session(start_index)
     }
 
     fn end_session(end_index: SessionIndex) {
-        <Self as session::SessionManager<_>>::end_session(end_index)
+        <Self as pallet_session::SessionManager<_>>::end_session(end_index)
     }
 }

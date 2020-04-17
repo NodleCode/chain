@@ -20,9 +20,6 @@
 
 use std::sync::Arc;
 
-use grandpa::{
-    self, FinalityProofProvider as GrandpaFinalityProofProvider, StorageAndProofProvider,
-};
 use nodle_chain_runtime::{opaque::Block, RuntimeApi};
 use sc_client::{self, LongestChain};
 use sc_client::{Client, LocalCallExecutor};
@@ -30,6 +27,9 @@ use sc_client_db::Backend;
 use sc_consensus_babe;
 use sc_executor::native_executor_instance;
 use sc_executor::NativeExecutor;
+use sc_finality_grandpa::{
+    FinalityProofProvider as GrandpaFinalityProofProvider, StorageAndProofProvider,
+};
 use sc_network::NetworkService;
 use sc_offchain::OffchainWorkers;
 use sc_service::{
@@ -74,8 +74,11 @@ macro_rules! new_full_start {
             let select_chain = select_chain
                 .take()
                 .ok_or_else(|| sc_service::Error::SelectChainRequired)?;
-            let (grandpa_block_import, grandpa_link) =
-                grandpa::block_import(client.clone(), &(client.clone() as Arc<_>), select_chain)?;
+            let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
+                client.clone(),
+                &(client.clone() as Arc<_>),
+                select_chain,
+            )?;
             let justification_import = grandpa_block_import.clone();
 
             let (block_import, babe_link) = sc_consensus_babe::block_import(
@@ -128,8 +131,8 @@ macro_rules! new_full {
         let service = builder
             .with_finality_proof_provider(|client, backend| {
                 // GenesisAuthoritySetProvider is implemented for StorageAndProofProvider
-                let provider = client as Arc<dyn grandpa::StorageAndProofProvider<_, _>>;
-                Ok(Arc::new(grandpa::FinalityProofProvider::new(backend, provider)) as _)
+                let provider = client as Arc<dyn sc_finality_grandpa::StorageAndProofProvider<_, _>>;
+                Ok(Arc::new(sc_finality_grandpa::FinalityProofProvider::new(backend, provider)) as _)
             })?
             .build()?;
 
@@ -192,7 +195,7 @@ macro_rules! new_full {
             None
         };
 
-        let config = grandpa::Config {
+        let config = sc_finality_grandpa::Config {
             // FIXME #1578 make this available through chainspec
             gossip_duration: std::time::Duration::from_millis(333),
             justification_period: 512,
@@ -210,13 +213,13 @@ macro_rules! new_full {
             // and vote data availability than the observer. The observer has not
             // been tested extensively yet and having most nodes in a network run it
             // could lead to finality stalls.
-            let grandpa_config = grandpa::GrandpaParams {
+            let grandpa_config = sc_finality_grandpa::GrandpaParams {
                 config,
                 link: grandpa_link,
                 network: service.network(),
                 inherent_data_providers: inherent_data_providers.clone(),
                 telemetry_on_connect: Some(service.telemetry_on_connect_stream()),
-                voting_rule: grandpa::VotingRulesBuilder::default().build(),
+                voting_rule: sc_finality_grandpa::VotingRulesBuilder::default().build(),
                 prometheus_registry: service.prometheus_registry(),
             };
 
@@ -224,10 +227,10 @@ macro_rules! new_full {
             // if it fails we take down the service with it.
             service.spawn_essential_task(
                 "grandpa-voter",
-                grandpa::run_grandpa_voter(grandpa_config)?
+                sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
             );
         } else {
-            grandpa::setup_disabled_grandpa(
+            sc_finality_grandpa::setup_disabled_grandpa(
                 service.client(),
                 &inherent_data_providers,
                 service.network(),
@@ -300,7 +303,7 @@ pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceE
                     .ok_or_else(|| {
                         "Trying to start light import queue without active fetch checker"
                     })?;
-                let grandpa_block_import = grandpa::light_block_import(
+                let grandpa_block_import = sc_finality_grandpa::light_block_import(
                     client.clone(),
                     backend,
                     &(client.clone() as Arc<_>),
