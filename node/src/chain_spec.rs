@@ -229,6 +229,11 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
+/// Arcadia config, from json chainspec
+pub fn arcadia_config() -> ChainSpec {
+    ChainSpec::from_json_bytes(&include_bytes!("../../networks/arcadia.json")[..]).unwrap()
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -243,4 +248,10 @@ pub(crate) mod tests {
     fn test_create_local_testnet_chain_spec() {
         local_testnet_config().build_storage().unwrap();
     }
+
+    #[test]
+    fn test_create_arcadia_chain_spec() {
+        arcadia_config().build_storage().unwrap();
+    }
+
 }
