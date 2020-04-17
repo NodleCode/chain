@@ -3,6 +3,9 @@ Describe what is changed and your reasoning.
 
 Fixes [if needed, mention the issues involved].
 
+### Sanity
+- [ ] I have incremented the runtime version number
+
 ### Quality
 - [ ] I have added unit tests
 - [ ] All unit tests are passing
