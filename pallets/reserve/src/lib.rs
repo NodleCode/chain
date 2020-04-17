@@ -33,7 +33,7 @@ use frame_support::{
     weights::{FunctionOf, GetDispatchInfo, SimpleDispatchInfo},
     Parameter,
 };
-use frame_system::{self as system, ensure_signed};
+use frame_system::{self as system, ensure_root, ensure_signed};
 use sp_runtime::{
     traits::{AccountIdConversion, Dispatchable},
     ModuleId,
@@ -77,7 +77,9 @@ decl_module! {
         /// Spend `amount` funds from the reserve account to `to`.
         #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
         pub fn spend(origin, to: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
-            T::ExternalOrigin::ensure_origin(origin)?;
+            T::ExternalOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
 
             // TODO: we currently `AllowDeath` for our source account, shall we use `KeepAlive` instead?
             let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::AllowDeath);
@@ -106,7 +108,9 @@ decl_module! {
             true
         )]
         pub fn apply_as(origin, call: Box<<T as Trait>::Call>) -> DispatchResult {
-            T::ExternalOrigin::ensure_origin(origin)?;
+            T::ExternalOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
 
             let res = match call.dispatch(system::RawOrigin::Signed(Self::account_id()).into()) {
                 Ok(_) => true,

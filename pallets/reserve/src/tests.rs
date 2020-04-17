@@ -160,3 +160,15 @@ fn apply_as_works() {
         ));
     })
 }
+
+#[test]
+fn try_root_if_not_admin() {
+    new_test_ext().execute_with(|| {
+        let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
+        let r = <Test as Trait>::Currency::deposit_creating(&TestModule::account_id(), 100);
+        total_imbalance.subsume(r);
+
+        assert_ok!(TestModule::spend(Origin::ROOT, 3, 100));
+        assert_ok!(TestModule::apply_as(Origin::ROOT, make_call(1)));
+    })
+}
