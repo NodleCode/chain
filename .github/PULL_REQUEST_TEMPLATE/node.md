@@ -1,12 +1,12 @@
-# Title
+## Title
 Describe what is changed and your reasoning.
 
 Fixes [if needed, mention the issues involved].
 
-## Quality
+### Quality
 - [ ] I have added comments and documentation
 
-## Testing
+### Testing
 - [ ] The node runs fine on a development network
 - [ ] The node runs fine on a local network
 - [ ] The node runs fine on an upgraded local network
