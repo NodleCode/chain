@@ -67,7 +67,7 @@ parameter_types! {
 }
 pub type AuthorityId = u64;
 pub struct TestSessionHandler;
-impl session::SessionHandler<AuthorityId> for TestSessionHandler {
+impl pallet_session::SessionHandler<AuthorityId> for TestSessionHandler {
     const KEY_TYPE_IDS: &'static [KeyTypeId] = &[key_types::DUMMY];
 
     fn on_new_session<Ks: OpaqueKeys>(
@@ -81,12 +81,12 @@ impl session::SessionHandler<AuthorityId> for TestSessionHandler {
 
     fn on_genesis_session<Ks: OpaqueKeys>(_validators: &[(AuthorityId, Ks)]) {}
 }
-impl session::ShouldEndSession<u64> for TestSessionHandler {
+impl pallet_session::ShouldEndSession<u64> for TestSessionHandler {
     fn should_end_session(_now: u64) -> bool {
         false
     }
 }
-impl session::Trait for Test {
+impl pallet_session::Trait for Test {
     type SessionManager = Module<Test>;
     type SessionHandler = TestSessionHandler;
     type ShouldEndSession = TestSessionHandler;
@@ -99,7 +99,7 @@ impl session::Trait for Test {
 }
 impl Trait for Test {}
 
-type SessionModule = session::Module<Test>;
+type SessionModule = pallet_session::Module<Test>;
 type TestModule = Module<Test>;
 
 pub const VALIDATOR: u64 = 1;

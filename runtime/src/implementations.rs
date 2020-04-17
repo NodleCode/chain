@@ -30,22 +30,28 @@ pub struct ToAuthor<R>(sp_std::marker::PhantomData<R>);
 
 impl<R> OnUnbalanced<NegativeImbalance<R>> for ToAuthor<R>
 where
-    R: balances::Trait + authorship::Trait,
-    <R as system::Trait>::AccountId: From<AccountId>,
-    <R as system::Trait>::AccountId: Into<AccountId>,
-    <R as system::Trait>::Event: From<
-        balances::RawEvent<
-            <R as system::Trait>::AccountId,
-            <R as balances::Trait>::Balance,
-            balances::DefaultInstance,
+    R: pallet_balances::Trait + pallet_authorship::Trait,
+    <R as frame_system::Trait>::AccountId: From<AccountId>,
+    <R as frame_system::Trait>::AccountId: Into<AccountId>,
+    <R as frame_system::Trait>::Event: From<
+        pallet_balances::RawEvent<
+            <R as frame_system::Trait>::AccountId,
+            <R as pallet_balances::Trait>::Balance,
+            pallet_balances::DefaultInstance,
         >,
     >,
 {
     fn on_nonzero_unbalanced(amount: NegativeImbalance<R>) {
         let numeric_amount = amount.peek();
-        let author = <authorship::Module<R>>::author();
-        <balances::Module<R>>::resolve_creating(&<authorship::Module<R>>::author(), amount);
-        <system::Module<R>>::deposit_event(balances::RawEvent::Deposit(author, numeric_amount));
+        let author = <pallet_authorship::Module<R>>::author();
+        <pallet_balances::Module<R>>::resolve_creating(
+            &<pallet_authorship::Module<R>>::author(),
+            amount,
+        );
+        <frame_system::Module<R>>::deposit_event(pallet_balances::RawEvent::Deposit(
+            author,
+            numeric_amount,
+        ));
     }
 }
 
@@ -53,7 +59,7 @@ where
 /// node's balance type.
 ///
 /// This should typically create a mapping between the following ranges:
-///   - [0, system::MaximumBlockWeight]
+///   - [0, frame_system::MaximumBlockWeight]
 ///   - [Balance::min, Balance::max]
 ///
 /// Yet, it can be used for any other sort of change to weight-fee. Some examples being:
@@ -164,7 +170,7 @@ mod tests {
     where
         F: Fn() -> (),
     {
-        let mut t: sp_io::TestExternalities = system::GenesisConfig::default()
+        let mut t: sp_io::TestExternalities = frame_system::GenesisConfig::default()
             .build_storage::<Runtime>()
             .unwrap()
             .into();
@@ -252,7 +258,8 @@ mod tests {
                 }
                 fm = next;
                 iterations += 1;
-                let fee = <Runtime as transaction_payment::Trait>::WeightToFee::convert(tx_weight);
+                let fee =
+                    <Runtime as pallet_transaction_payment::Trait>::WeightToFee::convert(tx_weight);
                 let adjusted_fee = fm.saturated_multiply_accumulate(fee);
                 println!(
                     "iteration {}, new fm = {:?}. Fee at this point is: {} units / {} millicents, \

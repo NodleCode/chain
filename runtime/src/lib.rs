@@ -24,8 +24,9 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use grandpa::{fg_primitives, AuthorityId as GrandpaId};
-use im_online::sr25519::AuthorityId as ImOnlineId;
+use frame_system::offchain::TransactionSubmitter;
+use pallet_grandpa::{fg_primitives, AuthorityId as GrandpaId};
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::u32_trait::{_1, _2, _4};
@@ -43,28 +44,28 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use system::offchain::TransactionSubmitter;
 
 // A few exports that help ease life for downstream crates.
-pub use balances::Call as BalancesCall;
 pub use frame_support::{
     construct_runtime, debug, parameter_types,
     traits::{Currency, Randomness, SplitTwoWays},
     weights::Weight,
     StorageValue,
 };
+pub use pallet_balances::Call as BalancesCall;
+pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
-pub use timestamp::Call as TimestampCall;
 
 pub mod constants;
 mod implementations;
 
 use implementations::{TargetedFeeAdjustment, ToAuthor, WeightToFee};
 
-type NegativeImbalance<T> =
-    <balances::Module<T> as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+type NegativeImbalance<T> = <pallet_balances::Module<T> as Currency<
+    <T as frame_system::Trait>::AccountId,
+>>::NegativeImbalance;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -153,11 +154,13 @@ pub type TransactionSubmitterOf<KeyType> =
 
 /// Submits transaction with the node's public and signature type. Adheres to the signed extension
 /// format of the chain.
-impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtime {
+impl frame_system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtime {
     type Public = <Signature as sp_runtime::traits::Verify>::Signer;
     type Signature = Signature;
 
-    fn create_transaction<TSigner: system::offchain::Signer<Self::Public, Self::Signature>>(
+    fn create_transaction<
+        TSigner: frame_system::offchain::Signer<Self::Public, Self::Signature>,
+    >(
         call: Call,
         public: Self::Public,
         account: AccountId,
@@ -178,12 +181,12 @@ impl system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtim
             .saturating_sub(1);
         let tip = 0;
         let extra: SignedExtra = (
-            system::CheckVersion::<Runtime>::new(),
-            system::CheckGenesis::<Runtime>::new(),
-            system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
-            system::CheckNonce::<Runtime>::from(index),
-            system::CheckWeight::<Runtime>::new(),
-            transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+            frame_system::CheckVersion::<Runtime>::new(),
+            frame_system::CheckGenesis::<Runtime>::new(),
+            frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
+            frame_system::CheckNonce::<Runtime>::from(index),
+            frame_system::CheckWeight::<Runtime>::new(),
+            pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
         );
         let raw_payload = SignedPayload::new(call, extra)
             .map_err(|e| {
@@ -214,7 +217,7 @@ parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
 }
 
-impl system::Trait for Runtime {
+impl frame_system::Trait for Runtime {
     type AccountId = AccountId;
     type Call = Call;
     type Lookup = Indices;
@@ -231,7 +234,7 @@ impl system::Trait for Runtime {
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = Version;
     type ModuleToIndex = ModuleToIndex;
-    type AccountData = balances::AccountData<Balance>;
+    type AccountData = pallet_balances::AccountData<Balance>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
 }
@@ -241,23 +244,22 @@ parameter_types! {
     pub const ExpectedBlockTime: u64 = constants::MILLISECS_PER_BLOCK;
 }
 
-impl babe::Trait for Runtime {
+impl pallet_babe::Trait for Runtime {
     type EpochDuration = EpochDuration;
     type ExpectedBlockTime = ExpectedBlockTime;
 
     // session module is the trigger
-    type EpochChangeTrigger = babe::ExternalTrigger;
+    type EpochChangeTrigger = pallet_babe::ExternalTrigger;
 }
 
-impl grandpa::Trait for Runtime {
+impl pallet_grandpa::Trait for Runtime {
     type Event = Event;
 }
 
-impl authority_discovery::Trait for Runtime {}
+impl pallet_authority_discovery::Trait for Runtime {}
 
-// TODO: substrate#2986 implement this properly
-impl authorship::Trait for Runtime {
-    type FindAuthor = session::FindAccountFromAuthorIndex<Self, Babe>;
+impl pallet_authorship::Trait for Runtime {
+    type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
     type UncleGenerations = UncleGenerations;
     type FilterUncle = ();
     type EventHandler = ImOnline;
@@ -268,7 +270,7 @@ parameter_types! {
     pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 }
 
-impl im_online::Trait for Runtime {
+impl pallet_im_online::Trait for Runtime {
     type AuthorityId = ImOnlineId;
     type Event = Event;
     type Call = Call;
@@ -278,9 +280,9 @@ impl im_online::Trait for Runtime {
     type UnsignedPriority = ImOnlineUnsignedPriority;
 }
 
-impl offences::Trait for Runtime {
+impl pallet_offences::Trait for Runtime {
     type Event = Event;
-    type IdentificationTuple = session::historical::IdentificationTuple<Self>;
+    type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
     // TODO: as of now, we don't execute any slashing, however offences are logged
     // so that we could decide to remove validators later
     type OnOffenceHandler = ();
@@ -290,7 +292,7 @@ parameter_types! {
     pub const IndexDeposit: Balance = 1 * constants::DOLLARS;
 }
 
-impl indices::Trait for Runtime {
+impl pallet_indices::Trait for Runtime {
     type AccountIndex = AccountIndex;
     type Currency = Balances;
     type Deposit = IndexDeposit;
@@ -312,7 +314,7 @@ pub type DealWithFees = SplitTwoWays<
     ToAuthor<Runtime>, // 4/5 to the block author
 >;
 
-impl balances::Trait for Runtime {
+impl pallet_balances::Trait for Runtime {
     type Balance = Balance;
     type Event = Event;
     type DustRemoval = CompanyReserve;
@@ -328,7 +330,7 @@ parameter_types! {
     pub const TargetBlockFullness: Perbill = constants::TARGET_BLOCK_FULLNESS;
 }
 
-impl transaction_payment::Trait for Runtime {
+impl pallet_transaction_payment::Trait for Runtime {
     type Currency = Balances;
     type OnTransactionPayment = DealWithFees;
     type TransactionBaseFee = TransactionBaseFee;
@@ -341,7 +343,7 @@ parameter_types! {
     pub const MinVestedTransfer: Balance = 1 * constants::DOLLARS;
 }
 
-impl vesting::Trait for Runtime {
+impl pallet_vesting::Trait for Runtime {
     type Event = Event;
     type Currency = Balances;
     type BlockNumberToBalance = ConvertInto;
@@ -352,7 +354,7 @@ parameter_types! {
     pub const MinimumPeriod: u64 = constants::SLOT_DURATION / 2;
 }
 
-impl timestamp::Trait for Runtime {
+impl pallet_timestamp::Trait for Runtime {
     type Moment = u64;
     type OnTimestampSet = Babe;
     type MinimumPeriod = MinimumPeriod;
@@ -368,7 +370,7 @@ parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
 }
 
-impl session::Trait for Runtime {
+impl pallet_session::Trait for Runtime {
     type SessionManager = PoaSessions;
     type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
@@ -380,33 +382,41 @@ impl session::Trait for Runtime {
     type NextSessionRotation = Babe;
 }
 
-impl session::historical::Trait for Runtime {
-    type FullIdentification = poa::FullIdentification;
-    type FullIdentificationOf = poa::FullIdentificationOf<Runtime>;
+impl pallet_session::historical::Trait for Runtime {
+    type FullIdentification = pallet_poa::FullIdentification;
+    type FullIdentificationOf = pallet_poa::FullIdentificationOf<Runtime>;
 }
 
-impl membership::Trait<membership::Instance2> for Runtime {
+impl pallet_membership::Trait<pallet_membership::Instance2> for Runtime {
     type Event = Event;
-    type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type AddOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type RemoveOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = PoaSessions;
     type MembershipChanged = PoaSessions;
 }
 
-impl poa::Trait for Runtime {}
+impl pallet_poa::Trait for Runtime {}
 
-impl membership::Trait<membership::Instance1> for Runtime {
+impl pallet_membership::Trait<pallet_membership::Instance1> for Runtime {
     type Event = Event;
-    type AddOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type AddOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type RemoveOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
 }
@@ -415,28 +425,28 @@ parameter_types! {
     pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
 }
 
-type TechnicalCollective = collective::Instance2;
-impl collective::Trait<TechnicalCollective> for Runtime {
+type TechnicalCollective = pallet_collective::Instance2;
+impl pallet_collective::Trait<TechnicalCollective> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
     type Event = Event;
     type MotionDuration = MotionDuration;
 }
 
-impl mandate::Trait for Runtime {
+impl pallet_mandate::Trait for Runtime {
     type Event = Event;
     type Call = Call;
 
     // A majority of the committee can dispatch root calls
     type ExternalOrigin =
-        collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
 }
 
-impl reserve::Trait for Runtime {
+impl pallet_reserve::Trait for Runtime {
     type Event = Event;
-    type Currency = balances::Module<Runtime>;
+    type Currency = pallet_balances::Module<Runtime>;
     type ExternalOrigin =
-        collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type Call = Call;
 }
 
@@ -457,8 +467,10 @@ impl pallet_identity::Trait for Runtime {
     type MaxSubAccounts = MaxSubAccounts;
     type MaxAdditionalFields = MaxAdditionalFields;
     type Slashed = CompanyReserve;
-    type ForceOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RegistrarOrigin = collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ForceOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RegistrarOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 }
 
 parameter_types! {
@@ -486,7 +498,7 @@ parameter_types! {
     pub const MaxSignatories: u16 = 100;
 }
 
-impl utility::Trait for Runtime {
+impl pallet_utility::Trait for Runtime {
     type Event = Event;
     type Call = Call;
     type Currency = Balances;
@@ -502,35 +514,35 @@ construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: system::{Module, Call, Storage, Config, Event<T>},
-        Timestamp: timestamp::{Module, Call, Storage, Inherent},
-        Indices: indices::{Module, Call, Storage, Config<T>, Event<T>},
-        Balances: balances::{Module, Call, Storage, Config<T>, Event<T>},
-        TransactionPayment: transaction_payment::{Module, Storage},
-        RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
-        Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
+        System: frame_system::{Module, Call, Storage, Config, Event<T>},
+        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
+        Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
+        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+        TransactionPayment: pallet_transaction_payment::{Module, Storage},
+        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
+        Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
         // Consensus
-        Babe: babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
-        Grandpa: grandpa::{Module, Call, Storage, Config, Event},
-        Authorship: authorship::{Module, Call, Storage},
-        ImOnline: im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
-        Offences: offences::{Module, Call, Storage, Event},
-        PoaSessions: poa::{Module, Storage},
-        ValidatorsSet: membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
-        Session: session::{Module, Call, Storage, Event, Config<T>},
-        AuthorityDiscovery: authority_discovery::{Module, Call, Config},
+        Babe: pallet_babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
+        Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
+        Authorship: pallet_authorship::{Module, Call, Storage},
+        ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+        Offences: pallet_offences::{Module, Call, Storage, Event},
+        PoaSessions: pallet_poa::{Module, Storage},
+        ValidatorsSet: pallet_membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
+        Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+        AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
 
         // Governance
-        TechnicalCommittee: collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-        TechnicalMembership: membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
-        Mandate: mandate::{Module, Call, Event},
-        CompanyReserve: reserve::{Module, Call, Storage, Config, Event<T>},
+        TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
+        Mandate: pallet_mandate::{Module, Call, Event},
+        CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
         Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
-        Utility: utility::{Module, Call, Storage, Event<T>},
+        Utility: pallet_utility::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -546,12 +558,12 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
-    system::CheckVersion<Runtime>,
-    system::CheckGenesis<Runtime>,
-    system::CheckEra<Runtime>,
-    system::CheckNonce<Runtime>,
-    system::CheckWeight<Runtime>,
-    transaction_payment::ChargeTransactionPayment<Runtime>,
+    frame_system::CheckVersion<Runtime>,
+    frame_system::CheckGenesis<Runtime>,
+    frame_system::CheckEra<Runtime>,
+    frame_system::CheckNonce<Runtime>,
+    frame_system::CheckWeight<Runtime>,
+    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
@@ -560,8 +572,13 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-    frame_executive::Executive<Runtime, Block, system::ChainContext<Runtime>, Runtime, AllModules>;
+pub type Executive = frame_executive::Executive<
+    Runtime,
+    Block,
+    frame_system::ChainContext<Runtime>,
+    Runtime,
+    AllModules,
+>;
 
 sp_api::impl_runtime_apis! {
     impl sp_api::Core<Block> for Runtime {
@@ -667,7 +684,7 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
+    impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
         fn account_nonce(account: AccountId) -> Index {
             System::account_nonce(account)
         }
@@ -720,7 +737,7 @@ sp_api::impl_runtime_apis! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use system::offchain::{SignAndSubmitTransaction, SubmitSignedTransaction};
+    use frame_system::offchain::{SignAndSubmitTransaction, SubmitSignedTransaction};
 
     #[test]
     fn validate_transaction_submitter_bounds() {
