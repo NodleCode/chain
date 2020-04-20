@@ -51,7 +51,7 @@ decl_module! {
 
         /// Toggle the shutdown state if authorized to do so.
         #[weight = SimpleDispatchInfo::FixedOperational(10_000)]
-        pub fn toggle_shutdown(origin) -> DispatchResult {
+        pub fn toggle(origin) -> DispatchResult {
             T::ShutdownOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;

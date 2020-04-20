@@ -91,14 +91,14 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 #[test]
 fn root_toggle() {
     new_test_ext().execute_with(|| {
-        assert_ok!(TestModule::toggle_shutdown(Origin::ROOT));
+        assert_ok!(TestModule::toggle(Origin::ROOT));
     })
 }
 
 #[test]
 fn shutdown_origin_toggle() {
     new_test_ext().execute_with(|| {
-        assert_ok!(TestModule::toggle_shutdown(Origin::signed(Admin::get())));
+        assert_ok!(TestModule::toggle(Origin::signed(Admin::get())));
     })
 }
 
@@ -107,10 +107,10 @@ fn toggle_on_off() {
     new_test_ext().execute_with(|| {
         assert_eq!(TestModule::shutdown(), false);
 
-        assert_ok!(TestModule::toggle_shutdown(Origin::ROOT));
+        assert_ok!(TestModule::toggle(Origin::ROOT));
         assert_eq!(TestModule::shutdown(), true);
 
-        assert_ok!(TestModule::toggle_shutdown(Origin::ROOT));
+        assert_ok!(TestModule::toggle(Origin::ROOT));
         assert_eq!(TestModule::shutdown(), false);
     })
 }
@@ -118,6 +118,6 @@ fn toggle_on_off() {
 #[test]
 fn non_origin_fails() {
     new_test_ext().execute_with(|| {
-        assert_noop!(TestModule::toggle_shutdown(Origin::signed(0)), BadOrigin);
+        assert_noop!(TestModule::toggle(Origin::signed(0)), BadOrigin);
     })
 }
