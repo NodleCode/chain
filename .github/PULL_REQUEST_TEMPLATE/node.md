@@ -1,7 +1,7 @@
-## Title
+## Context
 Describe what is changed and your reasoning.
 
-Fixes [if needed, mention the issues involved].
+> Fixes [if needed, mention the issues involved].
 
 ### Quality
 - [ ] I have added comments and documentation

@@ -1,7 +1,7 @@
-## Title
+## Context
 Describe what is changed and your reasoning.
 
-Fixes [if needed, mention the issues involved].
+> Fixes [if needed, mention the issues involved].
 
 ### Sanity
 - [ ] I have incremented the runtime version number
