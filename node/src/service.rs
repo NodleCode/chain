@@ -111,15 +111,10 @@ macro_rules! new_full_start {
 macro_rules! new_full {
     ($config:expr, $with_startup_data: expr) => {{
         use futures::prelude::*;
-        use sc_network::Event;
         use sc_client_api::ExecutorProvider;
+        use sc_network::Event;
 
-        let (
-            role,
-            force_authoring,
-            name,
-            disable_grandpa,
-        ) = (
+        let (role, force_authoring, name, disable_grandpa) = (
             $config.role.clone(),
             $config.force_authoring,
             $config.network.node_name.clone(),
@@ -131,24 +126,29 @@ macro_rules! new_full {
         let service = builder
             .with_finality_proof_provider(|client, backend| {
                 // GenesisAuthoritySetProvider is implemented for StorageAndProofProvider
-                let provider = client as Arc<dyn sc_finality_grandpa::StorageAndProofProvider<_, _>>;
-                Ok(Arc::new(sc_finality_grandpa::FinalityProofProvider::new(backend, provider)) as _)
+                let provider =
+                    client as Arc<dyn sc_finality_grandpa::StorageAndProofProvider<_, _>>;
+                Ok(Arc::new(sc_finality_grandpa::FinalityProofProvider::new(
+                    backend, provider,
+                )) as _)
             })?
             .build()?;
 
-        let (block_import, grandpa_link, babe_link) = import_setup.take()
-                .expect("Link Half and Block Import are present for Full Services or setup failed before. qed");
+        let (block_import, grandpa_link, babe_link) = import_setup.take().expect(
+            "Link Half and Block Import are present for Full Services or setup failed before. qed",
+        );
 
         ($with_startup_data)(&block_import, &babe_link);
 
         if let sc_service::config::Role::Authority { sentry_nodes } = &role {
             let proposer = sc_basic_authorship::ProposerFactory::new(
                 service.client(),
-                service.transaction_pool()
+                service.transaction_pool(),
             );
 
             let client = service.client();
-            let select_chain = service.select_chain()
+            let select_chain = service
+                .select_chain()
                 .ok_or(sc_service::Error::SelectChainRequired)?;
 
             let can_author_with =
@@ -171,10 +171,15 @@ macro_rules! new_full {
             service.spawn_essential_task("babe-proposer", babe);
 
             let network = service.network();
-            let dht_event_stream = network.event_stream("authority-discovery").filter_map(|e| async move { match e {
-                Event::Dht(e) => Some(e),
-                _ => None,
-            }}).boxed();
+            let dht_event_stream = network
+                .event_stream("authority-discovery")
+                .filter_map(|e| async move {
+                    match e {
+                        Event::Dht(e) => Some(e),
+                        _ => None,
+                    }
+                })
+                .boxed();
             let authority_discovery = sc_authority_discovery::AuthorityDiscovery::new(
                 service.client(),
                 network,
@@ -227,7 +232,7 @@ macro_rules! new_full {
             // if it fails we take down the service with it.
             service.spawn_essential_task(
                 "grandpa-voter",
-                sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
+                sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
             );
         } else {
             sc_finality_grandpa::setup_disabled_grandpa(
@@ -241,7 +246,7 @@ macro_rules! new_full {
     }};
     ($config:expr) => {{
         new_full!($config, |_, _| {})
-    }}
+    }};
 }
 
 type ConcreteBlock = nodle_chain_runtime::opaque::Block;
