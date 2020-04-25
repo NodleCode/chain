@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        toolchain: [nightly, stable]
 
     steps:
     - uses: actions/checkout@v2
@@ -32,26 +31,11 @@ jobs:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Install ${{ matrix.toolchain }} toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.toolchain }}
-        override: true
-        components: rustfmt
-
-    - name: Install WASM toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: nightly
-        target: wasm32-unknown-unknown
+    - name: Install toolchain
+      run: ./scripts/init.sh
 
     - name: Run tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --all-targets --all-features --workspace
+      run: cargo test --all-targets --all-features --workspace
 
   lints:
     runs-on: ubuntu-latest
