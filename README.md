@@ -1,3 +1,5 @@
+![Nodle Banner](https://user-images.githubusercontent.com/10683430/80538204-2a6bef00-895a-11ea-94eb-2203ef6fae09.jpg)
+
 # Nodle Chain
 
 A Blockchain node for the Nodle Chain to connect and secure the next trillion things.
