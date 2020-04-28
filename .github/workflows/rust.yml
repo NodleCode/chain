@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        toolchain: [nightly]
 
     steps:
     - uses: actions/checkout@v2
@@ -32,20 +31,6 @@ jobs:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Install ${{ matrix.toolchain }} toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.toolchain }}
-        override: true
-
-    - name: Install WASM toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: nightly
-        target: wasm32-unknown-unknown
-
     - name: Install ubuntu native dependencies
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt install -y cmake pkg-config libssl-dev git gcc build-essential clang libclang-dev
@@ -54,28 +39,26 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: brew install openssl cmake llvm
 
+    - name: Setup toolchain
+      run: ./scripts/init.sh
+
     - name: Run tests
       uses: actions-rs/cargo@v1
       with:
         command: test
         args: --all-targets --all-features --workspace
 
-  lints:
+  fmt:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install stable toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
-        components: rustfmt
+    - name: Setup toolchain
+      run: ./scripts/init.sh
+
+    - name: Install rustfmt
+      run: rustup component add rustfmt
 
     - name: Run cargo fmt
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
+      run: cargo fmt --all -- --check
