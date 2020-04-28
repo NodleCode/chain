@@ -22,11 +22,8 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
-use frame_system::RawOrigin;
-use sp_runtime::traits::{Dispatchable, Saturating};
-
-const SEED: u32 = 0;
+use frame_benchmarking::benchmarks;
+use sp_runtime::traits::Dispatchable;
 
 benchmarks! {
     _ { }
