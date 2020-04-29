@@ -3,30 +3,51 @@ name: Test rust code
 on: [push]
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Cache cargo registry
-      uses: actions/cache@v1
-      with:
-        path: ~/.cargo/registry
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-    - name: Cache cargo index
-      uses: actions/cache@v1
-      with:
-        path: ~/.cargo/git
-        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
     - name: Cache cargo build
       uses: actions/cache@v1
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Toolchain
+    - name: Install ubuntu native dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt install -y cmake pkg-config libssl-dev git gcc build-essential clang libclang-dev
+
+    - name: Cleanup ubuntu filesystem
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt clean
+
+    - name: Install mac os native dependencies
+      if: matrix.os == 'macos-latest'
+      run: brew install openssl cmake llvm
+
+    - name: Setup toolchain
       run: ./scripts/init.sh
+
     - name: Run tests
       run: cargo test --all-targets --all-features --workspace
+
+  fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup toolchain
+      run: ./scripts/init.sh
+
+    - name: Install rustfmt
+      run: rustup component add rustfmt
+
+    - name: Run cargo fmt
+      run: cargo fmt --all -- --check

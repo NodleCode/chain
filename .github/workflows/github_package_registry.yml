@@ -1,25 +1,29 @@
-name: Create node docker image
+name: Create docker image
 
 on:
-  push:
-    branches:
-      - master
+  release:  
+    types: [published]
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest 
+  push_to_registry:
+
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Publish Docker Image to GPR
-      uses: machine-learning-apps/gpr-docker-publish@master
-      with:
-        cache: true
-        IMAGE_NAME: 'nodle-chain'
-        TAG: 'latest'
-        DOCKERFILE_PATH: '.maintain/docker/Dockerfile'
-        BUILD_CONTEXT: '.'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: nodlecode/chain/nodle-chain
+          tag_with_ref: true
+          dockerfile: '.maintain/docker/Dockerfile'
+          cache_froms: nodlecode/chain/nodle-chain:latest
+          add_git_labels: true
