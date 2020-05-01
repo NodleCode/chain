@@ -724,8 +724,10 @@ sp_api::impl_runtime_apis! {
 
             use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark};
 
+            //use pallet_session_benchmarking::Module as SessionBench;
             //use frame_system_benchmarking::Module as SystemBench;
 
+            //impl pallet_session_benchmarking::Trait for Runtime {}
             //impl frame_system_benchmarking::Trait for Runtime {}
 
             let mut batches = Vec::<BenchmarkBatch>::new();
@@ -739,6 +741,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"vesting", Vesting);
             add_benchmark!(params, batches, b"identity", Identity);
             //add_benchmark!(params, batches, b"system", SystemBench::<Runtime>);
+            //add_benchmark!(params, batches, b"session", SessionBench::<Runtime>);
 
             add_benchmark!(params, batches, b"reserve", CompanyReserve);
             add_benchmark!(params, batches, b"emergency-shutdown", EmergencyShutdown);
