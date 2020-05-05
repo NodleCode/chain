@@ -22,6 +22,7 @@
 //! `AccountId`) are accepted based on the number of tokens staked in support to their
 //! application.
 
+mod benchmarking;
 mod tests;
 
 use frame_support::{
