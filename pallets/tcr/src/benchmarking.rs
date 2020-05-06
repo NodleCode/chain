@@ -70,7 +70,7 @@ benchmarks! {
         let metadata = (0..100).map(|v| v).collect();
         let deposit_applying = T::MinimumApplicationAmount::get();
         let deposit_countering = T::MinimumCounterAmount::get();
-        let deposit_voting = 100.into();
+        let deposit_voting = deposit_applying + deposit_countering;
         let supporting = u % 2 == 0;
 
         let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
