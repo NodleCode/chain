@@ -135,7 +135,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 13,
+    spec_version: 15,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -513,6 +513,53 @@ impl pallet_emergency_shutdown::Trait for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 }
 
+parameter_types! {
+    // TCR economics
+    pub const MinimumApplicationAmount: Balance = 5 * constants::NODL;
+    pub const MinimumCounterAmount: Balance = 10 * constants::NODL;
+    // Challenging is considerably more expensive as it would lead to the removal of the member
+    pub const MinimumChallengeAmount: Balance = 100 * constants::NODL;
+    // If you lose you loose 1/3 of your bid
+    pub const LoosersSlash: Perbill = Perbill::from_percent(33);
+
+    // TCR ops
+    // We use 3 days to account for different time zones and weekends
+    pub const FinalizeApplicationPeriod: BlockNumber = 3 * constants::DAYS;
+    // 7 days was chosen to provide enough for a complete review but still manageable
+    pub const FinalizeChallengePeriod: BlockNumber = 7 * constants::DAYS;
+}
+
+impl pallet_tcr::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type MinimumApplicationAmount = MinimumApplicationAmount;
+    type MinimumCounterAmount = MinimumCounterAmount;
+    type MinimumChallengeAmount = MinimumChallengeAmount;
+    type LoosersSlash = LoosersSlash;
+    type FinalizeApplicationPeriod = FinalizeApplicationPeriod;
+    type FinalizeChallengePeriod = FinalizeChallengePeriod;
+    type ChangeMembers = ();
+}
+
+parameter_types! {
+    // Total onboarding cost: 15 NODL + fees (with TCR application)
+    pub const SlotBookingCost: Balance = 10 * constants::NODL;
+    // Doesn't need to be as expensive
+    pub const SlotRenewingCost: Balance = 1 * constants::NODL;
+    // One year validity, unless revoked or renewed
+    pub const SlotValidity: BlockNumber = 365 * constants::DAYS;
+}
+
+impl pallet_root_of_trust::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type CertificateId = AccountId;
+    type SlotBookingCost = SlotBookingCost;
+    type SlotRenewingCost = SlotRenewingCost;
+    type SlotValidity = SlotValidity;
+    type FundsCollector = CompanyReserve;
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -544,14 +591,16 @@ construct_runtime!(
         TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
         CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
         Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
         Utility: pallet_utility::{Module, Call, Storage, Event<T>},
 
-        // Tokeneconomics
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event},
+        // Nodle Stack
+        Tcr: pallet_tcr::{Module, Call, Storage, Event<T>},
+        RootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -709,6 +758,16 @@ sp_api::impl_runtime_apis! {
         }
     }
 
+    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, AccountId> for Runtime {
+        fn is_root_certificate_valid(cert: &AccountId) -> bool {
+            RootOfTrust::is_root_certificate_valid(cert)
+        }
+
+        fn is_child_certificate_valid(root: &AccountId, child: &AccountId) -> bool {
+            RootOfTrust::is_child_certificate_valid(root, child)
+        }
+    }
+
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
         fn dispatch_benchmark(
@@ -744,6 +803,8 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"reserve", CompanyReserve);
             //add_benchmark!(params, batches, b"session", SessionBench::<Runtime>);
             //add_benchmark!(params, batches, b"system", SystemBench::<Runtime>);
+            add_benchmark!(params, batches, b"root-of-trust", RootOfTrust);
+            add_benchmark!(params, batches, b"tcr", Tcr);
             add_benchmark!(params, batches, b"timestamp", Timestamp);
             add_benchmark!(params, batches, b"utility", Utility);
             add_benchmark!(params, batches, b"vesting", Vesting);

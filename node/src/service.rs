@@ -54,6 +54,8 @@ macro_rules! new_full_start {
     ($config:expr) => {{
         use std::sync::Arc;
 
+        type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
+
         let mut import_setup = None;
         let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
@@ -98,6 +100,14 @@ macro_rules! new_full_start {
 
             import_setup = Some((block_import, grandpa_link, babe_link));
             Ok(import_queue)
+        })?
+        .with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
+            let mut io = jsonrpc_core::IoHandler::default();
+            io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
+                pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
+            ));
+
+            Ok(io)
         })?;
 
         (builder, import_setup, inherent_data_providers)
@@ -286,6 +296,8 @@ pub fn new_full(
 
 /// Builds a new service for a light client.
 pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceError> {
+    type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
+
     let inherent_data_providers = InherentDataProviders::new();
 
     let service = ServiceBuilder::new_light::<Block, RuntimeApi, Executor>(config)?
@@ -341,6 +353,14 @@ pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceE
             // GenesisAuthoritySetProvider is implemented for StorageAndProofProvider
             let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
             Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
+        })?
+        .with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
+            let mut io = jsonrpc_core::IoHandler::default();
+            io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
+                pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
+            ));
+
+            Ok(io)
         })?
         .build()?;
 
