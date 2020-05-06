@@ -125,7 +125,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Book a certificate slot
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = SimpleDispatchInfo::FixedOperational(160_000)]
         fn book_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(Self::is_member(&sender), Error::<T>::NotAMember);
@@ -152,7 +152,7 @@ decl_module! {
         }
 
         /// Renew a non expired slot and make it valid for a longer time
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = SimpleDispatchInfo::FixedOperational(150_000)]
         fn renew_slot(origin, certificate: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
@@ -173,7 +173,7 @@ decl_module! {
         }
 
         /// Revoke a slot before it is expired thus invalidating all child certificates
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = SimpleDispatchInfo::FixedOperational(75_000)]
         fn revoke_slot(origin, certificate: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
@@ -189,7 +189,7 @@ decl_module! {
         }
 
         /// Mark a slot's child as revoked thus invalidating it
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = SimpleDispatchInfo::FixedOperational(75_000)]
         fn revoke_child(origin, root: T::CertificateId, child: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
