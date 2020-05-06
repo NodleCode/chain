@@ -125,6 +125,7 @@ mod tests {
         new_test_ext().execute_with(|| {
             assert_ok!(test_benchmark_apply::<Test>());
             assert_ok!(test_benchmark_counter::<Test>());
+            assert_ok!(test_benchmark_vote::<Test>());
             assert_ok!(test_benchmark_challenge::<Test>());
         });
     }
