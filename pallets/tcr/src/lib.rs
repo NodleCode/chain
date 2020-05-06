@@ -151,7 +151,7 @@ decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = SimpleDispatchInfo::FixedOperational(150_000)]
         pub fn apply(origin, metadata: Vec<u8>, deposit: BalanceOf<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumApplicationAmount::get(), Error::<T>::DepositTooSmall);
@@ -226,7 +226,7 @@ decl_module! {
         }
 
         /// Trigger a new challenge to remove an existing member
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = SimpleDispatchInfo::FixedOperational(150_000)]
         pub fn challenge(origin, member: T::AccountId, deposit: BalanceOf<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumChallengeAmount::get(), Error::<T>::DepositTooSmall);
