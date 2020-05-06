@@ -240,6 +240,12 @@ impl<T: Trait> Module<T> {
 
         !equals && root_valid && !revoked
     }
+
+    /// A simple, benchmark only, function to replace or set the module's members
+    #[cfg(feature = "runtime-benchmarks")]
+    pub fn benchmark_set_members(members: &[T::AccountId]) {
+        <Members<T>>::put(members);
+    }
 }
 
 impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {

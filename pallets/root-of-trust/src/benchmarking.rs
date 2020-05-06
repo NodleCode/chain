@@ -20,4 +20,74 @@
 
 #![cfg(feature = "runtime-benchmarks")]
 
-// TODO
+use super::*;
+
+use frame_benchmarking::{account, benchmarks};
+use frame_system::RawOrigin;
+use sp_runtime::traits::Bounded;
+
+const SEED_MANAGER: u32 = 0;
+
+fn register<T: Trait>(index: u32) -> Result<T::AccountId, &'static str> {
+    let manager = account("manager", index, SEED_MANAGER);
+    T::Currency::make_free_balance_be(&manager, BalanceOf::<T>::max_value());
+    <Module<T>>::benchmark_set_members(&[manager.clone()]);
+
+    Ok(manager)
+}
+
+benchmarks! {
+    _ { }
+
+    book_slot {
+        let u in 0 .. 1000;
+
+        let manager = register::<T>(u)?;
+        let certificate: T::CertificateId = Default::default();
+    }: _(RawOrigin::Signed(manager), certificate)
+
+    renew_slot {
+        let u in 0 .. 1000;
+
+        let manager = register::<T>(u)?;
+        let certificate: T::CertificateId = Default::default();
+
+        let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
+    }: _(RawOrigin::Signed(manager), certificate)
+
+    revoke_slot {
+        let u in 0 .. 1000;
+
+        let manager = register::<T>(u)?;
+        let certificate: T::CertificateId = Default::default();
+
+        let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
+    }: _(RawOrigin::Signed(manager), certificate)
+
+    revoke_child {
+        let u in 0 .. 1000;
+
+        let manager = register::<T>(u)?;
+        let certificate: T::CertificateId = Default::default();
+        let child: T::CertificateId = Default::default();
+
+        let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
+    }: _(RawOrigin::Signed(manager), certificate, child)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tests::{new_test_ext, Test};
+    use frame_support::assert_ok;
+
+    #[test]
+    fn test_benchmarks() {
+        new_test_ext().execute_with(|| {
+            assert_ok!(test_benchmark_book_slot::<Test>());
+            assert_ok!(test_benchmark_renew_slot::<Test>());
+            assert_ok!(test_benchmark_revoke_slot::<Test>());
+            assert_ok!(test_benchmark_revoke_child::<Test>());
+        });
+    }
+}
