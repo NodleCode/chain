@@ -23,7 +23,6 @@
 use super::*;
 
 use frame_benchmarking::{account, benchmarks};
-use frame_support::traits::OnFinalize;
 use frame_system::RawOrigin;
 
 const SEED_APPLICANT: u32 = 0;
@@ -109,8 +108,8 @@ benchmarks! {
             deposit_applying
         );
 
-        <Module<T> as OnFinalize<<T as frame_system::Trait>::BlockNumber>>::on_finalize(
-            T::FinalizeChallengePeriod::get() + <system::Module<T>>::block_number()
+        let _ = <Module<T>>::commit_applications(
+            T::FinalizeApplicationPeriod::get() + <system::Module<T>>::block_number()
         );
     }: _(RawOrigin::Signed(challenger), applicant, deposit_challenging)
 }
@@ -126,6 +125,7 @@ mod tests {
         new_test_ext().execute_with(|| {
             assert_ok!(test_benchmark_apply::<Test>());
             assert_ok!(test_benchmark_counter::<Test>());
+            assert_ok!(test_benchmark_challenge::<Test>());
         });
     }
 }
