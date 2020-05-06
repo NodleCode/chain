@@ -758,6 +758,16 @@ sp_api::impl_runtime_apis! {
         }
     }
 
+    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, AccountId> for Runtime {
+        fn is_root_certificate_valid(cert: &AccountId) -> bool {
+            RootOfTrust::is_root_certificate_valid(cert)
+        }
+
+        fn is_child_certificate_valid(root: &AccountId, child: &AccountId) -> bool {
+            RootOfTrust::is_child_certificate_valid(root, child)
+        }
+    }
+
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
         fn dispatch_benchmark(
