@@ -30,7 +30,6 @@ use frame_support::{
     dispatch::DispatchResult,
     ensure,
     traits::{ChangeMembers, Currency, ExistenceRequirement, Get, OnUnbalanced, WithdrawReasons},
-    weights::SimpleDispatchInfo,
     Parameter,
 };
 use frame_system::{self as system, ensure_signed};
@@ -113,8 +112,8 @@ decl_error! {
 
 decl_storage! {
     trait Store for Module<T: Trait> as RootOfTrustModule {
-        Members get(members): Vec<T::AccountId>;
-        Slots get(slots): map hasher(blake2_128_concat)
+        Members get(fn members): Vec<T::AccountId>;
+        Slots get(fn slots): map hasher(blake2_128_concat)
             T::CertificateId => RootCertificate<T::AccountId, T::CertificateId, T::BlockNumber>;
     }
 }
@@ -125,7 +124,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Book a certificate slot
-        #[weight = SimpleDispatchInfo::FixedOperational(160_000)]
+        #[weight = 160_000_000]
         fn book_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(Self::is_member(&sender), Error::<T>::NotAMember);
@@ -152,7 +151,7 @@ decl_module! {
         }
 
         /// Renew a non expired slot and make it valid for a longer time
-        #[weight = SimpleDispatchInfo::FixedOperational(150_000)]
+        #[weight = 150_000_000]
         fn renew_slot(origin, certificate: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
@@ -173,7 +172,7 @@ decl_module! {
         }
 
         /// Revoke a slot before it is expired thus invalidating all child certificates
-        #[weight = SimpleDispatchInfo::FixedOperational(75_000)]
+        #[weight = 75_000_000]
         fn revoke_slot(origin, certificate: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
@@ -189,7 +188,7 @@ decl_module! {
         }
 
         /// Mark a slot's child as revoked thus invalidating it
-        #[weight = SimpleDispatchInfo::FixedOperational(75_000)]
+        #[weight = 75_000_000]
         fn revoke_child(origin, root: T::CertificateId, child: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
