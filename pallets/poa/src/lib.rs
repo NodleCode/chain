@@ -38,7 +38,7 @@ pub trait Trait: system::Trait + pallet_session::Trait {}
 
 decl_storage! {
     trait Store for Module<T: Trait> as Poa {
-        Validators get(validators): Vec<T::AccountId>;
+        Validators get(fn validators): Vec<T::AccountId>;
     }
 }
 
