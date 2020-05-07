@@ -507,12 +507,6 @@ impl pallet_utility::Trait for Runtime {
     type MaxSignatories = MaxSignatories;
 }
 
-impl pallet_emergency_shutdown::Trait for Runtime {
-    type Event = Event;
-    type ShutdownOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-}
-
 parameter_types! {
     // TCR economics
     pub const MinimumApplicationAmount: Balance = 5 * constants::NODL;
@@ -591,7 +585,6 @@ construct_runtime!(
         TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
         CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
