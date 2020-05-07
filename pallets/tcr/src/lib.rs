@@ -30,7 +30,6 @@ use frame_support::{
     dispatch::{result::Result, DispatchError, DispatchResult},
     ensure,
     traits::{ChangeMembers, Currency, Get, Imbalance, ReservableCurrency},
-    weights::SimpleDispatchInfo,
     IterableStorageMap,
 };
 use frame_system::{self as system, ensure_signed};
@@ -151,7 +150,8 @@ decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
-        #[weight = SimpleDispatchInfo::FixedOperational(150_000)]
+        /// Apply to join the TCR, `metadata` can be used to add something like a URL or ID
+        #[weight = 150_000_000]
         pub fn apply(origin, metadata: Vec<u8>, deposit: BalanceOf<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumApplicationAmount::get(), Error::<T>::DepositTooSmall);
@@ -182,7 +182,7 @@ decl_module! {
         }
 
         /// Counter a pending application, this will initiate a challenge
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = 100_000_000]
         pub fn counter(origin, member: T::AccountId, deposit: BalanceOf<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumCounterAmount::get(), Error::<T>::DepositTooSmall);
@@ -202,7 +202,7 @@ decl_module! {
         }
 
         /// Vote in support or opposition of a given challenge
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = 100_000_000]
         pub fn vote(origin, member: T::AccountId, supporting: bool, deposit: BalanceOf<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(<Challenges<T>>::contains_key(member.clone()), Error::<T>::ChallengeNotFound);
@@ -226,7 +226,7 @@ decl_module! {
         }
 
         /// Trigger a new challenge to remove an existing member
-        #[weight = SimpleDispatchInfo::FixedOperational(150_000)]
+        #[weight = 150_000_000]
         pub fn challenge(origin, member: T::AccountId, deposit: BalanceOf<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumChallengeAmount::get(), Error::<T>::DepositTooSmall);
