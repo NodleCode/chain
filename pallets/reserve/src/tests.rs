@@ -69,6 +69,9 @@ impl frame_system::Trait for Test {
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
+    type DbWeight = ();
+    type BlockExecutionWeight = ();
+    type ExtrinsicBaseWeight = ();
 }
 impl pallet_balances::Trait for Test {
     type Balance = u64;

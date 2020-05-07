@@ -28,15 +28,14 @@ mod tests;
 
 use frame_support::{
     decl_event, decl_module, decl_storage,
-    dispatch::DispatchResult,
     traits::{Currency, EnsureOrigin, ExistenceRequirement, Imbalance, OnUnbalanced},
-    weights::{FunctionOf, GetDispatchInfo, SimpleDispatchInfo},
+    weights::{FunctionOf, GetDispatchInfo, Pays},
     Parameter,
 };
 use frame_system::{self as system, ensure_root, ensure_signed};
 use sp_runtime::{
     traits::{AccountIdConversion, Dispatchable},
-    ModuleId,
+    DispatchResult, ModuleId,
 };
 use sp_std::prelude::Box;
 
@@ -75,7 +74,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Spend `amount` funds from the reserve account to `to`.
-        #[weight = SimpleDispatchInfo::FixedOperational(100_000)]
+        #[weight = 100_000_000]
         pub fn spend(origin, to: T::AccountId, amount: BalanceOf<T>) -> DispatchResult {
             T::ExternalOrigin::try_origin(origin)
                 .map(|_| ())
@@ -90,7 +89,7 @@ decl_module! {
         }
 
         /// Deposit `amount` tokens in the treasure account
-        #[weight = SimpleDispatchInfo::FixedNormal(50_000)]
+        #[weight = 50_000_000]
         pub fn tip(origin, amount: BalanceOf<T>) -> DispatchResult {
             let tipper = ensure_signed(origin)?;
 
@@ -105,23 +104,16 @@ decl_module! {
         #[weight = FunctionOf(
             |args: (&Box<<T as Trait>::Call>,)| args.0.get_dispatch_info().weight + 10_000,
             |args: (&Box<<T as Trait>::Call>,)| args.0.get_dispatch_info().class,
-            true
+            Pays::Yes,
         )]
-        pub fn apply_as(origin, call: Box<<T as Trait>::Call>) -> DispatchResult {
+        pub fn apply_as(origin, call: Box<<T as Trait>::Call>) {
             T::ExternalOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
-            let res = match call.dispatch(system::RawOrigin::Signed(Self::account_id()).into()) {
-                Ok(_) => true,
-                Err(e) => {
-                    sp_runtime::print(e);
-                    false
-                }
-            };
+            let res = call.dispatch(frame_system::RawOrigin::Root.into());
 
-            Self::deposit_event(RawEvent::ReserveOp(res));
-            Ok(())
+            Self::deposit_event(RawEvent::ReserveOp(res.map(|_| ()).map_err(|e| e.error)));
         }
     }
 }
@@ -139,7 +131,7 @@ decl_event!(
         /// Someone tipped the company reserve
         TipReceived(AccountId, Balance),
         /// We executed a call coming from the company reserve account
-        ReserveOp(bool),
+        ReserveOp(DispatchResult),
     }
 );
 
