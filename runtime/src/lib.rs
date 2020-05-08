@@ -134,7 +134,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 16,
+    spec_version: 17,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -572,6 +572,12 @@ impl pallet_root_of_trust::Trait for Runtime {
     type FundsCollector = CompanyReserve;
 }
 
+impl pallet_emergency_shutdown::Trait for Runtime {
+    type Event = Event;
+    type ShutdownOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -612,6 +618,7 @@ construct_runtime!(
         // Nodle Stack
         Tcr: pallet_tcr::{Module, Call, Storage, Event<T>},
         RootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event, Storage},
     }
 );
 
