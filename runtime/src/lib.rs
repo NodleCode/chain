@@ -24,12 +24,12 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use frame_system::offchain::TransactionSubmitter;
 use pallet_grandpa::{fg_primitives, AuthorityId as GrandpaId};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
+use parity_scale_codec::Encode;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use sp_core::u32_trait::{_1, _2, _4};
+use sp_core::u32_trait::{_1, _2};
 use sp_core::OpaqueMetadata;
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
@@ -48,24 +48,23 @@ use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime, debug, parameter_types,
-    traits::{Currency, Randomness, SplitTwoWays},
-    weights::Weight,
+    traits::{Currency, Imbalance, OnUnbalanced, Randomness, SplitTwoWays},
+    weights::{
+        constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+        Weight,
+    },
     StorageValue,
 };
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
-pub use sp_runtime::{Perbill, Permill};
+pub use sp_runtime::{Perbill, Permill, Perquintill};
 
 pub mod constants;
 mod implementations;
 
-use implementations::{TargetedFeeAdjustment, ToAuthor, WeightToFee};
-
-type NegativeImbalance<T> = <pallet_balances::Module<T> as Currency<
-    <T as frame_system::Trait>::AccountId,
->>::NegativeImbalance;
+use implementations::{Author, LinearWeightToFee, TargetedFeeAdjustment};
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -135,7 +134,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 15,
+    spec_version: 17,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -146,59 +145,8 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     impl_version: 0,
 
     apis: RUNTIME_API_VERSIONS,
+    transaction_version: 1,
 };
-
-/// A transaction submitter with the given key type.
-pub type TransactionSubmitterOf<KeyType> =
-    TransactionSubmitter<KeyType, Runtime, UncheckedExtrinsic>;
-
-/// Submits transaction with the node's public and signature type. Adheres to the signed extension
-/// format of the chain.
-impl frame_system::offchain::CreateTransaction<Runtime, UncheckedExtrinsic> for Runtime {
-    type Public = <Signature as sp_runtime::traits::Verify>::Signer;
-    type Signature = Signature;
-
-    fn create_transaction<
-        TSigner: frame_system::offchain::Signer<Self::Public, Self::Signature>,
-    >(
-        call: Call,
-        public: Self::Public,
-        account: AccountId,
-        index: Index,
-    ) -> Option<(
-        Call,
-        <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
-    )> {
-        // take the biggest period possible.
-        let period = BlockHashCount::get()
-            .checked_next_power_of_two()
-            .map(|c| c / 2)
-            .unwrap_or(2) as u64;
-        let current_block = System::block_number()
-            .saturated_into::<u64>()
-            // The `System::block_number` is initialized with `n+1`,
-            // so the actual block number is `n`.
-            .saturating_sub(1);
-        let tip = 0;
-        let extra: SignedExtra = (
-            frame_system::CheckVersion::<Runtime>::new(),
-            frame_system::CheckGenesis::<Runtime>::new(),
-            frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
-            frame_system::CheckNonce::<Runtime>::from(index),
-            frame_system::CheckWeight::<Runtime>::new(),
-            pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
-        );
-        let raw_payload = SignedPayload::new(call, extra)
-            .map_err(|e| {
-                debug::warn!("Unable to create signed payload: {:?}", e);
-            })
-            .ok()?;
-        let signature = TSigner::sign(public, &raw_payload)?;
-        let address = Indices::unlookup(account);
-        let (call, extra, _) = raw_payload.deconstruct();
-        Some((call, (address, signature, extra)))
-    }
-}
 
 /// The version infromation used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
@@ -211,7 +159,7 @@ pub fn native_version() -> NativeVersion {
 
 parameter_types! {
     pub const BlockHashCount: BlockNumber = 250;
-    pub const MaximumBlockWeight: Weight = 1_000_000_000;
+    pub const MaximumBlockWeight: Weight = 2 * WEIGHT_PER_SECOND;
     pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
     pub const MaximumBlockLength: u32 = 5 * 1024 * 1024;
     pub const Version: RuntimeVersion = VERSION;
@@ -237,6 +185,9 @@ impl frame_system::Trait for Runtime {
     type AccountData = pallet_balances::AccountData<Balance>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
+    type DbWeight = RocksDbWeight;
+    type BlockExecutionWeight = BlockExecutionWeight;
+    type ExtrinsicBaseWeight = ExtrinsicBaseWeight;
 }
 
 parameter_types! {
@@ -270,11 +221,66 @@ parameter_types! {
     pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 }
 
+impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime
+where
+    Call: From<LocalCall>,
+{
+    fn create_transaction<C: frame_system::offchain::AppCrypto<Self::Public, Self::Signature>>(
+        call: Call,
+        public: <Signature as sp_runtime::traits::Verify>::Signer,
+        account: AccountId,
+        nonce: Index,
+    ) -> Option<(
+        Call,
+        <UncheckedExtrinsic as sp_runtime::traits::Extrinsic>::SignaturePayload,
+    )> {
+        // take the biggest period possible.
+        let period = BlockHashCount::get()
+            .checked_next_power_of_two()
+            .map(|c| c / 2)
+            .unwrap_or(2) as u64;
+        let current_block = System::block_number()
+            .saturated_into::<u64>()
+            // The `System::block_number` is initialized with `n+1`,
+            // so the actual block number is `n`.
+            .saturating_sub(1);
+        let tip = 0;
+        let extra: SignedExtra = (
+            frame_system::CheckVersion::<Runtime>::new(),
+            frame_system::CheckGenesis::<Runtime>::new(),
+            frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
+            frame_system::CheckNonce::<Runtime>::from(nonce),
+            frame_system::CheckWeight::<Runtime>::new(),
+            pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+        );
+        let raw_payload = SignedPayload::new(call, extra)
+            .map_err(|e| {
+                debug::warn!("Unable to create signed payload: {:?}", e);
+            })
+            .ok()?;
+        let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
+        let address = Indices::unlookup(account);
+        let (call, extra, _) = raw_payload.deconstruct();
+        Some((call, (address, signature.into(), extra)))
+    }
+}
+
+impl frame_system::offchain::SigningTypes for Runtime {
+    type Public = <Signature as sp_runtime::traits::Verify>::Signer;
+    type Signature = Signature;
+}
+
+impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
+where
+    Call: From<C>,
+{
+    type OverarchingCall = Call;
+    type Extrinsic = UncheckedExtrinsic;
+}
+
 impl pallet_im_online::Trait for Runtime {
     type AuthorityId = ImOnlineId;
     type Event = Event;
-    type Call = Call;
-    type SubmitTransaction = TransactionSubmitterOf<ImOnlineId>;
     type SessionDuration = SessionDuration;
     type ReportUnresponsiveness = Offences;
     type UnsignedPriority = ImOnlineUnsignedPriority;
@@ -304,15 +310,24 @@ parameter_types! {
     pub const CreationFee: Balance = 1 * constants::CENTS;
 }
 
+type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+
 /// Splits fees 20/80 between reserve and block author.
-pub type DealWithFees = SplitTwoWays<
-    Balance,
-    NegativeImbalance<Runtime>,
-    _1,
-    CompanyReserve, // 1/5 to the company reserve
-    _4,
-    ToAuthor<Runtime>, // 4/5 to the block author
->;
+pub struct DealWithFees;
+impl OnUnbalanced<NegativeImbalance> for DealWithFees {
+    fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
+        if let Some(fees) = fees_then_tips.next() {
+            // for fees, 80% to treasury, 20% to author
+            let mut split = fees.ration(80, 20);
+            if let Some(tips) = fees_then_tips.next() {
+                // for tips, if any, 80% to treasury, 20% to author (though this can be anything)
+                tips.ration_merge_into(80, 20, &mut split);
+            }
+            CompanyReserve::on_unbalanced(split.0);
+            Author::on_unbalanced(split.1);
+        }
+    }
+}
 
 impl pallet_balances::Trait for Runtime {
     type Balance = Balance;
@@ -323,19 +338,20 @@ impl pallet_balances::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const TransactionBaseFee: Balance = 1 * constants::CENTS;
     pub const TransactionByteFee: Balance = 10 * constants::MILLICENTS;
     // For a sane configuration, this should always be less than `AvailableBlockRatio`.
     // Fees raises after a fullness of 25%
-    pub const TargetBlockFullness: Perbill = constants::TARGET_BLOCK_FULLNESS;
+    pub const TargetBlockFullness: Perquintill = constants::TARGET_BLOCK_FULLNESS;
+    // In the Substrate node, a weight of 10_000_000 (smallest non-zero weight)
+    // is mapped to 10_000_000 units of fees, hence:
+    pub const WeightFeeCoefficient: Balance = 1;
 }
 
 impl pallet_transaction_payment::Trait for Runtime {
     type Currency = Balances;
     type OnTransactionPayment = DealWithFees;
-    type TransactionBaseFee = TransactionBaseFee;
     type TransactionByteFee = TransactionByteFee;
-    type WeightToFee = WeightToFee;
+    type WeightToFee = LinearWeightToFee<WeightFeeCoefficient>;
     type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness>;
 }
 
@@ -456,6 +472,7 @@ parameter_types! {
     pub const SubAccountDeposit: Balance = 2 * constants::DOLLARS;   // 53 bytes on-chain
     pub const MaxSubAccounts: u32 = 100;
     pub const MaxAdditionalFields: u32 = 100;
+    pub const MaxRegistrars: u32 = 20;
 }
 
 impl pallet_identity::Trait for Runtime {
@@ -471,6 +488,7 @@ impl pallet_identity::Trait for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type RegistrarOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type MaxRegistrars = MaxRegistrars;
 }
 
 parameter_types! {
@@ -505,12 +523,6 @@ impl pallet_utility::Trait for Runtime {
     type MultisigDepositBase = MultisigDepositBase;
     type MultisigDepositFactor = MultisigDepositFactor;
     type MaxSignatories = MaxSignatories;
-}
-
-impl pallet_emergency_shutdown::Trait for Runtime {
-    type Event = Event;
-    type ShutdownOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
 }
 
 parameter_types! {
@@ -560,6 +572,12 @@ impl pallet_root_of_trust::Trait for Runtime {
     type FundsCollector = CompanyReserve;
 }
 
+impl pallet_emergency_shutdown::Trait for Runtime {
+    type Event = Event;
+    type ShutdownOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -591,7 +609,6 @@ construct_runtime!(
         TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
         CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
@@ -601,6 +618,7 @@ construct_runtime!(
         // Nodle Stack
         Tcr: pallet_tcr::{Module, Call, Storage, Event<T>},
         RootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event, Storage},
     }
 );
 
@@ -703,19 +721,19 @@ sp_api::impl_runtime_apis! {
     }
 
     impl sp_consensus_babe::BabeApi<Block> for Runtime {
-        fn configuration() -> sp_consensus_babe::BabeConfiguration {
+        fn configuration() -> sp_consensus_babe::BabeGenesisConfiguration {
             // The choice of `c` parameter (where `1 - c` represents the
             // probability of a slot being empty), is done in accordance to the
             // slot duration and expected target block time, for safely
             // resisting network delays of maximum two seconds.
             // <https://research.web3.foundation/en/latest/polkadot/BABE/Babe/#6-practical-results>
-            sp_consensus_babe::BabeConfiguration {
+            sp_consensus_babe::BabeGenesisConfiguration {
                 slot_duration: Babe::slot_duration(),
                 epoch_length: EpochDuration::get(),
                 c: constants::PRIMARY_PROBABILITY,
                 genesis_authorities: Babe::authorities(),
                 randomness: Babe::randomness(),
-                secondary_slots: true,
+                allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
             }
         }
 
@@ -812,35 +830,5 @@ sp_api::impl_runtime_apis! {
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use frame_system::offchain::{SignAndSubmitTransaction, SubmitSignedTransaction};
-
-    #[test]
-    fn validate_transaction_submitter_bounds() {
-        fn is_submit_signed_transaction<T>()
-        where
-            T: SubmitSignedTransaction<Runtime, Call>,
-        {
-        }
-
-        fn is_sign_and_submit_transaction<T>()
-        where
-            T: SignAndSubmitTransaction<
-                Runtime,
-                Call,
-                Extrinsic = UncheckedExtrinsic,
-                CreateTransaction = Runtime,
-                Signer = ImOnlineId,
-            >,
-        {
-        }
-
-        is_submit_signed_transaction::<TransactionSubmitterOf<ImOnlineId>>();
-        is_sign_and_submit_transaction::<TransactionSubmitterOf<ImOnlineId>>();
     }
 }

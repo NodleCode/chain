@@ -28,7 +28,6 @@ mod tests;
 
 use frame_support::{
     decl_event, decl_module, decl_storage, dispatch::DispatchResult, traits::EnsureOrigin,
-    weights::SimpleDispatchInfo,
 };
 use frame_system::{self as system, ensure_root};
 
@@ -50,7 +49,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Toggle the shutdown state if authorized to do so.
-        #[weight = SimpleDispatchInfo::FixedOperational(10_000)]
+        #[weight = 10_000_000]
         pub fn toggle(origin) -> DispatchResult {
             T::ShutdownOrigin::try_origin(origin)
                 .map(|_| ())

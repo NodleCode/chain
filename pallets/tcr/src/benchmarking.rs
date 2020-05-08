@@ -24,6 +24,7 @@ use super::*;
 
 use frame_benchmarking::{account, benchmarks};
 use frame_system::RawOrigin;
+use sp_std::prelude::*;
 
 const SEED_APPLICANT: u32 = 0;
 const SEED_COUNTERER: u32 = 1;
