@@ -24,6 +24,7 @@ use super::*;
 
 use frame_benchmarking::benchmarks;
 use sp_runtime::traits::Dispatchable;
+use sp_std::prelude::*;
 
 benchmarks! {
     _ { }
