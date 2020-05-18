@@ -58,8 +58,8 @@ pub struct TargetedFeeAdjustment<T>(sp_std::marker::PhantomData<T>);
 
 impl<T: Get<Perquintill>> Convert<Fixed128, Fixed128> for TargetedFeeAdjustment<T> {
     fn convert(multiplier: Fixed128) -> Fixed128 {
-        let block_weight = System::all_extrinsics_weight();
         let max_weight = MaximumBlockWeight::get();
+        let block_weight = System::all_extrinsics_weight().total().min(max_weight);
         let target_weight = (T::get() * max_weight) as u128;
         let block_weight = block_weight as u128;
 
@@ -105,7 +105,7 @@ impl<T: Get<Perquintill>> Convert<Fixed128, Fixed128> for TargetedFeeAdjustment<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{constants, TargetBlockFullness, TransactionPayment};
+    use crate::{constants::*, TargetBlockFullness, TransactionPayment};
     use crate::{AvailableBlockRatio, MaximumBlockWeight, Runtime};
     use core::num::NonZeroI128;
     use frame_support::weights::Weight;
@@ -121,11 +121,12 @@ mod tests {
 
     // poc reference implementation.
     fn fee_multiplier_update(block_weight: Weight, previous: Fixed128) -> Fixed128 {
-        let block_weight = block_weight as f64;
-        let v: f64 = 0.00004;
-
         // maximum tx weight
         let m = max() as f64;
+        // block weight always truncated to max weight
+        let block_weight = (block_weight as f64).min(m);
+        let v: f64 = 0.00004;
+
         // Ideal saturation in terms of weight
         let ss = target() as f64;
         // Current saturation in terms of weight
@@ -238,9 +239,9 @@ mod tests {
                     iterations,
                     fm,
                     adjusted_fee,
-                    adjusted_fee / constants::MILLICENTS,
-                    adjusted_fee / constants::CENTS,
-                    adjusted_fee / constants::DOLLARS,
+                    adjusted_fee / MILLICENTS,
+                    adjusted_fee / CENTS,
+                    adjusted_fee / DOLLARS,
                 );
             }
         });
