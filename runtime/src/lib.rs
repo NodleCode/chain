@@ -26,15 +26,19 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use pallet_grandpa::{fg_primitives, AuthorityId as GrandpaId};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
 use parity_scale_codec::Encode;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use sp_core::u32_trait::{_1, _2};
-use sp_core::OpaqueMetadata;
+use sp_core::{
+    crypto::KeyTypeId,
+    u32_trait::{_1, _2},
+    OpaqueMetadata,
+};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{
-        BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, OpaqueKeys,
+        BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, NumberFor, OpaqueKeys,
         SaturatedConversion, StaticLookup, Verify,
     },
     transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
@@ -48,7 +52,7 @@ use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime, debug, parameter_types,
-    traits::{Currency, Imbalance, OnUnbalanced, Randomness, SplitTwoWays},
+    traits::{Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, SplitTwoWays},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         Weight,
@@ -118,6 +122,37 @@ pub mod opaque {
     }
 }
 
+/// App-specific crypto used for reporting equivocation/misbehavior in BABE and
+/// GRANDPA. Any rewards for misbehavior reporting will be paid out to this
+/// account.
+pub mod report {
+    use super::{Signature, Verify};
+    use frame_system::offchain::AppCrypto;
+    use sp_core::crypto::{key_types, KeyTypeId};
+
+    /// Key type for the reporting module. Used for reporting BABE and GRANDPA
+    /// equivocations.
+    pub const KEY_TYPE: KeyTypeId = key_types::REPORTING;
+
+    mod app {
+        use sp_application_crypto::{app_crypto, sr25519};
+        app_crypto!(sr25519, super::KEY_TYPE);
+    }
+
+    /// Identity of the equivocation/misbehavior reporter.
+    pub type ReporterId = app::Public;
+
+    /// An `AppCrypto` type to allow submitting signed transactions using the reporting
+    /// application key as signer.
+    pub struct ReporterAppCrypto;
+
+    impl AppCrypto<<Signature as Verify>::Signer, Signature> for ReporterAppCrypto {
+        type RuntimeAppPublic = ReporterId;
+        type GenericSignature = sp_core::sr25519::Signature;
+        type GenericPublic = sp_core::sr25519::Public;
+    }
+}
+
 /// This runtime version.
 /// This should not be thought of as classic Semver (major/minor/tiny).
 /// This triplet have different semantics and mis-interpretation could cause problems.
@@ -134,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 17,
+    spec_version: 18,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -205,6 +240,24 @@ impl pallet_babe::Trait for Runtime {
 
 impl pallet_grandpa::Trait for Runtime {
     type Event = Event;
+    type Call = Call;
+
+    type KeyOwnerProofSystem = Historical;
+
+    type KeyOwnerProof =
+        <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(KeyTypeId, GrandpaId)>>::Proof;
+
+    type KeyOwnerIdentification = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
+        KeyTypeId,
+        GrandpaId,
+    )>>::IdentificationTuple;
+
+    type HandleEquivocation = pallet_grandpa::EquivocationHandler<
+        Self::KeyOwnerIdentification,
+        report::ReporterAppCrypto,
+        Runtime,
+        Offences,
+    >;
 }
 
 impl pallet_authority_discovery::Trait for Runtime {}
@@ -246,12 +299,14 @@ where
             .saturating_sub(1);
         let tip = 0;
         let extra: SignedExtra = (
-            frame_system::CheckVersion::<Runtime>::new(),
+            frame_system::CheckSpecVersion::<Runtime>::new(),
+            frame_system::CheckTxVersion::<Runtime>::new(),
             frame_system::CheckGenesis::<Runtime>::new(),
             frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
             frame_system::CheckNonce::<Runtime>::from(nonce),
             frame_system::CheckWeight::<Runtime>::new(),
             pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
+            pallet_grandpa::ValidateEquivocationReport::<Runtime>::new(),
         );
         let raw_payload = SignedPayload::new(call, extra)
             .map_err(|e| {
@@ -439,6 +494,7 @@ impl pallet_membership::Trait<pallet_membership::Instance1> for Runtime {
 
 parameter_types! {
     pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
+    pub const MaxProposals: u32 = 100;
 }
 
 type TechnicalCollective = pallet_collective::Instance2;
@@ -447,6 +503,7 @@ impl pallet_collective::Trait<TechnicalCollective> for Runtime {
     type Proposal = Call;
     type Event = Event;
     type MotionDuration = MotionDuration;
+    type MaxProposals = MaxProposals;
 }
 
 impl pallet_mandate::Trait for Runtime {
@@ -602,6 +659,7 @@ construct_runtime!(
         PoaSessions: pallet_poa::{Module, Storage},
         ValidatorsSet: pallet_membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
         Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+        Historical: pallet_session_historical::{Module},
         AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
 
         // Governance
@@ -634,12 +692,14 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
-    frame_system::CheckVersion<Runtime>,
+    frame_system::CheckSpecVersion<Runtime>,
+    frame_system::CheckTxVersion<Runtime>,
     frame_system::CheckGenesis<Runtime>,
     frame_system::CheckEra<Runtime>,
     frame_system::CheckNonce<Runtime>,
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+    pallet_grandpa::ValidateEquivocationReport<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
@@ -717,6 +777,32 @@ sp_api::impl_runtime_apis! {
     impl fg_primitives::GrandpaApi<Block> for Runtime {
         fn grandpa_authorities() -> Vec<(GrandpaId, u64)> {
             Grandpa::grandpa_authorities()
+        }
+
+        fn submit_report_equivocation_extrinsic(
+            equivocation_proof: fg_primitives::EquivocationProof<
+                <Block as BlockT>::Hash,
+                NumberFor<Block>,
+            >,
+            key_owner_proof: fg_primitives::OpaqueKeyOwnershipProof,
+        ) -> Option<()> {
+            let key_owner_proof = key_owner_proof.decode()?;
+
+            Grandpa::submit_report_equivocation_extrinsic(
+                equivocation_proof,
+                key_owner_proof,
+            )
+        }
+
+        fn generate_key_ownership_proof(
+            _set_id: fg_primitives::SetId,
+            authority_id: GrandpaId,
+        ) -> Option<fg_primitives::OpaqueKeyOwnershipProof> {
+            use parity_scale_codec::Encode;
+
+            Historical::prove((fg_primitives::KEY_TYPE, authority_id))
+                .map(|p| p.encode())
+                .map(fg_primitives::OpaqueKeyOwnershipProof::new)
         }
     }
 
@@ -830,5 +916,22 @@ sp_api::impl_runtime_apis! {
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frame_system::offchain::CreateSignedTransaction;
+
+    #[test]
+    fn validate_transaction_submitter_bounds() {
+        fn is_submit_signed_transaction<T>()
+        where
+            T: CreateSignedTransaction<Call>,
+        {
+        }
+
+        is_submit_signed_transaction::<Runtime>();
     }
 }

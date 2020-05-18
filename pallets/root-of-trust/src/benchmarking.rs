@@ -25,7 +25,7 @@ use super::*;
 use frame_benchmarking::{account, benchmarks};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
-use sp_std::prelude::*;
+use sp_std::{prelude::*, vec};
 
 const SEED_MANAGER: u32 = 0;
 
