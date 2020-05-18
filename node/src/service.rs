@@ -24,18 +24,18 @@ use nodle_chain_runtime::{opaque::Block, RuntimeApi};
 use sc_consensus_babe;
 use sc_executor::native_executor_instance;
 use sc_finality_grandpa::{
-	FinalityProofProvider as GrandpaFinalityProofProvider, StorageAndProofProvider,
+    FinalityProofProvider as GrandpaFinalityProofProvider, StorageAndProofProvider,
 };
 use sc_service::{
-	config::Configuration, error::Error as ServiceError, AbstractService, ServiceBuilder,
+    config::Configuration, error::Error as ServiceError, AbstractService, ServiceBuilder,
 };
 use sp_inherents::InherentDataProviders;
 
 native_executor_instance!(
-	pub Executor,
-	nodle_chain_runtime::api::dispatch,
-	nodle_chain_runtime::native_version,
-	frame_benchmarking::benchmarking::HostFunctions,
+    pub Executor,
+    nodle_chain_runtime::api::dispatch,
+    nodle_chain_runtime::native_version,
+    frame_benchmarking::benchmarking::HostFunctions,
 );
 
 /// Starts a `ServiceBuilder` for a full service.
@@ -43,80 +43,80 @@ native_executor_instance!(
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
 macro_rules! new_full_start {
-	($config:expr) => {{
-		use std::sync::Arc;
+    ($config:expr) => {{
+        use std::sync::Arc;
 
-		type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
+        type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 
-		let mut import_setup = None;
-		let mut rpc_setup = None;
-		let inherent_data_providers = sp_inherents::InherentDataProviders::new();
+        let mut import_setup = None;
+        let mut rpc_setup = None;
+        let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
-		let builder = sc_service::ServiceBuilder::new_full::<
-			nodle_chain_runtime::opaque::Block,
-			nodle_chain_runtime::RuntimeApi,
-			crate::service::Executor,
-		>($config)?
-		.with_select_chain(|_config, backend| Ok(sc_consensus::LongestChain::new(backend.clone())))?
-		.with_transaction_pool(|config, client, _fetcher, prometheus_registry| {
-			let pool_api = sc_transaction_pool::FullChainApi::new(client.clone());
-			Ok(sc_transaction_pool::BasicPool::new(
-				config,
-				std::sync::Arc::new(pool_api),
-				prometheus_registry,
-			))
-		})?
-		.with_import_queue(
-			|_config,
-			 client,
-			 mut select_chain,
-			 _transaction_pool,
-			 spawn_task_handle,
-			 prometheus_registry| {
-				let select_chain = select_chain
-					.take()
-					.ok_or_else(|| sc_service::Error::SelectChainRequired)?;
-				let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
-					client.clone(),
-					&(client.clone() as Arc<_>),
-					select_chain,
-				)?;
-				let justification_import = grandpa_block_import.clone();
+        let builder = sc_service::ServiceBuilder::new_full::<
+            nodle_chain_runtime::opaque::Block,
+            nodle_chain_runtime::RuntimeApi,
+            crate::service::Executor,
+        >($config)?
+        .with_select_chain(|_config, backend| Ok(sc_consensus::LongestChain::new(backend.clone())))?
+        .with_transaction_pool(|config, client, _fetcher, prometheus_registry| {
+            let pool_api = sc_transaction_pool::FullChainApi::new(client.clone());
+            Ok(sc_transaction_pool::BasicPool::new(
+                config,
+                std::sync::Arc::new(pool_api),
+                prometheus_registry,
+            ))
+        })?
+        .with_import_queue(
+            |_config,
+             client,
+             mut select_chain,
+             _transaction_pool,
+             spawn_task_handle,
+             prometheus_registry| {
+                let select_chain = select_chain
+                    .take()
+                    .ok_or_else(|| sc_service::Error::SelectChainRequired)?;
+                let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
+                    client.clone(),
+                    &(client.clone() as Arc<_>),
+                    select_chain,
+                )?;
+                let justification_import = grandpa_block_import.clone();
 
-				let (block_import, babe_link) = sc_consensus_babe::block_import(
-					sc_consensus_babe::Config::get_or_compute(&*client)?,
-					grandpa_block_import,
-					client.clone(),
-				)?;
+                let (block_import, babe_link) = sc_consensus_babe::block_import(
+                    sc_consensus_babe::Config::get_or_compute(&*client)?,
+                    grandpa_block_import,
+                    client.clone(),
+                )?;
 
-				let import_queue = sc_consensus_babe::import_queue(
-					babe_link.clone(),
-					block_import.clone(),
-					Some(Box::new(justification_import)),
-					None,
-					client,
-					inherent_data_providers.clone(),
-					spawn_task_handle,
-					prometheus_registry,
-				)?;
+                let import_queue = sc_consensus_babe::import_queue(
+                    babe_link.clone(),
+                    block_import.clone(),
+                    Some(Box::new(justification_import)),
+                    None,
+                    client,
+                    inherent_data_providers.clone(),
+                    spawn_task_handle,
+                    prometheus_registry,
+                )?;
 
-				import_setup = Some((block_import, grandpa_link, babe_link));
-				Ok(import_queue)
-			},
-			)?
-		.with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
-			let mut io = jsonrpc_core::IoHandler::default();
-			io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
-				pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
-			));
+                import_setup = Some((block_import, grandpa_link, babe_link));
+                Ok(import_queue)
+            },
+        )?
+        .with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
+            let mut io = jsonrpc_core::IoHandler::default();
+            io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
+                pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
+            ));
 
-			let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
-			rpc_setup = Some((shared_voter_state));
-			Ok(io)
-		})?;
+            let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
+            rpc_setup = Some((shared_voter_state));
+            Ok(io)
+        })?;
 
-		(builder, import_setup, inherent_data_providers, rpc_setup)
-		}};
+        (builder, import_setup, inherent_data_providers, rpc_setup)
+    }};
 }
 
 /// Creates a full service from the configuration.
@@ -282,88 +282,88 @@ macro_rules! new_full {
 
 /// Builds a new service for a full client.
 pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceError> {
-	new_full!(config).map(|(service, _)| service)
+    new_full!(config).map(|(service, _)| service)
 }
 
 /// Builds a new service for a light client.
 pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceError> {
-	type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
+    type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 
-	let inherent_data_providers = InherentDataProviders::new();
+    let inherent_data_providers = InherentDataProviders::new();
 
-	let service = ServiceBuilder::new_light::<Block, RuntimeApi, Executor>(config)?
-		.with_select_chain(|_config, backend| Ok(sc_consensus::LongestChain::new(backend.clone())))?
-		.with_transaction_pool(|config, client, fetcher, prometheus_registry| {
-			let fetcher = fetcher
-				.ok_or_else(|| "Trying to start light transaction pool without active fetcher")?;
-			let pool_api = sc_transaction_pool::LightChainApi::new(client.clone(), fetcher.clone());
-			let pool = sc_transaction_pool::BasicPool::with_revalidation_type(
-				config,
-				Arc::new(pool_api),
-				prometheus_registry,
-				sc_transaction_pool::RevalidationType::Light,
-			);
-			Ok(pool)
-		})?
-		.with_import_queue_and_fprb(
-			|_config,
-			 client,
-			 backend,
-			 fetcher,
-			 _select_chain,
-			 _tx_pool,
-			 spawn_task_handle,
-			 prometheus_registry| {
-				let fetch_checker = fetcher
-					.map(|fetcher| fetcher.checker().clone())
-					.ok_or_else(|| {
-						"Trying to start light import queue without active fetch checker"
-					})?;
-				let grandpa_block_import = sc_finality_grandpa::light_block_import(
-					client.clone(),
-					backend,
-					&(client.clone() as Arc<_>),
-					Arc::new(fetch_checker),
-				)?;
+    let service = ServiceBuilder::new_light::<Block, RuntimeApi, Executor>(config)?
+        .with_select_chain(|_config, backend| Ok(sc_consensus::LongestChain::new(backend.clone())))?
+        .with_transaction_pool(|config, client, fetcher, prometheus_registry| {
+            let fetcher = fetcher
+                .ok_or_else(|| "Trying to start light transaction pool without active fetcher")?;
+            let pool_api = sc_transaction_pool::LightChainApi::new(client.clone(), fetcher.clone());
+            let pool = sc_transaction_pool::BasicPool::with_revalidation_type(
+                config,
+                Arc::new(pool_api),
+                prometheus_registry,
+                sc_transaction_pool::RevalidationType::Light,
+            );
+            Ok(pool)
+        })?
+        .with_import_queue_and_fprb(
+            |_config,
+             client,
+             backend,
+             fetcher,
+             _select_chain,
+             _tx_pool,
+             spawn_task_handle,
+             prometheus_registry| {
+                let fetch_checker = fetcher
+                    .map(|fetcher| fetcher.checker().clone())
+                    .ok_or_else(|| {
+                        "Trying to start light import queue without active fetch checker"
+                    })?;
+                let grandpa_block_import = sc_finality_grandpa::light_block_import(
+                    client.clone(),
+                    backend,
+                    &(client.clone() as Arc<_>),
+                    Arc::new(fetch_checker),
+                )?;
 
-				let finality_proof_import = grandpa_block_import.clone();
-				let finality_proof_request_builder =
-					finality_proof_import.create_finality_proof_request_builder();
+                let finality_proof_import = grandpa_block_import.clone();
+                let finality_proof_request_builder =
+                    finality_proof_import.create_finality_proof_request_builder();
 
-				let (babe_block_import, babe_link) = sc_consensus_babe::block_import(
-					sc_consensus_babe::Config::get_or_compute(&*client)?,
-					grandpa_block_import,
-					client.clone(),
-				)?;
+                let (babe_block_import, babe_link) = sc_consensus_babe::block_import(
+                    sc_consensus_babe::Config::get_or_compute(&*client)?,
+                    grandpa_block_import,
+                    client.clone(),
+                )?;
 
-				let import_queue = sc_consensus_babe::import_queue(
-					babe_link,
-					babe_block_import,
-					None,
-					Some(Box::new(finality_proof_import)),
-					client.clone(),
-					inherent_data_providers.clone(),
-					spawn_task_handle,
-					prometheus_registry,
-				)?;
+                let import_queue = sc_consensus_babe::import_queue(
+                    babe_link,
+                    babe_block_import,
+                    None,
+                    Some(Box::new(finality_proof_import)),
+                    client.clone(),
+                    inherent_data_providers.clone(),
+                    spawn_task_handle,
+                    prometheus_registry,
+                )?;
 
-				Ok((import_queue, finality_proof_request_builder))
-			},
-		)?
-		.with_finality_proof_provider(|client, backend| {
-			// GenesisAuthoritySetProvider is implemented for StorageAndProofProvider
-			let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
-			Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
-		})?
-		.with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
-			let mut io = jsonrpc_core::IoHandler::default();
-			io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
-				pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
-			));
+                Ok((import_queue, finality_proof_request_builder))
+            },
+        )?
+        .with_finality_proof_provider(|client, backend| {
+            // GenesisAuthoritySetProvider is implemented for StorageAndProofProvider
+            let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
+            Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
+        })?
+        .with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
+            let mut io = jsonrpc_core::IoHandler::default();
+            io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
+                pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
+            ));
 
-			Ok(io)
-		})?
-		.build()?;
+            Ok(io)
+        })?
+        .build()?;
 
-	Ok(service)
+    Ok(service)
 }
