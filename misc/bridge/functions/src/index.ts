@@ -28,5 +28,5 @@ export const registerMemo = functions.https.onRequest(async (request, response) 
         address: nodlePublicKey,
     }, { merge: true });
 
-    response.send({ memoHash: memoHash });
+    response.send({ memoHash: memoHash, destination: functions.config().nodle.coinsdest });
 });
