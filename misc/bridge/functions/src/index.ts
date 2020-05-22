@@ -16,7 +16,7 @@ const byteToHexString = (uint8arr: Uint8Array) => {
 }
 
 export const registerMemo = functions.https.onRequest(async (request, response) => {
-    const nodlePublicKey = request.body.ss58Address;
+    const nodlePublicKey = request.body.nodlePublicKey;
 
     // In order to generate a deterministic ID we hash the user's address.
     var hasher = blake2.createHash('blake2b', { digestLength: 16 });
