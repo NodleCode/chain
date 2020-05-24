@@ -193,7 +193,7 @@ fn lock_unlock_works() {
         assert_eq!(BalancesModule::usable_balance(CANDIDATE), 0);
         assert_noop!(
             TestModule::reserve_for(CANDIDATE, 1),
-            Error::<Test>::NotEnoughFunds
+            Error::<Test, DefaultInstance>::NotEnoughFunds
         );
 
         assert_ok!(TestModule::unreserve_for(
@@ -252,7 +252,7 @@ fn can_not_apply_twice() {
                 vec![],
                 MinimumApplicationAmount::get()
             ),
-            Error::<Test>::ApplicationPending
+            Error::<Test, DefaultInstance>::ApplicationPending
         );
     })
 }
@@ -266,7 +266,7 @@ fn can_not_apply_if_not_enough_tokens() {
                 vec![],
                 MinimumApplicationAmount::get()
             ),
-            Error::<Test>::NotEnoughFunds
+            Error::<Test, DefaultInstance>::NotEnoughFunds
         );
     })
 }
@@ -280,7 +280,7 @@ fn can_not_apply_if_deposit_is_too_low() {
                 vec![],
                 MinimumApplicationAmount::get() - 1
             ),
-            Error::<Test>::DepositTooSmall
+            Error::<Test, DefaultInstance>::DepositTooSmall
         );
     })
 }
@@ -321,7 +321,7 @@ fn can_not_counter_unexisting_application() {
                 CANDIDATE,
                 MinimumCounterAmount::get()
             ),
-            Error::<Test>::ApplicationNotFound
+            Error::<Test, DefaultInstance>::ApplicationNotFound
         );
     })
 }
@@ -335,7 +335,7 @@ fn can_not_counter_application_if_deposit_too_low() {
                 CANDIDATE,
                 MinimumCounterAmount::get() - 1
             ),
-            Error::<Test>::DepositTooSmall
+            Error::<Test, DefaultInstance>::DepositTooSmall
         );
     })
 }
@@ -366,7 +366,7 @@ fn can_not_counter_application_if_not_enough_funds() {
                 CANDIDATE,
                 MinimumCounterAmount::get()
             ),
-            Error::<Test>::NotEnoughFunds
+            Error::<Test, DefaultInstance>::NotEnoughFunds
         );
     })
 }
@@ -394,7 +394,7 @@ fn can_not_reapply_while_challenged() {
                 vec![],
                 MinimumApplicationAmount::get()
             ),
-            Error::<Test>::ApplicationChallenged
+            Error::<Test, DefaultInstance>::ApplicationChallenged
         );
     })
 }
@@ -453,7 +453,7 @@ fn can_not_vote_if_challenge_does_not_exists() {
 
         assert_noop!(
             TestModule::vote(Origin::signed(VOTER_FOR), CANDIDATE, true, 100),
-            Error::<Test>::ChallengeNotFound
+            Error::<Test, DefaultInstance>::ChallengeNotFound
         );
     })
 }
@@ -477,7 +477,7 @@ fn can_not_deposit_if_not_enough_funds() {
 
         assert_noop!(
             TestModule::vote(Origin::signed(VOTER_FOR), CANDIDATE, true, 1001),
-            Error::<Test>::NotEnoughFunds
+            Error::<Test, DefaultInstance>::NotEnoughFunds
         );
     })
 }
@@ -813,7 +813,7 @@ fn can_not_challenge_non_member_application() {
                 CANDIDATE,
                 MinimumChallengeAmount::get()
             ),
-            Error::<Test>::MemberNotFound
+            Error::<Test, DefaultInstance>::MemberNotFound
         );
     })
 }
@@ -839,7 +839,7 @@ fn can_not_challenge_member_applicaton_if_not_enough_funds() {
                 CANDIDATE,
                 MinimumChallengeAmount::get() + 1
             ),
-            Error::<Test>::NotEnoughFunds
+            Error::<Test, DefaultInstance>::NotEnoughFunds
         );
     })
 }
@@ -853,7 +853,7 @@ fn can_not_challenge_member_applicaton_if_not_big_enough_deposit() {
                 CANDIDATE,
                 MinimumChallengeAmount::get() - 1
             ),
-            Error::<Test>::DepositTooSmall
+            Error::<Test, DefaultInstance>::DepositTooSmall
         );
     })
 }
