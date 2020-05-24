@@ -476,6 +476,14 @@ impl pallet_membership::Trait<pallet_membership::Instance2> for Runtime {
 
 impl pallet_poa::Trait for Runtime {}
 
+// Shared parameters with all collectives / committees
+parameter_types! {
+    pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
+    pub const MaxProposals: u32 = 100;
+}
+
+// --- Technical committee
+
 impl pallet_membership::Trait<pallet_membership::Instance1> for Runtime {
     type Event = Event;
     type AddOrigin =
@@ -492,13 +500,35 @@ impl pallet_membership::Trait<pallet_membership::Instance1> for Runtime {
     type MembershipChanged = TechnicalCommittee;
 }
 
-parameter_types! {
-    pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
-    pub const MaxProposals: u32 = 100;
-}
-
 type TechnicalCollective = pallet_collective::Instance2;
 impl pallet_collective::Trait<TechnicalCollective> for Runtime {
+    type Origin = Origin;
+    type Proposal = Call;
+    type Event = Event;
+    type MotionDuration = MotionDuration;
+    type MaxProposals = MaxProposals;
+}
+
+// --- Financial committee
+
+impl pallet_membership::Trait<pallet_membership::Instance3> for Runtime {
+    type Event = Event;
+    type AddOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RemoveOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type MembershipInitialized = FinancialCommittee;
+    type MembershipChanged = FinancialCommittee;
+}
+
+type FinancialCollective = pallet_collective::Instance3;
+impl pallet_collective::Trait<FinancialCollective> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
     type Event = Event;
@@ -665,6 +695,8 @@ construct_runtime!(
         // Governance
         TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
+        FinancialCommittee: pallet_collective::<Instance3>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        FinancialMembership: pallet_membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
         CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
 
