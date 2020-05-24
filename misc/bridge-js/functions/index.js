@@ -108,6 +108,7 @@ exports.scheduledFunction = functions.pubsub.schedule('every 1 minutes').onRun(a
         .get();
 
     if (allUnpaids.empty) {
+        console.info('no unpaids transactions found');
         return null;
     }
 
