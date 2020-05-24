@@ -549,7 +549,7 @@ impl pallet_reserve::Trait for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Module<Runtime>;
     type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
 }
 
