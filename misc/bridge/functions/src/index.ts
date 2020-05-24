@@ -2,9 +2,13 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as blake2 from 'blake2';
 import StellarSdk from 'stellar-sdk';
+import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
 
 admin.initializeApp();
 const stellarServer = new StellarSdk.Server(functions.config().stellar.horizonurl);
+const keyring = new Keyring({ type: 'sr25519' });
+const bridgeAccount = keyring.addFromUri(functions.config().nodle.chainseed);
+const wsProvider = new WsProvider(functions.config().nodle.nodeEndpoint);
 
 const firestoreAccountsCollection = 'bridge-accounts';
 const firestoreTransactionsCollection = 'bridge-transactions';
@@ -92,4 +96,53 @@ export const proveTransaction = functions.https.onRequest(async (request, respon
     });
 
     response.send({ validTxHash: request.body.txHash })
+});
+
+exports.scheduledFunction = functions.pubsub.schedule('every 1 minutes').onRun(async (context) => {
+    const allUnpaids = await admin.firestore()
+        .collection(firestoreTransactionsCollection)
+        .where("paid", "==", "false")
+        .get();
+
+    if (allUnpaids.empty) {
+        return null;
+    }
+
+    const chainApi = await ApiPromise.create({ provider: wsProvider });
+
+    // Create an iterable structure to make sure we execute requests synchronously
+    const buffer: any[] = [];
+    allUnpaids.forEach(doc => {
+        buffer.push({ id: doc.id, data: doc.data() });
+    });
+
+    for (const entry of buffer) {
+        const entryId = entry.id;
+        const entryData = entry.data;
+
+        const amountInPico = Math.trunc(entryData.amount * 1000000000000);
+        const amountWithNoDecimals = Math.trunc(amountInPico);
+
+        // Make sure we have no decimals errors
+        if (amountInPico !== amountWithNoDecimals * 1.0) {
+            console.error(`computation error for ${entryId}`);
+            continue;
+        }
+
+        const txHash = await chainApi.tx.balances
+            .transfer(entryData.address, amountWithNoDecimals)
+            .signAndSend(bridgeAccount);
+
+        entryData.paid = true;
+        entryData.nodleTxHash = txHash.toString();
+
+        await admin.firestore()
+            .collection(firestoreTransactionsCollection)
+            .doc(entryId)
+            .set(entryData, { merge: true });
+
+        console.log(`done ${entryId} => ${txHash}`);
+    }
+
+    return null;
 });
