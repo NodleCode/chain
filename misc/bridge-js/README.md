@@ -5,7 +5,7 @@ A NodeJS service to bridge the Stellar Nodle Cash to the chain itself.
 This is a **one way** bridge that require users to destroy their coins to have them recreated on the new chain. A another two way bridge might be developed in the future.
 
 ## Deployment
-1. `npx firebase functions:config:set nodle.chainseed="SUBSTRATE_SEED" stellar.horizonurl="https://horizon-testnet.stellar.org" stellar.issuer="STELLAR_ADDR" stellar.code="STELLAR_ASSET_CODE" stellar.dest="STELLAR_ADDR" nodle.nodeEndpoint="wss://arcadia1.nodleprotocol.io"`.
+1. `npx firebase functions:config:set nodle.chainseed="SUBSTRATE_SEED" nodle.nodeendpoint="wss://arcadia1.nodleprotocol.io" stellar.horizonurl="https://horizon-testnet.stellar.org" stellar.issuer="STELLAR_ADDR" stellar.code="STELLAR_ASSET_CODE" stellar.dest="STELLAR_ADDR"`.
 2. `npx firebase deploy`.
 
 ## API Usage

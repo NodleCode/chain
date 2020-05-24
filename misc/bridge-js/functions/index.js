@@ -1,19 +1,17 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import * as blake2 from 'blake2';
-import StellarSdk from 'stellar-sdk';
-import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const blake2 = require('blake2');
+const StellarSdk = require('stellar-sdk');
+const { ApiPromise, Keyring, WsProvider } = require('@polkadot/api');
+const { cryptoWaitReady } = require('@polkadot/util-crypto');
 
 admin.initializeApp();
 const stellarServer = new StellarSdk.Server(functions.config().stellar.horizonurl);
-const keyring = new Keyring({ type: 'sr25519' });
-const bridgeAccount = keyring.addFromUri(functions.config().nodle.chainseed);
-const wsProvider = new WsProvider(functions.config().nodle.nodeEndpoint);
 
 const firestoreAccountsCollection = 'bridge-accounts';
 const firestoreTransactionsCollection = 'bridge-transactions';
 
-const byteToHexString = (uint8arr: Uint8Array) => {
+const byteToHexString = (uint8arr) => {
     let hexStr = '';
     for (const elem of uint8arr) {
         let hex = (elem & 0xff).toString(16);
@@ -24,7 +22,7 @@ const byteToHexString = (uint8arr: Uint8Array) => {
     return hexStr.toUpperCase();
 }
 
-export const registerMemo = functions.https.onRequest(async (request, response) => {
+exports.registerMemo = functions.https.onRequest(async (request, response) => {
     const nodlePublicKey = request.body.nodlePublicKey;
 
     // In order to generate a deterministic ID we hash the user's address.
@@ -40,7 +38,7 @@ export const registerMemo = functions.https.onRequest(async (request, response) 
     response.send({ memoHash: memoHash, destination: functions.config().nodle.coinsdest });
 });
 
-export const proveTransaction = functions.https.onRequest(async (request, response) => {
+exports.proveTransaction = functions.https.onRequest(async (request, response) => {
     const tx = await stellarServer.transactions()
         .transaction(request.body.txHash)
         .call();
@@ -99,6 +97,11 @@ export const proveTransaction = functions.https.onRequest(async (request, respon
 });
 
 exports.scheduledFunction = functions.pubsub.schedule('every 1 minutes').onRun(async (context) => {
+    await cryptoWaitReady();
+    const keyring = new Keyring({ type: 'sr25519' });
+    const bridgeAccount = keyring.addFromUri(functions.config().nodle.chainseed);
+    const wsProvider = new WsProvider(functions.config().nodle.nodeendpoint);
+
     const allUnpaids = await admin.firestore()
         .collection(firestoreTransactionsCollection)
         .where("paid", "==", "false")
@@ -111,7 +114,7 @@ exports.scheduledFunction = functions.pubsub.schedule('every 1 minutes').onRun(a
     const chainApi = await ApiPromise.create({ provider: wsProvider });
 
     // Create an iterable structure to make sure we execute requests synchronously
-    const buffer: any[] = [];
+    const buffer = [];
     allUnpaids.forEach(doc => {
         buffer.push({ id: doc.id, data: doc.data() });
     });
@@ -124,19 +127,19 @@ exports.scheduledFunction = functions.pubsub.schedule('every 1 minutes').onRun(a
         const amountWithNoDecimals = Math.trunc(amountInPico);
 
         // Make sure we have no decimals errors
-        if (amountInPico !== amountWithNoDecimals * 1.0) {
+        if (amountInPico !== Number(amountWithNoDecimals)) {
             console.error(`computation error for ${entryId}`);
             continue;
         }
 
-        const txHash = await chainApi.tx.balances
+        const txHash = await chainApi.tx.balances // eslint-disable-line no-await-in-loop
             .transfer(entryData.address, amountWithNoDecimals)
             .signAndSend(bridgeAccount);
 
         entryData.paid = true;
         entryData.nodleTxHash = txHash.toString();
 
-        await admin.firestore()
+        await admin.firestore() // eslint-disable-line no-await-in-loop
             .collection(firestoreTransactionsCollection)
             .doc(entryId)
             .set(entryData, { merge: true });
