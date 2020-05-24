@@ -104,7 +104,7 @@ exports.scheduledFunction = functions.pubsub.schedule('every 1 minutes').onRun(a
 
     const allUnpaids = await admin.firestore()
         .collection(firestoreTransactionsCollection)
-        .where("paid", "==", "false")
+        .where('paid', '==', false)
         .get();
 
     if (allUnpaids.empty) {
