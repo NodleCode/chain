@@ -22,7 +22,7 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
+use frame_benchmarking::{account, benchmarks_instance};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
@@ -31,7 +31,7 @@ const SEED_COUNTERER: u32 = 1;
 const SEED_VOTER: u32 = 2;
 const SEED_CHALLENGER: u32 = 3;
 
-benchmarks! {
+benchmarks_instance! {
     _ { }
 
     apply {
@@ -55,7 +55,7 @@ benchmarks! {
         let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
         let _ = T::Currency::make_free_balance_be(&counterer, deposit_countering);
 
-        let _ = <Module<T>>::apply(RawOrigin::Signed(
+        let _ = <Module<T, _>>::apply(RawOrigin::Signed(
             applicant.clone()).into(),
             metadata,
             deposit_applying
@@ -78,13 +78,13 @@ benchmarks! {
         let _ = T::Currency::make_free_balance_be(&counterer, deposit_countering);
         let _ = T::Currency::make_free_balance_be(&voter, deposit_voting);
 
-        let _ = <Module<T>>::apply(
+        let _ = <Module<T, _>>::apply(
             RawOrigin::Signed(applicant.clone()).into(),
             metadata,
             deposit_applying
         );
 
-        let _ = <Module<T>>::counter(
+        let _ = <Module<T, _>>::counter(
             RawOrigin::Signed(counterer.clone()).into(),
             applicant.clone(),
             deposit_countering
@@ -103,13 +103,13 @@ benchmarks! {
         let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
         let _ = T::Currency::make_free_balance_be(&challenger, deposit_challenging);
 
-        let _ = <Module<T>>::apply(
+        let _ = <Module<T, _>>::apply(
             RawOrigin::Signed(applicant.clone()).into(),
             metadata,
             deposit_applying
         );
 
-        let _ = <Module<T>>::commit_applications(
+        let _ = <Module<T, _>>::commit_applications(
             T::FinalizeApplicationPeriod::get() + <system::Module<T>>::block_number()
         );
     }: _(RawOrigin::Signed(challenger), applicant, deposit_challenging)
