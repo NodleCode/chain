@@ -19,8 +19,9 @@
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::{
     opaque::SessionKeys, AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig,
-    GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, SessionConfig, Signature,
-    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
+    RootMembershipConfig, SessionConfig, Signature, SystemConfig, TechnicalMembershipConfig,
+    ValidatorsSetConfig, WASM_BINARY,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -165,12 +166,25 @@ pub fn testnet_genesis(
         }),
 
         // Governance
+        // Technical Committee
         pallet_collective_Instance2: Some(Default::default()),
         pallet_membership_Instance1: Some(TechnicalMembershipConfig {
-            members: roots,
+            members: roots.clone(),
+            phantom: Default::default(),
+        }),
+        // Financial Committee
+        pallet_collective_Instance3: Some(Default::default()),
+        pallet_membership_Instance3: Some(FinancialMembershipConfig {
+            members: roots.clone(),
             phantom: Default::default(),
         }),
         pallet_reserve: Some(Default::default()),
+        // Root Committee
+        pallet_collective_Instance4: Some(Default::default()),
+        pallet_membership_Instance4: Some(RootMembershipConfig {
+            members: roots.clone(),
+            phantom: Default::default(),
+        }),
     }
 }
 
