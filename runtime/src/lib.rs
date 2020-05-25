@@ -486,16 +486,15 @@ parameter_types! {
 
 impl pallet_membership::Trait<pallet_membership::Instance1> for Runtime {
     type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
 }
@@ -513,16 +512,15 @@ impl pallet_collective::Trait<TechnicalCollective> for Runtime {
 
 impl pallet_membership::Trait<pallet_membership::Instance3> for Runtime {
     type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = FinancialCommittee;
     type MembershipChanged = FinancialCommittee;
 }
@@ -540,16 +538,15 @@ impl pallet_collective::Trait<FinancialCollective> for Runtime {
 
 impl pallet_membership::Trait<pallet_membership::Instance4> for Runtime {
     type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
 }
@@ -689,7 +686,7 @@ impl pallet_root_of_trust::Trait for Runtime {
 impl pallet_emergency_shutdown::Trait for Runtime {
     type Event = Event;
     type ShutdownOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
 }
 
 construct_runtime!(
