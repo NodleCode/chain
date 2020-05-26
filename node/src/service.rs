@@ -44,9 +44,13 @@ native_executor_instance!(
 /// be able to perform chain operations.
 macro_rules! new_full_start {
     ($config:expr) => {{
+        use nodle_chain_runtime::{AccountId, Index};
+        use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi};
+        use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
+        use sc_consensus_babe_rpc::{BabeApi, BabeRpcHandler};
+        use sc_finality_grandpa_rpc::{GrandpaApi, GrandpaRpcHandler};
         use std::sync::Arc;
-
-        type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
+        use substrate_frame_rpc_system::{FullSystem, SystemApi};
 
         let mut import_setup = None;
         let mut rpc_setup = None;
@@ -104,15 +108,59 @@ macro_rules! new_full_start {
                 Ok(import_queue)
             },
         )?
-        .with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
-            let mut io = jsonrpc_core::IoHandler::default();
-            io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
-                pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
-            ));
+        .with_rpc_extensions_builder(|builder| {
+            let pool = builder.pool().clone();
+            let client = builder.client().clone();
 
+            let babe_link = import_setup
+                .as_ref()
+                .map(|s| &s.2)
+                .expect("BabeLink is present for full services or set up failed; qed.");
+            let babe_config = babe_link.config().clone();
+            let shared_epoch_changes = babe_link.epoch_changes().clone();
+
+            let grandpa_link = import_setup
+                .as_ref()
+                .map(|s| &s.1)
+                .expect("GRANDPA LinkHalf is present for full services or set up failed; qed.");
+            let shared_authority_set = grandpa_link.shared_authority_set().clone();
             let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
-            rpc_setup = Some((shared_voter_state));
-            Ok(io)
+
+            rpc_setup = Some((shared_voter_state.clone()));
+
+            let select_chain = builder
+                .select_chain()
+                .cloned()
+                .expect("SelectChain is present for full services or set up failed; qed.");
+            let keystore = builder.keystore().clone();
+
+            Ok(move |deny_unsafe| {
+                let mut io = jsonrpc_core::IoHandler::default();
+                io.extend_with(SystemApi::<AccountId, Index>::to_delegate(FullSystem::new(
+                    client.clone(),
+                    pool.clone(),
+                )));
+                io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
+                    client.clone(),
+                )));
+                io.extend_with(BabeApi::to_delegate(BabeRpcHandler::new(
+                    client.clone(),
+                    shared_epoch_changes.clone(),
+                    keystore.clone(),
+                    babe_config.clone(),
+                    select_chain.clone(),
+                    deny_unsafe,
+                )));
+                io.extend_with(GrandpaApi::to_delegate(GrandpaRpcHandler::new(
+                    shared_authority_set.clone(),
+                    shared_voter_state.clone(),
+                )));
+                io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(
+                    client.clone(),
+                )));
+
+                io
+            })
         })?;
 
         (builder, import_setup, inherent_data_providers, rpc_setup)
@@ -162,7 +210,8 @@ macro_rules! new_full {
 		if let sc_service::config::Role::Authority { .. } = &role {
 			let proposer = sc_basic_authorship::ProposerFactory::new(
 				service.client(),
-				service.transaction_pool()
+                service.transaction_pool(),
+                service.prometheus_registry().as_ref(),
 			);
 
 			let client = service.client();
@@ -287,7 +336,9 @@ pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceEr
 
 /// Builds a new service for a light client.
 pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceError> {
-    type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
+    use nodle_chain_runtime::{AccountId, Index};
+    use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi};
+    use substrate_frame_rpc_system::{LightSystem, SystemApi};
 
     let inherent_data_providers = InherentDataProviders::new();
 
@@ -355,11 +406,22 @@ pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceE
             let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
             Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
         })?
-        .with_rpc_extensions(|builder| -> std::result::Result<RpcExtension, _> {
+        .with_rpc_extensions(|builder| {
+            let fetcher = builder
+                .fetcher()
+                .ok_or_else(|| "Trying to start node RPC without active fetcher")?;
+            let remote_blockchain = builder
+                .remote_backend()
+                .ok_or_else(|| "Trying to start node RPC without active remote blockchain")?;
+            let client = builder.client();
+
             let mut io = jsonrpc_core::IoHandler::default();
-            io.extend_with(pallet_root_of_trust_rpc::RootOfTrustApi::to_delegate(
-                pallet_root_of_trust_rpc::RootOfTrust::new(builder.client().clone()),
+            io.extend_with(SystemApi::<AccountId, Index>::to_delegate(
+                LightSystem::new(client.clone(), remote_blockchain, fetcher, builder.pool()),
             ));
+            io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(
+                client.clone(),
+            )));
 
             Ok(io)
         })?
