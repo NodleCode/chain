@@ -15,11 +15,13 @@ Describe what is changed and your reasoning.
 
 ### Sanity
 - [ ] I have incremented the runtime version number
+- [ ] I have incremented `transaction_version` if needed
 
 ### Quality
 - [ ] I have added unit tests, and they are passing
 - [ ] I have added benchmarks to my pallet
 - [ ] I have added the benchmarks to the node
+- [ ] I have added potential RPC calls to the node
 - [ ] I have added comments and documentation
 
 ### Testing

@@ -19,30 +19,18 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Authorship, Balance, Balances, MaximumBlockWeight, NegativeImbalance, System};
-use core::num::NonZeroI128;
+use crate::{Authorship, Balances, MaximumBlockWeight, NegativeImbalance, System};
 use frame_support::traits::{Currency, Get, OnUnbalanced};
-use frame_support::weights::Weight;
-use sp_runtime::traits::{Convert, Saturating};
-use sp_runtime::{Fixed128, Perquintill};
+use sp_runtime::{
+    traits::{Convert, Saturating},
+    Fixed128, FixedPointNumber, Perquintill,
+};
 
 /// Logic for the author to get a portion of fees.
 pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {
     fn on_nonzero_unbalanced(amount: NegativeImbalance) {
         Balances::resolve_creating(&Authorship::author(), amount);
-    }
-}
-
-/// Convert from weight to balance via a simple coefficient multiplication
-/// The associated type C encapsulates a constant in units of balance per weight
-pub struct LinearWeightToFee<C>(sp_std::marker::PhantomData<C>);
-
-impl<C: Get<Balance>> Convert<Weight, Balance> for LinearWeightToFee<C> {
-    fn convert(w: Weight) -> Balance {
-        // setting this to zero will disable the weight fee.
-        let coefficient = C::get();
-        Balance::from(w).saturating_mul(coefficient)
     }
 }
 
@@ -59,25 +47,21 @@ pub struct TargetedFeeAdjustment<T>(sp_std::marker::PhantomData<T>);
 impl<T: Get<Perquintill>> Convert<Fixed128, Fixed128> for TargetedFeeAdjustment<T> {
     fn convert(multiplier: Fixed128) -> Fixed128 {
         let max_weight = MaximumBlockWeight::get();
-        let block_weight = System::all_extrinsics_weight().total().min(max_weight);
+        let block_weight = System::block_weight().total().min(max_weight);
         let target_weight = (T::get() * max_weight) as u128;
         let block_weight = block_weight as u128;
 
         // determines if the first_term is positive
         let positive = block_weight >= target_weight;
         let diff_abs = block_weight.max(target_weight) - block_weight.min(target_weight);
-        // safe, diff_abs cannot exceed u64 and it can always be computed safely even with the lossy
-        // `Fixed128::from_rational`.
-        let diff = Fixed128::from_rational(
-            diff_abs as i128,
-            NonZeroI128::new(max_weight.max(1) as i128).unwrap(),
-        );
+        // safe, diff_abs cannot exceed u64.
+        let diff = Fixed128::saturating_from_rational(diff_abs, max_weight.max(1));
         let diff_squared = diff.saturating_mul(diff);
 
         // 0.00004 = 4/100_000 = 40_000/10^9
-        let v = Fixed128::from_rational(4, NonZeroI128::new(100_000).unwrap());
+        let v = Fixed128::saturating_from_rational(4, 100_000);
         // 0.00004^2 = 16/10^10 Taking the future /2 into account... 8/10^10
-        let v_squared_2 = Fixed128::from_rational(8, NonZeroI128::new(10_000_000_000).unwrap());
+        let v_squared_2 = Fixed128::saturating_from_rational(8, 10_000_000_000u64);
 
         let first_term = v.saturating_mul(diff);
         let second_term = v_squared_2.saturating_mul(diff_squared);
@@ -97,7 +81,7 @@ impl<T: Get<Perquintill>> Convert<Fixed128, Fixed128> for TargetedFeeAdjustment<
                 // multiplier. While at -1, it means that the network is so un-congested that all
                 // transactions have no weight fee. We stop here and only increase if the network
                 // became more busy.
-                .max(Fixed128::from_natural(-1))
+                .max(Fixed128::saturating_from_integer(-1))
         }
     }
 }
@@ -107,8 +91,7 @@ mod tests {
     use super::*;
     use crate::{constants::*, TargetBlockFullness, TransactionPayment};
     use crate::{AvailableBlockRatio, MaximumBlockWeight, Runtime};
-    use core::num::NonZeroI128;
-    use frame_support::weights::Weight;
+    use frame_support::weights::{Weight, WeightToFeePolynomial};
     use sp_runtime::assert_eq_error_rate;
 
     fn max() -> Weight {
@@ -133,7 +116,7 @@ mod tests {
         let s = block_weight;
 
         let fm = v * (s / m - ss / m) + v.powi(2) * (s / m - ss / m).powi(2) / 2.0;
-        let addition_fm = Fixed128::from_parts((fm * Fixed128::accuracy() as f64).round() as i128);
+        let addition_fm = Fixed128::from_inner((fm * Fixed128::accuracy() as f64).round() as i128);
         previous.saturating_add(addition_fm)
     }
 
@@ -153,7 +136,7 @@ mod tests {
 
     #[test]
     fn fee_multiplier_update_poc_works() {
-        let fm = Fixed128::from_rational(0, NonZeroI128::new(1).unwrap());
+        let fm = Fixed128::saturating_from_rational(0, 1);
         let test_set = vec![
             (0, fm.clone()),
             (100, fm.clone()),
@@ -167,7 +150,7 @@ mod tests {
                     fee_multiplier_update(w, fm),
                     TargetedFeeAdjustment::<TargetBlockFullness>::convert(fm),
                     // Error is only 1 in 10^18
-                    Fixed128::from_parts(1),
+                    Fixed128::from_inner(1),
                 );
             })
         })
@@ -183,7 +166,7 @@ mod tests {
             loop {
                 let next = TargetedFeeAdjustment::<TargetBlockFullness>::convert(fm);
                 fm = next;
-                if fm == Fixed128::from_natural(-1) {
+                if fm == Fixed128::saturating_from_integer(-1) {
                     break;
                 }
                 iterations += 1;
@@ -231,8 +214,8 @@ mod tests {
                 fm = next;
                 iterations += 1;
                 let fee =
-                    <Runtime as pallet_transaction_payment::Trait>::WeightToFee::convert(tx_weight);
-                let adjusted_fee = fm.saturated_multiply_accumulate(fee);
+                    <Runtime as pallet_transaction_payment::Trait>::WeightToFee::calc(&tx_weight);
+                let adjusted_fee = fm.saturating_mul_acc_int(fee);
                 println!(
                     "iteration {}, new fm = {:?}. Fee at this point is: {} units / {} millicents, \
 					{} cents, {} dollars",
@@ -325,8 +308,10 @@ mod tests {
 
             // ... stops going down at -1
             assert_eq!(
-                TargetedFeeAdjustment::<TargetBlockFullness>::convert(Fixed128::from_natural(-1)),
-                Fixed128::from_natural(-1)
+                TargetedFeeAdjustment::<TargetBlockFullness>::convert(
+                    Fixed128::saturating_from_integer(-1)
+                ),
+                Fixed128::saturating_from_integer(-1)
             );
         })
     }
@@ -335,7 +320,7 @@ mod tests {
     fn weight_to_fee_should_not_overflow_on_large_weights() {
         let kb = 1024 as Weight;
         let mb = kb * kb;
-        let max_fm = Fixed128::from_natural(i128::max_value());
+        let max_fm = Fixed128::saturating_from_integer(i128::max_value());
 
         // check that for all values it can compute, correctly.
         vec![
@@ -361,7 +346,7 @@ mod tests {
                 let next =
                     TargetedFeeAdjustment::<TargetBlockFullness>::convert(Fixed128::default());
                 let truth = fee_multiplier_update(i, Fixed128::default());
-                assert_eq_error_rate!(truth, next, Fixed128::from_parts(50_000_000));
+                assert_eq_error_rate!(truth, next, Fixed128::from_inner(50_000_000));
             });
         });
 

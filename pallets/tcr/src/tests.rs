@@ -71,6 +71,7 @@ impl system::Trait for Test {
     type DbWeight = ();
     type BlockExecutionWeight = ();
     type ExtrinsicBaseWeight = ();
+    type MaximumExtrinsicWeight = MaximumBlockWeight;
 }
 parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);

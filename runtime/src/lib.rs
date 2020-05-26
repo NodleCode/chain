@@ -39,7 +39,7 @@ use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{
         BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, NumberFor, OpaqueKeys,
-        SaturatedConversion, StaticLookup, Verify,
+        SaturatedConversion, Saturating, StaticLookup, Verify,
     },
     transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, MultiSignature,
@@ -55,7 +55,7 @@ pub use frame_support::{
     traits::{Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, SplitTwoWays},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        Weight,
+        IdentityFee, Weight,
     },
     StorageValue,
 };
@@ -68,7 +68,7 @@ pub use sp_runtime::{Perbill, Permill, Perquintill};
 pub mod constants;
 mod implementations;
 
-use implementations::{Author, LinearWeightToFee, TargetedFeeAdjustment};
+use implementations::{Author, TargetedFeeAdjustment};
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 20,
+    spec_version: 21,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -179,8 +179,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// would result in only the `impl_version` changing.
     impl_version: 0,
 
+    /// Used for hardware wallets. This typically happens when `SignedExtra` changes.
+    transaction_version: 2,
+
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 1,
 };
 
 /// The version infromation used to identify this runtime when compiled natively.
@@ -197,6 +199,8 @@ parameter_types! {
     pub const MaximumBlockWeight: Weight = 2 * WEIGHT_PER_SECOND;
     pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
     pub const MaximumBlockLength: u32 = 5 * 1024 * 1024;
+    pub const MaximumExtrinsicWeight: Weight = AvailableBlockRatio::get()
+        .saturating_sub(Perbill::from_percent(10)) * MaximumBlockWeight::get();
     pub const Version: RuntimeVersion = VERSION;
 }
 
@@ -223,6 +227,7 @@ impl frame_system::Trait for Runtime {
     type DbWeight = RocksDbWeight;
     type BlockExecutionWeight = BlockExecutionWeight;
     type ExtrinsicBaseWeight = ExtrinsicBaseWeight;
+    type MaximumExtrinsicWeight = MaximumExtrinsicWeight;
 }
 
 parameter_types! {
@@ -341,12 +346,17 @@ impl pallet_im_online::Trait for Runtime {
     type UnsignedPriority = ImOnlineUnsignedPriority;
 }
 
+parameter_types! {
+    pub const OffencesWeightSoftLimit: Weight = Perbill::from_percent(60) * MaximumBlockWeight::get();
+}
+
 impl pallet_offences::Trait for Runtime {
     type Event = Event;
     type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
     // TODO: as of now, we don't execute any slashing, however offences are logged
     // so that we could decide to remove validators later
     type OnOffenceHandler = ();
+    type WeightSoftLimit = OffencesWeightSoftLimit;
 }
 
 parameter_types! {
@@ -397,16 +407,13 @@ parameter_types! {
     // For a sane configuration, this should always be less than `AvailableBlockRatio`.
     // Fees raises after a fullness of 25%
     pub const TargetBlockFullness: Perquintill = constants::TARGET_BLOCK_FULLNESS;
-    // In the Substrate node, a weight of 10_000_000 (smallest non-zero weight)
-    // is mapped to 10_000_000 units of fees, hence:
-    pub const WeightFeeCoefficient: Balance = 1;
 }
 
 impl pallet_transaction_payment::Trait for Runtime {
     type Currency = Balances;
     type OnTransactionPayment = DealWithFees;
     type TransactionByteFee = TransactionByteFee;
-    type WeightToFee = LinearWeightToFee<WeightFeeCoefficient>;
+    type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness>;
 }
 
@@ -634,6 +641,7 @@ impl pallet_utility::Trait for Runtime {
     type MultisigDepositBase = MultisigDepositBase;
     type MultisigDepositFactor = MultisigDepositFactor;
     type MaxSignatories = MaxSignatories;
+    type IsCallable = ();
 }
 
 parameter_types! {
