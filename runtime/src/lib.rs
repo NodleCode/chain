@@ -179,8 +179,10 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// would result in only the `impl_version` changing.
     impl_version: 0,
 
+    /// Typically this is modified when `SignedExtra` is changed.
+    transaction_version: 2,
+
     apis: RUNTIME_API_VERSIONS,
-    transaction_version: 1,
 };
 
 /// The version infromation used to identify this runtime when compiled natively.

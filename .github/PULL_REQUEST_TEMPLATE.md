@@ -15,6 +15,7 @@ Describe what is changed and your reasoning.
 
 ### Sanity
 - [ ] I have incremented the runtime version number
+- [ ] I have incremented the `transaction_version` number if needed
 
 ### Quality
 - [ ] I have added unit tests, and they are passing
