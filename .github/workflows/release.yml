@@ -1,4 +1,4 @@
-name: Create binaries for release
+name: Create artefacts for release
 
 on:
   release:  
@@ -27,76 +27,3 @@ jobs:
           dockerfile: '.maintain/docker/Dockerfile'
           cache_froms: nodlecode/chain/nodle-chain:latest
           add_git_labels: true
-
-  node:
-    name: Compile and make available binaries
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Cache cargo registry  
-      uses: actions/cache@v1  
-      with: 
-        path: ~/.cargo/registry 
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-registry-
-
-    - name: Cache cargo index 
-      uses: actions/cache@v1  
-      with: 
-        path: ~/.cargo/git  
-        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-index-
-
-    - name: Cache cargo build
-      uses: actions/cache@v1
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-target-
-
-    - name: Install ubuntu native dependencies
-      if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install -y cmake pkg-config libssl-dev git gcc build-essential clang libclang-dev
-
-    - name: Cleanup ubuntu filesystem
-      if: matrix.os == 'ubuntu-latest'
-      run: sudo apt clean
-
-    - name: Install mac os native dependencies
-      if: matrix.os == 'macos-latest'
-      run: brew install openssl cmake llvm
-
-    - name: Setup toolchain
-      run: ./scripts/init.sh
-
-    - name: Build in release mode
-      run: cargo build -p nodle-chain --release
-
-    - name: Upload node binary
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./target/release/nodle-chain
-        asset_name: nodle-chain-${{ matrix.os }}-${{ github.event.release.tag_name }}
-        asset_content_type: binary/octet-stream
-
-    - name: Upload runtime WASM blob
-      if: matrix.os == 'ubuntu-latest' # OS was chosen arbitrarily
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: target/release/wbuild/target/wasm32-unknown-unknown/release/nodle_chain_runtime.wasm
-        asset_name: runtime-${{ github.event.release.tag_name }}.wasm
-        asset_content_type: binary/octet-stream
