@@ -117,8 +117,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
         .into()
 }
 
-fn make_proposal(value: u64) -> Call {
-    Call::System(frame_system::Call::remark(value.encode()))
+fn make_proposal(value: u64) -> Box<Call> {
+    Box::new(Call::System(frame_system::Call::remark(value.encode())))
 }
 
 #[test]

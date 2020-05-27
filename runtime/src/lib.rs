@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 21,
+    spec_version: 22,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -570,10 +570,34 @@ impl pallet_collective::Trait<RootCollective> for Runtime {
 impl pallet_mandate::Trait for Runtime {
     type Event = Event;
     type Call = Call;
-
-    // A majority of the committee can dispatch root calls
     type ExternalOrigin =
-        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, RootCollective>;
+}
+
+parameter_types! {
+    pub const MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * MaximumBlockWeight::get();
+}
+
+impl pallet_scheduler::Trait for Runtime {
+    type Event = Event;
+    type Origin = Origin;
+    type Call = Call;
+    type MaximumWeight = MaximumSchedulerWeight;
+}
+
+parameter_types! {
+    pub const AmendmentDelay: BlockNumber = 2 * constants::DAYS;
+}
+
+impl pallet_amendments::Trait for Runtime {
+    type Event = Event;
+    type Amendment = Call;
+    type Scheduler = Scheduler;
+    type SubmissionOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type VetoOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type Delay = AmendmentDelay;
 }
 
 impl pallet_reserve::Trait for Runtime {
@@ -731,6 +755,8 @@ construct_runtime!(
         FinancialMembership: pallet_membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
         RootCommittee: pallet_collective::<Instance4>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
         RootMembership: pallet_membership::<Instance4>::{Module, Call, Storage, Event<T>, Config<T>},
+        Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
+        Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
         CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
 
@@ -964,6 +990,7 @@ sp_api::impl_runtime_apis! {
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&pallet, &benchmark, &lowest_range_values, &highest_range_values, &steps, repeat);
 
+            add_benchmark!(params, batches, b"amendments", Amendments);
             add_benchmark!(params, batches, b"balances", Balances);
             add_benchmark!(params, batches, b"collective", TechnicalCommittee);
             add_benchmark!(params, batches, b"emergency-shutdown", EmergencyShutdown);
@@ -974,6 +1001,7 @@ sp_api::impl_runtime_apis! {
             //add_benchmark!(params, batches, b"session", SessionBench::<Runtime>);
             //add_benchmark!(params, batches, b"system", SystemBench::<Runtime>);
             add_benchmark!(params, batches, b"root-of-trust", PkiRootOfTrust);
+            add_benchmark!(params, batches, b"scheduler", Scheduler);
             add_benchmark!(params, batches, b"tcr", PkiTcr);
             add_benchmark!(params, batches, b"timestamp", Timestamp);
             add_benchmark!(params, batches, b"utility", Utility);

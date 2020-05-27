@@ -36,7 +36,7 @@ benchmarks! {
         let b in 1 .. MAX_BYTES;
 
         let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
-        let call = Call::<T>::propose(amendment);
+        let call = Call::<T>::propose(Box::new(amendment));
         let origin = T::SubmissionOrigin::successful_origin();
     }: {
         let _ = call.dispatch(origin)?;
@@ -48,7 +48,7 @@ benchmarks! {
         let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
         Module::<T>::propose(
             SystemOrigin::Root.into(),
-            amendment
+            Box::new(amendment)
         )?;
 
         let call = Call::<T>::veto(0);

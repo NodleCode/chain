@@ -30,6 +30,7 @@ use frame_support::{
 use frame_system::{self as system, ensure_root};
 use parity_scale_codec::Encode;
 use sp_runtime::{traits::Dispatchable, DispatchResult};
+use sp_std::prelude::Box;
 
 mod benchmarking;
 mod tests;
@@ -90,11 +91,11 @@ decl_module! {
 
         /// Trigger a new challenge to remove an existing member
         #[weight = FunctionOf(
-            |args: (&<T as Trait>::Amendment,)| args.0.get_dispatch_info().weight + 20_000,
-            |args: (&<T as Trait>::Amendment,)| args.0.get_dispatch_info().class,
+            |args: (&Box<<T as Trait>::Amendment>,)| args.0.get_dispatch_info().weight + 20_000,
+            |args: (&Box<<T as Trait>::Amendment>,)| args.0.get_dispatch_info().class,
             Pays::Yes,
         )]
-        fn propose(origin, amendment: T::Amendment) -> DispatchResult {
+        fn propose(origin, amendment: Box<T::Amendment>) -> DispatchResult {
             T::SubmissionOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
@@ -108,7 +109,7 @@ decl_module! {
                 when,
                 None,
                 62,
-                amendment.clone(),
+                *amendment,
             ).is_err() {
                 Err(Error::<T>::FailedToScheduleAmendment)?;
             }
