@@ -94,6 +94,7 @@ ord_parameter_types! {
     pub const Veto: u64 = 2;
     pub const Accelerator: u64 = 3;
     pub const Hacker: u64 = 4;
+    pub const BlockDelay: u64 = 10;
 }
 impl Trait for Test {
     type Event = ();
@@ -101,6 +102,7 @@ impl Trait for Test {
     type SubmissionOrigin = EnsureSignedBy<Proposer, u64>;
     type VetoOrigin = EnsureSignedBy<Veto, u64>;
     type AccelerationOrigin = EnsureSignedBy<Accelerator, u64>;
+    type Delay = BlockDelay;
     type Scheduler = Scheduler;
 }
 
@@ -121,22 +123,31 @@ fn make_proposal(value: u64) -> Call {
     Call::System(frame_system::Call::remark(value.encode()))
 }
 
-fn proposal_hash(proposal: Call) -> H256 {
-    BlakeTwo256::hash(&proposal.encode()[..])
-}
-
 #[test]
 fn non_authorized_origin_cannot_trigger_amendment() {
     new_test_ext().execute_with(|| {
         assert_noop!(
-            Amendments::propose(Origin::signed(Hacker::get()), Box::new(make_proposal((1)))),
+            Amendments::propose(Origin::signed(Hacker::get()), make_proposal(1)),
             BadOrigin
         );
     })
 }
 
 #[test]
-fn call_gets_registered_correctly() {}
+fn call_gets_registered_correctly() {
+    new_test_ext().execute_with(|| {
+        let amendment = make_proposal(1);
+        assert_ok!(Amendments::propose(
+            Origin::signed(Proposer::get()),
+            amendment.clone()
+        ));
+
+        assert_eq!(Amendments::pending_amendments().len(), 1);
+
+        let pending = &Amendments::pending_amendments()[0];
+        assert_eq!(pending.amendment, amendment);
+    })
+}
 
 #[test]
 fn non_accelerator_cannot_accelerate_proposal() {}

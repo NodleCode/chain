@@ -22,8 +22,8 @@
 //! delay configured along with a veto capability.
 
 use frame_support::{
-    decl_event, decl_module, decl_storage,
-    traits::{schedule::Named as ScheduleNamed, EnsureOrigin, LockIdentifier},
+    decl_error, decl_event, decl_module, decl_storage,
+    traits::{schedule::Named as ScheduleNamed, EnsureOrigin, Get, LockIdentifier},
     weights::{FunctionOf, GetDispatchInfo, Pays},
     Parameter,
 };
@@ -36,10 +36,12 @@ mod tests;
 
 const AMENDMENTS_ID: LockIdentifier = *b"amendmen";
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-pub struct PendingAmendment<Amendment, BlockNumber> {
+type AmendmentId = u64;
+
+#[derive(Encode, Decode, Clone, PartialEq)]
+pub struct PendingAmendment<Amendment> {
     amendment: Amendment,
-    execute_on: BlockNumber,
+    scheduler_id: Vec<u8>,
 }
 
 /// The module's configuration trait.
@@ -56,6 +58,16 @@ pub trait Trait: system::Trait {
 
     /// Origin that can speed up amendments
     type AccelerationOrigin: EnsureOrigin<Self::Origin>;
+
+    /// How much blocks have to be produced before executing the amendment
+    type Delay: Get<Self::BlockNumber>;
+}
+
+decl_error! {
+    pub enum Error for Module<T: Trait> {
+        /// We failed to schedule the amendment
+        FailedToScheduleAmendment,
+    }
 }
 
 decl_event!(
@@ -65,7 +77,7 @@ decl_event!(
         <T as frame_system::Trait>::BlockNumber,
     {
         /// A new amendment has been scheduled to be executed at the given block number
-        AmendmentScheduled(Hash, BlockNumber),
+        AmendmentScheduled(Vec<u8>, BlockNumber),
         /// An amendment has been applied with success to the ledger
         AmendmentSuccess(Hash),
         /// An amendment has not been applied with success to the ledger
@@ -80,8 +92,9 @@ decl_event!(
 decl_storage! {
     trait Store for Module<T: Trait> as Amendments {
         /// This keeps track of the upcoming amendments
-        pub PendingAmendments get(fn pending_amendments):
-            map hasher(blake2_128_concat) T::Hash => PendingAmendment<T::Amendment, T::BlockNumber>;
+        pub PendingAmendments get(fn pending_amendments): Vec<PendingAmendment<T::Amendment>>;
+        /// Internal variable to keep track of amendment ids for scheduling purposes
+        pub AmendmentsScheduled get(fn amendments_scheduled): u64;
     }
 }
 
@@ -91,12 +104,33 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Trigger a new challenge to remove an existing member
-        #[weight = 100_000_000]
-        fn propose(origin, amendment: Box<T::Amendment>) -> DispatchResult {
+        #[weight = 50_000_000]
+        fn propose(origin, amendment: T::Amendment) -> DispatchResult {
             T::SubmissionOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
+            let nb_scheduled = <AmendmentsScheduled>::get();
+            let scheduler_id = (AMENDMENTS_ID, nb_scheduled).encode();
+            let when = <system::Module<T>>::block_number() + T::Delay::get();
+
+            if T::Scheduler::schedule_named(
+                scheduler_id.clone(),
+                when,
+                None,
+                62,
+                amendment.clone(),
+            ).is_err() {
+                Err(Error::<T>::FailedToScheduleAmendment)?;
+            }
+
+            <AmendmentsScheduled>::put(nb_scheduled.clone());
+            <PendingAmendments<T>>::mutate(|p| p.push(PendingAmendment{
+                amendment: amendment,
+                scheduler_id: scheduler_id.clone(),
+            }));
+
+            Self::deposit_event(RawEvent::AmendmentScheduled(scheduler_id, when));
             Ok(())
         }
     }
