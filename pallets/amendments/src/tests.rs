@@ -29,7 +29,7 @@ use parity_scale_codec::Encode;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
-    traits::{BlakeTwo256, Hash, IdentityLookup},
+    traits::{BlakeTwo256, IdentityLookup},
     DispatchError::BadOrigin,
     Perbill,
 };
@@ -92,8 +92,7 @@ impl pallet_scheduler::Trait for Test {
 ord_parameter_types! {
     pub const Proposer: u64 = 1;
     pub const Veto: u64 = 2;
-    pub const Accelerator: u64 = 3;
-    pub const Hacker: u64 = 4;
+    pub const Hacker: u64 = 3;
     pub const BlockDelay: u64 = 10;
 }
 impl Trait for Test {
@@ -101,7 +100,6 @@ impl Trait for Test {
     type Amendment = Call;
     type SubmissionOrigin = EnsureSignedBy<Proposer, u64>;
     type VetoOrigin = EnsureSignedBy<Veto, u64>;
-    type AccelerationOrigin = EnsureSignedBy<Accelerator, u64>;
     type Delay = BlockDelay;
     type Scheduler = Scheduler;
 }
@@ -136,33 +134,31 @@ fn non_authorized_origin_cannot_trigger_amendment() {
 #[test]
 fn call_gets_registered_correctly() {
     new_test_ext().execute_with(|| {
-        let amendment = make_proposal(1);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
-            amendment.clone()
+            make_proposal(1)
         ));
-
-        assert_eq!(Amendments::pending_amendments().len(), 1);
-
-        let pending = &Amendments::pending_amendments()[0];
-        assert_eq!(pending.amendment, amendment);
     })
 }
 
 #[test]
-fn non_accelerator_cannot_accelerate_proposal() {}
+fn non_veto_origin_cannot_veto() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Amendments::veto(Origin::signed(Hacker::get()), 0),
+            BadOrigin
+        );
+    })
+}
 
 #[test]
-fn accelerator_speeds_up_proposal() {}
+fn veto_proposal_before_delay_expired() {
+    new_test_ext().execute_with(|| {
+        assert_ok!(Amendments::propose(
+            Origin::signed(Proposer::get()),
+            make_proposal(1)
+        ));
 
-#[test]
-fn non_veto_origin_cannot_veto() {}
-
-#[test]
-fn veto_proposal_before_delay_expired() {}
-
-#[test]
-fn call_is_not_executed_when_delay_is_not_met() {}
-
-#[test]
-fn call_is_executed_when_delay_is_met() {}
+        assert_ok!(Amendments::veto(Origin::signed(Veto::get()), 0));
+    })
+}

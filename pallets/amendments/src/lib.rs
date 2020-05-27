@@ -28,21 +28,12 @@ use frame_support::{
     Parameter,
 };
 use frame_system::{self as system, ensure_root};
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::Encode;
 use sp_runtime::{traits::Dispatchable, DispatchResult};
-use sp_std::prelude::Box;
 
 mod tests;
 
 const AMENDMENTS_ID: LockIdentifier = *b"amendmen";
-
-type AmendmentId = u64;
-
-#[derive(Encode, Decode, Clone, PartialEq)]
-pub struct PendingAmendment<Amendment> {
-    amendment: Amendment,
-    scheduler_id: Vec<u8>,
-}
 
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
@@ -56,9 +47,6 @@ pub trait Trait: system::Trait {
     /// Origin that can veto amendments
     type VetoOrigin: EnsureOrigin<Self::Origin>;
 
-    /// Origin that can speed up amendments
-    type AccelerationOrigin: EnsureOrigin<Self::Origin>;
-
     /// How much blocks have to be produced before executing the amendment
     type Delay: Get<Self::BlockNumber>;
 }
@@ -67,32 +55,25 @@ decl_error! {
     pub enum Error for Module<T: Trait> {
         /// We failed to schedule the amendment
         FailedToScheduleAmendment,
+        /// We failed to cancel the amendment
+        FailedToCancelAmendment,
     }
 }
 
 decl_event!(
     pub enum Event<T>
     where
-        <T as frame_system::Trait>::Hash,
         <T as frame_system::Trait>::BlockNumber,
     {
         /// A new amendment has been scheduled to be executed at the given block number
-        AmendmentScheduled(Vec<u8>, BlockNumber),
-        /// An amendment has been applied with success to the ledger
-        AmendmentSuccess(Hash),
-        /// An amendment has not been applied with success to the ledger
-        AmendmentFailure(Hash),
+        AmendmentScheduled(u64, BlockNumber),
         /// An amendment has been vetoed and will never be triggered
-        AmendmentVetoed(Hash),
-        /// An amendment has been fast tracked
-        AmendmentAccelerated(Hash),
+        AmendmentVetoed(u64),
     }
 );
 
 decl_storage! {
     trait Store for Module<T: Trait> as Amendments {
-        /// This keeps track of the upcoming amendments
-        pub PendingAmendments get(fn pending_amendments): Vec<PendingAmendment<T::Amendment>>;
         /// Internal variable to keep track of amendment ids for scheduling purposes
         pub AmendmentsScheduled get(fn amendments_scheduled): u64;
     }
@@ -104,7 +85,11 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Trigger a new challenge to remove an existing member
-        #[weight = 50_000_000]
+        #[weight = FunctionOf(
+            |args: (&<T as Trait>::Amendment,)| args.0.get_dispatch_info().weight + 20_000,
+            |args: (&<T as Trait>::Amendment,)| args.0.get_dispatch_info().class,
+            Pays::Yes,
+        )]
         fn propose(origin, amendment: T::Amendment) -> DispatchResult {
             T::SubmissionOrigin::try_origin(origin)
                 .map(|_| ())
@@ -124,13 +109,25 @@ decl_module! {
                 Err(Error::<T>::FailedToScheduleAmendment)?;
             }
 
-            <AmendmentsScheduled>::put(nb_scheduled.clone());
-            <PendingAmendments<T>>::mutate(|p| p.push(PendingAmendment{
-                amendment: amendment,
-                scheduler_id: scheduler_id.clone(),
-            }));
+            <AmendmentsScheduled>::put(nb_scheduled.clone() + 1);
 
-            Self::deposit_event(RawEvent::AmendmentScheduled(scheduler_id, when));
+            Self::deposit_event(RawEvent::AmendmentScheduled(nb_scheduled, when));
+            Ok(())
+        }
+
+        /// Veto and cancel a scheduled amendment
+        #[weight = 20_000_000]
+        fn veto(origin, amendment_id: u64) -> DispatchResult {
+            T::VetoOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
+
+            let scheduler_id = (AMENDMENTS_ID, amendment_id).encode();
+            if T::Scheduler::cancel_named(scheduler_id).is_err() {
+                Err(Error::<T>::FailedToCancelAmendment)?;
+            }
+
+            Self::deposit_event(RawEvent::AmendmentVetoed(amendment_id));
             Ok(())
         }
     }
