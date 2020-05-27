@@ -31,6 +31,7 @@ use frame_system::{self as system, ensure_root};
 use parity_scale_codec::Encode;
 use sp_runtime::{traits::Dispatchable, DispatchResult};
 
+mod benchmarking;
 mod tests;
 
 const AMENDMENTS_ID: LockIdentifier = *b"amendmen";
@@ -38,7 +39,10 @@ const AMENDMENTS_ID: LockIdentifier = *b"amendmen";
 /// The module's configuration trait.
 pub trait Trait: system::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
-    type Amendment: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+    type Amendment: Parameter
+        + Dispatchable<Origin = Self::Origin>
+        + From<frame_system::Call<Self>>
+        + GetDispatchInfo;
     type Scheduler: ScheduleNamed<Self::BlockNumber, Self::Amendment>;
 
     /// Origin that can submit amendments
