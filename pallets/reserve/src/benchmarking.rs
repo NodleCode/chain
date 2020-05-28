@@ -22,14 +22,14 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
+use frame_benchmarking::{account, benchmarks_instance};
 use frame_system::RawOrigin;
 use sp_runtime::traits::{Dispatchable, Saturating};
 use sp_std::prelude::*;
 
 const SEED: u32 = 0;
 
-benchmarks! {
+benchmarks_instance! {
     _ { }
 
     tip {
@@ -44,7 +44,7 @@ benchmarks! {
         let dest = account("dest", u, SEED);
         let value = T::Currency::minimum_balance().saturating_mul(100.into());
 
-        let call = Call::<T>::spend(dest, value);
+        let call = Call::<T, I>::spend(dest, value);
         let origin = T::ExternalOrigin::successful_origin();
     }: {
         let _ = call.dispatch(origin)?;

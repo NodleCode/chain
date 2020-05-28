@@ -42,7 +42,7 @@ use sp_runtime::{
         SaturatedConversion, Saturating, StaticLookup, Verify,
     },
     transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult, ModuleId, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 23,
+    spec_version: 24,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -600,12 +600,43 @@ impl pallet_amendments::Trait for Runtime {
     type Delay = AmendmentDelay;
 }
 
-impl pallet_reserve::Trait for Runtime {
+parameter_types! {
+    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+}
+
+impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Module<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
+    type ModuleId = CompanyReserveModuleId;
+}
+
+parameter_types! {
+    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint");
+}
+
+impl pallet_reserve::Trait<pallet_reserve::Instance2> for Runtime {
+    type Event = Event;
+    type Currency = pallet_balances::Module<Runtime>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type Call = Call;
+    type ModuleId = InternationalReserveModuleId;
+}
+
+parameter_types! {
+    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa");
+}
+
+impl pallet_reserve::Trait<pallet_reserve::Instance3> for Runtime {
+    type Event = Event;
+    type Currency = pallet_balances::Module<Runtime>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type Call = Call;
+    type ModuleId = UsaReserveModuleId;
 }
 
 parameter_types! {
@@ -772,7 +803,9 @@ construct_runtime!(
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
-        CompanyReserve: pallet_reserve::{Module, Call, Storage, Config, Event<T>},
+        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config, Event<T>},
+        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config, Event<T>},
+        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config, Event<T>},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
