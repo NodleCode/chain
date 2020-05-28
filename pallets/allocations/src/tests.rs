@@ -96,7 +96,11 @@ parameter_types! {
     pub const CoinsLimit: u64 = 1_000_000;
     pub const Fee: Perbill = Perbill::from_percent(10);
 }
-
+impl WithAccountId<u64> for Receiver {
+    fn account_id() -> u64 {
+        Receiver::get()
+    }
+}
 impl Trait for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;

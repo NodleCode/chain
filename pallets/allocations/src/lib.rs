@@ -26,10 +26,12 @@ use frame_support::{
     traits::{ChangeMembers, Currency, Get, Imbalance, InitializeMembers, OnUnbalanced},
 };
 use frame_system::{self as system, ensure_signed};
+use nodle_support::WithAccountId;
 use sp_runtime::{
     traits::{CheckedAdd, Saturating},
     DispatchResult, Perbill,
 };
+use sp_std::prelude::Vec;
 
 type BalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
@@ -41,7 +43,7 @@ pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
     type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
     type Currency: Currency<Self::AccountId>;
     type ProtocolFee: Get<Perbill>;
-    type ProtocolFeeReceiver: Get<Self::AccountId>;
+    type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
     type SourceOfTheCoins: OnUnbalanced<PositiveImbalanceOf<Self>>;
     type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
 }
@@ -98,7 +100,7 @@ decl_module! {
 
             let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
             let r_grantee = T::Currency::deposit_creating(&to, amount_for_grantee);
-            let r_protocol = T::Currency::deposit_creating(&T::ProtocolFeeReceiver::get(), amount_for_protocol);
+            let r_protocol = T::Currency::deposit_creating(&T::ProtocolFeeReceiver::account_id(), amount_for_protocol);
             total_imbalance.subsume(r_grantee);
             total_imbalance.subsume(r_protocol);
             T::SourceOfTheCoins::on_unbalanced(total_imbalance);

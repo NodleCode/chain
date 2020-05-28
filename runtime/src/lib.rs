@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 22,
+    spec_version: 23,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -721,6 +721,20 @@ impl pallet_emergency_shutdown::Trait for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
 }
 
+parameter_types! {
+    pub const ProtocolFee: Perbill = Perbill::from_percent(20);
+    pub const MaximumCoinsEverAllocated: Balance = 1_000_000_000 * constants::NODL;
+}
+
+impl pallet_allocations::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type ProtocolFee = ProtocolFee;
+    type ProtocolFeeReceiver = CompanyReserve;
+    type SourceOfTheCoins = ();
+    type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -769,6 +783,7 @@ construct_runtime!(
         PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
         PkiRootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
         EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event, Storage},
+        Allocations: pallet_allocations::{Module, Call, Event<T>, Storage},
     }
 );
 
@@ -990,6 +1005,7 @@ sp_api::impl_runtime_apis! {
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&pallet, &benchmark, &lowest_range_values, &highest_range_values, &steps, repeat);
 
+            add_benchmark!(params, batches, b"allocations", Allocations);
             add_benchmark!(params, batches, b"amendments", Amendments);
             add_benchmark!(params, batches, b"balances", Balances);
             add_benchmark!(params, batches, b"collective", TechnicalCommittee);
