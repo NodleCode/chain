@@ -18,7 +18,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-//mod benchmarking;
+mod benchmarking;
 mod tests;
 
 use frame_support::{
