@@ -26,8 +26,10 @@ use frame_support::{
     traits::{ChangeMembers, Currency, Get, Imbalance, InitializeMembers, OnUnbalanced},
 };
 use frame_system::{self as system, ensure_signed};
-use sp_runtime::DispatchResult;
-use sp_runtime::Perbill;
+use sp_runtime::{
+    traits::{CheckedAdd, Saturating},
+    DispatchResult, Perbill,
+};
 
 type BalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
@@ -39,7 +41,8 @@ pub trait Trait: frame_system::Trait {
     type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
     type Currency: Currency<Self::AccountId>;
     type ProtocolFee: Get<Perbill>;
-    type ProtocolFeeReceiver: OnUnbalanced<PositiveImbalanceOf<Self>>;
+    type ProtocolFeeReceiver: Get<Self::AccountId>;
+    type SourceOfTheCoins: OnUnbalanced<PositiveImbalanceOf<Self>>;
 }
 
 decl_error! {
@@ -80,6 +83,23 @@ decl_module! {
         #[weight = 50_000_000]
         pub fn allocate(origin, to: T::AccountId, amount: BalanceOf<T>, proof: Vec<u8>) -> DispatchResult {
             Self::ensure_oracle(origin)?;
+
+            <CoinsConsumed<T>>::put(
+                <CoinsConsumed<T>>::get().checked_add(&amount).ok_or("Overflow computing coins consumed")?
+            );
+
+            let amount_for_protocol = T::ProtocolFee::get() * amount;
+            let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
+
+            let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
+            let r_grantee = T::Currency::deposit_creating(&to, amount_for_grantee);
+            let r_protocol = T::Currency::deposit_creating(&T::ProtocolFeeReceiver::get(), amount_for_protocol);
+            total_imbalance.subsume(r_grantee);
+            total_imbalance.subsume(r_protocol);
+            T::SourceOfTheCoins::on_unbalanced(total_imbalance);
+
+            Self::deposit_event(RawEvent::NewAllocation(to, amount_for_grantee, amount_for_protocol, proof));
+
             Ok(())
         }
     }

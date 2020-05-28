@@ -20,16 +20,11 @@
 
 use super::*;
 
-use frame_support::{
-    assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
-    traits::Imbalance, weights::Weight,
-};
-use frame_system::EnsureSignedBy;
+use frame_support::{assert_noop, assert_ok, impl_outer_origin, parameter_types, weights::Weight};
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
-    DispatchError::BadOrigin,
     Perbill,
 };
 
@@ -85,21 +80,20 @@ parameter_types! {
     pub const Oracle: u64 = 0;
     pub const Hacker: u64 = 1;
     pub const Grantee: u64 = 2;
-    pub const Fee: Perbill = Perbill::from_percent(50);
+    pub const Receiver: u64 = 3;
+    pub const Fee: Perbill = Perbill::from_percent(10);
 }
 
 impl Trait for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type ProtocolFee = Fee;
-    type ProtocolFeeReceiver = ();
+    type ProtocolFeeReceiver = Receiver;
+    type SourceOfTheCoins = ();
 }
 type Allocations = Module<Test>;
 type Errors = Error<Test>;
 type Balances = pallet_balances::Module<Test>;
-
-type PositiveImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::PositiveImbalance;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -117,7 +111,7 @@ fn non_oracle_can_not_trigger_allocation() {
             Allocations::allocate(
                 Origin::signed(Hacker::get()),
                 Grantee::get(),
-                42,
+                50,
                 Vec::new(),
             ),
             Errors::OracleAccessDenied
@@ -134,17 +128,33 @@ fn oracle_triggers_allocation() {
         assert_ok!(Allocations::allocate(
             Origin::signed(Oracle::get()),
             Grantee::get(),
-            42,
+            50,
             Vec::new(),
         ));
     })
 }
 
 #[test]
-fn allocation_send_fee_to_receiver() {}
+fn allocate_the_right_amount_of_coins_to_everyone() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
 
-#[test]
-fn allocation_grant_minus_fee() {}
+        assert_eq!(Allocations::coins_consumed(), 0);
+        assert_ok!(Allocations::allocate(
+            Origin::signed(Oracle::get()),
+            Grantee::get(),
+            50,
+            Vec::new(),
+        ));
+
+        assert_eq!(Balances::free_balance(Grantee::get()), 45);
+        assert_eq!(Balances::free_balance(Receiver::get()), 5);
+        assert_eq!(Allocations::coins_consumed(), 50);
+    })
+}
 
 #[test]
 fn can_not_allocate_more_coins_than_max() {}
+
+#[test]
+fn emergency_shutdown() {}
