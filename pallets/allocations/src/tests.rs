@@ -20,7 +20,11 @@
 
 use super::*;
 
-use frame_support::{assert_noop, assert_ok, impl_outer_origin, parameter_types, weights::Weight};
+use frame_support::{
+    assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
+    weights::Weight,
+};
+use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -76,6 +80,14 @@ impl pallet_balances::Trait for Test {
     type AccountStore = frame_system::Module<Test>;
 }
 
+ord_parameter_types! {
+    pub const ShutdownAdmin: u64 = 21;
+}
+impl pallet_emergency_shutdown::Trait for Test {
+    type Event = ();
+    type ShutdownOrigin = EnsureSignedBy<ShutdownAdmin, u64>;
+}
+
 parameter_types! {
     pub const Oracle: u64 = 0;
     pub const Hacker: u64 = 1;
@@ -94,8 +106,9 @@ impl Trait for Test {
     type MaximumCoinsEverAllocated = CoinsLimit;
 }
 type Allocations = Module<Test>;
-type Errors = Error<Test>;
+type EmergencyShutdown = pallet_emergency_shutdown::Module<Test>;
 type Balances = pallet_balances::Module<Test>;
+type Errors = Error<Test>;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -173,4 +186,21 @@ fn can_not_allocate_more_coins_than_max() {
 }
 
 #[test]
-fn emergency_shutdown() {}
+fn emergency_shutdown() {
+    new_test_ext().execute_with(|| {
+        assert_ok!(EmergencyShutdown::toggle(Origin::signed(
+            ShutdownAdmin::get()
+        )));
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_noop!(
+            Allocations::allocate(
+                Origin::signed(Oracle::get()),
+                Grantee::get(),
+                42,
+                Vec::new(),
+            ),
+            Errors::UnderShutdown
+        );
+    })
+}

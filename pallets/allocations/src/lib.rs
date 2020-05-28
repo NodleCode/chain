@@ -37,7 +37,7 @@ type PositiveImbalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
 
 /// The module's configuration trait.
-pub trait Trait: frame_system::Trait {
+pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
     type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
     type Currency: Currency<Self::AccountId>;
     type ProtocolFee: Get<Perbill>;
@@ -52,6 +52,8 @@ decl_error! {
         OracleAccessDenied,
         /// We are trying to allocate more coins than we can
         TooManyCoinsToAllocate,
+        /// Emergency shutdown is active, operations suspended
+        UnderShutdown,
     }
 }
 
@@ -82,6 +84,7 @@ decl_module! {
         #[weight = 50_000_000]
         pub fn allocate(origin, to: T::AccountId, amount: BalanceOf<T>, proof: Vec<u8>) -> DispatchResult {
             Self::ensure_oracle(origin)?;
+            ensure!(!pallet_emergency_shutdown::Module::<T>::shutdown(), Error::<T>::UnderShutdown);
 
             let coins_already_allocated = Self::coins_consumed();
             let coins_that_will_be_consumed = coins_already_allocated.checked_add(&amount).ok_or("Overflow computing coins consumed")?;
