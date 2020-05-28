@@ -28,7 +28,7 @@ mod tests;
 
 use frame_support::{
     decl_event, decl_module, decl_storage,
-    traits::{Currency, EnsureOrigin, ExistenceRequirement, Imbalance, OnUnbalanced},
+    traits::{Currency, EnsureOrigin, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
     weights::{FunctionOf, GetDispatchInfo, Pays},
     Parameter,
 };
@@ -46,15 +46,13 @@ type NegativeImbalanceOf<T, I> = <<T as Trait<I>>::Currency as Currency<
     <T as frame_system::Trait>::AccountId,
 >>::NegativeImbalance;
 
-const MODULE_ID: ModuleId = ModuleId(*b"py/resrv");
-
 /// The module's configuration trait.
 pub trait Trait<I: Instance = DefaultInstance>: frame_system::Trait {
     type Event: From<Event<Self, I>> + Into<<Self as frame_system::Trait>::Event>;
-
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
     type Currency: Currency<Self::AccountId>;
     type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+    type ModuleId: Get<ModuleId>;
 }
 
 decl_storage! {
@@ -139,7 +137,7 @@ decl_module! {
 
 impl<T: Trait<I>, I: Instance> WithAccountId<T::AccountId> for Module<T, I> {
     fn account_id() -> T::AccountId {
-        MODULE_ID.into_account()
+        T::ModuleId::get().into_account()
     }
 }
 

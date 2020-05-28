@@ -85,11 +85,15 @@ impl pallet_balances::Trait for Test {
 ord_parameter_types! {
     pub const Admin: u64 = 1;
 }
+parameter_types! {
+    pub const ReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+}
 impl Trait for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = frame_system::Call<Test>;
+    type ModuleId = ReserveModuleId;
 }
 type TestModule = Module<Test>;
 type Balances = pallet_balances::Module<Test>;
