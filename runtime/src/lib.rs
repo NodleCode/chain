@@ -601,7 +601,7 @@ impl pallet_amendments::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const ReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
@@ -610,7 +610,33 @@ impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
-    type ModuleId = ReserveModuleId;
+    type ModuleId = CompanyReserveModuleId;
+}
+
+parameter_types! {
+    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint");
+}
+
+impl pallet_reserve::Trait<pallet_reserve::Instance2> for Runtime {
+    type Event = Event;
+    type Currency = pallet_balances::Module<Runtime>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type Call = Call;
+    type ModuleId = InternationalReserveModuleId;
+}
+
+parameter_types! {
+    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa");
+}
+
+impl pallet_reserve::Trait<pallet_reserve::Instance3> for Runtime {
+    type Event = Event;
+    type Currency = pallet_balances::Module<Runtime>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type Call = Call;
+    type ModuleId = UsaReserveModuleId;
 }
 
 parameter_types! {
@@ -778,6 +804,8 @@ construct_runtime!(
         Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
         CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config, Event<T>},
+        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config, Event<T>},
+        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config, Event<T>},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},

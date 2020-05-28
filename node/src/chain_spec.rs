@@ -179,6 +179,8 @@ pub fn testnet_genesis(
             phantom: Default::default(),
         }),
         pallet_reserve_Instance1: Some(Default::default()),
+        pallet_reserve_Instance2: Some(Default::default()),
+        pallet_reserve_Instance3: Some(Default::default()),
         // Root Committee
         pallet_collective_Instance4: Some(Default::default()),
         pallet_membership_Instance4: Some(RootMembershipConfig {
