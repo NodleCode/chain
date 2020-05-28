@@ -81,6 +81,7 @@ parameter_types! {
     pub const Hacker: u64 = 1;
     pub const Grantee: u64 = 2;
     pub const Receiver: u64 = 3;
+    pub const CoinsLimit: u64 = 1_000_000;
     pub const Fee: Perbill = Perbill::from_percent(10);
 }
 
@@ -90,6 +91,7 @@ impl Trait for Test {
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type SourceOfTheCoins = ();
+    type MaximumCoinsEverAllocated = CoinsLimit;
 }
 type Allocations = Module<Test>;
 type Errors = Error<Test>;
@@ -154,7 +156,21 @@ fn allocate_the_right_amount_of_coins_to_everyone() {
 }
 
 #[test]
-fn can_not_allocate_more_coins_than_max() {}
+fn can_not_allocate_more_coins_than_max() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_noop!(
+            Allocations::allocate(
+                Origin::signed(Oracle::get()),
+                Grantee::get(),
+                CoinsLimit::get() + 1,
+                Vec::new(),
+            ),
+            Errors::TooManyCoinsToAllocate
+        );
+    })
+}
 
 #[test]
 fn emergency_shutdown() {}

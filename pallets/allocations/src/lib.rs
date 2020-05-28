@@ -43,14 +43,13 @@ pub trait Trait: frame_system::Trait {
     type ProtocolFee: Get<Perbill>;
     type ProtocolFeeReceiver: Get<Self::AccountId>;
     type SourceOfTheCoins: OnUnbalanced<PositiveImbalanceOf<Self>>;
+    type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
 }
 
 decl_error! {
     pub enum Error for Module<T: Trait> {
         /// Function is restricted to oracles only
         OracleAccessDenied,
-        /// We are trying to allocate 0 coins
-        ZeroAllocation,
         /// We are trying to allocate more coins than we can
         TooManyCoinsToAllocate,
     }
@@ -84,9 +83,12 @@ decl_module! {
         pub fn allocate(origin, to: T::AccountId, amount: BalanceOf<T>, proof: Vec<u8>) -> DispatchResult {
             Self::ensure_oracle(origin)?;
 
-            <CoinsConsumed<T>>::put(
-                <CoinsConsumed<T>>::get().checked_add(&amount).ok_or("Overflow computing coins consumed")?
-            );
+            let coins_already_allocated = Self::coins_consumed();
+            let coins_that_will_be_consumed = coins_already_allocated.checked_add(&amount).ok_or("Overflow computing coins consumed")?;
+
+            ensure!(coins_that_will_be_consumed <= T::MaximumCoinsEverAllocated::get(), Error::<T>::TooManyCoinsToAllocate);
+
+            <CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
             let amount_for_protocol = T::ProtocolFee::get() * amount;
             let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
