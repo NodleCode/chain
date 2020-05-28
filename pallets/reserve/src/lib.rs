@@ -33,6 +33,7 @@ use frame_support::{
     Parameter,
 };
 use frame_system::{self as system, ensure_root, ensure_signed};
+use nodle_support::WithAccountId;
 use sp_runtime::{
     traits::{AccountIdConversion, Dispatchable},
     DispatchResult, ModuleId,
@@ -135,8 +136,8 @@ decl_event!(
     }
 );
 
-impl<T: Trait> Module<T> {
-    pub fn account_id() -> T::AccountId {
+impl<T: Trait> WithAccountId<T::AccountId> for Module<T> {
+    fn account_id() -> T::AccountId {
         MODULE_ID.into_account()
     }
 }
