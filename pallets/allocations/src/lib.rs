@@ -79,6 +79,7 @@ decl_module! {
         /// Can only be called by an oracle, trigger a coin creation and an event
         #[weight = 50_000_000]
         pub fn allocate(origin, to: T::AccountId, amount: BalanceOf<T>, proof: Vec<u8>) -> DispatchResult {
+            Self::ensure_oracle(origin)?;
             Ok(())
         }
     }

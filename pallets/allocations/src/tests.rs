@@ -82,6 +82,9 @@ impl pallet_balances::Trait for Test {
 }
 
 parameter_types! {
+    pub const Oracle: u64 = 0;
+    pub const Hacker: u64 = 1;
+    pub const Grantee: u64 = 2;
     pub const Fee: Perbill = Perbill::from_percent(50);
 }
 
@@ -91,7 +94,8 @@ impl Trait for Test {
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = ();
 }
-type TestModule = Module<Test>;
+type Allocations = Module<Test>;
+type Errors = Error<Test>;
 type Balances = pallet_balances::Module<Test>;
 
 type PositiveImbalanceOf<T> =
@@ -107,13 +111,40 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 #[test]
-fn non_member_can_not_trigger_allocation() {}
+fn non_oracle_can_not_trigger_allocation() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Allocations::allocate(
+                Origin::signed(Hacker::get()),
+                Grantee::get(),
+                42,
+                Vec::new(),
+            ),
+            Errors::OracleAccessDenied
+        );
+    })
+}
 
 #[test]
-fn allocation_send_fee() {}
+fn oracle_triggers_allocation() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+        assert_eq!(Allocations::is_oracle(Oracle::get()), true);
+
+        assert_ok!(Allocations::allocate(
+            Origin::signed(Oracle::get()),
+            Grantee::get(),
+            42,
+            Vec::new(),
+        ));
+    })
+}
 
 #[test]
-fn allocation_with_fee() {}
+fn allocation_send_fee_to_receiver() {}
+
+#[test]
+fn allocation_grant_minus_fee() {}
 
 #[test]
 fn can_not_allocate_more_coins_than_max() {}
