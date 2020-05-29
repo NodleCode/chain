@@ -131,15 +131,7 @@ decl_module! {
 
 		fn deposit_event() = default;
 
-		/// # <weight>
-		/// - Preconditions:
-		/// 	- T::Currency is orml_currencies
-		/// - Complexity: `O(1)`
-		/// - Db reads: `VestingSchedules`, 3 items of orml_currencies
-		/// - Db writes: `VestingSchedules`, 3 items of orml_currencies
-		/// -------------------
-		/// Base Weight: 29.86 µs
-		/// # </weight>
+		/// Claim funds that have been vested so far
 		#[weight = 30_000_000 + T::DbWeight::get().reads_writes(2, 2)]
 		pub fn claim(origin) {
 			let who = ensure_signed(origin)?;
@@ -148,15 +140,7 @@ decl_module! {
 			Self::deposit_event(RawEvent::Claimed(who, locked_amount));
 		}
 
-		/// # <weight>
-		/// - Preconditions:
-		/// 	- T::Currency is orml_currencies
-		/// - Complexity: `O(1)`
-		/// - Db reads: `VestingSchedules`, 3 items of orml_currencies
-		/// - Db writes: `VestingSchedules`, 3 items of orml_currencies
-		/// -------------------
-		/// Base Weight: 47.26 µs
-		/// # </weight>
+		/// Wire funds to be vested by the receiver
 		#[weight = 48_000_000 + T::DbWeight::get().reads_writes(4, 4)]
 		pub fn add_vesting_schedule(
 			origin,
@@ -172,7 +156,7 @@ decl_module! {
 	}
 }
 
-const VESTING_LOCK_ID: LockIdentifier = *b"ormlvest";
+const VESTING_LOCK_ID: LockIdentifier = *b"nvesting";
 
 impl<T: Trait> Module<T> {
 	fn do_claim(who: &T::AccountId) -> BalanceOf<T> {
