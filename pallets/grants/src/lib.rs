@@ -8,7 +8,7 @@ use frame_support::{
 	},
 };
 use frame_system::{self as system, ensure_root, ensure_signed};
-use parity_scale_codec::{Decode, Encode, HasCompact};
+use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
 	traits::{AtLeast32Bit, CheckedAdd, StaticLookup, Zero},
 	DispatchResult, RuntimeDebug,
@@ -18,6 +18,7 @@ use sp_std::{
 	vec::Vec,
 };
 
+mod benchmarking;
 mod mock;
 mod tests;
 
@@ -26,11 +27,10 @@ mod tests;
 /// Benefits would be granted gradually, `per_period` amount every `period` of blocks
 /// after `start`.
 #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug)]
-pub struct VestingSchedule<BlockNumber, Balance: HasCompact> {
+pub struct VestingSchedule<BlockNumber, Balance> {
 	pub start: BlockNumber,
 	pub period: BlockNumber,
 	pub period_count: u32,
-	#[codec(compact)]
 	pub per_period: Balance,
 }
 
