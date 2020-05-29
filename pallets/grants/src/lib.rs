@@ -3,8 +3,8 @@
 use frame_support::{
 	decl_error, decl_event, decl_module, decl_storage, ensure,
 	traits::{
-		Currency, EnsureOrigin, ExistenceRequirement, Get, Imbalance, LockIdentifier,
-		LockableCurrency, OnUnbalanced, WithdrawReasons,
+		Currency, EnsureOrigin, ExistenceRequirement, Get, LockIdentifier, LockableCurrency,
+		WithdrawReasons,
 	},
 };
 use frame_system::{self as system, ensure_root, ensure_signed};
@@ -69,8 +69,6 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy>
 
 pub type BalanceOf<T> =
 	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
-type PositiveImbalanceOf<T> =
-	<<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
 pub type VestingScheduleOf<T> =
 	VestingSchedule<<T as frame_system::Trait>::BlockNumber, BalanceOf<T>>;
 pub type ScheduledGrant<T> = (
@@ -118,14 +116,8 @@ decl_storage! {
 					let total_grants = schedules.iter()
 						.fold(Zero::zero(), |acc, s| acc + s.locked_amount(0.into()));
 
-					let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
-					let r = T::Currency::deposit_creating(who, total_grants);
-					total_imbalance.subsume(r);
-
-					<() as OnUnbalanced<PositiveImbalanceOf<T>>>::on_unbalanced(total_imbalance);
-
-
-				<VestingSchedules<T>>::insert(who, schedules);
+					T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
+					<VestingSchedules<T>>::insert(who, schedules);
 				});
 		});
 	}

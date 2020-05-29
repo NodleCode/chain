@@ -106,7 +106,6 @@ impl Trait for Test {
     type Currency = pallet_balances::Module<Self>;
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
-    type SourceOfTheCoins = ();
     type MaximumCoinsEverAllocated = CoinsLimit;
 }
 type Allocations = Module<Test>;
