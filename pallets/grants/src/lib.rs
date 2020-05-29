@@ -3,10 +3,11 @@
 use frame_support::{
 	decl_error, decl_event, decl_module, decl_storage, ensure,
 	traits::{
-		Currency, ExistenceRequirement, Get, LockIdentifier, LockableCurrency, WithdrawReasons,
+		Currency, EnsureOrigin, ExistenceRequirement, Get, LockIdentifier, LockableCurrency,
+		WithdrawReasons,
 	},
 };
-use frame_system::{self as system, ensure_signed};
+use frame_system::{self as system, ensure_root, ensure_signed};
 use parity_scale_codec::{Decode, Encode, HasCompact};
 use sp_runtime::{
 	traits::{AtLeast32Bit, CheckedAdd, StaticLookup, Zero},
@@ -81,6 +82,7 @@ pub type ScheduledItem<T> = (
 pub trait Trait: frame_system::Trait {
 	type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
 	type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
+	type CancelOrigin: EnsureOrigin<Self::Origin>;
 }
 
 decl_storage! {
@@ -110,8 +112,8 @@ decl_event!(
 		VestingScheduleAdded(AccountId, AccountId, VestingSchedule),
 		/// Claimed vesting (who, locked_amount)
 		Claimed(AccountId, Balance),
-		/// Updated vesting schedules (who)
-		VestingSchedulesUpdated(AccountId),
+		/// Canceled all vesting schedules (who)
+		VestingSchedulesCanceled(AccountId),
 	}
 );
 
@@ -152,6 +154,33 @@ decl_module! {
 			Self::do_add_vesting_schedule(&from, &to, schedule.clone())?;
 
 			Self::deposit_event(RawEvent::VestingScheduleAdded(from, to, schedule));
+		}
+
+		/// Cancel all vested schedules for the given user. If there are coins to be
+		/// claimed they will be auto claimed for the given user.
+		#[weight = 48_000_000 + T::DbWeight::get().reads_writes(4, 4)]
+		pub fn cancel_all_vesting_schedules(
+			origin,
+			who: <T::Lookup as StaticLookup>::Source,
+			funds_collector: <T::Lookup as StaticLookup>::Source,
+		) {
+			T::CancelOrigin::try_origin(origin)
+				.map(|_| ())
+				.or_else(ensure_root)?;
+
+			let account_with_schedule = T::Lookup::lookup(who)?;
+			let account_collector = T::Lookup::lookup(funds_collector)?;
+
+			let locked_amount_left = Self::do_claim(&account_with_schedule);
+			T::Currency::remove_lock(VESTING_LOCK_ID, &account_with_schedule);
+			T::Currency::transfer(
+				&account_with_schedule,
+				&account_collector,
+				locked_amount_left,
+				ExistenceRequirement::AllowDeath
+			)?;
+
+			Self::deposit_event(RawEvent::VestingSchedulesCanceled(account_with_schedule));
 		}
 	}
 }

@@ -3,9 +3,13 @@
 #![cfg(test)]
 
 use super::*;
-use frame_support::{assert_err, assert_ok, traits::WithdrawReason};
-use mock::{ExtBuilder, Origin, PalletBalances, Runtime, System, TestEvent, Vesting, ALICE, BOB};
+use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReason};
+use mock::{
+	CancelOrigin, ExtBuilder, Origin, PalletBalances, Runtime, System, TestEvent, Vesting, ALICE,
+	BOB,
+};
 use pallet_balances::{BalanceLock, Reasons};
+use sp_runtime::DispatchError::BadOrigin;
 
 #[test]
 fn add_vesting_schedule_works() {
@@ -221,5 +225,53 @@ fn claim_works() {
 
 			// no locks anymore
 			assert_eq!(PalletBalances::locks(&BOB), vec![]);
+		});
+}
+
+#[test]
+fn cancel_restricted_origin() {
+	ExtBuilder::default().build().execute_with(|| {
+		assert_noop!(
+			Vesting::cancel_all_vesting_schedules(Origin::signed(ALICE), BOB, CancelOrigin::get()),
+			BadOrigin
+		);
+	})
+}
+
+#[test]
+fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
+	ExtBuilder::default()
+		.one_hundred_for_alice()
+		.build()
+		.execute_with(|| {
+			let schedule = VestingSchedule {
+				start: 0u64,
+				period: 10u64,
+				period_count: 2u32,
+				per_period: 10u64,
+			};
+			assert_ok!(Vesting::add_vesting_schedule(
+				Origin::signed(ALICE),
+				BOB,
+				schedule.clone()
+			));
+
+			System::set_block_number(11);
+
+			assert_ok!(Vesting::cancel_all_vesting_schedules(
+				Origin::signed(CancelOrigin::get()),
+				BOB,
+				CancelOrigin::get()
+			));
+
+			// Auto claim
+			assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
+
+			// Wire the rest
+			assert_ok!(PalletBalances::transfer(
+				Origin::signed(CancelOrigin::get()),
+				ALICE,
+				10
+			));
 		});
 }

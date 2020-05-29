@@ -2,7 +2,8 @@
 
 #![cfg(test)]
 
-use frame_support::{impl_outer_event, impl_outer_origin, parameter_types};
+use frame_support::{impl_outer_event, impl_outer_origin, ord_parameter_types, parameter_types};
+use frame_system::EnsureSignedBy;
 use pallet_balances;
 use sp_core::H256;
 use sp_runtime::{testing::Header, traits::IdentityLookup, Perbill};
@@ -77,9 +78,14 @@ impl pallet_balances::Trait for Runtime {
 }
 pub type PalletBalances = pallet_balances::Module<Runtime>;
 
+ord_parameter_types! {
+	pub const CancelOrigin: AccountId = 42;
+}
+
 impl Trait for Runtime {
 	type Event = TestEvent;
 	type Currency = PalletBalances;
+	type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 }
 pub type Vesting = Module<Runtime>;
 
