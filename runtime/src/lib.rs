@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 27,
+    spec_version: 28,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -415,17 +415,6 @@ impl pallet_transaction_payment::Trait for Runtime {
     type TransactionByteFee = TransactionByteFee;
     type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate = TargetedFeeAdjustment<TargetBlockFullness>;
-}
-
-parameter_types! {
-    pub const MinVestedTransfer: Balance = 1 * constants::DOLLARS;
-}
-
-impl pallet_vesting::Trait for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type BlockNumberToBalance = ConvertInto;
-    type MinVestedTransfer = MinVestedTransfer;
 }
 
 impl pallet_grants::Trait for Runtime {
@@ -785,7 +774,6 @@ construct_runtime!(
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
         TransactionPayment: pallet_transaction_payment::{Module, Storage},
         RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
-        Vesting: pallet_vesting::{Module, Call, Storage, Event<T>, Config<T>},
 
         // Consensus
         Babe: pallet_babe::{Module, Call, Storage, Config, Inherent(Timestamp)},
@@ -1062,7 +1050,6 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"tcr", PkiTcr);
             add_benchmark!(params, batches, b"timestamp", Timestamp);
             add_benchmark!(params, batches, b"utility", Utility);
-            add_benchmark!(params, batches, b"vesting", Vesting);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)
