@@ -51,7 +51,7 @@ fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
         start: 0.into(),
         period: 10.into(),
         period_count: 2u32,
-        per_period: 10.into(),
+        per_period: T::Currency::minimum_balance(),
     };
 
     BenchmarkConfig {
@@ -83,6 +83,7 @@ benchmarks! {
         let b in 0 .. MAX_SCHEDULES;
 
         let config = create_shared_config::<T>(u);
+        Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
         // Add some existing schedules according to b
         for x in 0 .. b {
