@@ -29,6 +29,40 @@ use sp_std::prelude::*;
 const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;
 
+struct BenchmarkConfig<T: Trait> {
+    granter: T::AccountId,
+    grantee: T::AccountId,
+    grantee_lookup: <T::Lookup as StaticLookup>::Source,
+    collector_lookup: <T::Lookup as StaticLookup>::Source,
+    schedule: VestingSchedule<T::BlockNumber, BalanceOf<T>>,
+}
+
+fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
+    let granter: T::AccountId = account("granter", u, SEED);
+    let grantee: T::AccountId = account("grantee", u, SEED);
+    let collector: T::AccountId = account("collector", u, SEED);
+    let grantee_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(grantee.clone());
+    let collector_lookup: <T::Lookup as StaticLookup>::Source =
+        T::Lookup::unlookup(collector.clone());
+
+    T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
+
+    let schedule = VestingSchedule {
+        start: 0.into(),
+        period: 10.into(),
+        period_count: 2u32,
+        per_period: 10.into(),
+    };
+
+    BenchmarkConfig {
+        granter,
+        grantee,
+        grantee_lookup,
+        collector_lookup,
+        schedule,
+    }
+}
+
 benchmarks! {
     _ { }
 
@@ -36,73 +70,38 @@ benchmarks! {
         let u in 1 .. 1000;
         let b in 0 .. MAX_SCHEDULES;
 
-        let granter: T::AccountId = account("granter", u, SEED);
-        let grantee: T::AccountId = account("grantee", u, SEED);
-        let grantee_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(grantee.clone());
-
-        T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
-
-        let schedule = VestingSchedule {
-            start: 0.into(),
-            period: 10.into(),
-            period_count: 2u32,
-            per_period: 10.into(),
-        };
+        let config = create_shared_config::<T>(u);
 
         // Add some existing schedules according to b
         for x in 0 .. b {
-            Module::<T>::do_add_vesting_schedule(&granter, &grantee, schedule.clone())?;
+            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
-    }:  _(RawOrigin::Signed(granter), grantee_lookup, schedule)
+    }:  _(RawOrigin::Signed(config.granter), config.grantee_lookup, config.schedule)
 
     claim {
         let u in 1 .. 1000;
         let b in 0 .. MAX_SCHEDULES;
 
-        let granter: T::AccountId = account("granter", u, SEED);
-        let grantee: T::AccountId = account("grantee", u, SEED);
-        let grantee_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(grantee.clone());
-
-        T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
-
-        let schedule = VestingSchedule {
-            start: 0.into(),
-            period: 10.into(),
-            period_count: 2u32,
-            per_period: 10.into(),
-        };
+        let config = create_shared_config::<T>(u);
 
         // Add some existing schedules according to b
         for x in 0 .. b {
-            Module::<T>::do_add_vesting_schedule(&granter, &grantee, schedule.clone())?;
+            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
-    }: _(RawOrigin::Signed(grantee))
+    }: _(RawOrigin::Signed(config.grantee))
 
     cancel_all_vesting_schedules {
         let u in 1 .. 1000;
         let b in 0 .. MAX_SCHEDULES;
 
-        let granter: T::AccountId = account("granter", u, SEED);
-        let grantee: T::AccountId = account("grantee", u, SEED);
-        let collector: T::AccountId = account("collector", u, SEED);
-        let grantee_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(grantee.clone());
-        let collector_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(collector.clone());
-
-        T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
-
-        let schedule = VestingSchedule {
-            start: 0.into(),
-            period: 10.into(),
-            period_count: 2u32,
-            per_period: 10.into(),
-        };
+       let config = create_shared_config::<T>(u);
 
         // Add some existing schedules according to b
         for x in 0 .. b {
-            Module::<T>::do_add_vesting_schedule(&granter, &grantee, schedule.clone())?;
+            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
-        let call = Call::<T>::cancel_all_vesting_schedules(grantee_lookup, collector_lookup);
+        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup);
         let origin = T::CancelOrigin::successful_origin();
     }: {
         let _ = call.dispatch(origin)?;
