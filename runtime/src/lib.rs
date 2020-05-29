@@ -1051,6 +1051,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"balances", Balances);
             add_benchmark!(params, batches, b"collective", TechnicalCommittee);
             add_benchmark!(params, batches, b"emergency-shutdown", EmergencyShutdown);
+            add_benchmark!(params, batches, b"grants", Grants);
             add_benchmark!(params, batches, b"identity", Identity);
             add_benchmark!(params, batches, b"im-online", ImOnline);
             //add_benchmark!(params, batches, b"offences", OffencesBench);
