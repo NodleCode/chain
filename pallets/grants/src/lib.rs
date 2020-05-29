@@ -6,7 +6,7 @@ use frame_support::{
 		Currency, ExistenceRequirement, Get, LockIdentifier, LockableCurrency, WithdrawReasons,
 	},
 };
-use frame_system::{self as system, ensure_root, ensure_signed};
+use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode, HasCompact};
 use sp_runtime::{
 	traits::{AtLeast32Bit, CheckedAdd, StaticLookup, Zero},
@@ -169,29 +169,6 @@ decl_module! {
 
 			Self::deposit_event(RawEvent::VestingScheduleAdded(from, to, schedule));
 		}
-
-		/// # <weight>
-		/// - Preconditions:
-		/// 	- T::Currency is orml_currencies
-		/// - Complexity: `O(1)`
-		/// - Db reads: `VestingSchedules`, 3 items of orml_currencies
-		/// - Db writes: `VestingSchedules`, 3 items of orml_currencies
-		/// -------------------
-		/// Base Weight: 27.96 µs
-		/// # </weight>
-		#[weight = 28_000_000 + T::DbWeight::get().reads_writes(4, 4)]
-		pub fn update_vesting_schedules(
-			origin,
-			who: <T::Lookup as StaticLookup>::Source,
-			vesting_schedules: Vec<VestingScheduleOf<T>>
-		) {
-			ensure_root(origin)?;
-
-			let account = T::Lookup::lookup(who)?;
-			Self::do_update_vesting_schedules(&account, vesting_schedules)?;
-
-			Self::deposit_event(RawEvent::VestingSchedulesUpdated(account));
-		}
 	}
 }
 
@@ -229,30 +206,6 @@ impl<T: Trait> Module<T> {
 		T::Currency::transfer(from, to, schedule_amount, ExistenceRequirement::AllowDeath)?;
 		T::Currency::set_lock(VESTING_LOCK_ID, to, total_amount, WithdrawReasons::all());
 		<VestingSchedules<T>>::mutate(to, |v| (*v).push(schedule));
-
-		Ok(())
-	}
-
-	fn do_update_vesting_schedules(
-		who: &T::AccountId,
-		schedules: Vec<VestingScheduleOf<T>>,
-	) -> DispatchResult {
-		let total_amount = schedules
-			.iter()
-			.try_fold::<_, _, Result<BalanceOf<T>, Error<T>>>(
-				Zero::zero(),
-				|acc_amount, schedule| {
-					let amount = Self::ensure_valid_vesting_schedule(schedule)?;
-					Ok(acc_amount + amount)
-				},
-			)?;
-		ensure!(
-			T::Currency::free_balance(who) >= total_amount,
-			Error::<T>::InsufficientBalanceToLock,
-		);
-
-		T::Currency::set_lock(VESTING_LOCK_ID, who, total_amount, WithdrawReasons::all());
-		<VestingSchedules<T>>::insert(who, schedules);
 
 		Ok(())
 	}
