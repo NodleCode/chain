@@ -3,8 +3,8 @@
 use frame_support::{
 	decl_error, decl_event, decl_module, decl_storage, ensure,
 	traits::{
-		Currency, EnsureOrigin, ExistenceRequirement, Get, LockIdentifier, LockableCurrency,
-		WithdrawReasons,
+		Currency, EnsureOrigin, ExistenceRequirement, Get, Imbalance, LockIdentifier,
+		LockableCurrency, OnUnbalanced, WithdrawReasons,
 	},
 };
 use frame_system::{self as system, ensure_root, ensure_signed};
@@ -69,6 +69,8 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy>
 
 pub type BalanceOf<T> =
 	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
+type PositiveImbalanceOf<T> =
+	<<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
 pub type VestingScheduleOf<T> =
 	VestingSchedule<<T as frame_system::Trait>::BlockNumber, BalanceOf<T>>;
 pub type ScheduledGrant<T> = (
@@ -91,8 +93,13 @@ pub trait Trait: frame_system::Trait {
 decl_storage! {
 	trait Store for Module<T: Trait> as Vesting {
 		/// Vesting schedules of an account.
-		pub VestingSchedules get(fn vesting_schedules) build(|config: &GenesisConfig<T>| {
-			config.vesting.iter()
+		pub VestingSchedules get(fn vesting_schedules): map hasher(blake2_128_concat) T::AccountId => Vec<VestingScheduleOf<T>>;
+	}
+
+	add_extra_genesis {
+		config(vesting): Vec<ScheduledItem<T>>;
+		build(|config: &GenesisConfig<T>| {
+			let grants = config.vesting.iter()
 				.map(|(ref who, schedules)|
 					(
 						who.clone(),
@@ -103,12 +110,24 @@ decl_storage! {
 							.collect::<Vec<_>>()
 					)
 				)
-				.collect::<Vec<_>>()
-		}): map hasher(blake2_128_concat) T::AccountId => Vec<VestingScheduleOf<T>>;
-	}
+				.collect::<Vec<_>>();
 
-	add_extra_genesis {
-		config(vesting): Vec<ScheduledItem<T>>;
+			// Create the required coins at genesis and add to storage
+			grants.iter()
+				.for_each(|(ref who, schedules)| {
+					let total_grants = schedules.iter()
+						.fold(Zero::zero(), |acc, s| acc + s.locked_amount(0.into()));
+
+					let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
+					let r = T::Currency::deposit_creating(who, total_grants);
+					total_imbalance.subsume(r);
+
+					<() as OnUnbalanced<PositiveImbalanceOf<T>>>::on_unbalanced(total_imbalance);
+
+
+				<VestingSchedules<T>>::insert(who, schedules);
+				});
+		});
 	}
 }
 
