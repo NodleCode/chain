@@ -149,7 +149,6 @@ pub fn testnet_genesis(
         pallet_grants: Some(GrantsConfig {
             vesting: vested_grants,
         }),
-        pallet_vesting: Some(Default::default()),
 
         // Consensus
         pallet_session: Some(SessionConfig {
