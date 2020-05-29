@@ -22,6 +22,7 @@ Describe what is changed and your reasoning.
 - [ ] I have added benchmarks to my pallet
 - [ ] I have added the benchmarks to the node
 - [ ] I have added potential RPC calls to the node
+- [ ] I have eventual custom types to the `types.json` file
 - [ ] I have added comments and documentation
 
 ### Testing
