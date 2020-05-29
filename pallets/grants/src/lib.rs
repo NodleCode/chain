@@ -71,12 +71,15 @@ pub type BalanceOf<T> =
 	<<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
 pub type VestingScheduleOf<T> =
 	VestingSchedule<<T as frame_system::Trait>::BlockNumber, BalanceOf<T>>;
-pub type ScheduledItem<T> = (
-	<T as frame_system::Trait>::AccountId,
+pub type ScheduledGrant<T> = (
 	<T as frame_system::Trait>::BlockNumber,
 	<T as frame_system::Trait>::BlockNumber,
 	u32,
 	BalanceOf<T>,
+);
+pub type ScheduledItem<T> = (
+	<T as frame_system::Trait>::AccountId,
+	Vec<ScheduledGrant<T>>,
 );
 
 pub trait Trait: frame_system::Trait {
@@ -90,8 +93,15 @@ decl_storage! {
 		/// Vesting schedules of an account.
 		pub VestingSchedules get(fn vesting_schedules) build(|config: &GenesisConfig<T>| {
 			config.vesting.iter()
-				.map(|&(ref who, start, period, period_count, per_period)|
-					(who.clone(), vec![VestingSchedule {start, period, period_count, per_period}])
+				.map(|(ref who, schedules)|
+					(
+						who.clone(),
+						schedules.iter()
+							.map(|&(start, period, period_count, per_period)| VestingSchedule {
+								start, period, period_count, per_period
+							})
+							.collect::<Vec<_>>()
+					)
 				)
 				.collect::<Vec<_>>()
 		}): map hasher(blake2_128_concat) T::AccountId => Vec<VestingScheduleOf<T>>;
