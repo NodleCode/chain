@@ -22,7 +22,7 @@ use super::*;
 
 use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, parameter_types,
-    traits::{Imbalance, OnFinalize},
+    traits::{Currency, OnFinalize},
     weights::Weight,
 };
 use sp_core::H256;
@@ -116,12 +116,10 @@ impl Trait for Test {
     type FundsCollector = ();
 }
 
-type PositiveImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
-
 type BalancesModule = pallet_balances::Module<Test>;
 type TcrModule = pallet_tcr::Module<Test>;
 type TestModule = Module<Test>;
+type TestCurrency = <Test as Trait>::Currency;
 
 const ROOT_MANAGER: u64 = 1;
 const OFFCHAIN_CERTIFICATE_SIGNER_1: u64 = 2;
@@ -138,12 +136,10 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 fn allocate_balances() {
-    let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
-    let r_manager = <Test as Trait>::Currency::deposit_creating(
+    TestCurrency::make_free_balance_be(
         &ROOT_MANAGER,
         MinimumApplicationAmount::get() + SlotBookingCost::get() + SlotRenewingCost::get(),
     );
-    total_imbalance.subsume(r_manager);
 }
 
 fn do_register() {

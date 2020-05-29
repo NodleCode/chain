@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 24,
+    spec_version: 26,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -426,6 +426,13 @@ impl pallet_vesting::Trait for Runtime {
     type Currency = Balances;
     type BlockNumberToBalance = ConvertInto;
     type MinVestedTransfer = MinVestedTransfer;
+}
+
+impl pallet_grants::Trait for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type CancelOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
 }
 
 parameter_types! {
@@ -762,7 +769,6 @@ impl pallet_allocations::Trait for Runtime {
     type Currency = Balances;
     type ProtocolFee = ProtocolFee;
     type ProtocolFeeReceiver = CompanyReserve;
-    type SourceOfTheCoins = ();
     type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
 }
 
@@ -806,6 +812,7 @@ construct_runtime!(
         CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config, Event<T>},
         InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config, Event<T>},
         UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config, Event<T>},
+        Grants: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
 
         // Neat things
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
@@ -1043,6 +1050,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, b"balances", Balances);
             add_benchmark!(params, batches, b"collective", TechnicalCommittee);
             add_benchmark!(params, batches, b"emergency-shutdown", EmergencyShutdown);
+            add_benchmark!(params, batches, b"grants", Grants);
             add_benchmark!(params, batches, b"identity", Identity);
             add_benchmark!(params, batches, b"im-online", ImOnline);
             //add_benchmark!(params, batches, b"offences", OffencesBench);

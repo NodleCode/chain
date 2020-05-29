@@ -26,93 +26,105 @@ use frame_benchmarking::{account, benchmarks_instance};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
-const SEED_APPLICANT: u32 = 0;
-const SEED_COUNTERER: u32 = 1;
-const SEED_VOTER: u32 = 2;
-const SEED_CHALLENGER: u32 = 3;
+const SEED: u32 = 0;
+const MAX_METADATA_SIZE: u32 = 1000;
+
+pub struct BenchmarkConfig<T: Trait<I>, I: Instance> {
+    applicant: T::AccountId,
+    challenger: T::AccountId,
+    counterer: T::AccountId,
+    voter: T::AccountId,
+    metadata: Vec<u8>,
+    deposit_applying: BalanceOf<T, I>,
+    deposit_challenging: BalanceOf<T, I>,
+    deposit_countering: BalanceOf<T, I>,
+    deposit_voting: BalanceOf<T, I>,
+}
+
+fn make_benchmark_config<T: Trait<I>, I: Instance>(u: u32, b: u32) -> BenchmarkConfig<T, I> {
+    let applicant = account("applicant", u, SEED);
+    let challenger = account("challenger", u, SEED);
+    let counterer = account("counterer", u, SEED);
+    let voter = account("voter", u, SEED);
+    let metadata = vec![1; b as usize];
+    let deposit_applying = T::MinimumApplicationAmount::get();
+    let deposit_challenging = T::MinimumChallengeAmount::get();
+    let deposit_countering = T::MinimumCounterAmount::get();
+    let deposit_voting = deposit_applying + deposit_countering;
+
+    T::Currency::make_free_balance_be(&applicant, deposit_applying);
+    T::Currency::make_free_balance_be(&counterer, deposit_countering);
+    T::Currency::make_free_balance_be(&voter, deposit_voting);
+    T::Currency::make_free_balance_be(&challenger, deposit_challenging);
+
+    BenchmarkConfig {
+        applicant,
+        challenger,
+        counterer,
+        voter,
+        metadata,
+        deposit_applying,
+        deposit_challenging,
+        deposit_countering,
+        deposit_voting,
+    }
+}
+
+fn do_apply<T: Trait<I>, I: Instance>(config: &BenchmarkConfig<T, I>) -> DispatchResult {
+    <Module<T, _>>::apply(
+        RawOrigin::Signed(config.applicant.clone()).into(),
+        config.metadata.clone(),
+        config.deposit_applying,
+    )
+}
 
 benchmarks_instance! {
     _ { }
 
     apply {
         let u in 0 .. 1000;
+        let b in 0 .. MAX_METADATA_SIZE;
 
-        let applicant = account("applicant", u, SEED_APPLICANT);
-        let metadata = (0..100).map(|v| v).collect();
-        let deposit_applying = T::MinimumApplicationAmount::get();
-        let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
-    }: _(RawOrigin::Signed(applicant), metadata, deposit_applying)
+        let config = make_benchmark_config::<T, _>(u, b);
+    }: _(RawOrigin::Signed(config.applicant), config.metadata, config.deposit_applying)
 
     counter {
         let u in 0 .. 1000;
+        let b in 0 .. MAX_METADATA_SIZE;
 
-        let applicant = account("applicant", u, SEED_APPLICANT);
-        let counterer = account("counterer", u, SEED_COUNTERER);
-        let metadata = (0..100).map(|v| v).collect();
-        let deposit_applying = T::MinimumApplicationAmount::get();
-        let deposit_countering = T::MinimumCounterAmount::get();
+        let config = make_benchmark_config::<T, _>(u, b);
 
-        let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
-        let _ = T::Currency::make_free_balance_be(&counterer, deposit_countering);
-
-        let _ = <Module<T, _>>::apply(RawOrigin::Signed(
-            applicant.clone()).into(),
-            metadata,
-            deposit_applying
-        );
-    }: _(RawOrigin::Signed(counterer), applicant, deposit_countering)
+        do_apply::<T, I>(&config)?;
+    }: _(RawOrigin::Signed(config.counterer), config.applicant, config.deposit_countering)
 
     vote {
         let u in 0 .. 1000;
+        let b in 0 .. MAX_METADATA_SIZE;
 
-        let applicant = account("applicant", u, SEED_APPLICANT);
-        let counterer = account("counterer", u, SEED_COUNTERER);
-        let voter = account("voter", u, SEED_VOTER);
-        let metadata = (0..100).map(|v| v).collect();
-        let deposit_applying = T::MinimumApplicationAmount::get();
-        let deposit_countering = T::MinimumCounterAmount::get();
-        let deposit_voting = deposit_applying + deposit_countering;
+        let config = make_benchmark_config::<T, _>(u, b);
         let supporting = u % 2 == 0;
 
-        let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
-        let _ = T::Currency::make_free_balance_be(&counterer, deposit_countering);
-        let _ = T::Currency::make_free_balance_be(&voter, deposit_voting);
-
-        let _ = <Module<T, _>>::apply(
-            RawOrigin::Signed(applicant.clone()).into(),
-            metadata,
-            deposit_applying
-        );
+        do_apply::<T, I>(&config)?;
 
         let _ = <Module<T, _>>::counter(
-            RawOrigin::Signed(counterer.clone()).into(),
-            applicant.clone(),
-            deposit_countering
+            RawOrigin::Signed(config.counterer.clone()).into(),
+            config.applicant.clone(),
+            config.deposit_countering
         );
-    }: _(RawOrigin::Signed(voter), applicant, supporting, deposit_voting)
+    }: _(RawOrigin::Signed(config.voter), config.applicant, supporting, config.deposit_voting)
 
     challenge {
         let u in 0 .. 1000;
+        let b in 0 .. MAX_METADATA_SIZE;
 
-        let applicant = account("applicant", u, SEED_APPLICANT);
-        let challenger = account("challenger", u, SEED_CHALLENGER);
-        let metadata = (0..100).map(|v| v).collect();
-        let deposit_applying = T::MinimumApplicationAmount::get();
-        let deposit_challenging = T::MinimumChallengeAmount::get();
+        let config = make_benchmark_config::<T, _>(u, b);
 
-        let _ = T::Currency::make_free_balance_be(&applicant, deposit_applying);
-        let _ = T::Currency::make_free_balance_be(&challenger, deposit_challenging);
-
-        let _ = <Module<T, _>>::apply(
-            RawOrigin::Signed(applicant.clone()).into(),
-            metadata,
-            deposit_applying
-        );
+        do_apply::<T, I>(&config)?;
 
         let _ = <Module<T, _>>::commit_applications(
             T::FinalizeApplicationPeriod::get() + <system::Module<T>>::block_number()
         );
-    }: _(RawOrigin::Signed(challenger), applicant, deposit_challenging)
+    }: _(RawOrigin::Signed(config.challenger), config.applicant, config.deposit_challenging)
 }
 
 #[cfg(test)]

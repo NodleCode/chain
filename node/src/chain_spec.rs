@@ -19,9 +19,9 @@
 use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::{
     opaque::SessionKeys, AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig,
-    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
-    RootMembershipConfig, SessionConfig, Signature, SystemConfig, TechnicalMembershipConfig,
-    ValidatorsSetConfig, WASM_BINARY,
+    BlockNumber, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig,
+    ImOnlineConfig, IndicesConfig, RootMembershipConfig, SessionConfig, Signature, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -97,6 +97,7 @@ pub fn testnet_genesis(
     roots: Vec<AccountId>,
     oracles: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
+    grants: Option<Vec<(AccountId, Vec<(BlockNumber, BlockNumber, u32, Balance)>)>>,
 ) -> GenesisConfig {
     let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -105,14 +106,25 @@ pub fn testnet_genesis(
             get_account_id_from_seed::<sr25519::Public>("Charlie"),
             get_account_id_from_seed::<sr25519::Public>("Dave"),
             get_account_id_from_seed::<sr25519::Public>("Eve"),
-            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
             get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
             get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
             get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
             get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
             get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-            get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
         ]
+    });
+
+    let vested_grants = grants.unwrap_or_else(|| {
+        vec![(
+            // Ferdie has a network launch grant:
+            // 1. after 1000 blocks a cliff of 1000 NODL unlocks
+            // 2. for the next 100000 blocks a grant of 100 NODL unlocks every 1000 blocks
+            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+            vec![
+                (1_000, 1, 1, 1000 * NODL),      // Cliff
+                (2_000, 1_000, 100, 100 * NODL), // Vesting
+            ],
+        )]
     });
 
     const ENDOWMENT: Balance = 100 * NODL;
@@ -134,6 +146,9 @@ pub fn testnet_genesis(
                 .collect(),
         }),
         pallet_indices: Some(IndicesConfig { indices: vec![] }),
+        pallet_grants: Some(GrantsConfig {
+            vesting: vested_grants,
+        }),
         pallet_vesting: Some(Default::default()),
 
         // Consensus
@@ -196,6 +211,7 @@ fn development_config_genesis() -> GenesisConfig {
         vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
         None,
+        None,
     )
 }
 
@@ -226,6 +242,7 @@ fn local_testnet_genesis() -> GenesisConfig {
             get_account_id_from_seed::<sr25519::Public>("Charlie"),
         ],
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
+        None,
         None,
     )
 }

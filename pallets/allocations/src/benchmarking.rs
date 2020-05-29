@@ -40,7 +40,7 @@ benchmarks! {
         let oracle: T::AccountId = account("oracle", u, SEED);
 
         Module::<T>::initialize_members(&[oracle.clone()]);
-    }: _(RawOrigin::Signed(oracle), grantee, 100.into(), Vec::new())
+    }: _(RawOrigin::Signed(oracle), grantee, 100.into(), vec![1; b as usize])
 }
 
 #[cfg(test)]

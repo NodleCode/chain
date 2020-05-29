@@ -21,9 +21,7 @@
 use super::*;
 
 use frame_support::{
-    assert_noop, assert_ok, impl_outer_origin, parameter_types,
-    traits::{Imbalance, OnFinalize},
-    weights::Weight,
+    assert_noop, assert_ok, impl_outer_origin, parameter_types, traits::OnFinalize, weights::Weight,
 };
 use sp_core::H256;
 use sp_runtime::{
@@ -131,9 +129,6 @@ impl Trait for Test {
     type ChangeMembers = TestChangeMembers;
 }
 
-type PositiveImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
-
 const CANDIDATE: u64 = 1;
 const CHALLENGER_1: u64 = 2;
 const CHALLENGER_2: u64 = 3;
@@ -142,6 +137,7 @@ const VOTER_AGAINST: u64 = 5;
 
 type BalancesModule = pallet_balances::Module<Test>;
 type TestModule = Module<Test>;
+type TestCurrency = <Test as Trait>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -153,20 +149,11 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 fn allocate_balances() {
-    let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
-    let r_candidate =
-        <Test as Trait>::Currency::deposit_creating(&CANDIDATE, MinimumApplicationAmount::get());
-    let r_challenger_1 =
-        <Test as Trait>::Currency::deposit_creating(&CHALLENGER_1, MinimumCounterAmount::get());
-    let r_challenger_2 =
-        <Test as Trait>::Currency::deposit_creating(&CHALLENGER_2, MinimumChallengeAmount::get());
-    let r_voter_for = <Test as Trait>::Currency::deposit_creating(&VOTER_FOR, 1000);
-    let r_voter_against = <Test as Trait>::Currency::deposit_creating(&VOTER_AGAINST, 1000);
-    total_imbalance.subsume(r_candidate);
-    total_imbalance.subsume(r_challenger_1);
-    total_imbalance.subsume(r_challenger_2);
-    total_imbalance.subsume(r_voter_for);
-    total_imbalance.subsume(r_voter_against);
+    TestCurrency::make_free_balance_be(&CANDIDATE, MinimumApplicationAmount::get());
+    TestCurrency::make_free_balance_be(&CHALLENGER_1, MinimumCounterAmount::get());
+    TestCurrency::make_free_balance_be(&CHALLENGER_2, MinimumChallengeAmount::get());
+    TestCurrency::make_free_balance_be(&VOTER_FOR, 1000);
+    TestCurrency::make_free_balance_be(&VOTER_AGAINST, 1000);
 }
 
 #[test]

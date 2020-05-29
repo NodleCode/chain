@@ -22,7 +22,7 @@ use super::*;
 
 use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
-    traits::Imbalance, weights::Weight,
+    traits::Currency, weights::Weight,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
@@ -97,9 +97,7 @@ impl Trait for Test {
 }
 type TestModule = Module<Test>;
 type Balances = pallet_balances::Module<Test>;
-
-type PositiveImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::PositiveImbalance;
+type TestCurrency = <Test as Trait>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -120,9 +118,7 @@ fn spend_error_if_bad_origin() {
 #[test]
 fn spend_funds_to_target() {
     new_test_ext().execute_with(|| {
-        let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
-        let r = <Test as Trait>::Currency::deposit_creating(&TestModule::account_id(), 100);
-        total_imbalance.subsume(r);
+        TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
 
         assert_eq!(Balances::free_balance(TestModule::account_id()), 100);
         assert_eq!(Balances::free_balance(3), 0);
@@ -135,9 +131,7 @@ fn spend_funds_to_target() {
 #[test]
 fn tip() {
     new_test_ext().execute_with(|| {
-        let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
-        let r = <Test as Trait>::Currency::deposit_creating(&999, 100);
-        total_imbalance.subsume(r);
+        TestCurrency::make_free_balance_be(&999, 100);
 
         assert_ok!(TestModule::tip(Origin::signed(999), 50));
         assert_eq!(Balances::free_balance(999), 50);
@@ -172,9 +166,7 @@ fn apply_as_works() {
 #[test]
 fn try_root_if_not_admin() {
     new_test_ext().execute_with(|| {
-        let mut total_imbalance = <PositiveImbalanceOf<Test>>::zero();
-        let r = <Test as Trait>::Currency::deposit_creating(&TestModule::account_id(), 100);
-        total_imbalance.subsume(r);
+        TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
 
         assert_ok!(TestModule::spend(Origin::ROOT, 3, 100));
         assert_ok!(TestModule::apply_as(Origin::ROOT, make_call(1)));

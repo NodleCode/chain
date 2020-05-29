@@ -23,7 +23,7 @@ mod tests;
 
 use frame_support::{
     decl_error, decl_event, decl_module, decl_storage, ensure,
-    traits::{ChangeMembers, Currency, Get, Imbalance, InitializeMembers, OnUnbalanced},
+    traits::{ChangeMembers, Currency, Get, InitializeMembers},
 };
 use frame_system::{self as system, ensure_signed};
 use nodle_support::WithAccountId;
@@ -35,8 +35,6 @@ use sp_std::prelude::Vec;
 
 type BalanceOf<T> =
     <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
-type PositiveImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
 
 /// The module's configuration trait.
 pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
@@ -44,7 +42,6 @@ pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
     type Currency: Currency<Self::AccountId>;
     type ProtocolFee: Get<Perbill>;
     type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
-    type SourceOfTheCoins: OnUnbalanced<PositiveImbalanceOf<Self>>;
     type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
 }
 
@@ -98,12 +95,8 @@ decl_module! {
             let amount_for_protocol = T::ProtocolFee::get() * amount;
             let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
 
-            let mut total_imbalance = <PositiveImbalanceOf<T>>::zero();
-            let r_grantee = T::Currency::deposit_creating(&to, amount_for_grantee);
-            let r_protocol = T::Currency::deposit_creating(&T::ProtocolFeeReceiver::account_id(), amount_for_protocol);
-            total_imbalance.subsume(r_grantee);
-            total_imbalance.subsume(r_protocol);
-            T::SourceOfTheCoins::on_unbalanced(total_imbalance);
+            T::Currency::resolve_creating(&T::ProtocolFeeReceiver::account_id(), T::Currency::issue(amount_for_protocol));
+            T::Currency::resolve_creating(&to, T::Currency::issue(amount_for_grantee));
 
             Self::deposit_event(RawEvent::NewAllocation(to, amount_for_grantee, amount_for_protocol, proof));
 
