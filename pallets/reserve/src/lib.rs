@@ -59,11 +59,14 @@ decl_storage! {
     trait Store for Module<T: Trait<I>, I: Instance = DefaultInstance> as Reserve {}
     add_extra_genesis {
         build(|_config| {
-            // Create account
-            let _ = T::Currency::make_free_balance_be(
-                &<Module<T, I>>::account_id(),
-                T::Currency::minimum_balance(),
-            );
+            let our_account = &<Module<T, I>>::account_id();
+
+            if T::Currency::free_balance(our_account) < T::Currency::minimum_balance() {
+                let _ = T::Currency::make_free_balance_be(
+                    our_account,
+                    T::Currency::minimum_balance(),
+                );
+            }
         });
     }
 }

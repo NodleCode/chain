@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 28,
+    spec_version: 29,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -597,7 +597,7 @@ impl pallet_amendments::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
@@ -610,7 +610,7 @@ impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
 }
 
 parameter_types! {
-    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint");
+    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint"); // 5EYCAe5ijiYfi6GQAEPSHYDwvw4CkyGtPTS52BjLh42GygSv
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance2> for Runtime {
@@ -623,7 +623,7 @@ impl pallet_reserve::Trait<pallet_reserve::Instance2> for Runtime {
 }
 
 parameter_types! {
-    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa");
+    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa"); // 5EYCAe5ijiYfi6MEfWpZC3nJ38KFZ9EQSFpsj9mgYgTtVNri
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance3> for Runtime {
@@ -750,7 +750,7 @@ impl pallet_emergency_shutdown::Trait for Runtime {
 
 parameter_types! {
     pub const ProtocolFee: Perbill = Perbill::from_percent(20);
-    pub const MaximumCoinsEverAllocated: Balance = 1_000_000_000 * constants::NODL;
+    pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
 }
 
 impl pallet_allocations::Trait for Runtime {
