@@ -266,6 +266,11 @@ pub fn arcadia_config() -> ChainSpec {
     ChainSpec::from_json_bytes(&include_bytes!("../res/arcadia.json")[..]).unwrap()
 }
 
+// Main config, from json chainspec
+pub fn main_config() -> ChainSpec {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/main.spec.json")[..]).unwrap()
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -284,5 +289,10 @@ pub(crate) mod tests {
     #[test]
     fn test_create_arcadia_chain_spec() {
         arcadia_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_create_main_chain_spec() {
+        main_config().build_storage().unwrap();
     }
 }
