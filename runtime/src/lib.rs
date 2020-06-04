@@ -597,7 +597,7 @@ impl pallet_amendments::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
@@ -610,7 +610,7 @@ impl pallet_reserve::Trait<pallet_reserve::Instance1> for Runtime {
 }
 
 parameter_types! {
-    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint");
+    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint"); // 5EYCAe5ijiYfi6GQAEPSHYDwvw4CkyGtPTS52BjLh42GygSv
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance2> for Runtime {
@@ -623,7 +623,7 @@ impl pallet_reserve::Trait<pallet_reserve::Instance2> for Runtime {
 }
 
 parameter_types! {
-    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa");
+    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa"); // 5EYCAe5ijiYfi6MEfWpZC3nJ38KFZ9EQSFpsj9mgYgTtVNri
 }
 
 impl pallet_reserve::Trait<pallet_reserve::Instance3> for Runtime {
