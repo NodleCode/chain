@@ -750,7 +750,7 @@ impl pallet_emergency_shutdown::Trait for Runtime {
 
 parameter_types! {
     pub const ProtocolFee: Perbill = Perbill::from_percent(20);
-    pub const MaximumCoinsEverAllocated: Balance = 1_000_000_000 * constants::NODL;
+    pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
 }
 
 impl pallet_allocations::Trait for Runtime {
