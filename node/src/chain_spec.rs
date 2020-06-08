@@ -271,7 +271,7 @@ pub fn arcadia_config() -> ChainSpec {
 
 // Main config, from json chainspec
 pub fn main_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/main.spec.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../res/main.json")[..]).unwrap()
 }
 
 #[cfg(test)]
