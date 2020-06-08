@@ -201,6 +201,9 @@ pub fn testnet_genesis(
             members: roots.clone(),
             phantom: Default::default(),
         }),
+
+        // Allocations
+        pallet_membership_Instance5: Some(Default::default()),
     }
 }
 
