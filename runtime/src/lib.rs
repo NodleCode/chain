@@ -371,8 +371,7 @@ impl pallet_indices::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const ExistentialDeposit: Balance = 100 * constants::CENTS;
-    pub const CreationFee: Balance = 1 * constants::CENTS;
+    pub const ExistentialDeposit: Balance = 1 * constants::MILLICENTS;
 }
 
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
