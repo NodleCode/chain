@@ -169,7 +169,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 30,
+    spec_version: 32,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -371,8 +371,7 @@ impl pallet_indices::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const ExistentialDeposit: Balance = 100 * constants::CENTS;
-    pub const CreationFee: Balance = 1 * constants::CENTS;
+    pub const ExistentialDeposit: Balance = 1 * constants::MILLICENTS;
 }
 
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
@@ -759,6 +758,7 @@ impl pallet_allocations::Trait for Runtime {
     type ProtocolFee = ProtocolFee;
     type ProtocolFeeReceiver = CompanyReserve;
     type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
+    type ExistentialDeposit = <Runtime as pallet_balances::Trait>::ExistentialDeposit;
 }
 
 impl pallet_membership::Trait<pallet_membership::Instance5> for Runtime {

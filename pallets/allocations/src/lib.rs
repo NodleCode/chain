@@ -43,6 +43,9 @@ pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
     type ProtocolFee: Get<Perbill>;
     type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
     type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
+
+    /// Runtime existential deposit
+    type ExistentialDeposit: Get<BalanceOf<Self>>;
 }
 
 decl_error! {
@@ -53,6 +56,8 @@ decl_error! {
         TooManyCoinsToAllocate,
         /// Emergency shutdown is active, operations suspended
         UnderShutdown,
+        /// Amount is too low and will conflict with the ExistentialDeposit parameter
+        DoesNotSatisfyExistentialDeposit,
     }
 }
 
@@ -90,10 +95,13 @@ decl_module! {
 
             ensure!(coins_that_will_be_consumed <= T::MaximumCoinsEverAllocated::get(), Error::<T>::TooManyCoinsToAllocate);
 
-            <CoinsConsumed<T>>::put(coins_that_will_be_consumed);
-
             let amount_for_protocol = T::ProtocolFee::get() * amount;
             let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
+
+            Self::ensure_satisfy_existential_deposit(&T::ProtocolFeeReceiver::account_id(), amount_for_protocol)?;
+            Self::ensure_satisfy_existential_deposit(&to, amount_for_grantee)?;
+
+            <CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
             T::Currency::resolve_creating(&T::ProtocolFeeReceiver::account_id(), T::Currency::issue(amount_for_protocol));
             T::Currency::resolve_creating(&to, T::Currency::issue(amount_for_grantee));
@@ -115,6 +123,20 @@ impl<T: Trait> Module<T> {
         ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 
         Ok(())
+    }
+
+    fn ensure_satisfy_existential_deposit(
+        who: &T::AccountId,
+        amount: BalanceOf<T>,
+    ) -> DispatchResult {
+        let already_over_existential_deposit =
+            T::Currency::free_balance(who) >= T::ExistentialDeposit::get();
+        let amount_over_existential_deposit = amount >= T::ExistentialDeposit::get();
+
+        match already_over_existential_deposit || amount_over_existential_deposit {
+            true => Ok(()),
+            false => Err(Error::<T>::DoesNotSatisfyExistentialDeposit)?,
+        }
     }
 }
 

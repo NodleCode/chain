@@ -72,11 +72,14 @@ impl frame_system::Trait for Test {
     type ExtrinsicBaseWeight = ();
     type MaximumExtrinsicWeight = MaximumBlockWeight;
 }
+parameter_types! {
+    pub const ExistentialDeposit: u64 = 2;
+}
 impl pallet_balances::Trait for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
-    type ExistentialDeposit = ();
+    type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = frame_system::Module<Test>;
 }
 
@@ -107,6 +110,7 @@ impl Trait for Test {
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;
+    type ExistentialDeposit = <Test as pallet_balances::Trait>::ExistentialDeposit;
 }
 type Allocations = Module<Test>;
 type EmergencyShutdown = pallet_emergency_shutdown::Module<Test>;
@@ -168,6 +172,49 @@ fn allocate_the_right_amount_of_coins_to_everyone() {
         assert_eq!(Balances::free_balance(Grantee::get()), 45);
         assert_eq!(Balances::free_balance(Receiver::get()), 5);
         assert_eq!(Allocations::coins_consumed(), 50);
+    })
+}
+
+#[test]
+fn error_if_too_small_for_existential_deposit() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 1, Vec::new()),
+            Errors::DoesNotSatisfyExistentialDeposit,
+        );
+
+        assert_eq!(Balances::free_balance(Grantee::get()), 0);
+        assert_eq!(Balances::free_balance(Receiver::get()), 0);
+        assert_eq!(Allocations::coins_consumed(), 0);
+    })
+}
+
+#[test]
+fn do_not_error_if_too_small_for_existential_deposit_but_balance_ok() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        Balances::make_free_balance_be(&Grantee::get(), ExistentialDeposit::get());
+        Balances::make_free_balance_be(&Receiver::get(), ExistentialDeposit::get());
+
+        assert_ok!(Allocations::allocate(
+            Origin::signed(Oracle::get()),
+            Grantee::get(),
+            10,
+            Vec::new()
+        ),);
+
+        assert_eq!(
+            Balances::free_balance(Grantee::get()),
+            ExistentialDeposit::get().saturating_add(9)
+        );
+        assert_eq!(
+            Balances::free_balance(Receiver::get()),
+            ExistentialDeposit::get().saturating_add(1)
+        );
+        assert_eq!(Allocations::coins_consumed(), 10);
     })
 }
 
