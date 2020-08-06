@@ -21,9 +21,9 @@
 use super::*;
 
 use frame_benchmarking::{account, benchmarks};
+use frame_support::traits::UnfilteredDispatchable;
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
-use sp_runtime::traits::Dispatchable;
 use sp_std::prelude::*;
 
 const MAX_SCHEDULES: u32 = 100;
@@ -104,9 +104,7 @@ benchmarks! {
 
         let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup);
         let origin = T::CancelOrigin::successful_origin();
-    }: {
-        let _ = call.dispatch(origin)?;
-    }
+    }: { call.dispatch_bypass_filter(origin)? }
 }
 
 #[cfg(test)]
