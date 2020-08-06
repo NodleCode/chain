@@ -29,7 +29,7 @@ mod tests;
 use frame_support::{
     decl_event, decl_module, decl_storage, dispatch::DispatchResult, traits::EnsureOrigin,
 };
-use frame_system::{self as system, ensure_root};
+use frame_system::ensure_root;
 
 /// The module's configuration trait.
 pub trait Trait: frame_system::Trait {

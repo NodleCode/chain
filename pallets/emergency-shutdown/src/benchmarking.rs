@@ -23,7 +23,7 @@
 use super::*;
 
 use frame_benchmarking::benchmarks;
-use sp_runtime::traits::Dispatchable;
+use frame_support::traits::UnfilteredDispatchable;
 use sp_std::prelude::*;
 
 benchmarks! {
@@ -34,9 +34,7 @@ benchmarks! {
 
         let call = Call::<T>::toggle();
         let origin = T::ShutdownOrigin::successful_origin();
-    }: {
-        let _ = call.dispatch(origin)?;
-    }
+    }: { call.dispatch_bypass_filter(origin)? }
 }
 
 #[cfg(test)]
