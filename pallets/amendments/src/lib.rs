@@ -23,8 +23,11 @@
 
 use frame_support::{
     decl_error, decl_event, decl_module, decl_storage,
-    traits::{schedule::Named as ScheduleNamed, EnsureOrigin, Get, LockIdentifier},
-    weights::{FunctionOf, GetDispatchInfo, Pays},
+    traits::{
+        schedule::DispatchTime::At, schedule::Named as ScheduleNamed, EnsureOrigin, Get,
+        LockIdentifier,
+    },
+    weights::GetDispatchInfo,
     Parameter,
 };
 use frame_system::{self as system, ensure_root};
@@ -44,7 +47,8 @@ pub trait Trait: system::Trait {
         + Dispatchable<Origin = Self::Origin>
         + From<frame_system::Call<Self>>
         + GetDispatchInfo;
-    type Scheduler: ScheduleNamed<Self::BlockNumber, Self::Amendment>;
+    type Scheduler: ScheduleNamed<Self::BlockNumber, Self::Amendment, Self::PalletsOrigin>;
+    type PalletsOrigin: From<system::RawOrigin<Self::AccountId>>;
 
     /// Origin that can submit amendments
     type SubmissionOrigin: EnsureOrigin<Self::Origin>;
@@ -90,11 +94,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Trigger a new challenge to remove an existing member
-        #[weight = FunctionOf(
-            |args: (&Box<<T as Trait>::Amendment>,)| args.0.get_dispatch_info().weight + 20_000,
-            |args: (&Box<<T as Trait>::Amendment>,)| args.0.get_dispatch_info().class,
-            Pays::Yes,
-        )]
+        #[weight = (amendment.get_dispatch_info().weight + 20_000, amendment.get_dispatch_info().class)]
         fn propose(origin, amendment: Box<T::Amendment>) -> DispatchResult {
             T::SubmissionOrigin::try_origin(origin)
                 .map(|_| ())
@@ -106,9 +106,10 @@ decl_module! {
 
             if T::Scheduler::schedule_named(
                 scheduler_id.clone(),
-                when,
+                At(when),
                 None,
                 62,
+                system::RawOrigin::Root.into(),
                 *amendment,
             ).is_err() {
                 Err(Error::<T>::FailedToScheduleAmendment)?;
