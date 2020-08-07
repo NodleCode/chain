@@ -779,6 +779,24 @@ impl pallet_proxy::Trait for Runtime {
 }
 
 parameter_types! {
+    // One storage item; key size is 32; value is size 4+4+16+32 bytes = 56 bytes.
+    pub const DepositBase: Balance = constants::deposit(1, 88);
+    // Additional storage item size of 32 bytes.
+    pub const DepositFactor: Balance = constants::deposit(0, 32);
+    pub const MaxSignatories: u16 = 100;
+}
+
+impl pallet_multisig::Trait for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type Currency = Balances;
+    type DepositBase = DepositBase;
+    type DepositFactor = DepositFactor;
+    type MaxSignatories = MaxSignatories;
+    type WeightInfo = ();
+}
+
+parameter_types! {
     // TCR economics
     pub const MinimumApplicationAmount: Balance = 5 * constants::NODL;
     pub const MinimumCounterAmount: Balance = 10 * constants::NODL;
@@ -907,6 +925,7 @@ construct_runtime!(
         Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
         Utility: pallet_utility::{Module, Call, Event},
         Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
+        Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 
         // Nodle Stack
         PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
@@ -1170,6 +1189,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_identity, Identity);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_indices, Indices);
+            add_benchmark!(params, batches, pallet_multisig, Multisig);
             //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
