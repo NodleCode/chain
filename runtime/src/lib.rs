@@ -29,7 +29,7 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
-use parity_scale_codec::Encode;
+use parity_scale_codec::{Decode, Encode};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
@@ -53,12 +53,15 @@ use sp_version::RuntimeVersion;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
     construct_runtime, debug, parameter_types,
-    traits::{Currency, Imbalance, KeyOwnerProofSystem, OnUnbalanced, Randomness, SplitTwoWays},
+    traits::{
+        Currency, Imbalance, InstanceFilter, KeyOwnerProofSystem, OnUnbalanced, Randomness,
+        SplitTwoWays,
+    },
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         IdentityFee, Weight,
     },
-    StorageValue,
+    RuntimeDebug, StorageValue,
 };
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
@@ -170,7 +173,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 33,
+    spec_version: 34,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -713,6 +716,69 @@ impl pallet_utility::Trait for Runtime {
 }
 
 parameter_types! {
+    // One storage item; key size 32, value size 8; .
+    pub const ProxyDepositBase: Balance = constants::deposit(1, 8);
+    // Additional storage item size of 33 bytes.
+    pub const ProxyDepositFactor: Balance = constants::deposit(0, 33);
+    pub const MaxProxies: u16 = 32;
+}
+
+/// The type used to represent the kinds of proxying allowed.
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug)]
+pub enum ProxyType {
+    Any,
+    NonTransfer,
+    Governance,
+}
+impl Default for ProxyType {
+    fn default() -> Self {
+        Self::Any
+    }
+}
+impl InstanceFilter<Call> for ProxyType {
+    fn filter(&self, c: &Call) -> bool {
+        match self {
+            ProxyType::Any => true,
+            ProxyType::NonTransfer => !matches!(
+                c,
+                Call::Balances(..)
+                    | Call::Grants(..)
+                    | Call::Indices(pallet_indices::Call::transfer(..))
+            ),
+            ProxyType::Governance => matches!(
+                c,
+                Call::FinancialCommittee(..)
+                    | Call::RootCommittee(..)
+                    | Call::TechnicalCommittee(..)
+                    | Call::CompanyReserve(..)
+                    | Call::UsaReserve(..)
+                    | Call::InternationalReserve(..)
+            ),
+        }
+    }
+    fn is_superset(&self, o: &Self) -> bool {
+        match (self, o) {
+            (x, y) if x == y => true,
+            (ProxyType::Any, _) => true,
+            (_, ProxyType::Any) => false,
+            (ProxyType::NonTransfer, _) => true,
+            _ => false,
+        }
+    }
+}
+
+impl pallet_proxy::Trait for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type Currency = Balances;
+    type ProxyType = ProxyType;
+    type ProxyDepositBase = ProxyDepositBase;
+    type ProxyDepositFactor = ProxyDepositFactor;
+    type MaxProxies = MaxProxies;
+    type WeightInfo = ();
+}
+
+parameter_types! {
     // TCR economics
     pub const MinimumApplicationAmount: Balance = 5 * constants::NODL;
     pub const MinimumCounterAmount: Balance = 10 * constants::NODL;
@@ -840,6 +906,7 @@ construct_runtime!(
         Identity: pallet_identity::{Module, Call, Storage, Event<T>},
         Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
         Utility: pallet_utility::{Module, Call, Event},
+        Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 
         // Nodle Stack
         PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
