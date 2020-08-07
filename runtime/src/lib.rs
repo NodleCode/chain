@@ -1074,15 +1074,16 @@ sp_api::impl_runtime_apis! {
             repeat: u32,
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
             // We did not include the offences and sessions benchmarks as they are parity
-            // specific and were causing some issues at compile time.
+            // specific and were causing some issues at compile time as they depend on the
+            // presence of the staking and elections pallets.
 
             use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark};
 
-            //use frame_system_benchmarking::Module as SystemBench;
+            use frame_system_benchmarking::Module as SystemBench;
             //use pallet_offences_benchmarking::Module as OffencesBench;
             //use pallet_session_benchmarking::Module as SessionBench;
 
-            //impl frame_system_benchmarking::Trait for Runtime {}
+            impl frame_system_benchmarking::Trait for Runtime {}
             //impl pallet_offences_benchmarking::Trait for Runtime{}
             //impl pallet_session_benchmarking::Trait for Runtime {}
 
@@ -1090,18 +1091,21 @@ sp_api::impl_runtime_apis! {
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&pallet, &benchmark, &lowest_range_values, &highest_range_values, &steps, repeat, &whitelist);
 
+            add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
             add_benchmark!(params, batches, pallet_amendments, Amendments);
+            add_benchmark!(params, batches, pallet_babe, Babe);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
+            add_benchmark!(params, batches, pallet_grandpa, Grandpa);
             add_benchmark!(params, batches, pallet_grants, Grants);
             add_benchmark!(params, batches, pallet_identity, Identity);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
-            //add_benchmark!(params, batches, b"offences", OffencesBench);
+            add_benchmark!(params, batches, pallet_indices, Indices);
+            //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
-            //add_benchmark!(params, batches, b"session", SessionBench::<Runtime>);
-            //add_benchmark!(params, batches, b"system", SystemBench::<Runtime>);
+            //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
             add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
             add_benchmark!(params, batches, pallet_tcr, PkiTcr);
