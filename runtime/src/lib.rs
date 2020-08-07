@@ -1191,6 +1191,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_indices, Indices);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
+            add_benchmark!(params, batches, pallet_proxy, Proxy);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
             add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
