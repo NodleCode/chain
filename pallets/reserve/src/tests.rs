@@ -21,10 +21,10 @@
 use super::*;
 
 use frame_support::{
-    assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
-    traits::Currency, weights::Weight,
+    assert_noop, assert_ok, impl_outer_dispatch, impl_outer_origin, ord_parameter_types,
+    parameter_types, traits::Currency, weights::Weight,
 };
-use frame_system::EnsureSignedBy;
+use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -36,6 +36,11 @@ use sp_std::prelude::Box;
 
 impl_outer_origin! {
     pub enum Origin for Test {}
+}
+impl_outer_dispatch! {
+    pub enum Call for Test where origin: Origin {
+        frame_system::System,
+    }
 }
 
 // For testing the module, we construct most of a mock runtime. This means
@@ -51,7 +56,7 @@ parameter_types! {
 }
 impl frame_system::Trait for Test {
     type Origin = Origin;
-    type Call = ();
+    type Call = Call;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -73,6 +78,8 @@ impl frame_system::Trait for Test {
     type BlockExecutionWeight = ();
     type ExtrinsicBaseWeight = ();
     type MaximumExtrinsicWeight = MaximumBlockWeight;
+    type BaseCallFilter = ();
+    type SystemWeightInfo = ();
 }
 impl pallet_balances::Trait for Test {
     type Balance = u64;
@@ -80,6 +87,7 @@ impl pallet_balances::Trait for Test {
     type DustRemoval = ();
     type ExistentialDeposit = ();
     type AccountStore = frame_system::Module<Test>;
+    type WeightInfo = ();
 }
 
 ord_parameter_types! {
@@ -92,11 +100,12 @@ impl Trait for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
-    type Call = frame_system::Call<Test>;
+    type Call = Call;
     type ModuleId = ReserveModuleId;
 }
 type TestModule = Module<Test>;
 type Balances = pallet_balances::Module<Test>;
+type System = frame_system::Module<Test>;
 type TestCurrency = <Test as Trait>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
@@ -139,8 +148,10 @@ fn tip() {
     })
 }
 
-fn make_call(value: u8) -> Box<frame_system::Call<Test>> {
-    Box::new(frame_system::Call::<Test>::remark(vec![value]))
+fn make_call(value: u8) -> Box<Call> {
+    Box::new(Call::System(frame_system::Call::<Test>::remark(vec![
+        value,
+    ])))
 }
 
 #[test]
@@ -168,7 +179,7 @@ fn try_root_if_not_admin() {
     new_test_ext().execute_with(|| {
         TestCurrency::make_free_balance_be(&TestModule::account_id(), 100);
 
-        assert_ok!(TestModule::spend(Origin::ROOT, 3, 100));
-        assert_ok!(TestModule::apply_as(Origin::ROOT, make_call(1)));
+        assert_ok!(TestModule::spend(RawOrigin::Root.into(), 3, 100));
+        assert_ok!(TestModule::apply_as(RawOrigin::Root.into(), make_call(1)));
     })
 }

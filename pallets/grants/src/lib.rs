@@ -7,7 +7,7 @@ use frame_support::{
         WithdrawReasons,
     },
 };
-use frame_system::{self as system, ensure_root, ensure_signed};
+use frame_system::{ensure_root, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{AtLeast32Bit, CheckedAdd, StaticLookup, Zero},

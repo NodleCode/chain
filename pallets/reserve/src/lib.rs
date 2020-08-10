@@ -29,10 +29,10 @@ mod tests;
 use frame_support::{
     decl_event, decl_module, decl_storage,
     traits::{Currency, EnsureOrigin, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
-    weights::{FunctionOf, GetDispatchInfo, Pays},
+    weights::GetDispatchInfo,
     Parameter,
 };
-use frame_system::{self as system, ensure_root, ensure_signed};
+use frame_system::{ensure_root, ensure_signed};
 use nodle_support::WithAccountId;
 use sp_runtime::{
     traits::{AccountIdConversion, Dispatchable},
@@ -121,11 +121,7 @@ decl_module! {
         }
 
         /// Dispatch a call as coming from the reserve account
-        #[weight = FunctionOf(
-            |args: (&Box<<T as Trait<I>>::Call>,)| args.0.get_dispatch_info().weight + 10_000,
-            |args: (&Box<<T as Trait<I>>::Call>,)| args.0.get_dispatch_info().class,
-            Pays::Yes,
-        )]
+        #[weight = (call.get_dispatch_info().weight + 10_000, call.get_dispatch_info().class)]
         pub fn apply_as(origin, call: Box<<T as Trait<I>>::Call>) {
             T::ExternalOrigin::try_origin(origin)
                 .map(|_| ())

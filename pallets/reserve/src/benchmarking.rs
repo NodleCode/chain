@@ -23,8 +23,9 @@
 use super::*;
 
 use frame_benchmarking::{account, benchmarks_instance};
+use frame_support::traits::UnfilteredDispatchable;
 use frame_system::RawOrigin;
-use sp_runtime::traits::{Dispatchable, Saturating};
+use sp_runtime::traits::Saturating;
 use sp_std::prelude::*;
 
 const SEED: u32 = 0;
@@ -46,9 +47,7 @@ benchmarks_instance! {
 
         let call = Call::<T, I>::spend(dest, value);
         let origin = T::ExternalOrigin::successful_origin();
-    }: {
-        let _ = call.dispatch(origin)?;
-    }
+    }: { call.dispatch_bypass_filter(origin)? }
 }
 
 #[cfg(test)]

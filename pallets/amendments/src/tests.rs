@@ -24,7 +24,7 @@ use frame_support::{
     assert_noop, assert_ok, impl_outer_dispatch, impl_outer_origin, ord_parameter_types,
     parameter_types, weights::Weight,
 };
-use frame_system::EnsureSignedBy;
+use frame_system::{EnsureRoot, EnsureSignedBy};
 use parity_scale_codec::Encode;
 use sp_core::H256;
 use sp_runtime::{
@@ -56,7 +56,7 @@ parameter_types! {
 }
 impl frame_system::Trait for Test {
     type Origin = Origin;
-    type Call = ();
+    type Call = Call;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -78,15 +78,20 @@ impl frame_system::Trait for Test {
     type BlockExecutionWeight = ();
     type ExtrinsicBaseWeight = ();
     type MaximumExtrinsicWeight = MaximumBlockWeight;
+    type BaseCallFilter = ();
+    type SystemWeightInfo = ();
 }
 parameter_types! {
-    pub const MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * MaximumBlockWeight::get();
+    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * MaximumBlockWeight::get();
 }
 impl pallet_scheduler::Trait for Test {
     type Event = ();
     type Origin = Origin;
     type Call = Call;
     type MaximumWeight = MaximumSchedulerWeight;
+    type ScheduleOrigin = EnsureRoot<u64>;
+    type PalletsOrigin = OriginCaller;
+    type WeightInfo = ();
 }
 
 ord_parameter_types! {
@@ -102,6 +107,7 @@ impl Trait for Test {
     type VetoOrigin = EnsureSignedBy<Veto, u64>;
     type Delay = BlockDelay;
     type Scheduler = Scheduler;
+    type PalletsOrigin = OriginCaller;
 }
 
 type Amendments = Module<Test>;

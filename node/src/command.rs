@@ -16,41 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::chain_spec;
-use crate::cli::{Cli, Subcommand};
-use crate::{service, service::Executor};
-use sc_cli::SubstrateCli;
+use crate::{
+    chain_spec,
+    cli::{Cli, Subcommand},
+    service::{self, new_full_params, Executor},
+};
+use nodle_chain_runtime::Block;
+use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
+use sc_service::ServiceParams;
 
 impl SubstrateCli for Cli {
-    fn impl_name() -> &'static str {
-        "Nodle Chain Node"
+    fn impl_name() -> String {
+        "Nodle Chain Node".into()
     }
 
-    fn impl_version() -> &'static str {
-        env!("CARGO_PKG_VERSION")
+    fn impl_version() -> String {
+        env!("CARGO_PKG_VERSION").into()
     }
 
-    fn description() -> &'static str {
-        env!("CARGO_PKG_DESCRIPTION")
+    fn description() -> String {
+        env!("CARGO_PKG_DESCRIPTION").into()
     }
 
-    fn author() -> &'static str {
-        env!("CARGO_PKG_AUTHORS")
+    fn author() -> String {
+        env!("CARGO_PKG_AUTHORS").into()
     }
 
-    fn support_url() -> &'static str {
-        "https://github.com/NodleCode/chain/issues"
+    fn support_url() -> String {
+        "https://github.com/NodleCode/chain/issues".into()
     }
 
     fn copyright_start_year() -> i32 {
         2019
     }
 
-    fn executable_name() -> &'static str {
-        env!("CARGO_PKG_NAME")
-    }
-
-    fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
+    fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()),
             "local" => Box::new(chain_spec::local_testnet_config()),
@@ -61,37 +61,52 @@ impl SubstrateCli for Cli {
             )?),
         })
     }
+
+    fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
+        &nodle_chain_runtime::VERSION
+    }
 }
 
-/// Parse and run command line arguments
-pub fn run() -> sc_cli::Result<()> {
+/// Parse command line arguments into service configuration.
+pub fn run() -> Result<()> {
     let cli = Cli::from_args();
 
     match &cli.subcommand {
-        Some(Subcommand::Base(subcommand)) => {
-            let runner = cli.create_runner(subcommand)?;
-            runner.run_subcommand(subcommand, |config| Ok(new_full_start!(config).0))
+        None => {
+            let runner = cli.create_runner(&cli.run)?;
+            runner.run_node_until_exit(|config| match config.role {
+                Role::Light => service::new_light(config),
+                _ => service::new_full(config),
+            })
         }
         Some(Subcommand::Benchmark(cmd)) => {
             if cfg!(feature = "runtime-benchmarks") {
                 let runner = cli.create_runner(cmd)?;
 
-                runner.sync_run(|config| cmd.run::<nodle_chain_runtime::Block, Executor>(config))
+                runner.sync_run(|config| cmd.run::<Block, Executor>(config))
             } else {
                 println!(
                     "Benchmarking wasn't enabled when building the node. \
-                    You can enable it with `--features runtime-benchmarks`."
+				You can enable it with `--features runtime-benchmarks`."
                 );
                 Ok(())
             }
         }
-        None => {
-            let runner = cli.create_runner(&cli.run)?;
-            runner.run_node(
-                service::new_light,
-                service::new_full,
-                nodle_chain_runtime::VERSION,
-            )
+        Some(Subcommand::Base(subcommand)) => {
+            let runner = cli.create_runner(subcommand)?;
+            runner.run_subcommand(subcommand, |config| {
+                let (
+                    ServiceParams {
+                        client,
+                        backend,
+                        import_queue,
+                        task_manager,
+                        ..
+                    },
+                    ..,
+                ) = new_full_params(config)?;
+                Ok((client, backend, import_queue, task_manager))
+            })
         }
     }
 }

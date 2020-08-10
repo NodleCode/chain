@@ -24,7 +24,7 @@ use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
     weights::Weight,
 };
-use frame_system::EnsureSignedBy;
+use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -72,6 +72,8 @@ impl frame_system::Trait for Test {
     type BlockExecutionWeight = ();
     type ExtrinsicBaseWeight = ();
     type MaximumExtrinsicWeight = MaximumBlockWeight;
+    type BaseCallFilter = ();
+    type SystemWeightInfo = ();
 }
 
 ord_parameter_types! {
@@ -95,7 +97,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 #[test]
 fn root_toggle() {
     new_test_ext().execute_with(|| {
-        assert_ok!(TestModule::toggle(Origin::ROOT));
+        assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
     })
 }
 
@@ -111,10 +113,10 @@ fn toggle_on_off() {
     new_test_ext().execute_with(|| {
         assert_eq!(TestModule::shutdown(), false);
 
-        assert_ok!(TestModule::toggle(Origin::ROOT));
+        assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
         assert_eq!(TestModule::shutdown(), true);
 
-        assert_ok!(TestModule::toggle(Origin::ROOT));
+        assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
         assert_eq!(TestModule::shutdown(), false);
     })
 }

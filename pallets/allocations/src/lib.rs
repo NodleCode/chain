@@ -25,7 +25,7 @@ use frame_support::{
     decl_error, decl_event, decl_module, decl_storage, ensure,
     traits::{ChangeMembers, Currency, Get, InitializeMembers},
 };
-use frame_system::{self as system, ensure_signed};
+use frame_system::ensure_signed;
 use nodle_support::WithAccountId;
 use sp_runtime::{
     traits::{CheckedAdd, Saturating},

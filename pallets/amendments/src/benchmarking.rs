@@ -23,8 +23,8 @@
 use super::*;
 
 use frame_benchmarking::benchmarks;
+use frame_support::traits::UnfilteredDispatchable;
 use frame_system::{Call as SystemCall, RawOrigin as SystemOrigin};
-use sp_runtime::traits::Dispatchable;
 use sp_std::prelude::*;
 
 const MAX_BYTES: u32 = 1_024;
@@ -38,9 +38,7 @@ benchmarks! {
         let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
         let call = Call::<T>::propose(Box::new(amendment));
         let origin = T::SubmissionOrigin::successful_origin();
-    }: {
-        let _ = call.dispatch(origin)?;
-    }
+    }: { call.dispatch_bypass_filter(origin)? }
 
     veto {
         let b in 1 .. MAX_BYTES;
@@ -53,9 +51,7 @@ benchmarks! {
 
         let call = Call::<T>::veto(0);
         let origin = T::VetoOrigin::successful_origin();
-    }: {
-        let _ = call.dispatch(origin)?;
-    }
+    }: { call.dispatch_bypass_filter(origin)? }
 }
 
 #[cfg(test)]

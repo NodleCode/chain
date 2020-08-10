@@ -71,6 +71,8 @@ impl system::Trait for Test {
     type BlockExecutionWeight = ();
     type ExtrinsicBaseWeight = ();
     type MaximumExtrinsicWeight = MaximumBlockWeight;
+    type BaseCallFilter = ();
+    type SystemWeightInfo = ();
 }
 parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
@@ -81,6 +83,7 @@ impl pallet_balances::Trait for Test {
     type DustRemoval = ();
     type AccountStore = system::Module<Test>;
     type ExistentialDeposit = ();
+    type WeightInfo = ();
 }
 parameter_types! {
     pub const MinimumApplicationAmount: u64 = 100;

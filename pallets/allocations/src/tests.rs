@@ -71,6 +71,8 @@ impl frame_system::Trait for Test {
     type BlockExecutionWeight = ();
     type ExtrinsicBaseWeight = ();
     type MaximumExtrinsicWeight = MaximumBlockWeight;
+    type BaseCallFilter = ();
+    type SystemWeightInfo = ();
 }
 parameter_types! {
     pub const ExistentialDeposit: u64 = 2;
@@ -81,6 +83,7 @@ impl pallet_balances::Trait for Test {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = frame_system::Module<Test>;
+    type WeightInfo = ();
 }
 
 ord_parameter_types! {
