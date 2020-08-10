@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use nodle_chain_runtime::constants::*;
 use nodle_chain_runtime::{
-    opaque::SessionKeys, AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance, BalancesConfig,
-    BlockNumber, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig,
-    ImOnlineConfig, IndicesConfig, RootMembershipConfig, SessionConfig, Signature, SystemConfig,
-    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+    constants::*, opaque::SessionKeys, AccountId, AuthorityDiscoveryConfig, BabeConfig, Balance,
+    BalancesConfig, BlockNumber, FinancialMembershipConfig, GenesisConfig, GrandpaConfig,
+    GrantsConfig, ImOnlineConfig, IndicesConfig, RootMembershipConfig, SessionConfig, Signature,
+    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
