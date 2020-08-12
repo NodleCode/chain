@@ -363,6 +363,34 @@ fn can_not_counter_application_if_not_enough_funds() {
 }
 
 #[test]
+fn can_not_dual_counter_an_application() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        assert_ok!(TestModule::counter(
+            Origin::signed(CHALLENGER_1),
+            CANDIDATE,
+            MinimumCounterAmount::get()
+        ));
+
+        assert_noop!(
+            TestModule::counter(
+                Origin::signed(CHALLENGER_1),
+                CANDIDATE,
+                MinimumCounterAmount::get()
+            ),
+            Error::<Test, DefaultInstance>::ApplicationNotFound
+        );
+    })
+}
+
+#[test]
 fn can_not_reapply_while_challenged() {
     new_test_ext().execute_with(|| {
         allocate_balances();
