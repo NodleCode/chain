@@ -124,6 +124,8 @@ decl_error! {
         ChallengeNotFound,
         /// The account id is not a member
         MemberNotFound,
+        /// Application was already challenged by someone else
+        ApplicationAlreadyChallenged,
 
         ReserveOverflow,
         UnreserveOverflow,
@@ -232,6 +234,7 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumChallengeAmount::get(), Error::<T, I>::DepositTooSmall);
             ensure!(<Members<T, I>>::contains_key(member.clone()), Error::<T, I>::MemberNotFound);
+            ensure!(!<Challenges<T, I>>::contains_key(member.clone()), Error::<T, I>::ApplicationAlreadyChallenged);
 
             Self::reserve_for(sender.clone(), deposit)?;
 

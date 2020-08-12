@@ -824,6 +824,42 @@ fn can_challenge_member_application() {
 }
 
 #[test]
+fn can_not_challenge_twice() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+        );
+        assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
+
+        assert_ok!(TestModule::challenge(
+            Origin::signed(CHALLENGER_2),
+            CANDIDATE,
+            MinimumChallengeAmount::get()
+        ));
+
+        // More funds
+        allocate_balances();
+
+        assert_noop!(
+            TestModule::challenge(
+                Origin::signed(CHALLENGER_2),
+                CANDIDATE,
+                MinimumChallengeAmount::get()
+            ),
+            Error::<Test, DefaultInstance>::ApplicationAlreadyChallenged
+        );
+    })
+}
+
+#[test]
 fn can_not_challenge_non_member_application() {
     new_test_ext().execute_with(|| {
         assert_noop!(
