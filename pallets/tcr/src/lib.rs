@@ -34,7 +34,10 @@ use frame_support::{
 };
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
-use sp_runtime::{traits::CheckedAdd, Perbill};
+use sp_runtime::{
+    traits::{CheckedDiv, Saturating},
+    Perbill,
+};
 use sp_std::prelude::Vec;
 
 type BalanceOf<T, I> =
@@ -215,10 +218,10 @@ decl_module! {
             let mut application = <Challenges<T, I>>::take(member.clone());
 
             if supporting {
-                application.votes_for = Some(Self::helper_vote_increment(application.votes_for, deposit)?);
+                application.votes_for = Some(application.votes_for.unwrap_or(0.into()).saturating_add(deposit));
                 application.voters_for.push((sender.clone(), deposit));
             } else {
-                application.votes_against = Some(Self::helper_vote_increment(application.votes_against, deposit)?);
+                application.votes_against = Some(application.votes_against.unwrap_or(0.into()).saturating_add(deposit));
                 application.voters_against.push((sender.clone(), deposit));
             }
 
@@ -304,29 +307,19 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn get_supporting(
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
     ) -> BalanceOf<T, I> {
-        application.candidate_deposit + application.votes_for.unwrap_or(0.into())
+        application
+            .candidate_deposit
+            .saturating_add(application.votes_for.unwrap_or(0.into()))
     }
 
     /// Number of tokens opposing a given application
     fn get_opposing(
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
     ) -> BalanceOf<T, I> {
-        application.challenger_deposit.unwrap_or(0.into())
-            + application.votes_against.unwrap_or(0.into())
-    }
-
-    fn helper_vote_increment(
-        src_votes: Option<BalanceOf<T, I>>,
-        add_votes: BalanceOf<T, I>,
-    ) -> Result<BalanceOf<T, I>, DispatchError> {
-        let votes = match src_votes {
-            Some(votes) => votes,
-            None => 0.into(),
-        };
-        match votes.checked_add(&add_votes) {
-            Some(votes) => Ok(votes),
-            None => Err(DispatchError::Other("votes overflow")),
-        }
+        application
+            .challenger_deposit
+            .unwrap_or(0.into())
+            .saturating_add(application.votes_against.unwrap_or(0.into()))
     }
 
     fn commit_applications(
@@ -414,7 +407,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
 
                 let total_winning_deposits: BalanceOf<T, I> = to_reward
                     .iter()
-                    .fold(0.into(), |acc, (_a, deposit)| acc + *deposit);
+                    .fold(0.into(), |acc, (_a, deposit)| acc.saturating_add(*deposit));
 
                 // Execute slashes
                 let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
@@ -427,17 +420,20 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
                 // Execute rewards
                 let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
                 let rewards_pool = slashes_imbalance.peek();
-                let mut allocated = 0.into();
+                let mut allocated: BalanceOf<T, I> = 0.into();
                 for (account_id, deposit) in to_reward.clone() {
                     Self::unreserve_for(account_id.clone(), deposit)?;
 
                     // deposit          deposit * pool
                     // ------- * pool = --------------
                     //  total               total
-                    let coins = deposit * rewards_pool / total_winning_deposits;
+                    let coins = deposit
+                        .saturating_mul(rewards_pool)
+                        .checked_div(&total_winning_deposits)
+                        .expect("total should always be equal to the sum of all deposits and thus should never {over, under}flow; qed");
 
                     if let Ok(r) = T::Currency::deposit_into_existing(&account_id, coins) {
-                        allocated += r.peek();
+                        allocated = allocated.saturating_add(r.peek());
                         rewards_imbalance.subsume(r);
                     }
                 }
