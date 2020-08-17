@@ -341,10 +341,10 @@ fn can_not_counter_application_if_not_enough_funds() {
                 candidate_deposit: 0,
                 metadata: vec![],
                 challenger: None,
-                challenger_deposit: None,
-                votes_for: None,
+                challenger_deposit: 0u64,
+                votes_for: 0u64,
                 voters_for: vec![],
-                votes_against: None,
+                votes_against: 0u64,
                 voters_against: vec![],
                 created_block: <system::Module<Test>>::block_number(),
                 challenged_block: <system::Module<Test>>::block_number(),
@@ -449,8 +449,8 @@ fn vote_positive_and_negative_works() {
         ));
 
         let challenge = <Challenges<Test>>::get(CANDIDATE);
-        assert_eq!(challenge.clone().votes_for, Some(100));
-        assert_eq!(challenge.clone().votes_against, Some(100));
+        assert_eq!(challenge.clone().votes_for, 100);
+        assert_eq!(challenge.clone().votes_against, 100);
         assert_eq!(
             TestModule::get_supporting(challenge.clone()),
             100 + MinimumApplicationAmount::get()
@@ -848,11 +848,11 @@ fn can_challenge_member_application() {
         );
         assert_eq!(
             <Challenges<Test>>::get(CANDIDATE).challenger_deposit,
-            Some(MinimumChallengeAmount::get())
+            MinimumChallengeAmount::get()
         );
-        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_for, None);
+        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_for, 0);
         assert_eq!(<Challenges<Test>>::get(CANDIDATE).voters_for, vec![]);
-        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_against, None);
+        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_against, 0);
         assert_eq!(<Challenges<Test>>::get(CANDIDATE).voters_against, vec![]);
         assert_eq!(
             <Challenges<Test>>::get(CANDIDATE).challenged_block,
