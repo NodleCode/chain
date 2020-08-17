@@ -466,6 +466,52 @@ fn vote_positive_and_negative_works() {
 }
 
 #[test]
+fn vote_detect_overflows() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        assert_ok!(TestModule::counter(
+            Origin::signed(CHALLENGER_1),
+            CANDIDATE,
+            MinimumCounterAmount::get(),
+        ));
+
+        assert_ok!(TestModule::vote(
+            Origin::signed(VOTER_FOR),
+            CANDIDATE,
+            true,
+            1
+        ));
+        assert_ok!(TestModule::vote(
+            Origin::signed(VOTER_AGAINST),
+            CANDIDATE,
+            false,
+            1
+        ));
+
+        assert_noop!(
+            TestModule::vote(Origin::signed(VOTER_FOR), CANDIDATE, true, std::u64::MAX),
+            Error::<Test, DefaultInstance>::DepositOverflow,
+        );
+        assert_noop!(
+            TestModule::vote(
+                Origin::signed(VOTER_AGAINST),
+                CANDIDATE,
+                false,
+                std::u64::MAX
+            ),
+            Error::<Test, DefaultInstance>::DepositOverflow,
+        );
+    })
+}
+
+#[test]
 fn can_not_vote_if_challenge_does_not_exists() {
     new_test_ext().execute_with(|| {
         allocate_balances();

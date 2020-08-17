@@ -35,7 +35,7 @@ use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{CheckedDiv, Saturating},
+    traits::{CheckedAdd, CheckedDiv, Saturating},
     Perbill,
 };
 use sp_std::prelude::Vec;
@@ -129,6 +129,8 @@ decl_error! {
         MemberNotFound,
         /// Application was already challenged by someone else
         ApplicationAlreadyChallenged,
+        /// Deposit value overflows votes
+        DepositOverflow,
 
         ReserveOverflow,
         UnreserveOverflow,
@@ -213,18 +215,19 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(<Challenges<T, I>>::contains_key(member.clone()), Error::<T, I>::ChallengeNotFound);
 
-            Self::reserve_for(sender.clone(), deposit)?;
-
-            let mut application = <Challenges<T, I>>::take(member.clone());
+            let mut application = <Challenges<T, I>>::get(member.clone());
 
             if supporting {
-                application.votes_for = Some(application.votes_for.unwrap_or(0.into()).saturating_add(deposit));
+                let new_votes = application.votes_for.unwrap_or(0.into()).checked_add(&deposit).ok_or_else(|| Error::<T, I>::DepositOverflow)?;
+                application.votes_for = Some(new_votes);
                 application.voters_for.push((sender.clone(), deposit));
             } else {
-                application.votes_against = Some(application.votes_against.unwrap_or(0.into()).saturating_add(deposit));
+                let new_votes = application.votes_against.unwrap_or(0.into()).checked_add(&deposit).ok_or_else(|| Error::<T, I>::DepositOverflow)?;
+                application.votes_against = Some(new_votes);
                 application.voters_against.push((sender.clone(), deposit));
             }
 
+            Self::reserve_for(sender.clone(), deposit)?;
             <Challenges<T, I>>::insert(member.clone(), application);
 
             Self::deposit_event(RawEvent::VoteRecorded(member, sender, deposit, supporting));
@@ -309,7 +312,8 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     ) -> BalanceOf<T, I> {
         application
             .candidate_deposit
-            .saturating_add(application.votes_for.unwrap_or(0.into()))
+            .checked_add(&application.votes_for.unwrap_or(0.into()))
+            .expect("coins can not exceed maximum supply which is not overflowing; qed")
     }
 
     /// Number of tokens opposing a given application
@@ -319,7 +323,8 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         application
             .challenger_deposit
             .unwrap_or(0.into())
-            .saturating_add(application.votes_against.unwrap_or(0.into()))
+            .checked_add(&application.votes_against.unwrap_or(0.into()))
+            .expect("coins can not exceed maximum supply which is not overflowing; qed")
     }
 
     fn commit_applications(
@@ -405,9 +410,12 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
                     Self::deposit_event(RawEvent::ChallengeRefusedApplication(account_id.clone()));
                 }
 
-                let total_winning_deposits: BalanceOf<T, I> = to_reward
-                    .iter()
-                    .fold(0.into(), |acc, (_a, deposit)| acc.saturating_add(*deposit));
+                let total_winning_deposits: BalanceOf<T, I> =
+                    to_reward.iter().fold(0.into(), |acc, (_a, deposit)| {
+                        acc.checked_add(deposit).expect(
+                            "total deposits have already been checked for overflows before; qed",
+                        )
+                    });
 
                 // Execute slashes
                 let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
@@ -433,7 +441,9 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
                         .expect("total should always be equal to the sum of all deposits and thus should never {over, under}flow; qed");
 
                     if let Ok(r) = T::Currency::deposit_into_existing(&account_id, coins) {
-                        allocated = allocated.saturating_add(r.peek());
+                        allocated = allocated
+                            .checked_add(&r.peek())
+                            .expect("a simple counters of coins that we already have and store in another variable; qed");
                         rewards_imbalance.subsume(r);
                     }
                 }
