@@ -575,7 +575,7 @@ fn finalize_application_if_not_challenged_and_enough_time_elapsed() {
 }
 
 #[test]
-fn does_not_finalize_challenged_application() {
+fn does_not_finalize_countered_or_challenged_application() {
     new_test_ext().execute_with(|| {
         allocate_balances();
 
