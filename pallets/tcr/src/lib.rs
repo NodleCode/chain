@@ -315,9 +315,8 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     }
 
     /// Decrease the locked amount of tokens
-    fn unreserve_for(who: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResult {
+    fn unreserve_for(who: T::AccountId, amount: BalanceOf<T, I>) {
         drop(T::Currency::unreserve(&who, amount));
-        Ok(())
     }
 
     /// Takes some funds away from a looser, deposit in our own account
@@ -354,22 +353,19 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn commit_applications(
         block: T::BlockNumber,
     ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
-        let mut new_members = Vec::new();
-
-        for (account_id, application) in <Applications<T, I>>::iter() {
-            if block - application.clone().created_block >= T::FinalizeApplicationPeriod::get() {
-                // In the case of a commited application, we only move the structure
-                // to the last list.
-
+        let new_members = <Applications<T, I>>::iter()
+            .filter(|(_account_id, application)| {
+                block - application.clone().created_block >= T::FinalizeApplicationPeriod::get()
+            })
+            .map(|(account_id, application)| {
                 <Applications<T, I>>::remove(account_id.clone());
                 <Members<T, I>>::insert(account_id.clone(), application.clone());
+                Self::unreserve_for(account_id.clone(), application.clone().candidate_deposit);
+                Self::deposit_event(RawEvent::ApplicationPassed(account_id.clone()));
 
-                Self::unreserve_for(account_id.clone(), application.clone().candidate_deposit)?;
-                new_members.push(account_id.clone());
-
-                Self::deposit_event(RawEvent::ApplicationPassed(account_id));
-            }
-        }
+                account_id
+            })
+            .collect::<Vec<T::AccountId>>();
 
         Ok((new_members, Vec::new()))
     }
@@ -377,23 +373,28 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn resolve_challenges(
         block: T::BlockNumber,
     ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
-        let mut new_members = Vec::new();
-        let mut old_members = Vec::new();
-
-        for (account_id, application) in <Challenges<T, I>>::iter() {
-            if block - application.clone().challenged_block >= T::FinalizeChallengePeriod::get() {
-                let (to_reward, to_slash) = match Self::get_supporting(application.clone())
-                    > Self::get_opposing(application.clone())
-                {
+        let all_members = <Challenges<T, I>>::iter()
+            .filter(|(_account_id, application)| {
+                Self::is_challenge_expired(block, application.clone())
+            })
+            .map(|(account_id, application)| {
+                (
+                    account_id.clone(),
+                    application.clone(),
+                    Self::is_challenge_passing(application.clone()),
+                    <Members<T, I>>::contains_key(account_id),
+                )
+            })
+            .map(|(account_id, application, challenge_passed, was_member)| {
+                let (to_reward, to_slash) = match challenge_passed {
                     true => Self::resolve_challenge_application_passed(
                         account_id.clone(),
                         application.clone(),
-                        &mut new_members,
                     ),
                     false => Self::resolve_challenge_application_refused(
                         account_id.clone(),
                         application.clone(),
-                        &mut old_members,
+                        was_member,
                     ),
                 };
 
@@ -404,61 +405,63 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
                         )
                     });
 
-                // Execute slashes
-                let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
-                for (account_id, deposit) in to_slash {
-                    Self::unreserve_for(account_id.clone(), deposit)?;
-                    let r = Self::slash_looser(account_id.clone(), deposit);
-                    slashes_imbalance.subsume(r);
-                }
+                (
+                    account_id,
+                    challenge_passed,
+                    was_member,
+                    to_reward,
+                    to_slash,
+                    total_winning_deposits,
+                )
+            })
+            .map(
+                |(
+                    account_id,
+                    challenge_passed,
+                    was_member,
+                    to_reward,
+                    to_slash,
+                    total_winning_deposits,
+                )| {
+                    Self::resolve_challenge_execute_slashes_and_rewards(
+                        to_reward,
+                        to_slash,
+                        total_winning_deposits,
+                    );
+                    <Challenges<T, I>>::remove(account_id.clone());
 
-                // Execute rewards
-                let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
-                let rewards_pool = slashes_imbalance.peek();
-                let mut allocated: BalanceOf<T, I> = 0.into();
-                for (account_id, deposit) in to_reward.clone() {
-                    Self::unreserve_for(account_id.clone(), deposit)?;
+                    (account_id, challenge_passed, was_member)
+                },
+            )
+            .collect::<Vec<(T::AccountId, bool, bool)>>();
 
-                    // deposit          deposit * pool
-                    // ------- * pool = --------------
-                    //  total               total
-                    let coins = deposit
-                        .saturating_mul(rewards_pool)
-                        .checked_div(&total_winning_deposits)
-                        .expect("total should always be equal to the sum of all deposits and thus should never {over, under}flow; qed");
+        // note to tomorrow's eliott:
+        // I need to undo the (account_id, challenge_passed) to (old, new). Maybe use options and results?
+        // another option is to collect and iter two items after
+        // also need to do more cleanup
 
-                    if let Ok(r) = T::Currency::deposit_into_existing(&account_id, coins) {
-                        allocated = allocated
-                            .checked_add(&r.peek())
-                            .expect("a simple counters of coins that we already have and store in another variable; qed");
-                        rewards_imbalance.subsume(r);
-                    }
-                }
-
-                // Last element is `challenger` or `candidate`. They simply get whatever dust might be left
-                let (dust_collector, _deposit) = &to_reward[to_reward.len() - 1];
-                let remaining = rewards_pool - allocated;
-                if let Ok(r) = T::Currency::deposit_into_existing(&dust_collector, remaining) {
-                    rewards_imbalance.subsume(r);
-                }
-
-                <Challenges<T, I>>::remove(account_id.clone());
-            }
-        }
-
-        Ok((new_members, old_members))
+        Ok((
+            all_members
+                .iter()
+                .filter(|(_account_id, passed, _was_member)| *passed)
+                .map(|(account_id, _passed, _was_member)| account_id.clone())
+                .collect::<Vec<T::AccountId>>(), // new_members
+            all_members
+                .iter()
+                .filter(|(_account_id, passed, was_member)| !*passed && *was_member)
+                .map(|(account_id, _passed, _was_member)| account_id.clone())
+                .collect::<Vec<T::AccountId>>(), // old_members
+        ))
     }
 
     fn resolve_challenge_application_passed(
         account_id: T::AccountId,
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
-        new_members: &mut Vec<T::AccountId>,
     ) -> (
         Vec<(T::AccountId, BalanceOf<T, I>)>,
         Vec<(T::AccountId, BalanceOf<T, I>)>,
     ) {
         <Members<T, I>>::insert(account_id.clone(), application.clone());
-        new_members.push(application.clone().candidate);
 
         Self::deposit_event(RawEvent::ChallengeAcceptedApplication(account_id));
 
@@ -472,15 +475,14 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn resolve_challenge_application_refused(
         account_id: T::AccountId,
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
-        old_members: &mut Vec<T::AccountId>,
+        was_member: bool,
     ) -> (
         Vec<(T::AccountId, BalanceOf<T, I>)>,
         Vec<(T::AccountId, BalanceOf<T, I>)>,
     ) {
         // If it is a member, remove it
-        if <Members<T, I>>::contains_key(application.clone().candidate) {
+        if was_member {
             <Members<T, I>>::remove(application.clone().candidate);
-            old_members.push(application.clone().candidate);
         }
 
         Self::deposit_event(RawEvent::ChallengeRefusedApplication(account_id));
@@ -490,6 +492,67 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
             application.clone().voters_against_and_challenger(),
             application.clone().voters_for_and_candidate(),
         )
+    }
+
+    fn resolve_challenge_execute_slashes_and_rewards(
+        to_reward: Vec<(T::AccountId, BalanceOf<T, I>)>,
+        to_slash: Vec<(T::AccountId, BalanceOf<T, I>)>,
+        total_winning_deposits: BalanceOf<T, I>,
+    ) {
+        let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
+        let mut iter = to_slash.iter().cloned();
+        loop {
+            match iter.next() {
+                Some((account_id, deposit)) => {
+                    Self::unreserve_for(account_id.clone(), deposit);
+                    let r = Self::slash_looser(account_id.clone(), deposit);
+                    slashes_imbalance.subsume(r);
+                }
+                None => break,
+            };
+        }
+        // Execute rewards
+        let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
+        let rewards_pool = slashes_imbalance.peek();
+        let mut allocated: BalanceOf<T, I> = 0.into();
+        for (account_id, deposit) in to_reward.clone() {
+            Self::unreserve_for(account_id.clone(), deposit);
+
+            // deposit          deposit * pool
+            // ------- * pool = --------------
+            //  total               total
+            let coins = deposit
+                        .saturating_mul(rewards_pool)
+                        .checked_div(&total_winning_deposits)
+                        .expect("total should always be equal to the sum of all deposits and thus should never {over, under}flow; qed");
+
+            if let Ok(r) = T::Currency::deposit_into_existing(&account_id, coins) {
+                allocated = allocated
+                            .checked_add(&r.peek())
+                            .expect("a simple counters of coins that we already have and store in another variable; qed");
+                rewards_imbalance.subsume(r);
+            }
+        }
+
+        // Last element is `challenger` or `candidate`. They simply get whatever dust might be left
+        let (dust_collector, _deposit) = &to_reward[to_reward.len() - 1];
+        let remaining = rewards_pool - allocated;
+        if let Ok(r) = T::Currency::deposit_into_existing(&dust_collector, remaining) {
+            rewards_imbalance.subsume(r);
+        }
+    }
+
+    fn is_challenge_expired(
+        block: T::BlockNumber,
+        application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+    ) -> bool {
+        block - application.clone().challenged_block >= T::FinalizeChallengePeriod::get()
+    }
+
+    fn is_challenge_passing(
+        application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+    ) -> bool {
+        Self::get_supporting(application.clone()) > Self::get_opposing(application.clone())
     }
 
     fn notify_members_change(new_members: Vec<T::AccountId>, old_members: Vec<T::AccountId>) {

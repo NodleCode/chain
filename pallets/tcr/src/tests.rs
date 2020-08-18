@@ -186,19 +186,12 @@ fn lock_unlock_works() {
             TestModule::reserve_for(CANDIDATE, 1),
             Error::<Test, DefaultInstance>::NotEnoughFunds
         );
-
-        assert_ok!(TestModule::unreserve_for(
-            CANDIDATE,
-            MinimumApplicationAmount::get() / 2
-        ));
+        TestModule::unreserve_for(CANDIDATE, MinimumApplicationAmount::get() / 2);
         assert_eq!(
             BalancesModule::usable_balance(CANDIDATE),
             MinimumApplicationAmount::get() / 2
         );
-        assert_ok!(TestModule::unreserve_for(
-            CANDIDATE,
-            MinimumApplicationAmount::get() / 2
-        ));
+        TestModule::unreserve_for(CANDIDATE, MinimumApplicationAmount::get() / 2);
         assert_eq!(
             BalancesModule::usable_balance(CANDIDATE),
             MinimumApplicationAmount::get()
