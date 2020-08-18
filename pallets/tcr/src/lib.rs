@@ -34,7 +34,10 @@ use frame_support::{
 };
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
-use sp_runtime::{traits::CheckedAdd, Perbill};
+use sp_runtime::{
+    traits::{CheckedAdd, CheckedDiv, Saturating},
+    Perbill,
+};
 use sp_std::prelude::Vec;
 
 type BalanceOf<T, I> =
@@ -51,15 +54,37 @@ pub struct Application<AccountId, Balance, BlockNumber> {
     metadata: Vec<u8>, // For instance, a link or a name...
 
     challenger: Option<AccountId>,
-    challenger_deposit: Option<Balance>,
+    challenger_deposit: Balance,
 
-    votes_for: Option<Balance>,
+    votes_for: Balance,
     voters_for: Vec<(AccountId, Balance)>,
-    votes_against: Option<Balance>,
+    votes_against: Balance,
     voters_against: Vec<(AccountId, Balance)>,
 
     created_block: BlockNumber,
     challenged_block: BlockNumber,
+}
+
+impl<AccountId, Balance, BlockNumber> Application<AccountId, Balance, BlockNumber> {
+    fn voters_for_and_candidate(self) -> Vec<(AccountId, Balance)> {
+        let mut voters = self.voters_for;
+        voters.push((self.candidate, self.candidate_deposit));
+
+        voters
+    }
+
+    fn voters_against_and_challenger(self) -> Vec<(AccountId, Balance)> {
+        let mut voters = self.voters_against;
+        if self.challenger.is_some() {
+            voters.push((
+                self.challenger
+                    .expect("we just checked that challenger was not none; qed"),
+                self.challenger_deposit,
+            ));
+        };
+
+        voters
+    }
 }
 
 /// The module's configuration trait.
@@ -124,6 +149,10 @@ decl_error! {
         ChallengeNotFound,
         /// The account id is not a member
         MemberNotFound,
+        /// Application was already challenged by someone else
+        ApplicationAlreadyChallenged,
+        /// Deposit value overflows votes
+        DepositOverflow,
 
         ReserveOverflow,
         UnreserveOverflow,
@@ -167,11 +196,11 @@ decl_module! {
                 metadata: metadata,
 
                 challenger: None,
-                challenger_deposit: None,
+                challenger_deposit: 0.into(),
 
-                votes_for: None,
+                votes_for: 0.into(),
                 voters_for: Vec::new(),
-                votes_against: None,
+                votes_against: 0.into(),
                 voters_against: Vec::new(),
 
                 created_block: <system::Module<T>>::block_number(),
@@ -191,9 +220,12 @@ decl_module! {
 
             Self::reserve_for(sender.clone(), deposit)?;
 
+            // Note the use of `take` instead of `get` that will effectively remove
+            // the application from Applications::<T, I>.
+            // We actually move the application out and convert it to a challenge.
             let mut application = <Applications<T, I>>::take(member.clone());
             application.challenger = Some(sender.clone());
-            application.challenger_deposit = Some(deposit);
+            application.challenger_deposit = deposit;
             application.challenged_block = <system::Module<T>>::block_number();
 
             <Challenges<T, I>>::insert(member.clone(), application);
@@ -208,18 +240,19 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(<Challenges<T, I>>::contains_key(member.clone()), Error::<T, I>::ChallengeNotFound);
 
-            Self::reserve_for(sender.clone(), deposit)?;
-
-            let mut application = <Challenges<T, I>>::take(member.clone());
+            let mut application = <Challenges<T, I>>::get(member.clone());
 
             if supporting {
-                application.votes_for = Some(Self::helper_vote_increment(application.votes_for, deposit)?);
+                let new_votes = application.votes_for.checked_add(&deposit).ok_or_else(|| Error::<T, I>::DepositOverflow)?;
+                application.votes_for = new_votes;
                 application.voters_for.push((sender.clone(), deposit));
             } else {
-                application.votes_against = Some(Self::helper_vote_increment(application.votes_against, deposit)?);
+                let new_votes = application.votes_against.checked_add(&deposit).ok_or_else(|| Error::<T, I>::DepositOverflow)?;
+                application.votes_against = new_votes;
                 application.voters_against.push((sender.clone(), deposit));
             }
 
+            Self::reserve_for(sender.clone(), deposit)?;
             <Challenges<T, I>>::insert(member.clone(), application);
 
             Self::deposit_event(RawEvent::VoteRecorded(member, sender, deposit, supporting));
@@ -232,16 +265,17 @@ decl_module! {
             let sender = ensure_signed(origin)?;
             ensure!(deposit >= T::MinimumChallengeAmount::get(), Error::<T, I>::DepositTooSmall);
             ensure!(<Members<T, I>>::contains_key(member.clone()), Error::<T, I>::MemberNotFound);
+            ensure!(!<Challenges<T, I>>::contains_key(member.clone()), Error::<T, I>::ApplicationAlreadyChallenged);
 
             Self::reserve_for(sender.clone(), deposit)?;
 
             let mut application = <Members<T, I>>::get(member.clone());
             application.challenger = Some(sender.clone());
-            application.challenger_deposit = Some(deposit);
+            application.challenger_deposit = deposit;
             application.challenged_block = <system::Module<T>>::block_number();
-            application.votes_for = None;
+            application.votes_for = 0.into();
             application.voters_for = Vec::new();
-            application.votes_against = None;
+            application.votes_against = 0.into();
             application.voters_against = Vec::new();
 
             <Challenges<T, I>>::insert(member.clone(), application);
@@ -281,9 +315,8 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     }
 
     /// Decrease the locked amount of tokens
-    fn unreserve_for(who: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResult {
+    fn unreserve_for(who: T::AccountId, amount: BalanceOf<T, I>) {
         drop(T::Currency::unreserve(&who, amount));
-        Ok(())
     }
 
     /// Takes some funds away from a looser, deposit in our own account
@@ -301,50 +334,38 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn get_supporting(
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
     ) -> BalanceOf<T, I> {
-        application.candidate_deposit + application.votes_for.unwrap_or(0.into())
+        application
+            .candidate_deposit
+            .checked_add(&application.votes_for)
+            .expect("coins can not exceed maximum supply which is not overflowing; qed")
     }
 
     /// Number of tokens opposing a given application
     fn get_opposing(
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
     ) -> BalanceOf<T, I> {
-        application.challenger_deposit.unwrap_or(0.into())
-            + application.votes_against.unwrap_or(0.into())
-    }
-
-    fn helper_vote_increment(
-        src_votes: Option<BalanceOf<T, I>>,
-        add_votes: BalanceOf<T, I>,
-    ) -> Result<BalanceOf<T, I>, DispatchError> {
-        let votes = match src_votes {
-            Some(votes) => votes,
-            None => 0.into(),
-        };
-        match votes.checked_add(&add_votes) {
-            Some(votes) => Ok(votes),
-            None => Err(DispatchError::Other("votes overflow")),
-        }
+        application
+            .challenger_deposit
+            .checked_add(&application.votes_against)
+            .expect("coins can not exceed maximum supply which is not overflowing; qed")
     }
 
     fn commit_applications(
         block: T::BlockNumber,
     ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
-        let mut new_members = Vec::new();
-
-        for (account_id, application) in <Applications<T, I>>::iter() {
-            if block - application.clone().created_block >= T::FinalizeApplicationPeriod::get() {
-                // In the case of a commited application, we only move the structure
-                // to the last list.
-
+        let new_members = <Applications<T, I>>::iter()
+            .filter(|(_account_id, application)| {
+                block - application.clone().created_block >= T::FinalizeApplicationPeriod::get()
+            })
+            .map(|(account_id, application)| {
                 <Applications<T, I>>::remove(account_id.clone());
                 <Members<T, I>>::insert(account_id.clone(), application.clone());
+                Self::unreserve_for(account_id.clone(), application.clone().candidate_deposit);
+                Self::deposit_event(RawEvent::ApplicationPassed(account_id.clone()));
 
-                Self::unreserve_for(account_id.clone(), application.clone().candidate_deposit)?;
-                new_members.push(account_id.clone());
-
-                Self::deposit_event(RawEvent::ApplicationPassed(account_id));
-            }
-        }
+                account_id
+            })
+            .collect::<Vec<T::AccountId>>();
 
         Ok((new_members, Vec::new()))
     }
@@ -352,106 +373,186 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn resolve_challenges(
         block: T::BlockNumber,
     ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
-        let mut new_members = Vec::new();
-        let mut old_members = Vec::new();
+        let all_members = <Challenges<T, I>>::iter()
+            .filter(|(_account_id, application)| {
+                Self::is_challenge_expired(block, application.clone())
+            })
+            .map(|(account_id, application)| {
+                (
+                    account_id.clone(),
+                    application.clone(),
+                    Self::is_challenge_passing(application.clone()),
+                    <Members<T, I>>::contains_key(account_id),
+                )
+            })
+            .map(|(account_id, application, challenge_passed, was_member)| {
+                let (to_reward, to_slash) = match challenge_passed {
+                    true => Self::resolve_challenge_application_passed(
+                        account_id.clone(),
+                        application.clone(),
+                    ),
+                    false => Self::resolve_challenge_application_refused(
+                        account_id.clone(),
+                        application.clone(),
+                        was_member,
+                    ),
+                };
 
-        for (account_id, application) in <Challenges<T, I>>::iter() {
-            if block - application.clone().challenged_block >= T::FinalizeChallengePeriod::get() {
-                let mut to_slash: Vec<(T::AccountId, BalanceOf<T, I>)>;
-                let mut to_reward: Vec<(T::AccountId, BalanceOf<T, I>)>;
+                let total_winning_deposits: BalanceOf<T, I> =
+                    to_reward.iter().fold(0.into(), |acc, (_a, deposit)| {
+                        acc.checked_add(deposit).expect(
+                            "total deposits have already been checked for overflows before; qed",
+                        )
+                    });
 
-                if Self::get_supporting(application.clone())
-                    > Self::get_opposing(application.clone())
-                {
-                    <Members<T, I>>::insert(account_id.clone(), application.clone());
-                    new_members.push(application.clone().candidate);
+                (
+                    account_id,
+                    challenge_passed,
+                    was_member,
+                    to_reward,
+                    to_slash,
+                    total_winning_deposits,
+                )
+            })
+            .map(
+                |(
+                    account_id,
+                    challenge_passed,
+                    was_member,
+                    to_reward,
+                    to_slash,
+                    total_winning_deposits,
+                )| {
+                    Self::resolve_challenge_execute_slashes_and_rewards(
+                        to_reward,
+                        to_slash,
+                        total_winning_deposits,
+                    );
+                    <Challenges<T, I>>::remove(account_id.clone());
 
-                    // The proposal passed, slash `challenger` and `voters_against`
+                    (account_id, challenge_passed, was_member)
+                },
+            )
+            .collect::<Vec<(T::AccountId, bool, bool)>>();
 
-                    to_slash = application.clone().voters_against;
-                    if let Some(challenger) = application.clone().challenger {
-                        to_slash.push((
-                            challenger,
-                            application.clone().challenger_deposit.unwrap_or(0.into()),
-                        ));
-                    }
+        // note to tomorrow's eliott:
+        // I need to undo the (account_id, challenge_passed) to (old, new). Maybe use options and results?
+        // another option is to collect and iter two items after
+        // also need to do more cleanup
 
-                    to_reward = application.clone().voters_for;
-                    to_reward.push((
-                        application.clone().candidate,
-                        application.clone().candidate_deposit,
-                    ));
+        Ok((
+            all_members
+                .iter()
+                .filter(|(_account_id, passed, _was_member)| *passed)
+                .map(|(account_id, _passed, _was_member)| account_id.clone())
+                .collect::<Vec<T::AccountId>>(), // new_members
+            all_members
+                .iter()
+                .filter(|(_account_id, passed, was_member)| !*passed && *was_member)
+                .map(|(account_id, _passed, _was_member)| account_id.clone())
+                .collect::<Vec<T::AccountId>>(), // old_members
+        ))
+    }
 
-                    Self::deposit_event(RawEvent::ChallengeAcceptedApplication(account_id.clone()));
-                } else {
-                    // If it is a member, remove it
-                    if <Members<T, I>>::contains_key(application.clone().candidate) {
-                        <Members<T, I>>::remove(application.clone().candidate);
-                        old_members.push(application.clone().candidate);
-                    }
+    fn resolve_challenge_application_passed(
+        account_id: T::AccountId,
+        application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+    ) -> (
+        Vec<(T::AccountId, BalanceOf<T, I>)>,
+        Vec<(T::AccountId, BalanceOf<T, I>)>,
+    ) {
+        <Members<T, I>>::insert(account_id.clone(), application.clone());
 
-                    // The proposal did not pass, slash `candidate` and `voters_for`
+        Self::deposit_event(RawEvent::ChallengeAcceptedApplication(account_id));
 
-                    to_slash = application.clone().voters_for;
-                    to_slash.push((
-                        application.clone().candidate,
-                        application.clone().candidate_deposit,
-                    ));
+        // The proposal passed, slash `challenger` and `voters_against`
+        (
+            application.clone().voters_for_and_candidate(),
+            application.clone().voters_against_and_challenger(),
+        )
+    }
 
-                    to_reward = application.clone().voters_against;
-                    if let Some(challenger) = application.clone().challenger {
-                        to_reward.push((
-                            challenger,
-                            application.clone().challenger_deposit.unwrap_or(0.into()),
-                        ));
-                    }
+    fn resolve_challenge_application_refused(
+        account_id: T::AccountId,
+        application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+        was_member: bool,
+    ) -> (
+        Vec<(T::AccountId, BalanceOf<T, I>)>,
+        Vec<(T::AccountId, BalanceOf<T, I>)>,
+    ) {
+        // If it is a member, remove it
+        if was_member {
+            <Members<T, I>>::remove(application.clone().candidate);
+        }
 
-                    Self::deposit_event(RawEvent::ChallengeRefusedApplication(account_id.clone()));
-                }
+        Self::deposit_event(RawEvent::ChallengeRefusedApplication(account_id));
 
-                let total_winning_deposits: BalanceOf<T, I> = to_reward
-                    .iter()
-                    .fold(0.into(), |acc, (_a, deposit)| acc + *deposit);
+        // The proposal did not pass, slash `candidate` and `voters_for`
+        (
+            application.clone().voters_against_and_challenger(),
+            application.clone().voters_for_and_candidate(),
+        )
+    }
 
-                // Execute slashes
-                let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
-                for (account_id, deposit) in to_slash {
-                    Self::unreserve_for(account_id.clone(), deposit)?;
+    fn resolve_challenge_execute_slashes_and_rewards(
+        to_reward: Vec<(T::AccountId, BalanceOf<T, I>)>,
+        to_slash: Vec<(T::AccountId, BalanceOf<T, I>)>,
+        total_winning_deposits: BalanceOf<T, I>,
+    ) {
+        let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
+        let mut iter = to_slash.iter().cloned();
+        loop {
+            match iter.next() {
+                Some((account_id, deposit)) => {
+                    Self::unreserve_for(account_id.clone(), deposit);
                     let r = Self::slash_looser(account_id.clone(), deposit);
                     slashes_imbalance.subsume(r);
                 }
+                None => break,
+            };
+        }
+        // Execute rewards
+        let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
+        let rewards_pool = slashes_imbalance.peek();
+        let mut allocated: BalanceOf<T, I> = 0.into();
+        for (account_id, deposit) in to_reward.clone() {
+            Self::unreserve_for(account_id.clone(), deposit);
 
-                // Execute rewards
-                let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
-                let rewards_pool = slashes_imbalance.peek();
-                let mut allocated = 0.into();
-                for (account_id, deposit) in to_reward.clone() {
-                    Self::unreserve_for(account_id.clone(), deposit)?;
+            // deposit          deposit * pool
+            // ------- * pool = --------------
+            //  total               total
+            let coins = deposit
+                        .saturating_mul(rewards_pool)
+                        .checked_div(&total_winning_deposits)
+                        .expect("total should always be equal to the sum of all deposits and thus should never {over, under}flow; qed");
 
-                    // deposit          deposit * pool
-                    // ------- * pool = --------------
-                    //  total               total
-                    let coins = deposit * rewards_pool / total_winning_deposits;
-
-                    if let Ok(r) = T::Currency::deposit_into_existing(&account_id, coins) {
-                        allocated += r.peek();
-                        rewards_imbalance.subsume(r);
-                    }
-                }
-
-                // Last element is `challenger` or `candidate`
-                if let Some((dust_collector, _deposit)) = to_reward.pop() {
-                    let remaining = rewards_pool - allocated;
-                    if let Ok(r) = T::Currency::deposit_into_existing(&dust_collector, remaining) {
-                        rewards_imbalance.subsume(r);
-                    }
-                }
-
-                <Challenges<T, I>>::remove(account_id.clone());
+            if let Ok(r) = T::Currency::deposit_into_existing(&account_id, coins) {
+                allocated = allocated
+                            .checked_add(&r.peek())
+                            .expect("a simple counters of coins that we already have and store in another variable; qed");
+                rewards_imbalance.subsume(r);
             }
         }
 
-        Ok((new_members, old_members))
+        // Last element is `challenger` or `candidate`. They simply get whatever dust might be left
+        let (dust_collector, _deposit) = &to_reward[to_reward.len() - 1];
+        let remaining = rewards_pool - allocated;
+        if let Ok(r) = T::Currency::deposit_into_existing(&dust_collector, remaining) {
+            rewards_imbalance.subsume(r);
+        }
+    }
+
+    fn is_challenge_expired(
+        block: T::BlockNumber,
+        application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+    ) -> bool {
+        block - application.clone().challenged_block >= T::FinalizeChallengePeriod::get()
+    }
+
+    fn is_challenge_passing(
+        application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+    ) -> bool {
+        Self::get_supporting(application.clone()) > Self::get_opposing(application.clone())
     }
 
     fn notify_members_change(new_members: Vec<T::AccountId>, old_members: Vec<T::AccountId>) {

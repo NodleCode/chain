@@ -186,19 +186,12 @@ fn lock_unlock_works() {
             TestModule::reserve_for(CANDIDATE, 1),
             Error::<Test, DefaultInstance>::NotEnoughFunds
         );
-
-        assert_ok!(TestModule::unreserve_for(
-            CANDIDATE,
-            MinimumApplicationAmount::get() / 2
-        ));
+        TestModule::unreserve_for(CANDIDATE, MinimumApplicationAmount::get() / 2);
         assert_eq!(
             BalancesModule::usable_balance(CANDIDATE),
             MinimumApplicationAmount::get() / 2
         );
-        assert_ok!(TestModule::unreserve_for(
-            CANDIDATE,
-            MinimumApplicationAmount::get() / 2
-        ));
+        TestModule::unreserve_for(CANDIDATE, MinimumApplicationAmount::get() / 2);
         assert_eq!(
             BalancesModule::usable_balance(CANDIDATE),
             MinimumApplicationAmount::get()
@@ -341,10 +334,10 @@ fn can_not_counter_application_if_not_enough_funds() {
                 candidate_deposit: 0,
                 metadata: vec![],
                 challenger: None,
-                challenger_deposit: None,
-                votes_for: None,
+                challenger_deposit: 0u64,
+                votes_for: 0u64,
                 voters_for: vec![],
-                votes_against: None,
+                votes_against: 0u64,
                 voters_against: vec![],
                 created_block: <system::Module<Test>>::block_number(),
                 challenged_block: <system::Module<Test>>::block_number(),
@@ -358,6 +351,34 @@ fn can_not_counter_application_if_not_enough_funds() {
                 MinimumCounterAmount::get()
             ),
             Error::<Test, DefaultInstance>::NotEnoughFunds
+        );
+    })
+}
+
+#[test]
+fn can_not_dual_counter_an_application() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        assert_ok!(TestModule::counter(
+            Origin::signed(CHALLENGER_1),
+            CANDIDATE,
+            MinimumCounterAmount::get()
+        ));
+
+        assert_noop!(
+            TestModule::counter(
+                Origin::signed(CHALLENGER_1),
+                CANDIDATE,
+                MinimumCounterAmount::get()
+            ),
+            Error::<Test, DefaultInstance>::ApplicationNotFound
         );
     })
 }
@@ -421,8 +442,8 @@ fn vote_positive_and_negative_works() {
         ));
 
         let challenge = <Challenges<Test>>::get(CANDIDATE);
-        assert_eq!(challenge.clone().votes_for, Some(100));
-        assert_eq!(challenge.clone().votes_against, Some(100));
+        assert_eq!(challenge.clone().votes_for, 100);
+        assert_eq!(challenge.clone().votes_against, 100);
         assert_eq!(
             TestModule::get_supporting(challenge.clone()),
             100 + MinimumApplicationAmount::get()
@@ -434,6 +455,52 @@ fn vote_positive_and_negative_works() {
 
         assert_eq!(BalancesModule::reserved_balance(VOTER_FOR), 100);
         assert_eq!(BalancesModule::reserved_balance(VOTER_AGAINST), 100);
+    })
+}
+
+#[test]
+fn vote_detect_overflows() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        assert_ok!(TestModule::counter(
+            Origin::signed(CHALLENGER_1),
+            CANDIDATE,
+            MinimumCounterAmount::get(),
+        ));
+
+        assert_ok!(TestModule::vote(
+            Origin::signed(VOTER_FOR),
+            CANDIDATE,
+            true,
+            1
+        ));
+        assert_ok!(TestModule::vote(
+            Origin::signed(VOTER_AGAINST),
+            CANDIDATE,
+            false,
+            1
+        ));
+
+        assert_noop!(
+            TestModule::vote(Origin::signed(VOTER_FOR), CANDIDATE, true, std::u64::MAX),
+            Error::<Test, DefaultInstance>::DepositOverflow,
+        );
+        assert_noop!(
+            TestModule::vote(
+                Origin::signed(VOTER_AGAINST),
+                CANDIDATE,
+                false,
+                std::u64::MAX
+            ),
+            Error::<Test, DefaultInstance>::DepositOverflow,
+        );
     })
 }
 
@@ -501,7 +568,7 @@ fn finalize_application_if_not_challenged_and_enough_time_elapsed() {
 }
 
 #[test]
-fn does_not_finalize_challenged_application() {
+fn does_not_finalize_countered_or_challenged_application() {
     new_test_ext().execute_with(|| {
         allocate_balances();
 
@@ -774,11 +841,11 @@ fn can_challenge_member_application() {
         );
         assert_eq!(
             <Challenges<Test>>::get(CANDIDATE).challenger_deposit,
-            Some(MinimumChallengeAmount::get())
+            MinimumChallengeAmount::get()
         );
-        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_for, None);
+        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_for, 0);
         assert_eq!(<Challenges<Test>>::get(CANDIDATE).voters_for, vec![]);
-        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_against, None);
+        assert_eq!(<Challenges<Test>>::get(CANDIDATE).votes_against, 0);
         assert_eq!(<Challenges<Test>>::get(CANDIDATE).voters_against, vec![]);
         assert_eq!(
             <Challenges<Test>>::get(CANDIDATE).challenged_block,
@@ -792,6 +859,42 @@ fn can_challenge_member_application() {
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
         assert_eq!(<Challenges<Test>>::contains_key(CANDIDATE), false);
         assert_eq!(<Members<Test>>::contains_key(CANDIDATE), false);
+    })
+}
+
+#[test]
+fn can_not_challenge_twice() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+        );
+        assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
+
+        assert_ok!(TestModule::challenge(
+            Origin::signed(CHALLENGER_2),
+            CANDIDATE,
+            MinimumChallengeAmount::get()
+        ));
+
+        // More funds
+        allocate_balances();
+
+        assert_noop!(
+            TestModule::challenge(
+                Origin::signed(CHALLENGER_2),
+                CANDIDATE,
+                MinimumChallengeAmount::get()
+            ),
+            Error::<Test, DefaultInstance>::ApplicationAlreadyChallenged
+        );
     })
 }
 

@@ -34,7 +34,7 @@ use frame_support::{
 };
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
-use sp_runtime::traits::{MaybeDisplay, MaybeSerializeDeserialize, Member};
+use sp_runtime::traits::{CheckedAdd, MaybeDisplay, MaybeSerializeDeserialize, Member};
 use sp_std::{fmt::Debug, prelude::Vec};
 
 type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
@@ -216,7 +216,11 @@ impl<T: Trait> Module<T> {
     ) -> bool {
         let owner_is_member = Self::is_member(&slot.owner);
         let revoked = slot.revoked;
-        let expired = slot.renewed + slot.validity <= <system::Module<T>>::block_number();
+        let expired = slot
+            .renewed
+            .checked_add(&slot.validity)
+            .expect("we only sum block numbers that are not supposed to overflow; qed")
+            <= <system::Module<T>>::block_number();
 
         owner_is_member && !revoked && !expired
     }
