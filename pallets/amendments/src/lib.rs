@@ -94,7 +94,7 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Trigger a new challenge to remove an existing member
-        #[weight = (amendment.get_dispatch_info().weight + 20_000, amendment.get_dispatch_info().class)]
+        #[weight = 100_000_000]
         fn propose(origin, amendment: Box<T::Amendment>) -> DispatchResult {
             T::SubmissionOrigin::try_origin(origin)
                 .map(|_| ())
