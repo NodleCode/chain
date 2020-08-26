@@ -19,6 +19,7 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use futures::prelude::*;
+use nodle_chain_executor::Executor;
 use nodle_chain_primitives::{AccountId, Block, Hash, Index};
 use nodle_chain_runtime::RuntimeApi;
 use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi};
@@ -26,8 +27,6 @@ use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_babe;
 use sc_consensus_babe_rpc::BabeRpcHandler;
-use sc_executor::native_executor_instance;
-pub use sc_executor::NativeExecutor;
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
 use sc_finality_grandpa_rpc::GrandpaRpcHandler;
 use sc_network::{Event, NetworkService};
@@ -42,13 +41,6 @@ use sp_inherents::InherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
 use substrate_frame_rpc_system::{FullSystem, LightSystem, SystemApi};
-
-native_executor_instance!(
-    pub Executor,
-    nodle_chain_runtime::api::dispatch,
-    nodle_chain_runtime::native_version,
-    frame_benchmarking::benchmarking::HostFunctions,
-);
 
 /// A IO handler that uses all Full RPC extensions.
 pub type IoHandler = jsonrpc_core::IoHandler<sc_rpc::Metadata>;

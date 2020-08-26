@@ -19,8 +19,9 @@
 use crate::{
     chain_spec,
     cli::{Cli, Subcommand},
-    service::{self, new_partial, Executor},
+    service::{self, new_partial},
 };
+use nodle_chain_executor::Executor;
 use nodle_chain_primitives::Block;
 use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
