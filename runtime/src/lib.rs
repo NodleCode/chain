@@ -35,7 +35,9 @@ use frame_support::{
 use nodle_chain_primitives::{
     AccountId, AccountIndex, Balance, BlockNumber, CertificateId, Hash, Index, Moment, Signature,
 };
-use pallet_grandpa::{fg_primitives, AuthorityId as GrandpaId};
+use pallet_grandpa::{
+    fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
+};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment};
@@ -748,7 +750,7 @@ impl pallet_membership::Trait<pallet_membership::Instance5> for Runtime {
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
-        NodeBlock = Block,
+        NodeBlock = nodle_chain_primitives::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
@@ -896,7 +898,7 @@ sp_api::impl_runtime_apis! {
     }
 
     impl fg_primitives::GrandpaApi<Block> for Runtime {
-        fn grandpa_authorities() -> Vec<(GrandpaId, u64)> {
+        fn grandpa_authorities() -> GrandpaAuthorityList {
             Grandpa::grandpa_authorities()
         }
 
