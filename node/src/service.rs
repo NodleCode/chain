@@ -19,7 +19,8 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use futures::prelude::*;
-use nodle_chain_runtime::{AccountId, Block, Hash, Index, RuntimeApi};
+use nodle_chain_primitives::{AccountId, Block, Hash, Index};
+use nodle_chain_runtime::RuntimeApi;
 use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi};
 use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 use sc_client_api::{ExecutorProvider, RemoteBackend};

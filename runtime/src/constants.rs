@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::Balance;
-use crate::BlockNumber;
+use nodle_chain_primitives::{Balance, BlockNumber};
 pub use sp_runtime::Perquintill;
 
 /// Money matters.
