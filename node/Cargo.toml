@@ -10,15 +10,24 @@ name = "nodle-chain"
 path = "src/main.rs"
 
 [features]
-default = [ "wasmtime" ]
+default = [ "cli" ]
 runtime-benchmarks = [
 	"nodle-chain-runtime/runtime-benchmarks",
 ]
-wasmtime = [
-	"sc-cli/wasmtime",
-	"sc-executor/wasmtime",
-	"sc-service/wasmtime",
+cli = [
+	"nodle-chain-executor/wasmi-errno",
 ]
+
+[package.metadata.wasm-pack.profile.release]
+# `wasm-opt` has some problems on linux, see
+# https://github.com/rustwasm/wasm-pack/issues/781 etc.
+wasm-opt = false
+
+[target.'cfg(target_arch="x86_64")'.dependencies]
+nodle-chain-executor = { version = "2.0.0-rc6", path = "../executor", features = [ "wasmtime" ] }
+sc-cli = { version = "0.8.0-rc6", features = [ "wasmtime" ] }
+sc-service = { version = "0.8.0-rc6", default-features = false, features = [ "wasmtime" ] }
+sp-trie = { version = "2.0.0-rc6", default-features = false, features = ["memory-tracker"] }
 
 [dependencies]
 frame-benchmarking = { version = "2.0.0-rc6", default-features = false }
@@ -26,6 +35,8 @@ frame-benchmarking-cli = { version = "2.0.0-rc6", default-features = false }
 futures = { version = "0.3.5", features = ["compat"] }
 jsonrpc-core = "14.2.0"
 jsonrpc-pubsub = "14.2.0"
+nodle-chain-executor = { version = "2.0.0-rc6", path = "../executor" }
+nodle-chain-primitives = { version = "2.0.0-rc6", path = "../primitives" }
 nodle-chain-runtime = { version = "2.0.0-rc6", path = "../runtime" }
 pallet-im-online = { version = "2.0.0-rc6", default-features = false }
 pallet-root-of-trust-rpc  = { version = "2.0.0-rc6", path = "../pallets/root-of-trust/rpc" }
@@ -38,7 +49,6 @@ sc-consensus = "0.8.0-rc6"
 sc-consensus-babe = "0.8.0-rc6"
 sc-consensus-babe-rpc = "0.8.0-rc6"
 sc-consensus-epochs = "0.8.0-rc6"
-sc-executor = "0.8.0-rc6"
 sc-finality-grandpa = "0.8.0-rc6"
 sc-finality-grandpa-rpc = "0.8.0-rc6"
 sc-keystore = "2.0.0-rc6"

@@ -24,136 +24,59 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use pallet_grandpa::{fg_primitives, AuthorityId as GrandpaId};
+use frame_support::{
+    construct_runtime, debug, parameter_types,
+    traits::{KeyOwnerProofSystem, Randomness},
+    weights::{
+        constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+        IdentityFee, Weight,
+    },
+};
+use nodle_chain_primitives::{
+    AccountId, AccountIndex, Balance, BlockNumber, CertificateId, Hash, Index, Moment, Signature,
+};
+use pallet_grandpa::{
+    fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
+};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
-use parity_scale_codec::{Decode, Encode};
+use parity_scale_codec::Encode;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2},
     OpaqueMetadata,
 };
+#[cfg(any(feature = "std", test))]
+pub use sp_runtime::BuildStorage;
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{
-        BlakeTwo256, Block as BlockT, ConvertInto, IdentifyAccount, NumberFor, OpaqueKeys,
-        SaturatedConversion, Saturating, StaticLookup, Verify,
+        BlakeTwo256, Block as BlockT, ConvertInto, NumberFor, OpaqueKeys, SaturatedConversion,
+        Saturating, StaticLookup,
     },
     transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, FixedPointNumber, ModuleId, MultiSignature,
+    ApplyExtrinsicResult, FixedPointNumber, ModuleId, Perbill, Perquintill,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-
-// A few exports that help ease life for downstream crates.
-pub use frame_support::{
-    construct_runtime, debug, parameter_types,
-    traits::{
-        Currency, Imbalance, InstanceFilter, KeyOwnerProofSystem, OnUnbalanced, Randomness,
-        SplitTwoWays,
-    },
-    weights::{
-        constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
-        IdentityFee, Weight,
-    },
-    RuntimeDebug, StorageValue,
-};
-pub use pallet_balances::Call as BalancesCall;
-pub use pallet_timestamp::Call as TimestampCall;
-#[cfg(any(feature = "std", test))]
-pub use sp_runtime::BuildStorage;
-pub use sp_runtime::{Perbill, Permill, Perquintill};
+use static_assertions::const_assert;
 
 pub mod constants;
 mod implementations;
 
-use implementations::Author;
+use implementations::{DealWithFees, ProxyType};
 
-/// An index to a block.
-pub type BlockNumber = u32;
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
-
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// The type for looking up accounts. We don't expect more than 4 billion of them, but you
-/// never know...
-pub type AccountIndex = u32;
-
-/// Balance of an account.
-pub type Balance = u128;
-
-/// Index of a transaction in the chain.
-pub type Index = u32;
-
-/// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
-
-/// Digest item type.
-pub type DigestItem = generic::DigestItem<Hash>;
-
-/// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
-/// the specifics of the runtime. They can then be made to be agnostic over specific formats
-/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
-/// to even the core data structures.
-pub mod opaque {
-    use super::*;
-
-    pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
-
-    /// Opaque block header type.
-    pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
-    /// Opaque block type.
-    pub type Block = generic::Block<Header, UncheckedExtrinsic>;
-    /// Opaque block identifier type.
-    pub type BlockId = generic::BlockId<Block>;
-
-    impl_opaque_keys! {
-        pub struct SessionKeys {
-            pub babe: Babe,
-            pub grandpa: Grandpa,
-            pub im_online: ImOnline,
-            pub authority_discovery: AuthorityDiscovery,
-        }
-    }
-}
-
-/// App-specific crypto used for reporting equivocation/misbehavior in BABE and
-/// GRANDPA. Any rewards for misbehavior reporting will be paid out to this
-/// account.
-pub mod report {
-    use super::{Signature, Verify};
-    use frame_system::offchain::AppCrypto;
-    use sp_core::crypto::{key_types, KeyTypeId};
-
-    /// Key type for the reporting module. Used for reporting BABE and GRANDPA
-    /// equivocations.
-    pub const KEY_TYPE: KeyTypeId = key_types::REPORTING;
-
-    mod app {
-        use sp_application_crypto::{app_crypto, sr25519};
-        app_crypto!(sr25519, super::KEY_TYPE);
-    }
-
-    /// Identity of the equivocation/misbehavior reporter.
-    pub type ReporterId = app::Public;
-
-    /// An `AppCrypto` type to allow submitting signed transactions using the reporting
-    /// application key as signer.
-    pub struct ReporterAppCrypto;
-
-    impl AppCrypto<<Signature as Verify>::Signer, Signature> for ReporterAppCrypto {
-        type RuntimeAppPublic = ReporterId;
-        type GenericSignature = sp_core::sr25519::Signature;
-        type GenericPublic = sp_core::sr25519::Public;
+impl_opaque_keys! {
+    pub struct SessionKeys {
+        pub babe: Babe,
+        pub grandpa: Grandpa,
+        pub im_online: ImOnline,
+        pub authority_discovery: AuthorityDiscovery,
     }
 }
 
@@ -184,7 +107,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     impl_version: 0,
 
     /// Used for hardware wallets. This typically happens when `SignedExtra` changes.
-    transaction_version: 2,
+    transaction_version: 3,
 
     apis: RUNTIME_API_VERSIONS,
 };
@@ -198,15 +121,23 @@ pub fn native_version() -> NativeVersion {
     }
 }
 
+const AVERAGE_ON_INITIALIZE_WEIGHT: Perbill = Perbill::from_percent(10);
 parameter_types! {
-    pub const BlockHashCount: BlockNumber = 250;
+    pub const BlockHashCount: BlockNumber = 2400;
+    /// We allow for 2 seconds of compute with a 6 second average block time.
     pub const MaximumBlockWeight: Weight = 2 * WEIGHT_PER_SECOND;
     pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
+    /// Assume 10% of weight for average on_initialize calls.
+    pub MaximumExtrinsicWeight: Weight =
+        AvailableBlockRatio::get().saturating_sub(AVERAGE_ON_INITIALIZE_WEIGHT)
+        * MaximumBlockWeight::get();
     pub const MaximumBlockLength: u32 = 5 * 1024 * 1024;
-    pub MaximumExtrinsicWeight: Weight = AvailableBlockRatio::get()
-        .saturating_sub(Perbill::from_percent(10)) * MaximumBlockWeight::get();
     pub const Version: RuntimeVersion = VERSION;
 }
+
+const_assert!(
+    AvailableBlockRatio::get().deconstruct() >= AVERAGE_ON_INITIALIZE_WEIGHT.deconstruct()
+);
 
 impl frame_system::Trait for Runtime {
     type AccountId = AccountId;
@@ -283,6 +214,10 @@ impl pallet_grandpa::Trait for Runtime {
 }
 
 impl pallet_authority_discovery::Trait for Runtime {}
+
+parameter_types! {
+    pub const UncleGenerations: u32 = 0;
+}
 
 impl pallet_authorship::Trait for Runtime {
     type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
@@ -393,25 +328,6 @@ parameter_types! {
     pub const ExistentialDeposit: Balance = 1 * constants::MILLICENTS;
 }
 
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
-
-/// Splits fees 20/80 between reserve and block author.
-pub struct DealWithFees;
-impl OnUnbalanced<NegativeImbalance> for DealWithFees {
-    fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
-        if let Some(fees) = fees_then_tips.next() {
-            // for fees, 80% to treasury, 20% to author
-            let mut split = fees.ration(80, 20);
-            if let Some(tips) = fees_then_tips.next() {
-                // for tips, if any, 80% to treasury, 20% to author (though this can be anything)
-                tips.ration_merge_into(80, 20, &mut split);
-            }
-            CompanyReserve::on_unbalanced(split.0);
-            Author::on_unbalanced(split.1);
-        }
-    }
-}
-
 impl pallet_balances::Trait for Runtime {
     type Balance = Balance;
     type Event = Event;
@@ -451,14 +367,10 @@ parameter_types! {
 }
 
 impl pallet_timestamp::Trait for Runtime {
-    type Moment = u64;
+    type Moment = Moment;
     type OnTimestampSet = Babe;
     type MinimumPeriod = MinimumPeriod;
     type WeightInfo = ();
-}
-
-parameter_types! {
-    pub const UncleGenerations: u32 = 0;
 }
 
 parameter_types! {
@@ -469,10 +381,10 @@ parameter_types! {
 
 impl pallet_session::Trait for Runtime {
     type SessionManager = PoaSessions;
-    type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
     type Event = Event;
-    type Keys = opaque::SessionKeys;
+    type Keys = SessionKeys;
     type ValidatorId = AccountId;
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
@@ -723,50 +635,6 @@ parameter_types! {
     pub const MaxProxies: u16 = 32;
 }
 
-/// The type used to represent the kinds of proxying allowed.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, RuntimeDebug)]
-pub enum ProxyType {
-    Any,
-    NonTransfer,
-    Governance,
-}
-impl Default for ProxyType {
-    fn default() -> Self {
-        Self::Any
-    }
-}
-impl InstanceFilter<Call> for ProxyType {
-    fn filter(&self, c: &Call) -> bool {
-        match self {
-            ProxyType::Any => true,
-            ProxyType::NonTransfer => !matches!(
-                c,
-                Call::Balances(..)
-                    | Call::Grants(..)
-                    | Call::Indices(pallet_indices::Call::transfer(..))
-            ),
-            ProxyType::Governance => matches!(
-                c,
-                Call::FinancialCommittee(..)
-                    | Call::RootCommittee(..)
-                    | Call::TechnicalCommittee(..)
-                    | Call::CompanyReserve(..)
-                    | Call::UsaReserve(..)
-                    | Call::InternationalReserve(..)
-            ),
-        }
-    }
-    fn is_superset(&self, o: &Self) -> bool {
-        match (self, o) {
-            (x, y) if x == y => true,
-            (ProxyType::Any, _) => true,
-            (_, ProxyType::Any) => false,
-            (ProxyType::NonTransfer, _) => true,
-            _ => false,
-        }
-    }
-}
-
 impl pallet_proxy::Trait for Runtime {
     type Event = Event;
     type Call = Call;
@@ -833,8 +701,6 @@ parameter_types! {
     pub const SlotValidity: BlockNumber = 365 * constants::DAYS;
 }
 
-pub type CertificateId = AccountId;
-
 impl pallet_root_of_trust::Trait for Runtime {
     type Event = Event;
     type Currency = Balances;
@@ -884,7 +750,7 @@ impl pallet_membership::Trait<pallet_membership::Instance5> for Runtime {
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
-        NodeBlock = opaque::Block,
+        NodeBlock = nodle_chain_primitives::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
@@ -1032,7 +898,7 @@ sp_api::impl_runtime_apis! {
     }
 
     impl fg_primitives::GrandpaApi<Block> for Runtime {
-        fn grandpa_authorities() -> Vec<(GrandpaId, u64)> {
+        fn grandpa_authorities() -> GrandpaAuthorityList {
             Grandpa::grandpa_authorities()
         }
 
@@ -1115,13 +981,13 @@ sp_api::impl_runtime_apis! {
 
     impl sp_session::SessionKeys<Block> for Runtime {
         fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-            opaque::SessionKeys::generate(seed)
+            SessionKeys::generate(seed)
         }
 
         fn decode_session_keys(
             encoded: Vec<u8>,
         ) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
-            opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
+            SessionKeys::decode_into_raw_public_keys(&encoded)
         }
     }
 
