@@ -45,8 +45,8 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
             // for fees, 20% to treasury, 80% to author
             let mut split = fees.ration(20, 80);
             if let Some(tips) = fees_then_tips.next() {
-                // for tips, if any, 80% to treasury, 20% to author (though this can be anything)
-                tips.ration_merge_into(80, 20, &mut split);
+                // for tips, if any, 20% to treasury, 80% to author (though this can be anything)
+                tips.ration_merge_into(20, 80, &mut split);
             }
             CompanyReserve::on_unbalanced(split.0);
             Author::on_unbalanced(split.1);
