@@ -747,6 +747,82 @@ impl pallet_membership::Trait<pallet_membership::Instance5> for Runtime {
     type MembershipChanged = Allocations;
 }
 
+use parity_scale_codec::Decode;
+use sp_runtime::RuntimeDebug;
+// Used for migration purposes, unfortunately it isn't public in the transaction_payment
+// pallet and we have to recreate it here.
+/// Storage releases of the module.
+#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug)]
+enum Releases {
+    /// Original version of the module.
+    V1,
+    /// One that bumps the usage to FixedU128 from FixedI128.
+    V2,
+}
+
+pub struct CustomRuntimeUpgradesRc2ToRc6;
+impl CustomRuntimeUpgradesRc2ToRc6 {
+    fn transaction_payment_rename_and_convert_multiplier() -> frame_support::weights::Weight {
+        // Removed in https://github.com/paritytech/substrate/commit/cf7432a5ebef122ab685e0b9256a15c722661116
+
+        use frame_support::{
+            debug::native::error,
+            migration::{put_storage_value, take_storage_value},
+        };
+        use sp_std::convert::TryInto;
+
+        sp_runtime::print("🕊️  Migrating Transaction Payment...");
+
+        type OldMultiplier = sp_runtime::FixedI128;
+        type OldInner = <OldMultiplier as FixedPointNumber>::Inner;
+        type Inner = <Multiplier as FixedPointNumber>::Inner;
+
+        put_storage_value(b"TransactionPayment", b"StorageVersion", &[], Releases::V2);
+
+        if let Some(old) =
+            take_storage_value::<OldMultiplier>(b"TransactionPayment", b"NextFeeMultiplier", &[])
+        {
+            let inner = old.into_inner();
+            let new_inner = <OldInner as TryInto<Inner>>::try_into(inner).unwrap_or_default();
+            let new = Multiplier::from_inner(new_inner);
+            put_storage_value(b"TransactionPayment", b"NextFeeMultiplier", &[], new);
+            sp_runtime::print("🕊️  Done Transaction Payment.");
+            <Runtime as frame_system::Trait>::DbWeight::get().reads_writes(1, 1)
+        } else {
+            error!("transaction-payment migration failed.");
+            <Runtime as frame_system::Trait>::DbWeight::get().reads(1)
+        }
+    }
+
+    fn multisig_migrate_from_utility() -> frame_support::weights::Weight {
+        use frame_support::migration::{put_storage_value, StorageIterator};
+
+        // Removed in https://github.com/paritytech/substrate/commit/cf7432a5ebef122ab685e0b9256a15c722661116
+
+        sp_runtime::print("🕊️  Migrating Multisigs...");
+        for (key, value) in StorageIterator::<
+            pallet_multisig::Multisig<BlockNumber, Balance, AccountId>,
+        >::new(b"Utility", b"Multisigs")
+        .drain()
+        {
+            put_storage_value(b"Multisig", b"Multisigs", &key, value);
+        }
+        sp_runtime::print("🕊️  Done Multisigs.");
+
+        1_000_000_000
+    }
+}
+impl frame_support::traits::OnRuntimeUpgrade for CustomRuntimeUpgradesRc2ToRc6 {
+    fn on_runtime_upgrade() -> frame_support::weights::Weight {
+        let mut weight =
+            CustomRuntimeUpgradesRc2ToRc6::transaction_payment_rename_and_convert_multiplier();
+        weight =
+            weight.saturating_add(CustomRuntimeUpgradesRc2ToRc6::multisig_migrate_from_utility());
+
+        weight
+    }
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -837,6 +913,7 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllModules,
+    CustomRuntimeUpgradesRc2ToRc6,
 >;
 
 sp_api::impl_runtime_apis! {
