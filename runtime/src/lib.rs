@@ -693,7 +693,7 @@ impl pallet_tcr::Trait<pallet_tcr::Instance1> for Runtime {
 }
 
 parameter_types! {
-    // Total onboarding cost: 15 NODL + fees (with TCR application)
+    // Total onboarding cost: 10 NODL + fees (with TCR application)
     pub const SlotBookingCost: Balance = 10 * constants::NODL;
     // Doesn't need to be as expensive
     pub const SlotRenewingCost: Balance = 1 * constants::NODL;
