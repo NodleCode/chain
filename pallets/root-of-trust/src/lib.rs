@@ -225,7 +225,8 @@ impl<T: Trait> Module<T> {
         owner_is_member && !revoked && !expired
     }
 
-    #[allow(dead_code)]
+    /// This function is used as a helper in tests or when implementing the runtime APIs linked
+    /// to this pallet.
     pub fn is_root_certificate_valid(cert: &T::CertificateId) -> bool {
         let exists = <Slots<T>>::contains_key(cert);
         let slot = <Slots<T>>::get(cert);
@@ -233,7 +234,8 @@ impl<T: Trait> Module<T> {
         exists && Self::is_slot_valid(&slot)
     }
 
-    #[allow(dead_code)]
+    /// This function is used as a helper in tests or when implementing the runtime APIs linked
+    /// to this pallet.
     pub fn is_child_certificate_valid(root: &T::CertificateId, child: &T::CertificateId) -> bool {
         let equals = root == child;
         let root_valid = Self::is_root_certificate_valid(root);
