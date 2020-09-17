@@ -289,8 +289,6 @@ decl_module! {
             let (mut new_1, mut old_1) = Self::commit_applications(block).unwrap_or((Vec::new(), Vec::new()));
             let (new_2, old_2) = Self::resolve_challenges(block).unwrap_or((Vec::new(), Vec::new()));
 
-            // TODO: optimise all those array operations
-
             // Should never be the same, so should not need some uniq checks
             new_1.extend(new_2.clone());
             old_1.extend(old_2.clone());
