@@ -138,7 +138,7 @@ impl<T: Trait> Module<T> {
 
         match already_over_existential_deposit || amount_over_existential_deposit {
             true => Ok(()),
-            false => Err(Error::<T>::DoesNotSatisfyExistentialDeposit)?,
+            false => Err(Error::<T>::DoesNotSatisfyExistentialDeposit.into()),
         }
     }
 }

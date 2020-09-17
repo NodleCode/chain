@@ -132,7 +132,7 @@ decl_module! {
 
             match T::Currency::withdraw(&sender, T::SlotBookingCost::get(), WithdrawReasons::all(), ExistenceRequirement::AllowDeath) {
                 Ok(imbalance) => T::FundsCollector::on_unbalanced(imbalance),
-                Err(_) => Err(Error::<T>::NotEnoughFunds)?,
+                Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
             let now = <system::Module<T>>::block_number();
@@ -161,7 +161,7 @@ decl_module! {
 
             match T::Currency::withdraw(&sender, T::SlotRenewingCost::get(), WithdrawReasons::all(), ExistenceRequirement::AllowDeath) {
                 Ok(imbalance) => T::FundsCollector::on_unbalanced(imbalance),
-                Err(_) => Err(Error::<T>::NotEnoughFunds)?,
+                Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
             slot.renewed = <system::Module<T>>::block_number();

@@ -105,7 +105,7 @@ decl_module! {
             let when = <system::Module<T>>::block_number() + T::Delay::get();
 
             if T::Scheduler::schedule_named(
-                scheduler_id.clone(),
+                scheduler_id,
                 At(when),
                 None,
                 // This number defines a priority of execution of the scheduled calls. We basically took the number
@@ -115,10 +115,10 @@ decl_module! {
                 system::RawOrigin::Root.into(),
                 *amendment,
             ).is_err() {
-                Err(Error::<T>::FailedToScheduleAmendment)?;
+                return Err(Error::<T>::FailedToScheduleAmendment.into());
             }
 
-            <AmendmentsScheduled>::put(nb_scheduled.clone() + 1);
+            <AmendmentsScheduled>::put(nb_scheduled + 1);
 
             Self::deposit_event(RawEvent::AmendmentScheduled(nb_scheduled, when));
             Ok(())
@@ -133,7 +133,7 @@ decl_module! {
 
             let scheduler_id = (AMENDMENTS_ID, amendment_id).encode();
             if T::Scheduler::cancel_named(scheduler_id).is_err() {
-                Err(Error::<T>::FailedToCancelAmendment)?;
+                return Err(Error::<T>::FailedToCancelAmendment.into());
             }
 
             Self::deposit_event(RawEvent::AmendmentVetoed(amendment_id));
