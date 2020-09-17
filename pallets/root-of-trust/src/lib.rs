@@ -241,7 +241,9 @@ impl<T: Trait> Module<T> {
         let root_valid = Self::is_root_certificate_valid(root);
         let revoked = <Slots<T>>::get(root).child_revocations.contains(child);
 
-        // TODO: let's support signature verification here
+        // At some point we could decide to have the clients submit complete certificates
+        // to the nodes for verification purposes. However, this should probably be kept
+        // off-chain anyways.
 
         !equals && root_valid && !revoked
     }
