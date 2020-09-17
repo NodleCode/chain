@@ -1,4 +1,4 @@
-use jsonrpc_core::{Error as RpcError, ErrorCode, Result};
+use jsonrpc_core::Result;
 use jsonrpc_derive::rpc;
 use pallet_root_of_trust_runtime_api::RootOfTrustApi as RootOfTrustRuntimeApi;
 use parity_scale_codec::Codec;
@@ -6,6 +6,9 @@ use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;
 use sp_runtime::{generic::BlockId, traits::Block as BlockT};
 use std::sync::Arc;
+
+mod rpc_errors;
+use rpc_errors::misc_rpc_error;
 
 #[rpc]
 pub trait RootOfTrustApi<BlockHash, CertificateId>
@@ -59,11 +62,7 @@ where
 			self.client.info().best_hash));
 
         api.is_root_certificate_valid(&at, &cert)
-            .map_err(|e| RpcError {
-                code: ErrorCode::ServerError(9876), // No real reason for this value
-                message: "Something wrong".into(),
-                data: Some(format!("{:?}", e).into()),
-            })
+            .map_err(misc_rpc_error)
     }
 
     fn is_child_certificate_valid(
@@ -78,10 +77,6 @@ where
 			self.client.info().best_hash));
 
         api.is_child_certificate_valid(&at, &root, &child)
-            .map_err(|e| RpcError {
-                code: ErrorCode::ServerError(9876), // No real reason for this value
-                message: "Something is wrong".into(),
-                data: Some(format!("{:?}", e).into()),
-            })
+            .map_err(misc_rpc_error)
     }
 }
