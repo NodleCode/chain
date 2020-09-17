@@ -108,6 +108,9 @@ decl_module! {
                 scheduler_id.clone(),
                 At(when),
                 None,
+                // This number defines a priority of execution of the scheduled calls. We basically took the number
+                // from parity's democracy pallet and substracted 1 to make sure we have priority over it if a chain
+                // uses both modules.
                 62,
                 system::RawOrigin::Root.into(),
                 *amendment,
