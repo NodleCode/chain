@@ -35,7 +35,7 @@ use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{CheckedAdd, CheckedDiv, Saturating},
+    traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating},
     Perbill,
 };
 use sp_std::prelude::Vec;
@@ -319,7 +319,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         drop(T::Currency::unreserve(&who, amount));
     }
 
-    /// Takes some funds away from a looser, deposit in our own account
+    /// Takes some funds away from a loser, deposit in our own account
     fn slash_looser(who: T::AccountId, amount: BalanceOf<T, I>) -> NegativeImbalanceOf<T, I> {
         let to_be_slashed = T::LoosersSlash::get() * amount; // Sorry buddy...
         if T::Currency::can_slash(&who, to_be_slashed) {
@@ -355,7 +355,10 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
         let new_members = <Applications<T, I>>::iter()
             .filter(|(_account_id, application)| {
-                block - application.clone().created_block >= T::FinalizeApplicationPeriod::get()
+                block
+                    .checked_sub(&application.clone().created_block)
+                    .expect("created_block should always be smaller than block; qed")
+                    >= T::FinalizeApplicationPeriod::get()
             })
             .map(|(account_id, application)| {
                 <Applications<T, I>>::remove(account_id.clone());
