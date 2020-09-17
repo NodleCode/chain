@@ -152,10 +152,10 @@ decl_module! {
 
         /// Renew a non expired slot and make it valid for a longer time
         #[weight = 150_000_000]
-        fn renew_slot(origin, certificate: T::CertificateId) -> DispatchResult {
+        fn renew_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
-            let mut slot = <Slots<T>>::get(&certificate);
+            let mut slot = <Slots<T>>::get(&certificate_id);
             ensure!(Self::is_slot_valid(&slot), Error::<T>::NoLongerValid);
             ensure!(slot.owner == sender, Error::<T>::NotTheOwner);
 
@@ -165,25 +165,25 @@ decl_module! {
             };
 
             slot.renewed = <system::Module<T>>::block_number();
-            <Slots<T>>::insert(&certificate, slot);
+            <Slots<T>>::insert(&certificate_id, slot);
 
-            Self::deposit_event(RawEvent::SlotRenewed(certificate));
+            Self::deposit_event(RawEvent::SlotRenewed(certificate_id));
             Ok(())
         }
 
         /// Revoke a slot before it is expired thus invalidating all child certificates
         #[weight = 75_000_000]
-        fn revoke_slot(origin, certificate: T::CertificateId) -> DispatchResult {
+        fn revoke_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
-            let mut slot = <Slots<T>>::get(&certificate);
+            let mut slot = <Slots<T>>::get(&certificate_id);
             ensure!(Self::is_slot_valid(&slot), Error::<T>::NoLongerValid);
             ensure!(slot.owner == sender, Error::<T>::NotTheOwner);
 
             slot.revoked = true;
-            <Slots<T>>::insert(&certificate, slot);
+            <Slots<T>>::insert(&certificate_id, slot);
 
-            Self::deposit_event(RawEvent::SlotRevoked(certificate));
+            Self::deposit_event(RawEvent::SlotRevoked(certificate_id));
             Ok(())
         }
 
