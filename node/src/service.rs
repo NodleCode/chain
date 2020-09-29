@@ -18,19 +18,15 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
+use crate::rpc::{self, DenyUnsafe, IoHandler};
 use futures::prelude::*;
 use nodle_chain_executor::Executor;
-use nodle_chain_primitives::{AccountId, Block, Hash, Index};
+use nodle_chain_primitives::{Block};
 use nodle_chain_runtime::RuntimeApi;
-use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi};
-use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_babe;
-use sc_consensus_babe_rpc::BabeRpcHandler;
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
-use sc_finality_grandpa_rpc::GrandpaRpcHandler;
 use sc_network::{Event, NetworkService};
-use sc_rpc_api::DenyUnsafe;
 use sc_service::{
     config::{Configuration, Role},
     error::Error as ServiceError,
@@ -40,10 +36,6 @@ use sp_core::traits::BareCryptoStorePtr;
 use sp_inherents::InherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
-use substrate_frame_rpc_system::{FullSystem, LightSystem, SystemApi};
-
-/// A IO handler that uses all Full RPC extensions.
-pub type IoHandler = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
@@ -62,7 +54,7 @@ pub fn new_partial(
         sp_consensus::DefaultImportQueue<Block, FullClient>,
         sc_transaction_pool::FullPool<Block, FullClient>,
         (
-            impl Fn(DenyUnsafe, jsonrpc_pubsub::manager::SubscriptionManager) -> IoHandler,
+            impl Fn(DenyUnsafe, sc_rpc::SubscriptionTaskExecutor) -> IoHandler,
             (
                 sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
                 sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
@@ -138,40 +130,27 @@ pub fn new_partial(
         let select_chain = select_chain.clone();
         let keystore = keystore.clone();
 
-        let rpc_extensions_builder = move |deny_unsafe: DenyUnsafe, subscriptions_executor| {
-            let mut io = jsonrpc_core::IoHandler::default();
-            io.extend_with(SystemApi::to_delegate(FullSystem::new(
-                client.clone(),
-                pool.clone(),
-                deny_unsafe.clone(),
-            )));
-            io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
-                client.clone(),
-            )));
-            io.extend_with(sc_consensus_babe_rpc::BabeApi::to_delegate(
-                BabeRpcHandler::new(
-                    client.clone(),
-                    shared_epoch_changes.clone(),
-                    keystore.clone(),
-                    babe_config.clone(),
-                    select_chain.clone(),
-                    deny_unsafe.clone(),
-                ),
-            ));
-            io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(
-                GrandpaRpcHandler::new(
-                    shared_authority_set.clone(),
-                    shared_voter_state.clone(),
-                    justification_stream.clone(),
-                    subscriptions_executor,
-                    finality_proof_provider.clone(),
-                ),
-            ));
-            io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(
-                client.clone(),
-            )));
+        let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
+            let deps = rpc::FullDeps {
+                client: client.clone(),
+                pool: pool.clone(),
+                select_chain: select_chain.clone(),
+                deny_unsafe,
+                babe: rpc::BabeDeps {
+                    babe_config: babe_config.clone(),
+                    shared_epoch_changes: shared_epoch_changes.clone(),
+                    keystore: keystore.clone(),
+                },
+                grandpa: rpc::GrandpaDeps {
+                    shared_voter_state: shared_voter_state.clone(),
+                    shared_authority_set: shared_authority_set.clone(),
+                    justification_stream: justification_stream.clone(),
+                    subscription_executor,
+                    finality_provider: finality_proof_provider.clone(),
+                },
+            };
 
-            io
+            rpc::create_full(deps)
         };
 
         (rpc_extensions_builder, rpc_setup)
@@ -488,15 +467,14 @@ pub fn new_light_base(
         );
     }
 
-    let mut rpc_extensions = jsonrpc_core::IoHandler::default();
-    rpc_extensions.extend_with(SystemApi::<Hash, AccountId, Index>::to_delegate(
-        LightSystem::new(
-            client.clone(),
-            backend.remote_blockchain(),
-            on_demand.clone(),
-            transaction_pool.clone(),
-        ),
-    ));
+    let light_deps = rpc::LightDeps {
+        remote_blockchain: backend.remote_blockchain(),
+        fetcher: on_demand.clone(),
+        client: client.clone(),
+        pool: transaction_pool.clone(),
+    };
+
+    let rpc_extensions = rpc::create_light(light_deps);
 
     let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
         on_demand: Some(on_demand),

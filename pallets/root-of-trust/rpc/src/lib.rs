@@ -1,6 +1,6 @@
 use jsonrpc_core::Result;
 use jsonrpc_derive::rpc;
-use pallet_root_of_trust_runtime_api::RootOfTrustApi as RootOfTrustRuntimeApi;
+pub use pallet_root_of_trust_runtime_api::RootOfTrustApi as RootOfTrustRuntimeApi;
 use parity_scale_codec::Codec;
 use sp_api::ProvideRuntimeApi;
 use sp_blockchain::HeaderBackend;

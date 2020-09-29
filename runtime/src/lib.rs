@@ -1040,12 +1040,12 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, AccountId> for Runtime {
-        fn is_root_certificate_valid(cert: &AccountId) -> bool {
+    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, CertificateId> for Runtime {
+        fn is_root_certificate_valid(cert: &CertificateId) -> bool {
             PkiRootOfTrust::is_root_certificate_valid(cert)
         }
 
-        fn is_child_certificate_valid(root: &AccountId, child: &AccountId) -> bool {
+        fn is_child_certificate_valid(root: &CertificateId, child: &CertificateId) -> bool {
             PkiRootOfTrust::is_child_certificate_valid(root, child)
         }
     }

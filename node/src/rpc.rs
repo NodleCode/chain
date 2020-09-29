@@ -16,13 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//! Custom RPCs API instantiation code.
+//! RPC APIs instantiation code for the Nodle Chain.
 
-#![warn(missing_docs)]
-
-use std::sync::Arc;
-
-use node_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index};
+use nodle_chain_primitives::{AccountId, Balance, Block, BlockNumber, CertificateId, Hash, Index};
+use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi, RootOfTrustRuntimeApi};
 use sc_consensus_babe::{Config, Epoch};
 use sc_consensus_babe_rpc::BabeRpcHandler;
 use sc_consensus_epochs::SharedEpochChanges;
@@ -39,6 +36,7 @@ use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_transaction_pool::TransactionPool;
+use std::sync::Arc;
 
 /// Light client extra dependencies.
 pub struct LightDeps<C, F, P> {
@@ -104,7 +102,7 @@ where
 	C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
 	C: Send + Sync + 'static,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
-	C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber>,
+	C::Api: RootOfTrustRuntimeApi<Block, CertificateId>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BabeApi<Block>,
 	C::Api: BlockBuilder<Block>,
@@ -113,7 +111,6 @@ where
 	B: sc_client_api::Backend<Block> + Send + Sync + 'static,
 	B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::HashFor<Block>>,
 {
-	use pallet_contracts_rpc::{Contracts, ContractsApi};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 	use substrate_frame_rpc_system::{FullSystem, SystemApi};
 
@@ -145,16 +142,12 @@ where
 		pool,
 		deny_unsafe,
 	)));
-	// Making synchronous calls in light client freezes the browser currently,
-	// more context: https://github.com/paritytech/substrate/pull/3480
-	// These RPCs should use an asynchronous caller instead.
-	io.extend_with(ContractsApi::to_delegate(Contracts::new(client.clone())));
 	io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
 		client.clone(),
 	)));
 	io.extend_with(sc_consensus_babe_rpc::BabeApi::to_delegate(
 		BabeRpcHandler::new(
-			client,
+			client.clone(),
 			shared_epoch_changes,
 			keystore,
 			babe_config,
@@ -171,6 +164,7 @@ where
 			finality_provider,
 		),
 	));
+	io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(client)));
 
 	io
 }
