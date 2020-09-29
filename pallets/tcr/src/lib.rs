@@ -535,7 +535,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
 
         // Last element is `challenger` or `candidate`. They simply get whatever dust might be left
         let (dust_collector, _deposit) = &to_reward[to_reward.len() - 1];
-        let remaining = rewards_pool - allocated;
+        let remaining = rewards_pool.checked_sub(&allocated).expect("we do not expect to allocate more coins than in rewards pool, would this happen we'd have bigger problems somewhere else; qed");
         if let Ok(r) = T::Currency::deposit_into_existing(&dust_collector, remaining) {
             rewards_imbalance.subsume(r);
         }
