@@ -100,8 +100,7 @@ decl_module! {
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
-            // TODO: we currently `AllowDeath` for our source account, shall we use `KeepAlive` instead?
-            let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::AllowDeath);
+            let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::KeepAlive);
 
             Self::deposit_event(RawEvent::SpentFunds(to, amount));
 

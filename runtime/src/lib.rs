@@ -96,7 +96,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 40,
+    spec_version: 41,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -693,7 +693,7 @@ impl pallet_tcr::Trait<pallet_tcr::Instance1> for Runtime {
 }
 
 parameter_types! {
-    // Total onboarding cost: 15 NODL + fees (with TCR application)
+    // Total onboarding cost: 10 NODL + fees (with TCR application)
     pub const SlotBookingCost: Balance = 10 * constants::NODL;
     // Doesn't need to be as expensive
     pub const SlotRenewingCost: Balance = 1 * constants::NODL;

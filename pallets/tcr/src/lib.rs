@@ -35,7 +35,7 @@ use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{CheckedAdd, CheckedDiv, Saturating},
+    traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating},
     Perbill,
 };
 use sp_std::prelude::Vec;
@@ -193,7 +193,7 @@ decl_module! {
             <Applications<T, I>>::insert(sender.clone(), Application {
                 candidate: sender.clone(),
                 candidate_deposit: deposit,
-                metadata: metadata,
+                metadata,
 
                 challenger: None,
                 challenger_deposit: 0.into(),
@@ -289,11 +289,9 @@ decl_module! {
             let (mut new_1, mut old_1) = Self::commit_applications(block).unwrap_or((Vec::new(), Vec::new()));
             let (new_2, old_2) = Self::resolve_challenges(block).unwrap_or((Vec::new(), Vec::new()));
 
-            // TODO: optimise all those array operations
-
             // Should never be the same, so should not need some uniq checks
-            new_1.extend(new_2.clone());
-            old_1.extend(old_2.clone());
+            new_1.extend(new_2);
+            old_1.extend(old_2);
 
             new_1.sort();
             old_1.sort();
@@ -303,12 +301,26 @@ decl_module! {
     }
 }
 
+type FinalizeHelperResultFrom<T> = Result<
+    (
+        Vec<<T as frame_system::Trait>::AccountId>,
+        Vec<<T as frame_system::Trait>::AccountId>,
+    ),
+    DispatchError,
+>;
+type AccountsAndDepositsFromResolvedChallenge<T, I> =
+    Vec<(<T as frame_system::Trait>::AccountId, BalanceOf<T, I>)>;
+type ResolvedChallengeResultFrom<T, I> = (
+    AccountsAndDepositsFromResolvedChallenge<T, I>, // Winners -> will be compensated
+    AccountsAndDepositsFromResolvedChallenge<T, I>, // Losers -> will be slashed
+);
+
 impl<T: Trait<I>, I: Instance> Module<T, I> {
     /// Do not just call `set_lock`, rather increase the locked amount
     fn reserve_for(who: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResult {
         // Make sure we can lock has many funds
         if !T::Currency::can_reserve(&who, amount) {
-            Err(Error::<T, I>::NotEnoughFunds)?;
+            return Err(Error::<T, I>::NotEnoughFunds.into());
         }
 
         T::Currency::reserve(&who, amount)
@@ -316,10 +328,10 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
 
     /// Decrease the locked amount of tokens
     fn unreserve_for(who: T::AccountId, amount: BalanceOf<T, I>) {
-        drop(T::Currency::unreserve(&who, amount));
+        T::Currency::unreserve(&who, amount);
     }
 
-    /// Takes some funds away from a looser, deposit in our own account
+    /// Takes some funds away from a loser, deposit in our own account
     fn slash_looser(who: T::AccountId, amount: BalanceOf<T, I>) -> NegativeImbalanceOf<T, I> {
         let to_be_slashed = T::LoosersSlash::get() * amount; // Sorry buddy...
         if T::Currency::can_slash(&who, to_be_slashed) {
@@ -350,17 +362,18 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
             .expect("coins can not exceed maximum supply which is not overflowing; qed")
     }
 
-    fn commit_applications(
-        block: T::BlockNumber,
-    ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
+    fn commit_applications(block: T::BlockNumber) -> FinalizeHelperResultFrom<T> {
         let new_members = <Applications<T, I>>::iter()
             .filter(|(_account_id, application)| {
-                block - application.clone().created_block >= T::FinalizeApplicationPeriod::get()
+                block
+                    .checked_sub(&application.clone().created_block)
+                    .expect("created_block should always be smaller than block; qed")
+                    >= T::FinalizeApplicationPeriod::get()
             })
             .map(|(account_id, application)| {
                 <Applications<T, I>>::remove(account_id.clone());
                 <Members<T, I>>::insert(account_id.clone(), application.clone());
-                Self::unreserve_for(account_id.clone(), application.clone().candidate_deposit);
+                Self::unreserve_for(account_id.clone(), application.candidate_deposit);
                 Self::deposit_event(RawEvent::ApplicationPassed(account_id.clone()));
 
                 account_id
@@ -370,9 +383,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         Ok((new_members, Vec::new()))
     }
 
-    fn resolve_challenges(
-        block: T::BlockNumber,
-    ) -> Result<(Vec<T::AccountId>, Vec<T::AccountId>), DispatchError> {
+    fn resolve_challenges(block: T::BlockNumber) -> FinalizeHelperResultFrom<T> {
         let all_members = <Challenges<T, I>>::iter()
             .filter(|(_account_id, application)| {
                 Self::is_challenge_expired(block, application.clone())
@@ -381,19 +392,18 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
                 (
                     account_id.clone(),
                     application.clone(),
-                    Self::is_challenge_passing(application.clone()),
+                    Self::is_challenge_passing(application),
                     <Members<T, I>>::contains_key(account_id),
                 )
             })
             .map(|(account_id, application, challenge_passed, was_member)| {
                 let (to_reward, to_slash) = match challenge_passed {
-                    true => Self::resolve_challenge_application_passed(
-                        account_id.clone(),
-                        application.clone(),
-                    ),
+                    true => {
+                        Self::resolve_challenge_application_passed(account_id.clone(), application)
+                    }
                     false => Self::resolve_challenge_application_refused(
                         account_id.clone(),
-                        application.clone(),
+                        application,
                         was_member,
                     ),
                 };
@@ -457,10 +467,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
     fn resolve_challenge_application_passed(
         account_id: T::AccountId,
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
-    ) -> (
-        Vec<(T::AccountId, BalanceOf<T, I>)>,
-        Vec<(T::AccountId, BalanceOf<T, I>)>,
-    ) {
+    ) -> ResolvedChallengeResultFrom<T, I> {
         <Members<T, I>>::insert(account_id.clone(), application.clone());
 
         Self::deposit_event(RawEvent::ChallengeAcceptedApplication(account_id));
@@ -468,7 +475,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         // The proposal passed, slash `challenger` and `voters_against`
         (
             application.clone().voters_for_and_candidate(),
-            application.clone().voters_against_and_challenger(),
+            application.voters_against_and_challenger(),
         )
     }
 
@@ -476,10 +483,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         account_id: T::AccountId,
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
         was_member: bool,
-    ) -> (
-        Vec<(T::AccountId, BalanceOf<T, I>)>,
-        Vec<(T::AccountId, BalanceOf<T, I>)>,
-    ) {
+    ) -> ResolvedChallengeResultFrom<T, I> {
         // If it is a member, remove it
         if was_member {
             <Members<T, I>>::remove(application.clone().candidate);
@@ -490,7 +494,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         // The proposal did not pass, slash `candidate` and `voters_for`
         (
             application.clone().voters_against_and_challenger(),
-            application.clone().voters_for_and_candidate(),
+            application.voters_for_and_candidate(),
         )
     }
 
@@ -500,17 +504,12 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         total_winning_deposits: BalanceOf<T, I>,
     ) {
         let mut slashes_imbalance = <NegativeImbalanceOf<T, I>>::zero();
-        let mut iter = to_slash.iter().cloned();
-        loop {
-            match iter.next() {
-                Some((account_id, deposit)) => {
-                    Self::unreserve_for(account_id.clone(), deposit);
-                    let r = Self::slash_looser(account_id.clone(), deposit);
-                    slashes_imbalance.subsume(r);
-                }
-                None => break,
-            };
-        }
+        to_slash.iter().cloned().for_each(|(account_id, deposit)| {
+            Self::unreserve_for(account_id.clone(), deposit);
+            let r = Self::slash_looser(account_id, deposit);
+            slashes_imbalance.subsume(r);
+        });
+
         // Execute rewards
         let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
         let rewards_pool = slashes_imbalance.peek();
@@ -536,7 +535,7 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
 
         // Last element is `challenger` or `candidate`. They simply get whatever dust might be left
         let (dust_collector, _deposit) = &to_reward[to_reward.len() - 1];
-        let remaining = rewards_pool - allocated;
+        let remaining = rewards_pool.checked_sub(&allocated).expect("we do not expect to allocate more coins than in rewards pool, would this happen we'd have bigger problems somewhere else; qed");
         if let Ok(r) = T::Currency::deposit_into_existing(&dust_collector, remaining) {
             rewards_imbalance.subsume(r);
         }
@@ -546,17 +545,17 @@ impl<T: Trait<I>, I: Instance> Module<T, I> {
         block: T::BlockNumber,
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
     ) -> bool {
-        block - application.clone().challenged_block >= T::FinalizeChallengePeriod::get()
+        block - application.challenged_block >= T::FinalizeChallengePeriod::get()
     }
 
     fn is_challenge_passing(
         application: Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
     ) -> bool {
-        Self::get_supporting(application.clone()) > Self::get_opposing(application.clone())
+        Self::get_supporting(application.clone()) > Self::get_opposing(application)
     }
 
     fn notify_members_change(new_members: Vec<T::AccountId>, old_members: Vec<T::AccountId>) {
-        if new_members.len() > 0 || old_members.len() > 0 {
+        if !new_members.is_empty() || !old_members.is_empty() {
             let mut sorted_members = <Members<T, I>>::iter()
                 .map(|(a, _app)| a)
                 .collect::<Vec<_>>();

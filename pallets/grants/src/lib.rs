@@ -10,7 +10,7 @@ use frame_support::{
 use frame_system::{ensure_root, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{AtLeast32Bit, CheckedAdd, StaticLookup, Zero},
+    traits::{AtLeast32Bit, CheckedAdd, Saturating, StaticLookup, Zero},
     DispatchResult, RuntimeDebug,
 };
 use sp_std::{
@@ -114,7 +114,7 @@ decl_storage! {
             grants.iter()
                 .for_each(|(ref who, schedules)| {
                     let total_grants = schedules.iter()
-                        .fold(Zero::zero(), |acc, s| acc + s.locked_amount(0.into()));
+                        .fold(Zero::zero(), |acc: BalanceOf<T>, s| acc.saturating_add(s.locked_amount(0.into())));
 
                     T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
                     T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
@@ -225,7 +225,11 @@ impl<T: Trait> Module<T> {
         let now = <frame_system::Module<T>>::block_number();
         Self::vesting_schedules(who)
             .iter()
-            .fold(Zero::zero(), |acc, s| acc + s.locked_amount(now))
+            .fold(Zero::zero(), |acc, s| {
+                acc.checked_add(&s.locked_amount(now)).expect(
+                    "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
+                )
+            })
     }
 
     fn do_add_vesting_schedule(

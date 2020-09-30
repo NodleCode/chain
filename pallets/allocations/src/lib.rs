@@ -95,6 +95,9 @@ decl_module! {
 
             ensure!(coins_that_will_be_consumed <= T::MaximumCoinsEverAllocated::get(), Error::<T>::TooManyCoinsToAllocate);
 
+            // When using a Perbill type as T::ProtocolFee::get() returns the default way to go is to used the standard mathematic
+            // operands. The risk of {over, under}flow is void as this operation will effectively take a part of `amount` and thus
+            // always produce a lower number. (We use Perbill to represent percentages)
             let amount_for_protocol = T::ProtocolFee::get() * amount;
             let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
 
@@ -135,7 +138,7 @@ impl<T: Trait> Module<T> {
 
         match already_over_existential_deposit || amount_over_existential_deposit {
             true => Ok(()),
-            false => Err(Error::<T>::DoesNotSatisfyExistentialDeposit)?,
+            false => Err(Error::<T>::DoesNotSatisfyExistentialDeposit.into()),
         }
     }
 }

@@ -42,8 +42,7 @@ fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
     let grantee: T::AccountId = account("grantee", u, SEED);
     let collector: T::AccountId = account("collector", u, SEED);
     let grantee_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(grantee.clone());
-    let collector_lookup: <T::Lookup as StaticLookup>::Source =
-        T::Lookup::unlookup(collector.clone());
+    let collector_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(collector);
 
     T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
 
