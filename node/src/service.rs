@@ -18,19 +18,15 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
+use crate::rpc::{self, DenyUnsafe, IoHandler};
 use futures::prelude::*;
 use nodle_chain_executor::Executor;
-use nodle_chain_primitives::{AccountId, Block, Hash, Index};
+use nodle_chain_primitives::Block;
 use nodle_chain_runtime::RuntimeApi;
-use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi};
-use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_babe;
-use sc_consensus_babe_rpc::BabeRpcHandler;
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
-use sc_finality_grandpa_rpc::GrandpaRpcHandler;
 use sc_network::{Event, NetworkService};
-use sc_rpc_api::DenyUnsafe;
 use sc_service::{
     config::{Configuration, Role},
     error::Error as ServiceError,
@@ -40,10 +36,6 @@ use sp_core::traits::BareCryptoStorePtr;
 use sp_inherents::InherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
-use substrate_frame_rpc_system::{FullSystem, LightSystem, SystemApi};
-
-/// A IO handler that uses all Full RPC extensions.
-pub type IoHandler = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
@@ -62,13 +54,16 @@ pub fn new_partial(
         sp_consensus::DefaultImportQueue<Block, FullClient>,
         sc_transaction_pool::FullPool<Block, FullClient>,
         (
-            impl Fn(DenyUnsafe, jsonrpc_pubsub::manager::SubscriptionManager) -> IoHandler,
+            impl Fn(DenyUnsafe, sc_rpc::SubscriptionTaskExecutor) -> IoHandler,
             (
                 sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
                 sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
                 sc_consensus_babe::BabeLink<Block>,
             ),
-            sc_finality_grandpa::SharedVoterState,
+            (
+                sc_finality_grandpa::SharedVoterState,
+                Arc<GrandpaFinalityProofProvider<FullBackend, Block>>,
+            ),
         ),
     >,
     ServiceError,
@@ -122,8 +117,10 @@ pub fn new_partial(
         let justification_stream = grandpa_link.justification_stream();
         let shared_authority_set = grandpa_link.shared_authority_set().clone();
         let shared_voter_state = sc_finality_grandpa::SharedVoterState::empty();
+        let finality_proof_provider =
+            GrandpaFinalityProofProvider::new_for_service(backend.clone(), client.clone());
 
-        let rpc_setup = shared_voter_state.clone();
+        let rpc_setup = (shared_voter_state.clone(), finality_proof_provider.clone());
 
         let babe_config = babe_link.config().clone();
         let shared_epoch_changes = babe_link.epoch_changes().clone();
@@ -133,43 +130,28 @@ pub fn new_partial(
         let select_chain = select_chain.clone();
         let keystore = keystore.clone();
 
-        let rpc_extensions_builder = Box::new(move |deny_unsafe: DenyUnsafe, subscriptions| {
-            let mut io = jsonrpc_core::IoHandler::default();
-            io.extend_with(SystemApi::to_delegate(FullSystem::new(
-                client.clone(),
-                pool.clone(),
-                deny_unsafe.clone(),
-            )));
-            // Making synchronous calls in light client freezes the browser currently,
-            // more context: https://github.com/paritytech/substrate/pull/3480
-            // These RPCs should use an asynchronous caller instead.
-            io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
-                client.clone(),
-            )));
-            io.extend_with(sc_consensus_babe_rpc::BabeApi::to_delegate(
-                BabeRpcHandler::new(
-                    client.clone(),
-                    shared_epoch_changes.clone(),
-                    keystore.clone(),
-                    babe_config.clone(),
-                    select_chain.clone(),
-                    deny_unsafe.clone(),
-                ),
-            ));
-            io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(
-                client.clone(),
-            )));
-            io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(
-                GrandpaRpcHandler::new(
-                    shared_authority_set.clone(),
-                    shared_voter_state.clone(),
-                    justification_stream.clone(),
-                    subscriptions,
-                ),
-            ));
+        let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
+            let deps = rpc::FullDeps {
+                client: client.clone(),
+                pool: pool.clone(),
+                select_chain: select_chain.clone(),
+                deny_unsafe,
+                babe: rpc::BabeDeps {
+                    babe_config: babe_config.clone(),
+                    shared_epoch_changes: shared_epoch_changes.clone(),
+                    keystore: keystore.clone(),
+                },
+                grandpa: rpc::GrandpaDeps {
+                    shared_voter_state: shared_voter_state.clone(),
+                    shared_authority_set: shared_authority_set.clone(),
+                    justification_stream: justification_stream.clone(),
+                    subscription_executor,
+                    finality_provider: finality_proof_provider.clone(),
+                },
+            };
 
-            io
-        });
+            rpc::create_full(deps)
+        };
 
         (rpc_extensions_builder, rpc_setup)
     };
@@ -187,6 +169,15 @@ pub fn new_partial(
     })
 }
 
+pub struct NewFullBase {
+    pub task_manager: TaskManager,
+    pub inherent_data_providers: InherentDataProviders,
+    pub client: Arc<FullClient>,
+    pub network: Arc<NetworkService<Block, <Block as BlockT>::Hash>>,
+    pub network_status_sinks: sc_service::NetworkStatusSinks<Block>,
+    pub transaction_pool: Arc<sc_transaction_pool::FullPool<Block, FullClient>>,
+}
+
 /// Creates a full service from the configuration.
 pub fn new_full_base(
     config: Configuration,
@@ -194,16 +185,7 @@ pub fn new_full_base(
         &sc_consensus_babe::BabeBlockImport<Block, FullClient, FullGrandpaBlockImport>,
         &sc_consensus_babe::BabeLink<Block>,
     ),
-) -> Result<
-    (
-        TaskManager,
-        InherentDataProviders,
-        Arc<FullClient>,
-        Arc<NetworkService<Block, <Block as BlockT>::Hash>>,
-        Arc<sc_transaction_pool::FullPool<Block, FullClient>>,
-    ),
-    ServiceError,
-> {
+) -> Result<NewFullBase, ServiceError> {
     let sc_service::PartialComponents {
         client,
         backend,
@@ -216,8 +198,7 @@ pub fn new_full_base(
         other: (rpc_extensions_builder, import_setup, rpc_setup),
     } = new_partial(&config)?;
 
-    let finality_proof_provider =
-        GrandpaFinalityProofProvider::new_for_service(backend.clone(), client.clone());
+    let (shared_voter_state, finality_proof_provider) = rpc_setup;
 
     let (network, network_status_sinks, system_rpc_tx, network_starter) =
         sc_service::build_network(sc_service::BuildNetworkParams {
@@ -261,12 +242,11 @@ pub fn new_full_base(
         on_demand: None,
         remote_blockchain: None,
         telemetry_connection_sinks: telemetry_connection_sinks.clone(),
-        network_status_sinks,
+        network_status_sinks: network_status_sinks.clone(),
         system_rpc_tx,
     })?;
 
     let (block_import, grandpa_link, babe_link) = import_setup;
-    let shared_voter_state = rpc_setup;
 
     (with_startup_data)(&block_import, &babe_link);
 
@@ -386,18 +366,19 @@ pub fn new_full_base(
     }
 
     network_starter.start_network();
-    Ok((
+    Ok(NewFullBase {
         task_manager,
         inherent_data_providers,
         client,
         network,
+        network_status_sinks,
         transaction_pool,
-    ))
+    })
 }
 
 /// Builds a new service for a full client.
 pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
-    new_full_base(config, |_, _| ()).map(|(task_manager, _, _, _, _)| task_manager)
+    new_full_base(config, |_, _| ()).map(|NewFullBase { task_manager, .. }| task_manager)
 }
 
 pub fn new_light_base(
@@ -486,15 +467,14 @@ pub fn new_light_base(
         );
     }
 
-    let mut rpc_extensions = jsonrpc_core::IoHandler::default();
-    rpc_extensions.extend_with(SystemApi::<Hash, AccountId, Index>::to_delegate(
-        LightSystem::new(
-            client.clone(),
-            backend.remote_blockchain(),
-            on_demand.clone(),
-            transaction_pool.clone(),
-        ),
-    ));
+    let light_deps = rpc::LightDeps {
+        remote_blockchain: backend.remote_blockchain(),
+        fetcher: on_demand.clone(),
+        client: client.clone(),
+        pool: transaction_pool.clone(),
+    };
+
+    let rpc_extensions = rpc::create_light(light_deps);
 
     let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
         on_demand: Some(on_demand),

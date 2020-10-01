@@ -155,7 +155,7 @@ impl frame_system::Trait for Runtime {
     type MaximumBlockLength = MaximumBlockLength;
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = Version;
-    type ModuleToIndex = ModuleToIndex;
+    type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<Balance>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -175,6 +175,7 @@ parameter_types! {
 impl pallet_babe::Trait for Runtime {
     type EpochDuration = EpochDuration;
     type ExpectedBlockTime = ExpectedBlockTime;
+    type WeightInfo = ();
 
     // session module is the trigger
     type EpochChangeTrigger = pallet_babe::ExternalTrigger;
@@ -198,6 +199,7 @@ impl pallet_babe::Trait for Runtime {
 impl pallet_grandpa::Trait for Runtime {
     type Event = Event;
     type Call = Call;
+    type WeightInfo = ();
 
     type KeyOwnerProofSystem = Historical;
 
@@ -224,6 +226,17 @@ impl pallet_authorship::Trait for Runtime {
     type UncleGenerations = UncleGenerations;
     type FilterUncle = ();
     type EventHandler = ImOnline;
+}
+
+parameter_types! {
+    pub const WindowSize: BlockNumber = 101;
+    pub const ReportLatency: BlockNumber = 1000;
+}
+
+impl pallet_finality_tracker::Trait for Runtime {
+    type OnFinalizationStalled = ();
+    type WindowSize = WindowSize;
+    type ReportLatency = ReportLatency;
 }
 
 parameter_types! {
@@ -254,12 +267,13 @@ where
             // The `System::block_number` is initialized with `n+1`,
             // so the actual block number is `n`.
             .saturating_sub(1);
+        let era = generic::Era::mortal(period, current_block);
         let tip = 0;
         let extra: SignedExtra = (
             frame_system::CheckSpecVersion::<Runtime>::new(),
             frame_system::CheckTxVersion::<Runtime>::new(),
             frame_system::CheckGenesis::<Runtime>::new(),
-            frame_system::CheckEra::<Runtime>::from(generic::Era::mortal(period, current_block)),
+            frame_system::CheckEra::<Runtime>::from(era),
             frame_system::CheckNonce::<Runtime>::from(nonce),
             frame_system::CheckWeight::<Runtime>::new(),
             pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
@@ -309,7 +323,6 @@ impl pallet_offences::Trait for Runtime {
     // so that we could decide to remove validators later
     type OnOffenceHandler = ();
     type WeightSoftLimit = OffencesWeightSoftLimit;
-    type WeightInfo = ();
 }
 
 parameter_types! {
@@ -326,6 +339,9 @@ impl pallet_indices::Trait for Runtime {
 
 parameter_types! {
     pub const ExistentialDeposit: Balance = 1 * constants::MILLICENTS;
+    // For weight estimation, we assume that the most locks on an individual account will be 50.
+    // This number may need to be adjusted in the future if this assumption no longer holds true.
+    pub const MaxLocks: u32 = 50;
 }
 
 impl pallet_balances::Trait for Runtime {
@@ -334,6 +350,7 @@ impl pallet_balances::Trait for Runtime {
     type DustRemoval = CompanyReserve;
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
+    type MaxLocks = MaxLocks;
     type WeightInfo = ();
 }
 
@@ -419,6 +436,7 @@ impl pallet_poa::Trait for Runtime {}
 parameter_types! {
     pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
     pub const MaxProposals: u32 = 100;
+    pub const MaxMembers: u32 = 50;
 }
 
 // --- Technical committee
@@ -446,6 +464,8 @@ impl pallet_collective::Trait<TechnicalCollective> for Runtime {
     type MotionDuration = MotionDuration;
     type MaxProposals = MaxProposals;
     type WeightInfo = ();
+    type MaxMembers = MaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
 
 // --- Financial committee
@@ -473,6 +493,8 @@ impl pallet_collective::Trait<FinancialCollective> for Runtime {
     type MotionDuration = MotionDuration;
     type MaxProposals = MaxProposals;
     type WeightInfo = ();
+    type MaxMembers = MaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
 
 // --- Root committee
@@ -500,6 +522,8 @@ impl pallet_collective::Trait<RootCollective> for Runtime {
     type MotionDuration = MotionDuration;
     type MaxProposals = MaxProposals;
     type WeightInfo = ();
+    type MaxMembers = MaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
 
 impl pallet_mandate::Trait for Runtime {
@@ -511,6 +535,7 @@ impl pallet_mandate::Trait for Runtime {
 
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * MaximumBlockWeight::get();
+    pub const MaxScheduledPerBlock: u32 = 50;
 }
 
 impl pallet_scheduler::Trait for Runtime {
@@ -520,6 +545,7 @@ impl pallet_scheduler::Trait for Runtime {
     type Call = Call;
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
+    type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type WeightInfo = ();
 }
 
@@ -633,6 +659,9 @@ parameter_types! {
     // Additional storage item size of 33 bytes.
     pub const ProxyDepositFactor: Balance = constants::deposit(0, 33);
     pub const MaxProxies: u16 = 32;
+    pub const AnnouncementDepositBase: Balance = constants::deposit(1, 8);
+    pub const AnnouncementDepositFactor: Balance = constants::deposit(0, 66);
+    pub const MaxPending: u16 = 32;
 }
 
 impl pallet_proxy::Trait for Runtime {
@@ -644,6 +673,10 @@ impl pallet_proxy::Trait for Runtime {
     type ProxyDepositFactor = ProxyDepositFactor;
     type MaxProxies = MaxProxies;
     type WeightInfo = ();
+    type MaxPending = MaxPending;
+    type CallHasher = BlakeTwo256;
+    type AnnouncementDepositBase = AnnouncementDepositBase;
+    type AnnouncementDepositFactor = AnnouncementDepositFactor;
 }
 
 parameter_types! {
@@ -747,82 +780,6 @@ impl pallet_membership::Trait<pallet_membership::Instance5> for Runtime {
     type MembershipChanged = Allocations;
 }
 
-use parity_scale_codec::Decode;
-use sp_runtime::RuntimeDebug;
-// Used for migration purposes, unfortunately it isn't public in the transaction_payment
-// pallet and we have to recreate it here.
-/// Storage releases of the module.
-#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug)]
-enum Releases {
-    /// Original version of the module.
-    V1,
-    /// One that bumps the usage to FixedU128 from FixedI128.
-    V2,
-}
-
-pub struct CustomRuntimeUpgradesRc2ToRc6;
-impl CustomRuntimeUpgradesRc2ToRc6 {
-    fn transaction_payment_rename_and_convert_multiplier() -> frame_support::weights::Weight {
-        // Removed in https://github.com/paritytech/substrate/commit/cf7432a5ebef122ab685e0b9256a15c722661116
-
-        use frame_support::{
-            debug::native::error,
-            migration::{put_storage_value, take_storage_value},
-        };
-        use sp_std::convert::TryInto;
-
-        sp_runtime::print("🕊️  Migrating Transaction Payment...");
-
-        type OldMultiplier = sp_runtime::FixedI128;
-        type OldInner = <OldMultiplier as FixedPointNumber>::Inner;
-        type Inner = <Multiplier as FixedPointNumber>::Inner;
-
-        put_storage_value(b"TransactionPayment", b"StorageVersion", &[], Releases::V2);
-
-        if let Some(old) =
-            take_storage_value::<OldMultiplier>(b"TransactionPayment", b"NextFeeMultiplier", &[])
-        {
-            let inner = old.into_inner();
-            let new_inner = <OldInner as TryInto<Inner>>::try_into(inner).unwrap_or_default();
-            let new = Multiplier::from_inner(new_inner);
-            put_storage_value(b"TransactionPayment", b"NextFeeMultiplier", &[], new);
-            sp_runtime::print("🕊️  Done Transaction Payment.");
-            <Runtime as frame_system::Trait>::DbWeight::get().reads_writes(1, 1)
-        } else {
-            error!("transaction-payment migration failed.");
-            <Runtime as frame_system::Trait>::DbWeight::get().reads(1)
-        }
-    }
-
-    fn multisig_migrate_from_utility() -> frame_support::weights::Weight {
-        use frame_support::migration::{put_storage_value, StorageIterator};
-
-        // Removed in https://github.com/paritytech/substrate/commit/cf7432a5ebef122ab685e0b9256a15c722661116
-
-        sp_runtime::print("🕊️  Migrating Multisigs...");
-        for (key, value) in StorageIterator::<
-            pallet_multisig::Multisig<BlockNumber, Balance, AccountId>,
-        >::new(b"Utility", b"Multisigs")
-        .drain()
-        {
-            put_storage_value(b"Multisig", b"Multisigs", &key, value);
-        }
-        sp_runtime::print("🕊️  Done Multisigs.");
-
-        1_000_000_000
-    }
-}
-impl frame_support::traits::OnRuntimeUpgrade for CustomRuntimeUpgradesRc2ToRc6 {
-    fn on_runtime_upgrade() -> frame_support::weights::Weight {
-        let mut weight =
-            CustomRuntimeUpgradesRc2ToRc6::transaction_payment_rename_and_convert_multiplier();
-        weight =
-            weight.saturating_add(CustomRuntimeUpgradesRc2ToRc6::multisig_migrate_from_utility());
-
-        weight
-    }
-}
-
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -836,11 +793,12 @@ construct_runtime!(
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
         TransactionPayment: pallet_transaction_payment::{Module, Storage},
         RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
+        FinalityTracker: pallet_finality_tracker::{Module, Call, Inherent},
 
         // Consensus
-        Babe: pallet_babe::{Module, Call, Storage, Config, Inherent},
-        Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event},
-        Authorship: pallet_authorship::{Module, Call, Storage},
+        Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned},
+        Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event, ValidateUnsigned},
+        Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
         ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
         Offences: pallet_offences::{Module, Call, Storage, Event},
         PoaSessions: pallet_poa::{Module, Storage},
@@ -913,7 +871,6 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllModules,
-    CustomRuntimeUpgradesRc2ToRc6,
 >;
 
 sp_api::impl_runtime_apis! {
@@ -1083,12 +1040,12 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, AccountId> for Runtime {
-        fn is_root_certificate_valid(cert: &AccountId) -> bool {
+    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, CertificateId> for Runtime {
+        fn is_root_certificate_valid(cert: &CertificateId) -> bool {
             PkiRootOfTrust::is_root_certificate_valid(cert)
         }
 
-        fn is_child_certificate_valid(root: &AccountId, child: &AccountId) -> bool {
+        fn is_child_certificate_valid(root: &CertificateId, child: &CertificateId) -> bool {
             PkiRootOfTrust::is_child_certificate_valid(root, child)
         }
     }
@@ -1096,13 +1053,7 @@ sp_api::impl_runtime_apis! {
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
         fn dispatch_benchmark(
-            pallet: Vec<u8>,
-            benchmark: Vec<u8>,
-            lowest_range_values: Vec<u32>,
-            highest_range_values: Vec<u32>,
-            steps: Vec<u32>,
-            repeat: u32,
-            extra: bool,
+            config: frame_benchmarking::BenchmarkConfig,
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
             // We did not include the offences and sessions benchmarks as they are parity
             // specific and were causing some issues at compile time as they depend on the
@@ -1120,7 +1071,7 @@ sp_api::impl_runtime_apis! {
 
             let whitelist: Vec<TrackedStorageKey> = vec![];
             let mut batches = Vec::<BenchmarkBatch>::new();
-            let params = (&pallet, &benchmark, &lowest_range_values, &highest_range_values, &steps, repeat, &whitelist, extra);
+            let params = (&config, &whitelist);
 
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
             add_benchmark!(params, batches, pallet_allocations, Allocations);

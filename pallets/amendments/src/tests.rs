@@ -70,7 +70,7 @@ impl frame_system::Trait for Test {
     type MaximumBlockLength = MaximumBlockLength;
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
-    type ModuleToIndex = ();
+    type PalletInfo = ();
     type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -83,12 +83,14 @@ impl frame_system::Trait for Test {
 }
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * MaximumBlockWeight::get();
+    pub const MaxScheduledPerBlock: u32 = 50;
 }
 impl pallet_scheduler::Trait for Test {
     type Event = ();
     type Origin = Origin;
     type Call = Call;
     type MaximumWeight = MaximumSchedulerWeight;
+    type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type ScheduleOrigin = EnsureRoot<u64>;
     type PalletsOrigin = OriginCaller;
     type WeightInfo = ();

@@ -62,7 +62,7 @@ impl system::Trait for Test {
     type MaximumBlockLength = MaximumBlockLength;
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
-    type ModuleToIndex = ();
+    type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -75,12 +75,14 @@ impl system::Trait for Test {
 }
 parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
+    pub const MaxLocks: u32 = 50;
 }
 impl pallet_balances::Trait for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
     type AccountStore = system::Module<Test>;
+    type MaxLocks = MaxLocks;
     type ExistentialDeposit = ();
     type WeightInfo = ();
 }
@@ -770,7 +772,10 @@ fn finalize_challenge_if_enough_time_elapsed_drop_and_kill_member() {
         <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
         );
-        assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![]);
+        assert_eq!(
+            MEMBERS.with(|m| m.borrow().clone()),
+            Vec::<<Test as system::Trait>::AccountId>::new()
+        );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
         assert_eq!(<Challenges<Test>>::contains_key(CANDIDATE), false);
@@ -855,7 +860,10 @@ fn can_challenge_member_application() {
         <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
         );
-        assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![]);
+        assert_eq!(
+            MEMBERS.with(|m| m.borrow().clone()),
+            Vec::<<Test as system::Trait>::AccountId>::new()
+        );
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
         assert_eq!(<Challenges<Test>>::contains_key(CANDIDATE), false);
         assert_eq!(<Members<Test>>::contains_key(CANDIDATE), false);

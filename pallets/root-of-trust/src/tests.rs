@@ -63,7 +63,7 @@ impl system::Trait for Test {
     type MaximumBlockLength = MaximumBlockLength;
     type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
-    type ModuleToIndex = ();
+    type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -76,11 +76,13 @@ impl system::Trait for Test {
 }
 parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
+    pub const MaxLocks: u32 = 50;
 }
 impl pallet_balances::Trait for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
+    type MaxLocks = MaxLocks;
     type AccountStore = system::Module<Test>;
     type ExistentialDeposit = ();
     type WeightInfo = ();
@@ -252,7 +254,7 @@ fn member_can_buy_slots() {
         );
         assert_eq!(
             TestModule::slots(OFFCHAIN_CERTIFICATE_SIGNER_1).child_revocations,
-            vec![],
+            Vec::<<Test as Trait>::CertificateId>::new(),
         );
 
         assert_eq!(
