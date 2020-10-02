@@ -93,7 +93,7 @@ decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
-        /// Trigger a new challenge to remove an existing member
+        /// Schedule `amendment` to be executed after the configured time, unless vetoed by `VetoOrigin`
         #[weight = 100_000_000]
         fn propose(origin, amendment: Box<T::Amendment>) -> DispatchResult {
             T::SubmissionOrigin::try_origin(origin)
