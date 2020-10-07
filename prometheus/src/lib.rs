@@ -94,6 +94,8 @@ mod known_os {
 		req: Request<Body>,
 		registry: Registry,
 	) -> Result<Response<Body>, Error> {
+		log::info!("〽️ In request_metrics");
+
 		if req.uri().path() == "/metrics" {
 			let metric_families = registry.gather();
 			let mut buffer = vec![];
@@ -122,6 +124,8 @@ mod known_os {
 		T::Output: Send + 'static,
 	{
 		fn execute(&self, future: T) {
+			log::info!("〽️ In execute");
+
 			async_std::task::spawn(future);
 		}
 	}
@@ -140,6 +144,8 @@ mod known_os {
 		log::info!("〽️ Prometheus server started at {}", prometheus_addr);
 
 		let service = make_service_fn(move |_| {
+			log::info!("〽️ In make_service_fn");
+
 			let registry = registry.clone();
 
 			async move {
