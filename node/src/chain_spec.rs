@@ -141,7 +141,6 @@ pub fn testnet_genesis(
                 .cloned()
                 .map(|k| (k, ENDOWMENT))
                 .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
-                .chain(initial_authorities.iter().map(|x| (x.0.clone(), ENDOWMENT)))
                 .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .collect(),
         }),
@@ -256,6 +255,31 @@ pub fn local_testnet_config() -> ChainSpec {
         "local_testnet",
         ChainType::Local,
         local_testnet_genesis,
+        vec![],
+        None,
+        None,
+        None,
+        Default::default(),
+    )
+}
+
+fn dummy_testnet_genesis() -> GenesisConfig {
+    testnet_genesis(
+        vec![get_authority_keys_from_seed("Alice")],
+        vec![],
+        vec![],
+        Some(vec![]),
+        Some(vec![]),
+    )
+}
+
+/// Dummy testnet config no balances, alice is a validator
+pub fn dummy_testnet_config() -> ChainSpec {
+    ChainSpec::from_genesis(
+        "Dummy Network",
+        "dummy_network",
+        ChainType::Live,
+        dummy_testnet_genesis,
         vec![],
         None,
         None,
