@@ -229,17 +229,6 @@ impl pallet_authorship::Trait for Runtime {
 }
 
 parameter_types! {
-    pub const WindowSize: BlockNumber = 101;
-    pub const ReportLatency: BlockNumber = 1000;
-}
-
-impl pallet_finality_tracker::Trait for Runtime {
-    type OnFinalizationStalled = ();
-    type WindowSize = WindowSize;
-    type ReportLatency = ReportLatency;
-}
-
-parameter_types! {
     pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_SLOTS as _;
     pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 }
@@ -793,7 +782,6 @@ construct_runtime!(
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
         TransactionPayment: pallet_transaction_payment::{Module, Storage},
         RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
-        FinalityTracker: pallet_finality_tracker::{Module, Call, Inherent},
 
         // Consensus
         Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned},
