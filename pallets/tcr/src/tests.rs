@@ -21,7 +21,7 @@
 use super::*;
 
 use frame_support::{
-    assert_noop, assert_ok, impl_outer_origin, parameter_types, traits::OnFinalize, weights::Weight,
+    assert_noop, assert_ok, impl_outer_origin, parameter_types, traits::OnFinalize,
 };
 use sp_core::H256;
 use sp_runtime::{
@@ -42,13 +42,13 @@ impl_outer_origin! {
 pub struct Test;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl system::Trait for Test {
+impl system::Config for Test {
     type Origin = Origin;
     type Call = ();
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -58,18 +58,12 @@ impl system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -77,7 +71,7 @@ parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
     pub const MaxLocks: u32 = 50;
 }
-impl pallet_balances::Trait for Test {
+impl pallet_balances::Config for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
@@ -122,7 +116,7 @@ impl ChangeMembers<u64> for TestChangeMembers {
         MEMBERS.with(|m| *m.borrow_mut() = new.to_vec());
     }
 }
-impl Trait for Test {
+impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type MinimumApplicationAmount = MinimumApplicationAmount;
@@ -142,7 +136,7 @@ const VOTER_AGAINST: u64 = 5;
 
 type BalancesModule = pallet_balances::Module<Test>;
 type TestModule = Module<Test>;
-type TestCurrency = <Test as Trait>::Currency;
+type TestCurrency = <Test as Config>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
@@ -553,7 +547,7 @@ fn finalize_application_if_not_challenged_and_enough_time_elapsed() {
             MinimumApplicationAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
@@ -586,7 +580,7 @@ fn does_not_finalize_countered_or_challenged_application() {
             MinimumCounterAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
         );
 
@@ -607,7 +601,7 @@ fn does_not_finalize_application_if_not_enough_time_elapsed() {
             MinimumApplicationAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number() - 1,
         );
 
@@ -641,7 +635,7 @@ fn finalize_challenge_if_enough_time_elapsed_drop() {
             2,
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
         );
 
@@ -700,7 +694,7 @@ fn finalize_challenge_if_enough_time_elapsed_accept() {
             2,
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
         );
 
@@ -758,7 +752,7 @@ fn finalize_challenge_if_enough_time_elapsed_drop_and_kill_member() {
             MinimumApplicationAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
@@ -769,12 +763,12 @@ fn finalize_challenge_if_enough_time_elapsed_drop_and_kill_member() {
             MinimumChallengeAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
         );
         assert_eq!(
             MEMBERS.with(|m| m.borrow().clone()),
-            Vec::<<Test as system::Trait>::AccountId>::new()
+            Vec::<<Test as system::Config>::AccountId>::new()
         );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
@@ -800,7 +794,7 @@ fn does_not_finalize_challenge_if_not_enough_time_elapsed() {
             MinimumCounterAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number() - 1,
         );
 
@@ -821,7 +815,7 @@ fn can_challenge_member_application() {
             MinimumApplicationAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
@@ -857,12 +851,12 @@ fn can_challenge_member_application() {
             <system::Module<Test>>::block_number()
         );
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
         );
         assert_eq!(
             MEMBERS.with(|m| m.borrow().clone()),
-            Vec::<<Test as system::Trait>::AccountId>::new()
+            Vec::<<Test as system::Config>::AccountId>::new()
         );
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
         assert_eq!(<Challenges<Test>>::contains_key(CANDIDATE), false);
@@ -881,7 +875,7 @@ fn can_not_challenge_twice() {
             MinimumApplicationAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
@@ -931,7 +925,7 @@ fn can_not_challenge_member_applicaton_if_not_enough_funds() {
             MinimumApplicationAmount::get(),
         ));
 
-        <TestModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
             FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
         );
 

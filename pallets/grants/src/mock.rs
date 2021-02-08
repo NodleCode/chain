@@ -6,7 +6,7 @@ use frame_support::{impl_outer_event, impl_outer_origin, ord_parameter_types, pa
 use frame_system::EnsureSignedBy;
 use pallet_balances;
 use sp_core::H256;
-use sp_runtime::{testing::Header, traits::IdentityLookup, Perbill};
+use sp_runtime::{testing::Header, traits::IdentityLookup};
 
 use super::*;
 
@@ -30,15 +30,15 @@ impl_outer_event! {
 pub struct Runtime;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: u32 = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::one();
 }
 
 pub type AccountId = u128;
-impl frame_system::Trait for Runtime {
+impl frame_system::Config for Runtime {
     type Origin = Origin;
     type Call = ();
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -48,18 +48,12 @@ impl frame_system::Trait for Runtime {
     type Header = Header;
     type Event = TestEvent;
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = ();
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -72,7 +66,7 @@ parameter_types! {
     pub const MaxLocks: u32 = 50;
 }
 
-impl pallet_balances::Trait for Runtime {
+impl pallet_balances::Config for Runtime {
     type Balance = Balance;
     type DustRemoval = ();
     type Event = TestEvent;
@@ -87,7 +81,7 @@ ord_parameter_types! {
     pub const CancelOrigin: AccountId = 42;
 }
 
-impl Trait for Runtime {
+impl Config for Runtime {
     type Event = TestEvent;
     type Currency = PalletBalances;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;

@@ -41,11 +41,11 @@ use sp_runtime::{
 use sp_std::prelude::Vec;
 
 type BalanceOf<T, I> =
-    <<T as Trait<I>>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+    <<T as Config<I>>::Currency as Currency<<T as system::Config>::AccountId>>::Balance;
 type NegativeImbalanceOf<T, I> =
-    <<T as Trait<I>>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+    <<T as Config<I>>::Currency as Currency<<T as system::Config>::AccountId>>::NegativeImbalance;
 type PositiveImbalanceOf<T, I> =
-    <<T as Trait<I>>::Currency as Currency<<T as system::Trait>::AccountId>>::PositiveImbalance;
+    <<T as Config<I>>::Currency as Currency<<T as system::Config>::AccountId>>::PositiveImbalance;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 pub struct Application<AccountId, Balance, BlockNumber> {
@@ -88,8 +88,8 @@ impl<AccountId, Balance, BlockNumber> Application<AccountId, Balance, BlockNumbe
 }
 
 /// The module's configuration trait.
-pub trait Trait<I: Instance = DefaultInstance>: system::Trait {
-    type Event: From<Event<Self, I>> + Into<<Self as system::Trait>::Event>;
+pub trait Config<I: Instance = DefaultInstance>: system::Config {
+    type Event: From<Event<Self, I>> + Into<<Self as system::Config>::Event>;
 
     /// The currency used to represent the voting power
     type Currency: ReservableCurrency<Self::AccountId>;
@@ -113,7 +113,7 @@ pub trait Trait<I: Instance = DefaultInstance>: system::Trait {
 decl_event!(
     pub enum Event<T, I: Instance = DefaultInstance>
     where
-        AccountId = <T as system::Trait>::AccountId,
+        AccountId = <T as system::Config>::AccountId,
         Balance = BalanceOf<T, I>,
     {
         /// Someone applied to join the registry
@@ -134,7 +134,7 @@ decl_event!(
 );
 
 decl_error! {
-    pub enum Error for Module<T: Trait<I>, I: Instance> {
+    pub enum Error for Module<T: Config<I>, I: Instance> {
         /// An application for this Origin is already pending
         ApplicationPending,
         /// A similar application is being challenged
@@ -160,7 +160,7 @@ decl_error! {
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait<I>, I: Instance = DefaultInstance> as Tcr {
+    trait Store for Module<T: Config<I>, I: Instance = DefaultInstance> as Tcr {
         /// This keeps track of the applications that have yet to be committed to the registry
         pub Applications get(fn applications):
             map hasher(blake2_128_concat) T::AccountId => Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>;
@@ -177,7 +177,7 @@ decl_storage! {
 
 decl_module! {
     /// The module declaration.
-    pub struct Module<T: Trait<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
         /// Apply to join the TCR, `metadata` can be used to add something like a URL or ID
@@ -303,19 +303,19 @@ decl_module! {
 
 type FinalizeHelperResultFrom<T> = Result<
     (
-        Vec<<T as frame_system::Trait>::AccountId>,
-        Vec<<T as frame_system::Trait>::AccountId>,
+        Vec<<T as frame_system::Config>::AccountId>,
+        Vec<<T as frame_system::Config>::AccountId>,
     ),
     DispatchError,
 >;
 type AccountsAndDepositsFromResolvedChallenge<T, I> =
-    Vec<(<T as frame_system::Trait>::AccountId, BalanceOf<T, I>)>;
+    Vec<(<T as frame_system::Config>::AccountId, BalanceOf<T, I>)>;
 type ResolvedChallengeResultFrom<T, I> = (
     AccountsAndDepositsFromResolvedChallenge<T, I>, // Winners -> will be compensated
     AccountsAndDepositsFromResolvedChallenge<T, I>, // Losers -> will be slashed
 );
 
-impl<T: Trait<I>, I: Instance> Module<T, I> {
+impl<T: Config<I>, I: Instance> Module<T, I> {
     /// Do not just call `set_lock`, rather increase the locked amount
     fn reserve_for(who: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResult {
         // Make sure we can lock has many funds

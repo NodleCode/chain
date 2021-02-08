@@ -22,7 +22,6 @@ use super::*;
 
 use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
-    weights::Weight,
 };
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
@@ -30,7 +29,6 @@ use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
     DispatchError::BadOrigin,
-    Perbill,
 };
 
 impl_outer_origin! {
@@ -44,13 +42,13 @@ impl_outer_origin! {
 pub struct Test;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl frame_system::Trait for Test {
+impl frame_system::Config for Test {
     type Origin = Origin;
     type Call = ();
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -60,18 +58,12 @@ impl frame_system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -79,7 +71,7 @@ impl frame_system::Trait for Test {
 ord_parameter_types! {
     pub const Admin: u64 = 1;
 }
-impl Trait for Test {
+impl Config for Test {
     type Event = ();
     type ShutdownOrigin = EnsureSignedBy<Admin, u64>;
 }

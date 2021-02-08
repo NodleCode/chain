@@ -22,7 +22,7 @@ use super::*;
 
 use frame_support::{
     assert_noop, assert_ok, impl_outer_dispatch, impl_outer_origin, ord_parameter_types,
-    parameter_types, traits::Currency, weights::Weight,
+    parameter_types, traits::Currency,
 };
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
@@ -30,7 +30,6 @@ use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
     DispatchError::BadOrigin,
-    Perbill,
 };
 use sp_std::prelude::Box;
 
@@ -50,13 +49,13 @@ impl_outer_dispatch! {
 pub struct Test;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl frame_system::Trait for Test {
+impl frame_system::Config for Test {
     type Origin = Origin;
     type Call = Call;
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -66,25 +65,19 @@ impl frame_system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
     pub const MaxLocks: u32 = 50;
 }
-impl pallet_balances::Trait for Test {
+impl pallet_balances::Config for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
@@ -100,7 +93,7 @@ ord_parameter_types! {
 parameter_types! {
     pub const ReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
 }
-impl Trait for Test {
+impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
@@ -110,7 +103,7 @@ impl Trait for Test {
 type TestModule = Module<Test>;
 type Balances = pallet_balances::Module<Test>;
 type System = frame_system::Module<Test>;
-type TestCurrency = <Test as Trait>::Currency;
+type TestCurrency = <Test as Config>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.

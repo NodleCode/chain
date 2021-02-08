@@ -3,7 +3,7 @@
 #![cfg(test)]
 
 use super::*;
-use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReason};
+use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use mock::{
     CancelOrigin, ExtBuilder, Origin, PalletBalances, Runtime, System, TestEvent, Vesting, ALICE,
     BOB,
@@ -100,13 +100,10 @@ fn cannot_use_fund_if_not_claimed() {
                 BOB,
                 schedule.clone()
             ));
-            assert!(PalletBalances::ensure_can_withdraw(
-                &BOB,
-                1,
-                WithdrawReason::Transfer.into(),
-                49
-            )
-            .is_err());
+            assert!(
+                PalletBalances::ensure_can_withdraw(&BOB, 1, WithdrawReasons::TRANSFER, 49)
+                    .is_err()
+            );
         });
 }
 

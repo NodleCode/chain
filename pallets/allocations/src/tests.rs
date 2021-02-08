@@ -22,7 +22,6 @@ use super::*;
 
 use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, ord_parameter_types, parameter_types,
-    weights::Weight,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
@@ -43,13 +42,13 @@ impl_outer_origin! {
 pub struct Test;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl frame_system::Trait for Test {
+impl frame_system::Config for Test {
     type Origin = Origin;
     type Call = ();
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -59,18 +58,12 @@ impl frame_system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -78,7 +71,7 @@ parameter_types! {
     pub const ExistentialDeposit: u64 = 2;
     pub const MaxLocks: u32 = 50;
 }
-impl pallet_balances::Trait for Test {
+impl pallet_balances::Config for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
@@ -91,7 +84,7 @@ impl pallet_balances::Trait for Test {
 ord_parameter_types! {
     pub const ShutdownAdmin: u64 = 21;
 }
-impl pallet_emergency_shutdown::Trait for Test {
+impl pallet_emergency_shutdown::Config for Test {
     type Event = ();
     type ShutdownOrigin = EnsureSignedBy<ShutdownAdmin, u64>;
 }
@@ -109,13 +102,13 @@ impl WithAccountId<u64> for Receiver {
         Receiver::get()
     }
 }
-impl Trait for Test {
+impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;
-    type ExistentialDeposit = <Test as pallet_balances::Trait>::ExistentialDeposit;
+    type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
 }
 type Allocations = Module<Test>;
 type EmergencyShutdown = pallet_emergency_shutdown::Module<Test>;

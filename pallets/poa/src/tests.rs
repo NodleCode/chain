@@ -18,7 +18,7 @@
 
 use super::*;
 
-use frame_support::{impl_outer_origin, parameter_types, weights::Weight};
+use frame_support::{impl_outer_origin, parameter_types};
 use sp_core::{crypto::key_types, H256};
 use sp_runtime::{
     testing::{Header, UintAuthorityId},
@@ -37,13 +37,13 @@ impl_outer_origin! {
 pub struct Test;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl system::Trait for Test {
+impl system::Config for Test {
     type Origin = Origin;
     type Call = ();
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -53,18 +53,12 @@ impl system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -92,19 +86,19 @@ impl pallet_session::ShouldEndSession<u64> for TestSessionHandler {
         false
     }
 }
-impl pallet_session::Trait for Test {
+impl pallet_session::Config for Test {
     type SessionManager = Module<Test>;
     type SessionHandler = TestSessionHandler;
     type ShouldEndSession = TestSessionHandler;
     type NextSessionRotation = ();
     type Event = ();
     type Keys = UintAuthorityId;
-    type ValidatorId = <Test as system::Trait>::AccountId;
+    type ValidatorId = <Test as system::Config>::AccountId;
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type WeightInfo = ();
 }
-impl Trait for Test {}
+impl Config for Test {}
 
 type SessionModule = pallet_session::Module<Test>;
 type TestModule = Module<Test>;

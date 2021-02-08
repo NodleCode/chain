@@ -23,7 +23,6 @@ use super::*;
 use frame_support::{
     assert_noop, assert_ok, impl_outer_origin, parameter_types,
     traits::{Currency, OnFinalize},
-    weights::Weight,
 };
 use sp_core::H256;
 use sp_runtime::{
@@ -43,13 +42,13 @@ impl_outer_origin! {
 pub struct Test;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl system::Trait for Test {
+impl system::Config for Test {
     type Origin = Origin;
     type Call = ();
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -59,18 +58,12 @@ impl system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
     type PalletInfo = ();
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -78,7 +71,7 @@ parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
     pub const MaxLocks: u32 = 50;
 }
-impl pallet_balances::Trait for Test {
+impl pallet_balances::Config for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
@@ -95,7 +88,7 @@ parameter_types! {
     pub const FinalizeChallengePeriod: u64 = 101; // Happens later to ease unit tests
     pub const LoosersSlash: Perbill = Perbill::from_percent(50);
 }
-impl pallet_tcr::Trait for Test {
+impl pallet_tcr::Config for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type MinimumApplicationAmount = MinimumApplicationAmount;
@@ -111,10 +104,10 @@ parameter_types! {
     pub const SlotRenewingCost: u64 = 10000;
     pub const SlotValidity: u64 = 100000;
 }
-impl Trait for Test {
+impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
-    type CertificateId = <Test as system::Trait>::AccountId;
+    type CertificateId = <Test as system::Config>::AccountId;
     type SlotBookingCost = SlotBookingCost;
     type SlotRenewingCost = SlotRenewingCost;
     type SlotValidity = SlotValidity;
@@ -124,7 +117,7 @@ impl Trait for Test {
 type BalancesModule = pallet_balances::Module<Test>;
 type TcrModule = pallet_tcr::Module<Test>;
 type TestModule = Module<Test>;
-type TestCurrency = <Test as Trait>::Currency;
+type TestCurrency = <Test as Config>::Currency;
 
 const ROOT_MANAGER: u64 = 1;
 const OFFCHAIN_CERTIFICATE_SIGNER_1: u64 = 2;
@@ -153,7 +146,7 @@ fn do_register() {
         vec![],
         MinimumApplicationAmount::get(),
     ));
-    <TcrModule as OnFinalize<<Test as system::Trait>::BlockNumber>>::on_finalize(
+    <TcrModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
         FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
     );
 }
@@ -254,7 +247,7 @@ fn member_can_buy_slots() {
         );
         assert_eq!(
             TestModule::slots(OFFCHAIN_CERTIFICATE_SIGNER_1).child_revocations,
-            Vec::<<Test as Trait>::CertificateId>::new(),
+            Vec::<<Test as Config>::CertificateId>::new(),
         );
 
         assert_eq!(
