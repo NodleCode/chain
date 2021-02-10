@@ -19,7 +19,7 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Authorship, Balances, Call, CompanyReserve};
+use crate::{Balances, Call, CompanyReserve};
 use frame_support::{
     traits::{Currency, Imbalance, InstanceFilter, OnUnbalanced},
     RuntimeDebug,
@@ -27,29 +27,18 @@ use frame_support::{
 use nodle_chain_primitives::AccountId;
 use parity_scale_codec::{Decode, Encode};
 
-/// Logic for the author to get a portion of fees.
-pub struct Author;
-impl OnUnbalanced<NegativeImbalance> for Author {
-    fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-        Balances::resolve_creating(&Authorship::author(), amount);
-    }
-}
-
 type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
-/// Splits fees 20/80 between reserve and block author.
+/// All to the company reserve.
 pub struct DealWithFees;
 impl OnUnbalanced<NegativeImbalance> for DealWithFees {
     fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item = NegativeImbalance>) {
         if let Some(fees) = fees_then_tips.next() {
-            // for fees, 20% to treasury, 80% to author
-            let mut split = fees.ration(20, 80);
+            let mut total = fees;
             if let Some(tips) = fees_then_tips.next() {
-                // for tips, if any, 20% to treasury, 80% to author (though this can be anything)
-                tips.ration_merge_into(20, 80, &mut split);
+                tips.merge_into(&mut total);
             }
-            CompanyReserve::on_unbalanced(split.0);
-            Author::on_unbalanced(split.1);
+            CompanyReserve::on_unbalanced(total);
         }
     }
 }
