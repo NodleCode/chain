@@ -41,9 +41,10 @@ use pallet_grandpa::{
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use pallet_session::historical as pallet_session_historical;
-use pallet_transaction_payment::{CurrencyAdapter, FeeDetails, Multiplier, TargetedFeeAdjustment};
+use pallet_transaction_payment::{FeeDetails, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
 use parity_scale_codec::Encode;
+use polkadot_parachain::primitives::Sibling;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::{
     crypto::KeyTypeId,
@@ -66,6 +67,16 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+use xcm::v0::{Junction, MultiLocation, NetworkId};
+use xcm_builder::{
+    AccountId32Aliases, CurrencyAdapter, LocationInverter, ParentIsDefault, RelayChainAsNative,
+    SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
+    SovereignSignedViaLocation,
+};
+use xcm_executor::{
+    traits::{IsConcrete, NativeAsset},
+    Config, XcmExecutor,
+};
 
 pub mod constants;
 mod implementations;
@@ -372,7 +383,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-    type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
+    type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, DealWithFees>;
     type TransactionByteFee = TransactionByteFee;
     type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate =
@@ -788,6 +799,68 @@ impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
     type MembershipChanged = Allocations;
 }
 
+impl parachain_info::Config for Runtime {}
+
+impl cumulus_parachain_system::Config for Runtime {
+    type Event = Event;
+    type OnValidationData = ();
+    type SelfParaId = parachain_info::Module<Runtime>;
+    type DownwardMessageHandlers = ();
+    type HrmpMessageHandlers = ();
+}
+
+parameter_types! {
+    pub const RococoLocation: MultiLocation = MultiLocation::X1(Junction::Parent);
+    pub const RococoNetwork: NetworkId = NetworkId::Polkadot;
+    pub RelayChainOrigin: Origin = xcm_handler::Origin::Relay.into();
+    pub Ancestry: MultiLocation = Junction::Parachain {
+        id: ParachainInfo::parachain_id().into()
+    }.into();
+}
+
+type LocationConverter = (
+    ParentIsDefault<AccountId>,
+    SiblingParachainConvertsVia<Sibling, AccountId>,
+    AccountId32Aliases<RococoNetwork, AccountId>,
+);
+
+type LocalAssetTransactor = CurrencyAdapter<
+    // Use this currency:
+    Balances,
+    // Use this currency when it is a fungible asset matching the given location or name:
+    IsConcrete<RococoLocation>,
+    // Do a simple punn to convert an AccountId32 MultiLocation into a native chain account ID:
+    LocationConverter,
+    // Our chain's account ID type (we can't get away without mentioning it explicitly):
+    AccountId,
+>;
+
+type LocalOriginConverter = (
+    SovereignSignedViaLocation<LocationConverter, Origin>,
+    RelayChainAsNative<RelayChainOrigin, Origin>,
+    SiblingParachainAsNative<xcm_handler::Origin, Origin>,
+    SignedAccountId32AsNative<RococoNetwork, Origin>,
+);
+
+pub struct XcmConfig;
+impl Config for XcmConfig {
+    type Call = Call;
+    type XcmSender = XcmHandler;
+    // How to withdraw and deposit an asset.
+    type AssetTransactor = LocalAssetTransactor;
+    type OriginConverter = LocalOriginConverter;
+    type IsReserve = NativeAsset;
+    type IsTeleporter = ();
+    type LocationInverter = LocationInverter<Ancestry>;
+}
+
+impl xcm_handler::Config for Runtime {
+    type Event = Event;
+    type XcmExecutor = XcmExecutor<XcmConfig>;
+    type UpwardMessageSender = ParachainSystem;
+    type HrmpMessageSender = ParachainSystem;
+}
+
 construct_runtime!(
     pub enum Runtime where
         Block = Block,
@@ -835,6 +908,11 @@ construct_runtime!(
         Utility: pallet_utility::{Module, Call, Event},
         Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
         Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
+
+        // Cumulus parachain
+        ParachainInfo: parachain_info::{Module, Storage, Config},
+        ParachainSystem: cumulus_parachain_system::{Module, Call, Storage, Inherent, Event},
+        XcmHandler: xcm_handler::{Module, Call, Event<T>, Origin},
 
         // Nodle Stack
         PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
@@ -1121,6 +1199,8 @@ sp_api::impl_runtime_apis! {
         }
     }
 }
+
+cumulus_runtime::register_validate_block!(Block, Executive);
 
 #[cfg(test)]
 mod tests {
