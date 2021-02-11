@@ -29,7 +29,7 @@ use sp_std::{prelude::*, vec};
 
 const SEED_MANAGER: u32 = 0;
 
-fn register<T: Trait>(index: u32) -> Result<T::AccountId, &'static str> {
+fn register<T: Config>(index: u32) -> Result<T::AccountId, &'static str> {
     let manager = account("manager", index, SEED_MANAGER);
     T::Currency::make_free_balance_be(&manager, BalanceOf::<T>::max_value());
     <Module<T>>::benchmark_set_members(&[manager.clone()]);
@@ -38,8 +38,6 @@ fn register<T: Trait>(index: u32) -> Result<T::AccountId, &'static str> {
 }
 
 benchmarks! {
-    _ { }
-
     book_slot {
         let u in 0 .. 1000;
 

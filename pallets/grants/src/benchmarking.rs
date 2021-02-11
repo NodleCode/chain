@@ -29,7 +29,7 @@ use sp_std::prelude::*;
 const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;
 
-struct BenchmarkConfig<T: Trait> {
+struct BenchmarkConfig<T: Config> {
     granter: T::AccountId,
     grantee: T::AccountId,
     grantee_lookup: <T::Lookup as StaticLookup>::Source,
@@ -37,7 +37,7 @@ struct BenchmarkConfig<T: Trait> {
     schedule: VestingSchedule<T::BlockNumber, BalanceOf<T>>,
 }
 
-fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
+fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
     let granter: T::AccountId = account("granter", u, SEED);
     let grantee: T::AccountId = account("grantee", u, SEED);
     let collector: T::AccountId = account("collector", u, SEED);
@@ -63,8 +63,6 @@ fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
 }
 
 benchmarks! {
-    _ { }
-
     add_vesting_schedule {
         let u in 1 .. 1000;
         let b in 0 .. MAX_SCHEDULES;

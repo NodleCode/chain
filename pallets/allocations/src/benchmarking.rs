@@ -30,8 +30,6 @@ const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
 benchmarks! {
-    _ { }
-
     allocate {
         let u in 1 .. 1000;
         let b in 1 .. MAX_BYTES;

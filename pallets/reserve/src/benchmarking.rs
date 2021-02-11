@@ -31,8 +31,6 @@ use sp_std::prelude::*;
 const SEED: u32 = 0;
 
 benchmarks_instance! {
-    _ { }
-
     tip {
         let u in 0 .. 1000;
         let tipper = account("caller", u, SEED);
