@@ -96,7 +96,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 43,
+    spec_version: 44,
 
     /// Version of the implementation of the specification. Nodes are free to ignore this; it
     /// serves only as an indication that the code is different; as long as the other two versions
@@ -838,46 +838,6 @@ construct_runtime!(
     }
 );
 
-pub struct RuntimeUpgradeStallFork;
-impl frame_support::traits::OnRuntimeUpgrade for RuntimeUpgradeStallFork {
-    fn on_runtime_upgrade() -> frame_support::weights::Weight {
-        use frame_support::migration::{put_storage_value, StorageIterator};
-        sp_runtime::print("🕊️  Recomputing Grants...");
-
-        for (account_id, grants) in StorageIterator::<
-            Vec<pallet_grants::VestingSchedule<BlockNumber, Balance>>,
-        >::new(b"Vesting", b"VestingSchedules")
-        .drain()
-        {
-            // The network was stopped at block 1905656. We simply remove those blocks from
-            // the start value since the network restarts at block 0.
-
-            let previous_network_stopped_at = 1905656;
-            put_storage_value(
-                b"Vesting",
-                b"VestingSchedules",
-                &account_id,
-                grants
-                    .iter()
-                    .clone()
-                    .map(
-                        |grant| pallet_grants::VestingSchedule::<BlockNumber, Balance> {
-                            start: grant.start.saturating_sub(previous_network_stopped_at),
-                            period: grant.period,
-                            period_count: grant.period_count,
-                            per_period: grant.per_period,
-                        },
-                    )
-                    .collect::<Vec<_>>(),
-            );
-        }
-
-        sp_runtime::print("🕊️  Grants migrated");
-
-        MaximumBlockWeight::get()
-    }
-}
-
 /// The address format for describing accounts.
 pub type Address = <Indices as StaticLookup>::Source;
 /// Block header type as expected by this runtime.
@@ -911,7 +871,6 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllModules,
-    RuntimeUpgradeStallFork,
 >;
 
 sp_api::impl_runtime_apis! {
