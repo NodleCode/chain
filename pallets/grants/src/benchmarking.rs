@@ -88,7 +88,7 @@ benchmarks! {
         for x in 0 .. b {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
-    }: _(RawOrigin::Signed(config.grantee))
+    }: _(RawOrigin::Signed(config.grantee), config.grantee_lookup)
 
     cancel_all_vesting_schedules {
         let u in 1 .. 1000;

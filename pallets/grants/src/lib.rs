@@ -156,12 +156,14 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Claim funds that have been vested so far
-        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(2, 2)]
-        pub fn claim(origin) {
-            let who = ensure_signed(origin)?;
-            let locked_amount = Self::do_claim(&who);
+        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(3, 2)]
+        pub fn claim(origin, grantee: <T::Lookup as StaticLookup>::Source) {
+            let _who = ensure_signed(origin)?;
+            let dest = T::Lookup::lookup(grantee)?;
 
-            Self::deposit_event(RawEvent::Claimed(who, locked_amount));
+            let locked_amount = Self::do_claim(&dest);
+
+            Self::deposit_event(RawEvent::Claimed(dest, locked_amount));
         }
 
         /// Wire funds to be vested by the receiver

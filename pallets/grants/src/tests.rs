@@ -211,14 +211,14 @@ fn claim_works() {
             // remain locked if not claimed
             assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10).is_err());
             // unlocked after claiming
-            assert_ok!(Vesting::claim(Origin::signed(BOB)));
+            assert_ok!(Vesting::claim(Origin::signed(BOB), BOB));
             assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
             // more are still locked
             assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 1).is_err());
 
             System::set_block_number(21);
-            // claim more
-            assert_ok!(Vesting::claim(Origin::signed(BOB)));
+            // claim more, alice pays for bob
+            assert_ok!(Vesting::claim(Origin::signed(ALICE), BOB));
             assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
             // all used up
             assert_eq!(PalletBalances::free_balance(BOB), 0);
