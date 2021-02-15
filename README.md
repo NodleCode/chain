@@ -19,6 +19,14 @@ cargo run -- --chain arcadia
 
 # Development
 
+## Rust toolchain
+Make sure your toolchain is setup for WASM development and running the correct versions of rust:
+```
+rustup update nightly
+rustup update stable
+rustup target add wasm32-unknown-unknown --toolchain nightly
+```
+
 ## Building
 ```
 cargo build

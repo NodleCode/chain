@@ -35,7 +35,7 @@ use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating},
+    traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating, Zero},
     Perbill,
 };
 use sp_std::prelude::Vec;
@@ -196,15 +196,15 @@ decl_module! {
                 metadata,
 
                 challenger: None,
-                challenger_deposit: 0.into(),
+                challenger_deposit: Zero::zero(),
 
-                votes_for: 0.into(),
+                votes_for: Zero::zero(),
                 voters_for: Vec::new(),
-                votes_against: 0.into(),
+                votes_against: Zero::zero(),
                 voters_against: Vec::new(),
 
                 created_block: <system::Module<T>>::block_number(),
-                challenged_block: 0.into(),
+                challenged_block: Zero::zero(),
             });
 
             Self::deposit_event(RawEvent::NewApplication(sender, deposit));
@@ -273,9 +273,9 @@ decl_module! {
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
             application.challenged_block = <system::Module<T>>::block_number();
-            application.votes_for = 0.into();
+            application.votes_for = Zero::zero();
             application.voters_for = Vec::new();
-            application.votes_against = 0.into();
+            application.votes_against = Zero::zero();
             application.voters_against = Vec::new();
 
             <Challenges<T, I>>::insert(member.clone(), application);
@@ -409,7 +409,7 @@ impl<T: Config<I>, I: Instance> Module<T, I> {
                 };
 
                 let total_winning_deposits: BalanceOf<T, I> =
-                    to_reward.iter().fold(0.into(), |acc, (_a, deposit)| {
+                    to_reward.iter().fold(Zero::zero(), |acc, (_a, deposit)| {
                         acc.checked_add(deposit).expect(
                             "total deposits have already been checked for overflows before; qed",
                         )
@@ -513,7 +513,7 @@ impl<T: Config<I>, I: Instance> Module<T, I> {
         // Execute rewards
         let mut rewards_imbalance = <PositiveImbalanceOf<T, I>>::zero();
         let rewards_pool = slashes_imbalance.peek();
-        let mut allocated: BalanceOf<T, I> = 0.into();
+        let mut allocated: BalanceOf<T, I> = Zero::zero();
         for (account_id, deposit) in to_reward.clone() {
             Self::unreserve_for(account_id.clone(), deposit);
 

@@ -9,9 +9,11 @@ RUN apt-get update && \
 	apt-get upgrade -y && \
 	apt-get install -y cmake pkg-config libssl-dev git clang
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-        export PATH=$PATH:$HOME/.cargo/bin && \
-        scripts/init.sh && \
-        cargo build -p nodle-chain --$PROFILE
+	export PATH=$PATH:$HOME/.cargo/bin && \
+	rustup update nightly && \
+	rustup update stable && \
+	rustup target add wasm32-unknown-unknown --toolchain nightly && \
+	cargo build -p nodle-chain --$PROFILE
 
 # ===== SECOND STAGE ======
 
