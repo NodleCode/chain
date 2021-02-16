@@ -18,8 +18,8 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-use cumulus_network::build_block_announce_validator;
-use cumulus_service::{
+use cumulus_client_network::build_block_announce_validator;
+use cumulus_client_service::{
     prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
 };
 use nodle_chain_executor::Executor;
@@ -64,7 +64,7 @@ pub fn new_partial(
         client.clone(),
     );
 
-    let import_queue = cumulus_consensus::import_queue::import_queue(
+    let import_queue = cumulus_client_consensus::import_queue::import_queue(
         client.clone(),
         client.clone(),
         inherent_data_providers.clone(),
@@ -105,12 +105,11 @@ async fn start_node_impl(
     let parachain_config = prepare_node_config(parachain_config);
 
     let polkadot_full_node =
-        cumulus_service::build_polkadot_full_node(polkadot_config, collator_key.public()).map_err(
-            |e| match e {
+        cumulus_client_service::build_polkadot_full_node(polkadot_config, collator_key.public())
+            .map_err(|e| match e {
                 polkadot_service::Error::Sub(x) => x,
                 s => format!("{}", s).into(),
-            },
-        )?;
+            })?;
 
     let params = new_partial(&parachain_config)?;
     let telemetry_span = params.other;

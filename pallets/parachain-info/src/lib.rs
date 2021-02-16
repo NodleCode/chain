@@ -20,7 +20,7 @@
 
 //! Minimal Pallet that injects a ParachainId into Runtime storage.
 
-use cumulus_primitives::ParaId;
+use cumulus_primitives_core::ParaId;
 use frame_support::{decl_module, decl_storage, traits::Get};
 
 /// Configuration trait of this pallet.

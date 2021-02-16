@@ -21,7 +21,7 @@ use crate::{
     cli::{Cli, RelayChainCli, Subcommand},
     service::new_partial,
 };
-use cumulus_primitives::{genesis::generate_genesis_block, ParaId};
+use cumulus_primitives_core::{genesis::generate_genesis_block, ParaId};
 use log::info;
 use nodle_chain_runtime::Block;
 use parity_scale_codec::Encode;

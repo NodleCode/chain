@@ -595,7 +595,7 @@ impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
 
 impl parachain_info::Config for Runtime {}
 
-impl cumulus_parachain_system::Config for Runtime {
+impl cumulus_pallet_parachain_system::Config for Runtime {
     type Event = Event;
     type OnValidationData = ();
     type SelfParaId = parachain_info::Module<Runtime>;
@@ -606,7 +606,7 @@ impl cumulus_parachain_system::Config for Runtime {
 parameter_types! {
     pub const RococoLocation: MultiLocation = MultiLocation::X1(Junction::Parent);
     pub const RococoNetwork: NetworkId = NetworkId::Polkadot;
-    pub RelayChainOrigin: Origin = xcm_handler::Origin::Relay.into();
+    pub RelayChainOrigin: Origin = cumulus_pallet_xcm_handler::Origin::Relay.into();
     pub Ancestry: MultiLocation = Junction::Parachain {
         id: ParachainInfo::parachain_id().into()
     }.into();
@@ -632,7 +632,7 @@ type LocalAssetTransactor = CurrencyAdapter<
 type LocalOriginConverter = (
     SovereignSignedViaLocation<LocationConverter, Origin>,
     RelayChainAsNative<RelayChainOrigin, Origin>,
-    SiblingParachainAsNative<xcm_handler::Origin, Origin>,
+    SiblingParachainAsNative<cumulus_pallet_xcm_handler::Origin, Origin>,
     SignedAccountId32AsNative<RococoNetwork, Origin>,
 );
 
@@ -648,7 +648,7 @@ impl Config for XcmConfig {
     type LocationInverter = LocationInverter<Ancestry>;
 }
 
-impl xcm_handler::Config for Runtime {
+impl cumulus_pallet_xcm_handler::Config for Runtime {
     type Event = Event;
     type XcmExecutor = XcmExecutor<XcmConfig>;
     type UpwardMessageSender = ParachainSystem;
@@ -693,8 +693,8 @@ construct_runtime!(
 
         // Cumulus parachain
         ParachainInfo: parachain_info::{Module, Storage, Config},
-        ParachainSystem: cumulus_parachain_system::{Module, Call, Storage, Inherent, Event},
-        XcmHandler: xcm_handler::{Module, Call, Event<T>, Origin},
+        ParachainSystem: cumulus_pallet_parachain_system::{Module, Call, Storage, Inherent, Event},
+        XcmHandler: cumulus_pallet_xcm_handler::{Module, Call, Event<T>, Origin},
 
         // Nodle Stack
         PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
@@ -881,4 +881,4 @@ sp_api::impl_runtime_apis! {
     }
 }
 
-cumulus_runtime::register_validate_block!(Block, Executive);
+cumulus_pallet_parachain_system::register_validate_block!(Block, Executive);

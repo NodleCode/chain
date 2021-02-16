@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use cumulus_primitives::ParaId;
+use cumulus_primitives_core::ParaId;
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
     constants::*, BalancesConfig, FinancialMembershipConfig, GenesisConfig, GrantsConfig,
