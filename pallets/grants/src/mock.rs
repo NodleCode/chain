@@ -2,40 +2,37 @@
 
 #![cfg(test)]
 
-use frame_support::{impl_outer_event, impl_outer_origin, ord_parameter_types, parameter_types};
+use super::*;
+use crate::{self as vesting};
+use frame_support::{ord_parameter_types, parameter_types};
 use frame_system::EnsureSignedBy;
 use pallet_balances;
 use sp_core::H256;
 use sp_runtime::{testing::Header, traits::IdentityLookup};
 
-use super::*;
+type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+type Block = frame_system::mocking::MockBlock<Test>;
 
-impl_outer_origin! {
-    pub enum Origin for Runtime where system = frame_system {}
-}
-
-mod vesting {
-    pub use crate::Event;
-}
-impl_outer_event! {
-    pub enum TestEvent for Runtime {
-        frame_system<T>,
-        vesting<T>,
-        pallet_balances<T>,
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Config, Storage, Event<T>},
+        PalletBalances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
+        Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
     }
-}
+);
 
-// Workaround for https://github.com/rust-lang/rust/issues/26925 . Remove when sorted.
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub struct Runtime;
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
 }
 
 pub type AccountId = u128;
-impl frame_system::Config for Runtime {
+impl frame_system::Config for Test {
     type Origin = Origin;
-    type Call = ();
+    type Call = Call;
     type BlockWeights = ();
     type BlockLength = ();
     type SS58Prefix = ();
@@ -46,10 +43,10 @@ impl frame_system::Config for Runtime {
     type AccountId = AccountId;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
-    type Event = TestEvent;
+    type Event = Event;
     type BlockHashCount = BlockHashCount;
     type Version = ();
-    type PalletInfo = ();
+    type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -57,7 +54,6 @@ impl frame_system::Config for Runtime {
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
-pub type System = frame_system::Module<Runtime>;
 
 type Balance = u64;
 
@@ -66,27 +62,25 @@ parameter_types! {
     pub const MaxLocks: u32 = 50;
 }
 
-impl pallet_balances::Config for Runtime {
+impl pallet_balances::Config for Test {
     type Balance = Balance;
     type DustRemoval = ();
-    type Event = TestEvent;
+    type Event = Event;
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
-    type AccountStore = frame_system::Module<Runtime>;
+    type AccountStore = frame_system::Module<Test>;
     type WeightInfo = ();
 }
-pub type PalletBalances = pallet_balances::Module<Runtime>;
 
 ord_parameter_types! {
     pub const CancelOrigin: AccountId = 42;
 }
 
-impl Config for Runtime {
-    type Event = TestEvent;
+impl Config for Test {
+    type Event = Event;
     type Currency = PalletBalances;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 }
-pub type Vesting = Module<Runtime>;
 
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
@@ -115,10 +109,10 @@ impl ExtBuilder {
 
     pub fn build(self) -> sp_io::TestExternalities {
         let mut t = frame_system::GenesisConfig::default()
-            .build_storage::<Runtime>()
+            .build_storage::<Test>()
             .unwrap();
 
-        pallet_balances::GenesisConfig::<Runtime> {
+        pallet_balances::GenesisConfig::<Test> {
             balances: self
                 .endowed_accounts
                 .into_iter()

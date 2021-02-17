@@ -20,8 +20,9 @@
 
 use super::*;
 
+use crate::{self as pallet_root_of_trust};
 use frame_support::{
-    assert_noop, assert_ok, impl_outer_origin, parameter_types,
+    assert_noop, assert_ok, parameter_types,
     traits::{Currency, OnFinalize},
 };
 use sp_core::H256;
@@ -31,21 +32,28 @@ use sp_runtime::{
     Perbill,
 };
 
-impl_outer_origin! {
-    pub enum Origin for Test {}
-}
+type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+type Block = frame_system::mocking::MockBlock<Test>;
 
-// For testing the module, we construct most of a mock runtime. This means
-// first constructing a configuration type (`Test`) which `impl`s each of the
-// configuration traits of modules we want to use.
-#[derive(Clone, Eq, PartialEq)]
-pub struct Test;
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: system::{Module, Call, Config, Storage, Event<T>},
+        BalancesModule: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
+        TcrModule: pallet_tcr::{Module, Call, Storage, Event<T>},
+        TestModule: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
+    }
+);
+
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
 }
 impl system::Config for Test {
     type Origin = Origin;
-    type Call = ();
+    type Call = Call;
     type BlockWeights = ();
     type BlockLength = ();
     type SS58Prefix = ();
@@ -59,7 +67,7 @@ impl system::Config for Test {
     type Event = ();
     type BlockHashCount = BlockHashCount;
     type Version = ();
-    type PalletInfo = ();
+    type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -114,9 +122,6 @@ impl Config for Test {
     type FundsCollector = ();
 }
 
-type BalancesModule = pallet_balances::Module<Test>;
-type TcrModule = pallet_tcr::Module<Test>;
-type TestModule = Module<Test>;
 type TestCurrency = <Test as Config>::Currency;
 
 const ROOT_MANAGER: u64 = 1;

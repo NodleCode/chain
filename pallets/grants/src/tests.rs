@@ -5,8 +5,8 @@
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use mock::{
-    CancelOrigin, ExtBuilder, Origin, PalletBalances, Runtime, System, TestEvent, Vesting, ALICE,
-    BOB,
+    CancelOrigin, Event as TestEvent, ExtBuilder, Origin, PalletBalances, System, Test as Runtime,
+    Vesting, ALICE, BOB,
 };
 use pallet_balances::{BalanceLock, Reasons};
 use sp_runtime::DispatchError::BadOrigin;

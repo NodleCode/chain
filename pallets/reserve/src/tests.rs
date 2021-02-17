@@ -19,10 +19,9 @@
 #![cfg(test)]
 
 use super::*;
-
+use crate::{self as pallet_reserve};
 use frame_support::{
-    assert_noop, assert_ok, impl_outer_dispatch, impl_outer_origin, ord_parameter_types,
-    parameter_types, traits::Currency,
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::Currency,
 };
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
@@ -33,20 +32,21 @@ use sp_runtime::{
 };
 use sp_std::prelude::Box;
 
-impl_outer_origin! {
-    pub enum Origin for Test {}
-}
-impl_outer_dispatch! {
-    pub enum Call for Test where origin: Origin {
-        frame_system::System,
-    }
-}
+type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+type Block = frame_system::mocking::MockBlock<Test>;
 
-// For testing the module, we construct most of a mock runtime. This means
-// first constructing a configuration type (`Test`) which `impl`s each of the
-// configuration traits of modules we want to use.
-#[derive(Clone, Eq, PartialEq)]
-pub struct Test;
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_reserve::{Module, Call, Storage, Event<T>},
+    }
+);
+
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
 }
@@ -66,7 +66,7 @@ impl frame_system::Config for Test {
     type Event = ();
     type BlockHashCount = BlockHashCount;
     type Version = ();
-    type PalletInfo = ();
+    type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -100,9 +100,6 @@ impl Config for Test {
     type Call = Call;
     type ModuleId = ReserveModuleId;
 }
-type TestModule = Module<Test>;
-type Balances = pallet_balances::Module<Test>;
-type System = frame_system::Module<Test>;
 type TestCurrency = <Test as Config>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to

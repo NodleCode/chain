@@ -19,10 +19,8 @@
 #![cfg(test)]
 
 use super::*;
-
-use frame_support::{
-    assert_noop, assert_ok, impl_outer_origin, parameter_types, traits::OnFinalize,
-};
+use crate as pallet_tcr;
+use frame_support::{assert_noop, assert_ok, parameter_types, traits::OnFinalize};
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
@@ -31,21 +29,27 @@ use sp_runtime::{
 };
 use std::cell::RefCell;
 
-impl_outer_origin! {
-    pub enum Origin for Test {}
-}
+type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+type Block = frame_system::mocking::MockBlock<Test>;
 
-// For testing the module, we construct most of a mock runtime. This means
-// first constructing a configuration type (`Test`) which `impl`s each of the
-// configuration traits of modules we want to use.
-#[derive(Clone, Eq, PartialEq)]
-pub struct Test;
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: system::{Module, Call, Config, Storage, Event<T>},
+        BalancesModule: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_tcr::{Module, Call, Storage, Event<T>},
+    }
+);
+
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
 }
 impl system::Config for Test {
     type Origin = Origin;
-    type Call = ();
+    type Call = Call;
     type BlockWeights = ();
     type BlockLength = ();
     type SS58Prefix = ();
@@ -59,7 +63,7 @@ impl system::Config for Test {
     type Event = ();
     type BlockHashCount = BlockHashCount;
     type Version = ();
-    type PalletInfo = ();
+    type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -134,8 +138,6 @@ const CHALLENGER_2: u64 = 3;
 const VOTER_FOR: u64 = 4;
 const VOTER_AGAINST: u64 = 5;
 
-type BalancesModule = pallet_balances::Module<Test>;
-type TestModule = Module<Test>;
 type TestCurrency = <Test as Config>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
