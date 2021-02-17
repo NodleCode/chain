@@ -21,7 +21,8 @@ use crate::{
     cli::{Cli, RelayChainCli, Subcommand},
     service::new_partial,
 };
-use cumulus_primitives_core::{genesis::generate_genesis_block, ParaId};
+use cumulus_client_service::genesis::generate_genesis_block;
+use cumulus_primitives_core::ParaId;
 use log::info;
 use nodle_chain_runtime::Block;
 use parity_scale_codec::Encode;
@@ -268,7 +269,7 @@ pub fn run() -> Result<()> {
             })
         }
         Some(Subcommand::ExportGenesisState(params)) => {
-            let mut builder = sc_cli::GlobalLoggerBuilder::new("");
+            let mut builder = sc_cli::LoggerBuilder::new("");
             builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
             let _ = builder.init();
 
@@ -292,7 +293,7 @@ pub fn run() -> Result<()> {
             Ok(())
         }
         Some(Subcommand::ExportGenesisWasm(params)) => {
-            let mut builder = sc_cli::GlobalLoggerBuilder::new("");
+            let mut builder = sc_cli::LoggerBuilder::new("");
             builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
             let _ = builder.init();
 
