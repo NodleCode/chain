@@ -47,8 +47,8 @@ fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
     T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
 
     let schedule = VestingSchedule {
-        start: 0.into(),
-        period: 10.into(),
+        start: 0u32.into(),
+        period: 10u32.into(),
         period_count: 2u32,
         per_period: T::Currency::minimum_balance(),
     };
@@ -107,7 +107,7 @@ benchmarks! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::{ExtBuilder, Runtime};
+    use crate::mock::{ExtBuilder, Test as Runtime};
     use frame_support::assert_ok;
 
     #[test]
