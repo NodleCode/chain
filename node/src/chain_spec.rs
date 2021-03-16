@@ -188,13 +188,13 @@ pub fn testnet_genesis(
 
     GenesisConfig {
         // Core
-        frame_system: Some(SystemConfig {
+        frame_system: SystemConfig {
             code: WASM_BINARY
                 .expect("WASM binary was not build, please build it!")
                 .to_vec(),
             changes_trie_config: Default::default(),
-        }),
-        pallet_balances: Some(BalancesConfig {
+        },
+        pallet_balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
@@ -219,40 +219,40 @@ pub fn testnet_genesis(
 
                     acc
                 }),
-        }),
-        pallet_indices: Some(IndicesConfig { indices: vec![] }),
-        pallet_grants: Some(GrantsConfig {
+        },
+        pallet_indices: IndicesConfig { indices: vec![] },
+        pallet_grants: GrantsConfig {
             vesting: vested_grants,
-        }),
+        },
 
         // Governance
         // Technical Committee
-        pallet_collective_Instance2: Some(Default::default()),
-        pallet_membership_Instance1: Some(TechnicalMembershipConfig {
+        pallet_collective_Instance2: Default::default(),
+        pallet_membership_Instance1: TechnicalMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
+        },
         // Financial Committee
-        pallet_collective_Instance3: Some(Default::default()),
-        pallet_membership_Instance3: Some(FinancialMembershipConfig {
+        pallet_collective_Instance3: Default::default(),
+        pallet_membership_Instance3: FinancialMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
-        pallet_reserve_Instance1: Some(Default::default()),
-        pallet_reserve_Instance2: Some(Default::default()),
-        pallet_reserve_Instance3: Some(Default::default()),
+        },
+        pallet_reserve_Instance1: Default::default(),
+        pallet_reserve_Instance2: Default::default(),
+        pallet_reserve_Instance3: Default::default(),
         // Root Committee
-        pallet_collective_Instance4: Some(Default::default()),
-        pallet_membership_Instance4: Some(RootMembershipConfig {
+        pallet_collective_Instance4: Default::default(),
+        pallet_membership_Instance4: RootMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
+        },
 
         // Allocations
-        pallet_membership_Instance5: Some(Default::default()),
+        pallet_membership_Instance5: Default::default(),
 
         // Cumulus
-        parachain_info: Some(ParachainInfoConfig { parachain_id: id }),
+        parachain_info: ParachainInfoConfig { parachain_id: id },
     }
 }
 
