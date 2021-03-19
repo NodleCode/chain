@@ -32,20 +32,20 @@ use frame_support::{
 use frame_system::ensure_root;
 
 /// The module's configuration trait.
-pub trait Trait: frame_system::Trait {
-    type Event: From<Event> + Into<<Self as frame_system::Trait>::Event>;
+pub trait Config: frame_system::Config {
+    type Event: From<Event> + Into<<Self as frame_system::Config>::Event>;
     type ShutdownOrigin: EnsureOrigin<Self::Origin>;
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait> as EmergencyShutdown {
+    trait Store for Module<T: Config> as EmergencyShutdown {
         pub Shutdown get(fn shutdown): bool;
     }
 }
 
 decl_module! {
     /// The module declaration.
-    pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
         /// Toggle the shutdown state if authorized to do so.

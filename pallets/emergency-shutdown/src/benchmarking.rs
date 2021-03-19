@@ -27,8 +27,6 @@ use frame_support::traits::UnfilteredDispatchable;
 use sp_std::prelude::*;
 
 benchmarks! {
-    _ { }
-
     toggle {
         let u in 0 .. 1000;
 
