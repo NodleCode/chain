@@ -30,8 +30,6 @@ const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
 benchmarks! {
-    _ { }
-
     allocate {
         let u in 1 .. 1000;
         let b in 1 .. MAX_BYTES;
@@ -40,7 +38,7 @@ benchmarks! {
         let oracle: T::AccountId = account("oracle", u, SEED);
 
         Module::<T>::initialize_members(&[oracle.clone()]);
-    }: _(RawOrigin::Signed(oracle), grantee, 100.into(), vec![1; b as usize])
+    }: _(RawOrigin::Signed(oracle), grantee, 100u32.into(), vec![1; b as usize])
 }
 
 #[cfg(test)]
