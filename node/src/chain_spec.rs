@@ -148,11 +148,11 @@ pub fn testnet_genesis(
         pallet_grants: Some(GrantsConfig {
             vesting: vested_grants,
         }),
-		pallet_contracts: Some(ContractsConfig {
-			current_schedule: pallet_contracts::Schedule {
-				..Default::default()
-			},
-		}),
+        pallet_contracts: Some(ContractsConfig {
+            current_schedule: pallet_contracts::Schedule {
+                ..Default::default()
+            },
+        }),
         // Consensus
         pallet_session: Some(SessionConfig {
             keys: initial_authorities
