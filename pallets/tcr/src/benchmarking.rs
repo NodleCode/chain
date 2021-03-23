@@ -29,7 +29,7 @@ use sp_std::prelude::*;
 const SEED: u32 = 0;
 const MAX_METADATA_SIZE: u32 = 1000;
 
-pub struct BenchmarkConfig<T: Trait<I>, I: Instance> {
+pub struct BenchmarkConfig<T: Config<I>, I: Instance> {
     applicant: T::AccountId,
     challenger: T::AccountId,
     counterer: T::AccountId,
@@ -41,7 +41,7 @@ pub struct BenchmarkConfig<T: Trait<I>, I: Instance> {
     deposit_voting: BalanceOf<T, I>,
 }
 
-fn make_benchmark_config<T: Trait<I>, I: Instance>(u: u32, b: u32) -> BenchmarkConfig<T, I> {
+fn make_benchmark_config<T: Config<I>, I: Instance>(u: u32, b: u32) -> BenchmarkConfig<T, I> {
     let applicant = account("applicant", u, SEED);
     let challenger = account("challenger", u, SEED);
     let counterer = account("counterer", u, SEED);
@@ -70,7 +70,7 @@ fn make_benchmark_config<T: Trait<I>, I: Instance>(u: u32, b: u32) -> BenchmarkC
     }
 }
 
-fn do_apply<T: Trait<I>, I: Instance>(config: &BenchmarkConfig<T, I>) -> DispatchResult {
+fn do_apply<T: Config<I>, I: Instance>(config: &BenchmarkConfig<T, I>) -> DispatchResult {
     <Module<T, _>>::apply(
         RawOrigin::Signed(config.applicant.clone()).into(),
         config.metadata.clone(),
@@ -79,8 +79,6 @@ fn do_apply<T: Trait<I>, I: Instance>(config: &BenchmarkConfig<T, I>) -> Dispatc
 }
 
 benchmarks_instance! {
-    _ { }
-
     apply {
         let u in 0 .. 1000;
         let b in 0 .. MAX_METADATA_SIZE;
