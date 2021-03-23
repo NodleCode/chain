@@ -19,10 +19,9 @@
 #![cfg(test)]
 
 use super::*;
-
+use crate::{self as pallet_reserve};
 use frame_support::{
-    assert_noop, assert_ok, impl_outer_dispatch, impl_outer_origin, ord_parameter_types,
-    parameter_types, traits::Currency, weights::Weight,
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::Currency,
 };
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
@@ -30,33 +29,33 @@ use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
     DispatchError::BadOrigin,
-    Perbill,
 };
 use sp_std::prelude::Box;
 
-impl_outer_origin! {
-    pub enum Origin for Test {}
-}
-impl_outer_dispatch! {
-    pub enum Call for Test where origin: Origin {
-        frame_system::System,
-    }
-}
+type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+type Block = frame_system::mocking::MockBlock<Test>;
 
-// For testing the module, we construct most of a mock runtime. This means
-// first constructing a configuration type (`Test`) which `impl`s each of the
-// configuration traits of modules we want to use.
-#[derive(Clone, Eq, PartialEq)]
-pub struct Test;
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_reserve::{Module, Call, Storage, Event<T>},
+    }
+);
+
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl frame_system::Trait for Test {
+impl frame_system::Config for Test {
     type Origin = Origin;
     type Call = Call;
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -66,25 +65,19 @@ impl frame_system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
-    type PalletInfo = ();
+    type PalletInfo = PalletInfo;
     type AccountData = pallet_balances::AccountData<u64>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
     pub const MaxLocks: u32 = 50;
 }
-impl pallet_balances::Trait for Test {
+impl pallet_balances::Config for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
@@ -100,17 +93,14 @@ ord_parameter_types! {
 parameter_types! {
     pub const ReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
 }
-impl Trait for Test {
+impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Module<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = Call;
     type ModuleId = ReserveModuleId;
 }
-type TestModule = Module<Test>;
-type Balances = pallet_balances::Module<Test>;
-type System = frame_system::Module<Test>;
-type TestCurrency = <Test as Trait>::Currency;
+type TestCurrency = <Test as Config>::Currency;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
