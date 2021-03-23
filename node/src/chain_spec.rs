@@ -18,10 +18,10 @@
 
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
-    constants::*, AuthorityDiscoveryConfig, BabeConfig, ContractsConfig, BalancesConfig, FinancialMembershipConfig,
-    GenesisConfig, GrandpaConfig, GrantsConfig, ImOnlineConfig, IndicesConfig,
-    RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
-    ValidatorsSetConfig, WASM_BINARY,
+    constants::*, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig,
+    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig, ImOnlineConfig,
+    IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;

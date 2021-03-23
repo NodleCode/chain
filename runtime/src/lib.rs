@@ -35,6 +35,7 @@ use frame_support::{
 use nodle_chain_primitives::{
     AccountId, AccountIndex, Balance, BlockNumber, CertificateId, Hash, Index, Moment, Signature,
 };
+use pallet_contracts_rpc_runtime_api::ContractExecResult;
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -64,7 +65,6 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
-use pallet_contracts_rpc_runtime_api::ContractExecResult;
 use static_assertions::const_assert;
 
 pub mod constants;
@@ -806,7 +806,6 @@ impl pallet_contracts::Trait for Runtime {
     type MaxValueSize = pallet_contracts::DefaultMaxValueSize;
     type WeightPrice = pallet_transaction_payment::Module<Self>;
 }
-
 
 construct_runtime!(
     pub enum Runtime where

@@ -112,9 +112,9 @@ where
     B: sc_client_api::Backend<Block> + Send + Sync + 'static,
     B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::HashFor<Block>>,
 {
+    use pallet_contracts_rpc::{Contracts, ContractsApi};
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
     use substrate_frame_rpc_system::{FullSystem, SystemApi};
-    use pallet_contracts_rpc::{Contracts, ContractsApi};
 
     let mut io = jsonrpc_core::IoHandler::default();
     let FullDeps {
@@ -148,9 +148,7 @@ where
     // Making synchronous calls in light client freezes the browser currently,
     // more context: https://github.com/paritytech/substrate/pull/3480
     // These RPCs should use an asynchronous caller instead.
-    io.extend_with(
-        ContractsApi::to_delegate(Contracts::new(client.clone()))
-    );
+    io.extend_with(ContractsApi::to_delegate(Contracts::new(client.clone())));
 
     io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
         client.clone(),
