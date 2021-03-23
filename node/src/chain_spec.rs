@@ -18,10 +18,10 @@
 
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
-    constants::*, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig,
-    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig, ImOnlineConfig,
-    IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
-    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+    constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
+    ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig,
+    ImOnlineConfig, IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -132,7 +132,7 @@ pub fn testnet_genesis(
     GenesisConfig {
         // Core
         frame_system: Some(SystemConfig {
-            code: WASM_BINARY.to_vec(),
+            code: wasm_binary_unwrap().to_vec(),
             changes_trie_config: Default::default(),
         }),
         pallet_balances: Some(BalancesConfig {
