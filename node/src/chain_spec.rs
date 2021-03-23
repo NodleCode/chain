@@ -142,7 +142,24 @@ pub fn testnet_genesis(
                 .map(|k| (k, ENDOWMENT))
                 .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
-                .collect(),
+                .fold(vec![], |mut acc, (account, endowment)| {
+                    if acc
+                        .iter()
+                        .find(|(who, _endowment)| who == &account)
+                        .is_some()
+                    {
+                        // Increase endowment
+                        acc = acc
+                            .iter()
+                            .cloned()
+                            .map(|(cur_account, cur_endowment)| (cur_account, cur_endowment))
+                            .collect::<Vec<(AccountId, Balance)>>();
+                    } else {
+                        acc.push((account, endowment));
+                    }
+
+                    acc
+                }),
         }),
         pallet_indices: Some(IndicesConfig { indices: vec![] }),
         pallet_grants: Some(GrantsConfig {
