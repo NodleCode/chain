@@ -37,9 +37,10 @@ use parity_scale_codec::{Decode, Encode};
 use sp_runtime::traits::{CheckedAdd, MaybeDisplay, MaybeSerializeDeserialize, Member};
 use sp_std::{fmt::Debug, prelude::Vec};
 
-type BalanceOf<T> = <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::Balance;
+type BalanceOf<T> =
+    <<T as Config>::Currency as Currency<<T as system::Config>::AccountId>>::Balance;
 type NegativeImbalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as system::Trait>::AccountId>>::NegativeImbalance;
+    <<T as Config>::Currency as Currency<<T as system::Config>::AccountId>>::NegativeImbalance;
 
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 pub struct RootCertificate<AccountId, CertificateId, BlockNumber> {
@@ -53,8 +54,8 @@ pub struct RootCertificate<AccountId, CertificateId, BlockNumber> {
 }
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
-    type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+pub trait Config: system::Config {
+    type Event: From<Event<Self>> + Into<<Self as system::Config>::Event>;
 
     /// The currency used to represent the voting power
     type Currency: Currency<Self::AccountId>;
@@ -81,8 +82,8 @@ pub trait Trait: system::Trait {
 decl_event!(
     pub enum Event<T>
     where
-        AccountId = <T as system::Trait>::AccountId,
-        CertificateId = <T as Trait>::CertificateId,
+        AccountId = <T as system::Config>::AccountId,
+        CertificateId = <T as Config>::CertificateId,
     {
         /// A new slot has been booked
         SlotTaken(AccountId, CertificateId),
@@ -96,7 +97,7 @@ decl_event!(
 );
 
 decl_error! {
-    pub enum Error for Module<T: Trait> {
+    pub enum Error for Module<T: Config> {
         /// `origin` a member, this function may need a member account id
         NotAMember,
         /// Slot was already taken, you will need to use another certificate id
@@ -111,7 +112,7 @@ decl_error! {
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait> as RootOfTrustModule {
+    trait Store for Module<T: Config> as RootOfTrustModule {
         Members get(fn members): Vec<T::AccountId>;
         Slots get(fn slots): map hasher(blake2_128_concat)
             T::CertificateId => RootCertificate<T::AccountId, T::CertificateId, T::BlockNumber>;
@@ -120,7 +121,7 @@ decl_storage! {
 
 decl_module! {
     /// The module declaration.
-    pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
         /// Book a certificate slot
@@ -206,7 +207,7 @@ decl_module! {
     }
 }
 
-impl<T: Trait> Module<T> {
+impl<T: Config> Module<T> {
     fn is_member(who: &T::AccountId) -> bool {
         Self::members().contains(who)
     }
@@ -255,7 +256,7 @@ impl<T: Trait> Module<T> {
     }
 }
 
-impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
+impl<T: Config> ChangeMembers<T::AccountId> for Module<T> {
     fn change_members_sorted(
         _incoming: &[T::AccountId],
         _outgoing: &[T::AccountId],
