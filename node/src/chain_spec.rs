@@ -18,10 +18,10 @@
 
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
-    constants::*, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, FinancialMembershipConfig,
-    GenesisConfig, GrandpaConfig, GrantsConfig, ImOnlineConfig, IndicesConfig,
-    RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
-    ValidatorsSetConfig, WASM_BINARY,
+    constants::*, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig, ContractsConfig,
+    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig, ImOnlineConfig,
+    IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -148,7 +148,11 @@ pub fn testnet_genesis(
         pallet_grants: Some(GrantsConfig {
             vesting: vested_grants,
         }),
-
+        pallet_contracts: Some(ContractsConfig {
+            current_schedule: pallet_contracts::Schedule {
+                ..Default::default()
+            },
+        }),
         // Consensus
         pallet_session: Some(SessionConfig {
             keys: initial_authorities
