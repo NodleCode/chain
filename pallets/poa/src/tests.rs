@@ -17,8 +17,8 @@
  */
 
 use super::*;
-
-use frame_support::{impl_outer_origin, parameter_types, weights::Weight};
+use crate::{self as pallet_poa};
+use frame_support::parameter_types;
 use sp_core::{crypto::key_types, H256};
 use sp_runtime::{
     testing::{Header, UintAuthorityId},
@@ -26,24 +26,30 @@ use sp_runtime::{
     KeyTypeId, Perbill,
 };
 
-impl_outer_origin! {
-    pub enum Origin for Test {}
-}
+type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
+type Block = frame_system::mocking::MockBlock<Test>;
 
-// For testing the module, we construct most of a mock runtime. This means
-// first constructing a configuration type (`Test`) which `impl`s each of the
-// configuration traits of modules we want to use.
-#[derive(Clone, Eq, PartialEq)]
-pub struct Test;
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Config, Storage, Event<T>},
+        SessionModule: pallet_session::{Module, Call, Storage, Event, Config<T>},
+        TestModule: pallet_poa::{Module, Storage},
+    }
+);
+
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub const MaximumBlockWeight: Weight = 1024;
-    pub const MaximumBlockLength: u32 = 2 * 1024;
-    pub const AvailableBlockRatio: Perbill = Perbill::from_percent(75);
 }
-impl system::Trait for Test {
+impl frame_system::Config for Test {
     type Origin = Origin;
-    type Call = ();
+    type Call = Call;
+    type BlockWeights = ();
+    type BlockLength = ();
+    type SS58Prefix = ();
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -53,18 +59,12 @@ impl system::Trait for Test {
     type Header = Header;
     type Event = ();
     type BlockHashCount = BlockHashCount;
-    type MaximumBlockWeight = MaximumBlockWeight;
-    type MaximumBlockLength = MaximumBlockLength;
-    type AvailableBlockRatio = AvailableBlockRatio;
     type Version = ();
-    type PalletInfo = ();
+    type PalletInfo = PalletInfo;
     type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BlockExecutionWeight = ();
-    type ExtrinsicBaseWeight = ();
-    type MaximumExtrinsicWeight = MaximumBlockWeight;
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
 }
@@ -92,29 +92,26 @@ impl pallet_session::ShouldEndSession<u64> for TestSessionHandler {
         false
     }
 }
-impl pallet_session::Trait for Test {
+impl pallet_session::Config for Test {
     type SessionManager = Module<Test>;
     type SessionHandler = TestSessionHandler;
     type ShouldEndSession = TestSessionHandler;
     type NextSessionRotation = ();
     type Event = ();
     type Keys = UintAuthorityId;
-    type ValidatorId = <Test as system::Trait>::AccountId;
+    type ValidatorId = <Test as frame_system::Config>::AccountId;
     type ValidatorIdOf = ConvertInto;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type WeightInfo = ();
 }
-impl Trait for Test {}
-
-type SessionModule = pallet_session::Module<Test>;
-type TestModule = Module<Test>;
+impl Config for Test {}
 
 pub const VALIDATOR: u64 = 1;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default()
+    frame_system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap()
         .into()

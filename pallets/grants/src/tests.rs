@@ -3,10 +3,10 @@
 #![cfg(test)]
 
 use super::*;
-use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReason};
+use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use mock::{
-    CancelOrigin, ExtBuilder, Origin, PalletBalances, Runtime, System, TestEvent, Vesting, ALICE,
-    BOB,
+    CancelOrigin, Event as TestEvent, ExtBuilder, Origin, PalletBalances, System, Test as Runtime,
+    Vesting, ALICE, BOB,
 };
 use pallet_balances::{BalanceLock, Reasons};
 use sp_runtime::DispatchError::BadOrigin;
@@ -100,13 +100,10 @@ fn cannot_use_fund_if_not_claimed() {
                 BOB,
                 schedule.clone()
             ));
-            assert!(PalletBalances::ensure_can_withdraw(
-                &BOB,
-                1,
-                WithdrawReason::Transfer.into(),
-                49
-            )
-            .is_err());
+            assert!(
+                PalletBalances::ensure_can_withdraw(&BOB, 1, WithdrawReasons::TRANSFER, 49)
+                    .is_err()
+            );
         });
 }
 
@@ -211,14 +208,14 @@ fn claim_works() {
             // remain locked if not claimed
             assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10).is_err());
             // unlocked after claiming
-            assert_ok!(Vesting::claim(Origin::signed(BOB), BOB));
+            assert_ok!(Vesting::claim(Origin::signed(BOB)));
             assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
             // more are still locked
             assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 1).is_err());
 
             System::set_block_number(21);
-            // claim more, alice pays for bob
-            assert_ok!(Vesting::claim(Origin::signed(ALICE), BOB));
+            // claim more
+            assert_ok!(Vesting::claim(Origin::signed(BOB)));
             assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
             // all used up
             assert_eq!(PalletBalances::free_balance(BOB), 0);

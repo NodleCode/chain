@@ -30,8 +30,6 @@ use sp_std::prelude::*;
 const MAX_BYTES: u32 = 1_024;
 
 benchmarks! {
-    _ { }
-
     propose {
         let b in 1 .. MAX_BYTES;
 

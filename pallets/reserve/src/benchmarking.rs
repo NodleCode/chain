@@ -31,19 +31,17 @@ use sp_std::prelude::*;
 const SEED: u32 = 0;
 
 benchmarks_instance! {
-    _ { }
-
     tip {
         let u in 0 .. 1000;
         let tipper = account("caller", u, SEED);
-        let value = 100.into();
+        let value = 100u32.into();
         let _ = T::Currency::make_free_balance_be(&tipper, value);
     }: _(RawOrigin::Signed(tipper), value)
 
     spend {
         let u in 0 .. 1000;
         let dest = account("dest", u, SEED);
-        let value = T::Currency::minimum_balance().saturating_mul(100.into());
+        let value = T::Currency::minimum_balance().saturating_mul(100u32.into());
 
         let call = Call::<T, I>::spend(dest, value);
         let origin = T::ExternalOrigin::successful_origin();

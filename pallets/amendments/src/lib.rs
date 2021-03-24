@@ -41,8 +41,8 @@ mod tests;
 const AMENDMENTS_ID: LockIdentifier = *b"amendmen";
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
-    type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+pub trait Config: system::Config {
+    type Event: From<Event<Self>> + Into<<Self as system::Config>::Event>;
     type Amendment: Parameter
         + Dispatchable<Origin = Self::Origin>
         + From<frame_system::Call<Self>>
@@ -61,7 +61,7 @@ pub trait Trait: system::Trait {
 }
 
 decl_error! {
-    pub enum Error for Module<T: Trait> {
+    pub enum Error for Module<T: Config> {
         /// We failed to schedule the amendment
         FailedToScheduleAmendment,
         /// We failed to cancel the amendment
@@ -72,7 +72,7 @@ decl_error! {
 decl_event!(
     pub enum Event<T>
     where
-        <T as frame_system::Trait>::BlockNumber,
+        <T as frame_system::Config>::BlockNumber,
     {
         /// A new amendment has been scheduled to be executed at the given block number
         AmendmentScheduled(u64, BlockNumber),
@@ -82,7 +82,7 @@ decl_event!(
 );
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Amendments {
+    trait Store for Module<T: Config> as Amendments {
         /// Internal variable to keep track of amendment ids for scheduling purposes
         pub AmendmentsScheduled get(fn amendments_scheduled): u64;
     }
@@ -90,7 +90,7 @@ decl_storage! {
 
 decl_module! {
     /// The module declaration.
-    pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
         /// Schedule `amendment` to be executed after the configured time, unless vetoed by `VetoOrigin`

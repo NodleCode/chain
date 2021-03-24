@@ -41,14 +41,14 @@ use sp_runtime::{
 use sp_std::prelude::Box;
 
 type BalanceOf<T, I> =
-    <<T as Trait<I>>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
-type NegativeImbalanceOf<T, I> = <<T as Trait<I>>::Currency as Currency<
-    <T as frame_system::Trait>::AccountId,
+    <<T as Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+type NegativeImbalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<
+    <T as frame_system::Config>::AccountId,
 >>::NegativeImbalance;
 
 /// The module's configuration trait.
-pub trait Trait<I: Instance = DefaultInstance>: frame_system::Trait {
-    type Event: From<Event<Self, I>> + Into<<Self as frame_system::Trait>::Event>;
+pub trait Config<I: Instance = DefaultInstance>: frame_system::Config {
+    type Event: From<Event<Self, I>> + Into<<Self as frame_system::Config>::Event>;
     type ExternalOrigin: EnsureOrigin<Self::Origin>;
     type Currency: Currency<Self::AccountId>;
     type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
@@ -56,7 +56,7 @@ pub trait Trait<I: Instance = DefaultInstance>: frame_system::Trait {
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait<I>, I: Instance = DefaultInstance> as Reserve {}
+    trait Store for Module<T: Config<I>, I: Instance = DefaultInstance> as Reserve {}
     add_extra_genesis {
         build(|_config| {
             let our_account = &<Module<T, I>>::account_id();
@@ -74,7 +74,7 @@ decl_storage! {
 decl_event!(
     pub enum Event<T, I: Instance = DefaultInstance>
     where
-        AccountId = <T as frame_system::Trait>::AccountId,
+        AccountId = <T as frame_system::Config>::AccountId,
         Balance = BalanceOf<T, I>,
     {
         /// Some amount was deposited (e.g. for transaction fees).
@@ -90,7 +90,7 @@ decl_event!(
 
 decl_module! {
     /// The module declaration.
-    pub struct Module<T: Trait<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
         /// Spend `amount` funds from the reserve account to `to`.
@@ -121,25 +121,25 @@ decl_module! {
 
         /// Dispatch a call as coming from the reserve account
         #[weight = (call.get_dispatch_info().weight + 10_000, call.get_dispatch_info().class)]
-        pub fn apply_as(origin, call: Box<<T as Trait<I>>::Call>) {
+        pub fn apply_as(origin, call: Box<<T as Config<I>>::Call>) {
             T::ExternalOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
-            let res = call.dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into());
+            let res = call.dispatch(frame_system::RawOrigin::Root.into());
 
             Self::deposit_event(RawEvent::ReserveOp(res.map(|_| ()).map_err(|e| e.error)));
         }
     }
 }
 
-impl<T: Trait<I>, I: Instance> WithAccountId<T::AccountId> for Module<T, I> {
+impl<T: Config<I>, I: Instance> WithAccountId<T::AccountId> for Module<T, I> {
     fn account_id() -> T::AccountId {
         T::ModuleId::get().into_account()
     }
 }
 
-impl<T: Trait<I>, I: Instance> OnUnbalanced<NegativeImbalanceOf<T, I>> for Module<T, I> {
+impl<T: Config<I>, I: Instance> OnUnbalanced<NegativeImbalanceOf<T, I>> for Module<T, I> {
     fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<T, I>) {
         let numeric_amount = amount.peek();
 

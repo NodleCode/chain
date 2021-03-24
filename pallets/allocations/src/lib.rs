@@ -34,11 +34,11 @@ use sp_runtime::{
 use sp_std::prelude::Vec;
 
 type BalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
+    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 /// The module's configuration trait.
-pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
-    type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
+pub trait Config: frame_system::Config + pallet_emergency_shutdown::Config {
+    type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
     type Currency: Currency<Self::AccountId>;
     type ProtocolFee: Get<Perbill>;
     type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
@@ -49,7 +49,7 @@ pub trait Trait: frame_system::Trait + pallet_emergency_shutdown::Trait {
 }
 
 decl_error! {
-    pub enum Error for Module<T: Trait> {
+    pub enum Error for Module<T: Config> {
         /// Function is restricted to oracles only
         OracleAccessDenied,
         /// We are trying to allocate more coins than we can
@@ -64,7 +64,7 @@ decl_error! {
 decl_event!(
     pub enum Event<T>
     where
-        AccountId = <T as frame_system::Trait>::AccountId,
+        AccountId = <T as frame_system::Config>::AccountId,
         Balance = BalanceOf<T>,
     {
         /// An allocation was triggered
@@ -73,7 +73,7 @@ decl_event!(
 );
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Allocations {
+    trait Store for Module<T: Config> as Allocations {
         Oracles get(fn oracles): Vec<T::AccountId>;
         CoinsConsumed get(fn coins_consumed): BalanceOf<T>;
     }
@@ -81,7 +81,7 @@ decl_storage! {
 
 decl_module! {
     /// The module declaration.
-    pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config> for enum Call where origin: T::Origin {
         fn deposit_event() = default;
 
         /// Can only be called by an oracle, trigger a coin creation and an event
@@ -116,7 +116,7 @@ decl_module! {
     }
 }
 
-impl<T: Trait> Module<T> {
+impl<T: Config> Module<T> {
     pub fn is_oracle(who: T::AccountId) -> bool {
         Self::oracles().contains(&who)
     }
@@ -143,7 +143,7 @@ impl<T: Trait> Module<T> {
     }
 }
 
-impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
+impl<T: Config> ChangeMembers<T::AccountId> for Module<T> {
     fn change_members_sorted(
         _incoming: &[T::AccountId],
         _outgoing: &[T::AccountId],
@@ -153,7 +153,7 @@ impl<T: Trait> ChangeMembers<T::AccountId> for Module<T> {
     }
 }
 
-impl<T: Trait> InitializeMembers<T::AccountId> for Module<T> {
+impl<T: Config> InitializeMembers<T::AccountId> for Module<T> {
     fn initialize_members(init: &[T::AccountId]) {
         <Oracles<T>>::put(init);
     }

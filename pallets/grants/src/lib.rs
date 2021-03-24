@@ -68,28 +68,28 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy>
 }
 
 pub type BalanceOf<T> =
-    <<T as Trait>::Currency as Currency<<T as frame_system::Trait>::AccountId>>::Balance;
+    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 pub type VestingScheduleOf<T> =
-    VestingSchedule<<T as frame_system::Trait>::BlockNumber, BalanceOf<T>>;
+    VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
 pub type ScheduledGrant<T> = (
-    <T as frame_system::Trait>::BlockNumber,
-    <T as frame_system::Trait>::BlockNumber,
+    <T as frame_system::Config>::BlockNumber,
+    <T as frame_system::Config>::BlockNumber,
     u32,
     BalanceOf<T>,
 );
 pub type ScheduledItem<T> = (
-    <T as frame_system::Trait>::AccountId,
+    <T as frame_system::Config>::AccountId,
     Vec<ScheduledGrant<T>>,
 );
 
-pub trait Trait: frame_system::Trait {
-    type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
+pub trait Config: frame_system::Config {
+    type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
     type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
     type CancelOrigin: EnsureOrigin<Self::Origin>;
 }
 
 decl_storage! {
-    trait Store for Module<T: Trait> as Vesting {
+    trait Store for Module<T: Config> as Vesting {
         /// Vesting schedules of an account.
         pub VestingSchedules get(fn vesting_schedules): map hasher(blake2_128_concat) T::AccountId => Vec<VestingScheduleOf<T>>;
     }
@@ -114,7 +114,7 @@ decl_storage! {
             grants.iter()
                 .for_each(|(ref who, schedules)| {
                     let total_grants = schedules.iter()
-                        .fold(Zero::zero(), |acc: BalanceOf<T>, s| acc.saturating_add(s.locked_amount(0.into())));
+                        .fold(Zero::zero(), |acc: BalanceOf<T>, s| acc.saturating_add(s.locked_amount(Zero::zero())));
 
                     T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
                     T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
@@ -126,7 +126,7 @@ decl_storage! {
 
 decl_event!(
     pub enum Event<T> where
-        <T as frame_system::Trait>::AccountId,
+        <T as frame_system::Config>::AccountId,
         Balance = BalanceOf<T>,
         VestingSchedule = VestingScheduleOf<T>
     {
@@ -141,7 +141,7 @@ decl_event!(
 
 decl_error! {
     /// Error for vesting module.
-    pub enum Error for Module<T: Trait> {
+    pub enum Error for Module<T: Config> {
         ZeroVestingPeriod,
         ZeroVestingPeriodCount,
         NumOverflow,
@@ -150,20 +150,18 @@ decl_error! {
 }
 
 decl_module! {
-    pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+    pub struct Module<T: Config> for enum Call where origin: T::Origin {
         type Error = Error<T>;
 
         fn deposit_event() = default;
 
         /// Claim funds that have been vested so far
-        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(3, 2)]
-        pub fn claim(origin, grantee: <T::Lookup as StaticLookup>::Source) {
-            let _who = ensure_signed(origin)?;
-            let dest = T::Lookup::lookup(grantee)?;
+        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(2, 2)]
+        pub fn claim(origin) {
+            let who = ensure_signed(origin)?;
+            let locked_amount = Self::do_claim(&who);
 
-            let locked_amount = Self::do_claim(&dest);
-
-            Self::deposit_event(RawEvent::Claimed(dest, locked_amount));
+            Self::deposit_event(RawEvent::Claimed(who, locked_amount));
         }
 
         /// Wire funds to be vested by the receiver
@@ -211,7 +209,7 @@ decl_module! {
 
 const VESTING_LOCK_ID: LockIdentifier = *b"nvesting";
 
-impl<T: Trait> Module<T> {
+impl<T: Config> Module<T> {
     fn do_claim(who: &T::AccountId) -> BalanceOf<T> {
         let locked = Self::locked_balance(who);
         if locked.is_zero() {

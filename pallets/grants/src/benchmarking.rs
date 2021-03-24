@@ -29,7 +29,7 @@ use sp_std::prelude::*;
 const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;
 
-struct BenchmarkConfig<T: Trait> {
+struct BenchmarkConfig<T: Config> {
     granter: T::AccountId,
     grantee: T::AccountId,
     grantee_lookup: <T::Lookup as StaticLookup>::Source,
@@ -37,7 +37,7 @@ struct BenchmarkConfig<T: Trait> {
     schedule: VestingSchedule<T::BlockNumber, BalanceOf<T>>,
 }
 
-fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
+fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
     let granter: T::AccountId = account("granter", u, SEED);
     let grantee: T::AccountId = account("grantee", u, SEED);
     let collector: T::AccountId = account("collector", u, SEED);
@@ -47,8 +47,8 @@ fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
     T::Currency::make_free_balance_be(&granter, BalanceOf::<T>::max_value());
 
     let schedule = VestingSchedule {
-        start: 0.into(),
-        period: 10.into(),
+        start: 0u32.into(),
+        period: 10u32.into(),
         period_count: 2u32,
         per_period: T::Currency::minimum_balance(),
     };
@@ -63,8 +63,6 @@ fn create_shared_config<T: Trait>(u: u32) -> BenchmarkConfig<T> {
 }
 
 benchmarks! {
-    _ { }
-
     add_vesting_schedule {
         let u in 1 .. 1000;
         let b in 0 .. MAX_SCHEDULES;
@@ -88,7 +86,7 @@ benchmarks! {
         for x in 0 .. b {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
-    }: _(RawOrigin::Signed(config.grantee), config.grantee_lookup)
+    }: _(RawOrigin::Signed(config.grantee))
 
     cancel_all_vesting_schedules {
         let u in 1 .. 1000;
@@ -109,7 +107,7 @@ benchmarks! {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mock::{ExtBuilder, Runtime};
+    use crate::mock::{ExtBuilder, Test as Runtime};
     use frame_support::assert_ok;
 
     #[test]
