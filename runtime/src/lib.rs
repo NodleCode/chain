@@ -387,7 +387,7 @@ parameter_types! {
 
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
-    type Currency = pallet_balances::Module<Runtime>;
+    type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
@@ -400,7 +400,7 @@ parameter_types! {
 
 impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
     type Event = Event;
-    type Currency = pallet_balances::Module<Runtime>;
+    type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
@@ -413,7 +413,7 @@ parameter_types! {
 
 impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
     type Event = Event;
-    type Currency = pallet_balances::Module<Runtime>;
+    type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
@@ -667,46 +667,46 @@ construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: frame_system::{Module, Call, Storage, Config, Event<T>},
-        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-        Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
-        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-        TransactionPayment: pallet_transaction_payment::{Module, Storage},
-        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
+        System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
+        Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
+        Indices: pallet_indices::{Pallet, Call, Storage, Config<T>, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+        TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
+        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Call, Storage},
 
         // Governance
-        TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-        TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>},
-        FinancialCommittee: pallet_collective::<Instance3>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-        FinancialMembership: pallet_membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>},
-        RootCommittee: pallet_collective::<Instance4>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>},
-        RootMembership: pallet_membership::<Instance4>::{Module, Call, Storage, Event<T>, Config<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
-        Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
-        Mandate: pallet_mandate::{Module, Call, Event},
-        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config, Event<T>},
-        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config, Event<T>},
-        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config, Event<T>},
-        Grants: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
+        TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
+        FinancialCommittee: pallet_collective::<Instance3>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        FinancialMembership: pallet_membership::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>},
+        RootCommittee: pallet_collective::<Instance4>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+        RootMembership: pallet_membership::<Instance4>::{Pallet, Call, Storage, Event<T>, Config<T>},
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+        Amendments: pallet_amendments::{Pallet, Call, Storage, Event<T>},
+        Mandate: pallet_mandate::{Pallet, Call, Event},
+        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config, Event<T>},
+        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config, Event<T>},
+        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config, Event<T>},
+        Grants: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>},
 
         // Neat things
-        Identity: pallet_identity::{Module, Call, Storage, Event<T>},
-        Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
-        Utility: pallet_utility::{Module, Call, Event},
-        Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
-        Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
+        Identity: pallet_identity::{Pallet, Call, Storage, Event<T>},
+        Recovery: pallet_recovery::{Pallet, Call, Storage, Event<T>},
+        Utility: pallet_utility::{Pallet, Call, Event},
+        Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
 
         // Cumulus parachain
-        ParachainInfo: parachain_info::{Module, Storage, Config},
-        ParachainSystem: cumulus_pallet_parachain_system::{Module, Call, Storage, Inherent, Event},
-        XcmHandler: cumulus_pallet_xcm_handler::{Module, Call, Event<T>, Origin},
+        ParachainInfo: parachain_info::{Pallet, Storage, Config},
+        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Storage, Inherent, Event},
+        XcmHandler: cumulus_pallet_xcm_handler::{Pallet, Call, Event<T>, Origin},
 
         // Nodle Stack
-        PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
-        PkiRootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event, Storage},
-        Allocations: pallet_allocations::{Module, Call, Event<T>, Storage},
-        AllocationsOracles: pallet_membership::<Instance5>::{Module, Call, Storage, Event<T>, Config<T>},
+        PkiTcr: pallet_tcr::<Instance1>::{Pallet, Call, Storage, Event<T>},
+        PkiRootOfTrust: pallet_root_of_trust::{Pallet, Call, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event, Storage},
+        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage},
+        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>},
     }
 );
 
@@ -742,7 +742,7 @@ pub type Executive = frame_executive::Executive<
     Block,
     frame_system::ChainContext<Runtime>,
     Runtime,
-    AllModules,
+    AllPallets,
 >;
 
 sp_api::impl_runtime_apis! {
@@ -787,7 +787,7 @@ sp_api::impl_runtime_apis! {
         }
 
         fn random_seed() -> <Block as BlockT>::Hash {
-            RandomnessCollectiveFlip::random_seed()
+            RandomnessCollectiveFlip::random_seed().0
         }
     }
 

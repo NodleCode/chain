@@ -41,9 +41,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        TestModule: pallet_reserve::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_reserve::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -95,7 +95,7 @@ parameter_types! {
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = Call;
     type ModuleId = ReserveModuleId;

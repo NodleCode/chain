@@ -38,8 +38,8 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        TestModule: pallet_emergency_shutdown::{Module, Call, Storage, Event},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        TestModule: pallet_emergency_shutdown::{Pallet, Call, Storage, Event},
     }
 );
 

@@ -203,7 +203,7 @@ decl_module! {
                 votes_against: Zero::zero(),
                 voters_against: Vec::new(),
 
-                created_block: <system::Module<T>>::block_number(),
+                created_block: <system::Pallet<T>>::block_number(),
                 challenged_block: Zero::zero(),
             });
 
@@ -226,7 +226,7 @@ decl_module! {
             let mut application = <Applications<T, I>>::take(member.clone());
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
+            application.challenged_block = <system::Pallet<T>>::block_number();
 
             <Challenges<T, I>>::insert(member.clone(), application);
 
@@ -272,7 +272,7 @@ decl_module! {
             let mut application = <Members<T, I>>::get(member.clone());
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
+            application.challenged_block = <system::Pallet<T>>::block_number();
             application.votes_for = Zero::zero();
             application.voters_for = Vec::new();
             application.votes_against = Zero::zero();

@@ -136,7 +136,7 @@ decl_module! {
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
-            let now = <system::Module<T>>::block_number();
+            let now = <system::Pallet<T>>::block_number();
             <Slots<T>>::insert(&certificate_id, RootCertificate {
                 owner: sender.clone(),
                 key: certificate_id.clone(),
@@ -165,7 +165,7 @@ decl_module! {
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
-            slot.renewed = <system::Module<T>>::block_number();
+            slot.renewed = <system::Pallet<T>>::block_number();
             <Slots<T>>::insert(&certificate_id, slot);
 
             Self::deposit_event(RawEvent::SlotRenewed(certificate_id));
@@ -221,7 +221,7 @@ impl<T: Config> Module<T> {
             .renewed
             .checked_add(&slot.validity)
             .expect("we only sum block numbers that are not supposed to overflow; qed")
-            <= <system::Module<T>>::block_number();
+            <= <system::Pallet<T>>::block_number();
 
         owner_is_member && !revoked && !expired
     }

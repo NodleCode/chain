@@ -102,7 +102,7 @@ decl_module! {
 
             let nb_scheduled = <AmendmentsScheduled>::get();
             let scheduler_id = (AMENDMENTS_ID, nb_scheduled).encode();
-            let when = <system::Module<T>>::block_number() + T::Delay::get();
+            let when = <system::Pallet<T>>::block_number() + T::Delay::get();
 
             if T::Scheduler::schedule_named(
                 scheduler_id,

@@ -38,10 +38,10 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event},
-        Allocations: pallet_allocations::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event},
+        Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -82,7 +82,7 @@ impl pallet_balances::Config for Test {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
     type WeightInfo = ();
 }
 
@@ -109,7 +109,7 @@ impl WithAccountId<u64> for Receiver {
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;

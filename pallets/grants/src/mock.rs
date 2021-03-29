@@ -19,9 +19,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        PalletBalances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        PalletBalances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        Vesting: vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
     }
 );
 

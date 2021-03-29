@@ -41,10 +41,10 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: system::{Module, Call, Config, Storage, Event<T>},
-        BalancesModule: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        TcrModule: pallet_tcr::{Module, Call, Storage, Event<T>},
-        TestModule: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
+        System: system::{Pallet, Call, Config, Storage, Event<T>},
+        BalancesModule: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        TcrModule: pallet_tcr::{Pallet, Call, Storage, Event<T>},
+        TestModule: pallet_root_of_trust::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -84,7 +84,7 @@ impl pallet_balances::Config for Test {
     type Event = ();
     type DustRemoval = ();
     type MaxLocks = MaxLocks;
-    type AccountStore = system::Module<Test>;
+    type AccountStore = system::Pallet<Test>;
     type ExistentialDeposit = ();
     type WeightInfo = ();
 }
@@ -98,7 +98,7 @@ parameter_types! {
 }
 impl pallet_tcr::Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type MinimumApplicationAmount = MinimumApplicationAmount;
     type MinimumCounterAmount = MinimumCounterAmount;
     type MinimumChallengeAmount = MinimumChallengeAmount;
@@ -114,7 +114,7 @@ parameter_types! {
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type CertificateId = <Test as system::Config>::AccountId;
     type SlotBookingCost = SlotBookingCost;
     type SlotRenewingCost = SlotRenewingCost;
@@ -152,7 +152,7 @@ fn do_register() {
         MinimumApplicationAmount::get(),
     ));
     <TcrModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-        FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+        FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
     );
 }
 
@@ -236,11 +236,11 @@ fn member_can_buy_slots() {
         );
         assert_eq!(
             TestModule::slots(OFFCHAIN_CERTIFICATE_SIGNER_1).created,
-            <system::Module<Test>>::block_number()
+            <system::Pallet<Test>>::block_number()
         );
         assert_eq!(
             TestModule::slots(OFFCHAIN_CERTIFICATE_SIGNER_1).renewed,
-            <system::Module<Test>>::block_number()
+            <system::Pallet<Test>>::block_number()
         );
         assert_eq!(
             TestModule::slots(OFFCHAIN_CERTIFICATE_SIGNER_1).revoked,
@@ -286,7 +286,7 @@ fn root_certificate_not_valid_if_revoked() {
         allocate_balances();
         do_register();
 
-        let now = <system::Module<Test>>::block_number();
+        let now = <system::Pallet<Test>>::block_number();
         <Slots<Test>>::insert(
             &OFFCHAIN_CERTIFICATE_SIGNER_1,
             RootCertificate {
@@ -318,7 +318,7 @@ fn root_certificate_not_valid_if_expired() {
             OFFCHAIN_CERTIFICATE_SIGNER_1
         ));
 
-        <system::Module<Test>>::set_block_number(SlotValidity::get() + 1);
+        <system::Pallet<Test>>::set_block_number(SlotValidity::get() + 1);
 
         assert_eq!(
             TestModule::is_root_certificate_valid(&OFFCHAIN_CERTIFICATE_SIGNER_1),
@@ -330,7 +330,7 @@ fn root_certificate_not_valid_if_expired() {
 #[test]
 fn root_certificate_not_valid_if_owner_is_no_longer_a_member() {
     new_test_ext().execute_with(|| {
-        let now = <system::Module<Test>>::block_number();
+        let now = <system::Pallet<Test>>::block_number();
         <Slots<Test>>::insert(
             &OFFCHAIN_CERTIFICATE_SIGNER_1,
             RootCertificate {
@@ -372,7 +372,7 @@ fn child_certificate_still_valid_if_revoked_under_non_parent_certificate() {
             OFFCHAIN_CERTIFICATE_SIGNER_1
         ));
 
-        let now = <system::Module<Test>>::block_number();
+        let now = <system::Pallet<Test>>::block_number();
         <Slots<Test>>::insert(
             &OFFCHAIN_CERTIFICATE_SIGNER_3,
             RootCertificate {
@@ -412,7 +412,7 @@ fn child_certificate_not_valid_if_revoked_in_root_certificate() {
         allocate_balances();
         do_register();
 
-        let now = <system::Module<Test>>::block_number();
+        let now = <system::Pallet<Test>>::block_number();
         <Slots<Test>>::insert(
             &OFFCHAIN_CERTIFICATE_SIGNER_1,
             RootCertificate {
@@ -518,7 +518,7 @@ fn renew_update_fields() {
         ));
         assert_eq!(
             TestModule::slots(OFFCHAIN_CERTIFICATE_SIGNER_1).renewed,
-            <system::Module<Test>>::block_number()
+            <system::Pallet<Test>>::block_number()
         );
         assert_eq!(
             BalancesModule::free_balance(ROOT_MANAGER),
@@ -559,7 +559,7 @@ fn can_not_renew_if_invalid() {
             OFFCHAIN_CERTIFICATE_SIGNER_1
         ));
 
-        <system::Module<Test>>::set_block_number(SlotValidity::get() + 1);
+        <system::Pallet<Test>>::set_block_number(SlotValidity::get() + 1);
 
         assert_noop!(
             TestModule::renew_slot(Origin::signed(ROOT_MANAGER), OFFCHAIN_CERTIFICATE_SIGNER_1),
