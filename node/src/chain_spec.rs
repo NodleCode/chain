@@ -251,8 +251,9 @@ pub fn testnet_genesis(
         // Allocations
         pallet_membership_Instance5: Default::default(),
 
-        // Cumulus
+        // Parachains
         parachain_info: ParachainInfoConfig { parachain_id: id },
+        orml_tokens: Default::default(),
     }
 }
 
