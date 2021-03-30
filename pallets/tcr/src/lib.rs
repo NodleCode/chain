@@ -153,6 +153,8 @@ decl_error! {
         ApplicationAlreadyChallenged,
         /// Deposit value overflows votes
         DepositOverflow,
+        /// No need to apply as this account is already a member
+        AlreadyMember,
 
         ReserveOverflow,
         UnreserveOverflow,
@@ -187,6 +189,7 @@ decl_module! {
             ensure!(deposit >= T::MinimumApplicationAmount::get(), Error::<T, I>::DepositTooSmall);
             ensure!(!<Applications<T, I>>::contains_key(sender.clone()), Error::<T, I>::ApplicationPending);
             ensure!(!<Challenges<T, I>>::contains_key(sender.clone()), Error::<T, I>::ApplicationChallenged);
+            ensure!(!<Members<T, I>>::contains_key(sender.clone()), Error::<T, I>::AlreadyMember);
 
             Self::reserve_for(sender.clone(), deposit)?;
 

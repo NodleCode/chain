@@ -955,3 +955,30 @@ fn can_not_challenge_member_applicaton_if_not_big_enough_deposit() {
         );
     })
 }
+
+#[test]
+fn can_not_apply_if_already_member() {
+    new_test_ext().execute_with(|| {
+        allocate_balances();
+
+        assert_ok!(TestModule::apply(
+            Origin::signed(CANDIDATE),
+            vec![],
+            MinimumApplicationAmount::get(),
+        ));
+
+        <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
+            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+        );
+        assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
+
+        assert_noop!(
+            TestModule::apply(
+                Origin::signed(CANDIDATE),
+                vec![],
+                MinimumApplicationAmount::get(),
+            ),
+            Error::<Test, DefaultInstance>::AlreadyMember
+        );
+    })
+}
