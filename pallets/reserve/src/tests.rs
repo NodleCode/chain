@@ -83,7 +83,7 @@ impl pallet_balances::Config for Test {
     type DustRemoval = ();
     type MaxLocks = MaxLocks;
     type ExistentialDeposit = ();
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
     type WeightInfo = ();
 }
 

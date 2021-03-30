@@ -24,9 +24,10 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use cumulus_primitives_core::relay_chain::Balance as RelayChainBalance;
 use frame_support::{
     construct_runtime, parameter_types,
-    traits::Randomness,
+    traits::{Get, Randomness},
     weights::{
         constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
         DispatchClass, IdentityFee, Weight,
@@ -37,7 +38,13 @@ use frame_system::{
     EnsureRoot,
 };
 use nodle_chain_primitives::{
-    AccountId, AccountIndex, Balance, BlockNumber, CertificateId, Hash, Index, Moment, Signature,
+    AccountId, AccountIndex, Amount, Balance, BlockNumber, CertificateId, CurrencyId, Hash, Index,
+    Moment, Signature,
+};
+use orml_currencies::BasicCurrencyAdapter;
+use orml_traits::parameter_type_with_key;
+use orml_xcm_support::{
+    CurrencyIdConverter, IsConcreteWithGeneralKey, MultiCurrencyAdapter, XcmHandler as XcmHandlerT,
 };
 use pallet_transaction_payment::{FeeDetails, Multiplier, TargetedFeeAdjustment};
 use pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo;
@@ -50,25 +57,22 @@ use sp_core::{
 pub use sp_runtime::BuildStorage;
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
-    traits::{BlakeTwo256, Block as BlockT, StaticLookup},
+    traits::{AccountIdConversion, BlakeTwo256, Block as BlockT, Convert, StaticLookup, Zero},
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, FixedPointNumber, ModuleId, Perbill, Perquintill,
+    ApplyExtrinsicResult, DispatchResult, FixedPointNumber, ModuleId, Perbill, Perquintill,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
-use xcm::v0::{Junction, MultiLocation, NetworkId};
+use xcm::v0::{Junction, MultiLocation, NetworkId, Xcm};
 use xcm_builder::{
-    AccountId32Aliases, CurrencyAdapter, LocationInverter, ParentIsDefault, RelayChainAsNative,
+    AccountId32Aliases, LocationInverter, ParentIsDefault, RelayChainAsNative,
     SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
     SovereignSignedViaLocation,
 };
-use xcm_executor::{
-    traits::{IsConcrete, NativeAsset},
-    Config, XcmExecutor,
-};
+use xcm_executor::{traits::NativeAsset, Config, XcmExecutor};
 
 pub mod constants;
 mod implementations;
@@ -383,6 +387,7 @@ impl pallet_amendments::Config for Runtime {
 
 parameter_types! {
     pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
+    pub CompanyReserveAccount: AccountId = CompanyReserveModuleId::get().into_account();
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
@@ -607,43 +612,52 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 }
 
 parameter_types! {
-    pub const RococoLocation: MultiLocation = MultiLocation::X1(Junction::Parent);
-    pub const RococoNetwork: NetworkId = NetworkId::Polkadot;
-    pub RelayChainOrigin: Origin = cumulus_pallet_xcm_handler::Origin::Relay.into();
-    pub Ancestry: MultiLocation = Junction::Parachain {
-        id: ParachainInfo::parachain_id().into()
-    }.into();
+    pub const PolkadotNetworkId: NetworkId = NetworkId::Polkadot;
 }
 
-type LocationConverter = (
+pub struct AccountId32Convert;
+impl Convert<AccountId, [u8; 32]> for AccountId32Convert {
+    fn convert(account_id: AccountId) -> [u8; 32] {
+        account_id.into()
+    }
+}
+
+parameter_types! {
+    pub NodleNetwork: NetworkId = NetworkId::Named("nodle".into());
+    pub RelayChainOrigin: Origin = cumulus_pallet_xcm_handler::Origin::Relay.into();
+    pub Ancestry: MultiLocation = MultiLocation::X1(Junction::Parachain {
+        id: ParachainInfo::get().into(),
+    });
+    pub const RelayChainCurrencyId: CurrencyId = CurrencyId::DOT;
+}
+
+pub type LocationConverter = (
     ParentIsDefault<AccountId>,
     SiblingParachainConvertsVia<Sibling, AccountId>,
-    AccountId32Aliases<RococoNetwork, AccountId>,
+    AccountId32Aliases<NodleNetwork, AccountId>,
 );
 
-type LocalAssetTransactor = CurrencyAdapter<
-    // Use this currency:
-    Balances,
-    // Use this currency when it is a fungible asset matching the given location or name:
-    IsConcrete<RococoLocation>,
-    // Do a simple punn to convert an AccountId32 MultiLocation into a native chain account ID:
+pub type LocalAssetTransactor = MultiCurrencyAdapter<
+    Currencies,
+    UnknownTokens,
+    IsConcreteWithGeneralKey<CurrencyId, RelayToNative>,
     LocationConverter,
-    // Our chain's account ID type (we can't get away without mentioning it explicitly):
     AccountId,
+    CurrencyIdConverter<CurrencyId, RelayChainCurrencyId>,
+    CurrencyId,
 >;
 
-type LocalOriginConverter = (
+pub type LocalOriginConverter = (
     SovereignSignedViaLocation<LocationConverter, Origin>,
     RelayChainAsNative<RelayChainOrigin, Origin>,
     SiblingParachainAsNative<cumulus_pallet_xcm_handler::Origin, Origin>,
-    SignedAccountId32AsNative<RococoNetwork, Origin>,
+    SignedAccountId32AsNative<NodleNetwork, Origin>,
 );
 
 pub struct XcmConfig;
 impl Config for XcmConfig {
     type Call = Call;
     type XcmSender = XcmHandler;
-    // How to withdraw and deposit an asset.
     type AssetTransactor = LocalAssetTransactor;
     type OriginConverter = LocalOriginConverter;
     type IsReserve = NativeAsset;
@@ -658,6 +672,73 @@ impl cumulus_pallet_xcm_handler::Config for Runtime {
     type HrmpMessageSender = ParachainSystem;
     type SendXcmOrigin = EnsureRoot<AccountId>;
     type AccountIdConverter = LocationConverter;
+}
+
+pub struct RelayToNative;
+impl Convert<RelayChainBalance, Balance> for RelayToNative {
+    fn convert(val: u128) -> Balance {
+        // both native and relay have 12 decimals
+        val
+    }
+}
+
+pub struct NativeToRelay;
+impl Convert<Balance, RelayChainBalance> for NativeToRelay {
+    fn convert(val: u128) -> Balance {
+        // both native and relay have 12 decimals
+        val
+    }
+}
+
+pub struct HandleXcm;
+impl XcmHandlerT<AccountId> for HandleXcm {
+    fn execute_xcm(origin: AccountId, xcm: Xcm) -> DispatchResult {
+        XcmHandler::execute_xcm(origin, xcm)
+    }
+}
+
+impl orml_xtokens::Config for Runtime {
+    type Event = Event;
+    type Balance = Balance;
+    type ToRelayChainBalance = NativeToRelay;
+    type AccountId32Convert = AccountId32Convert;
+    type RelayChainNetworkId = PolkadotNetworkId;
+    type ParaId = ParachainInfo;
+    type XcmHandler = HandleXcm;
+}
+
+parameter_type_with_key! {
+    pub ExistentialDeposits: |_currency_id: CurrencyId| -> Balance {
+        Zero::zero()
+    };
+}
+
+impl orml_tokens::Config for Runtime {
+    type Event = Event;
+    type Balance = Balance;
+    type Amount = Amount;
+    type CurrencyId = CurrencyId;
+    type WeightInfo = ();
+    type ExistentialDeposits = ExistentialDeposits;
+    type OnDust = orml_tokens::TransferDust<Runtime, CompanyReserveAccount>;
+}
+
+parameter_types! {
+    pub const GetNodleTokenId: CurrencyId = CurrencyId::NODL;
+}
+
+pub type NodleToken = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+
+impl orml_currencies::Config for Runtime {
+    type Event = Event;
+    type MultiCurrency = orml_tokens::Pallet<Runtime>;
+    type NativeCurrency = NodleToken;
+    type GetNativeCurrencyId = GetNodleTokenId;
+    type WeightInfo = ();
+}
+
+impl orml_unknown_tokens::Config for Runtime {
+    type Event = Event;
 }
 
 construct_runtime!(
@@ -700,6 +781,12 @@ construct_runtime!(
         ParachainInfo: parachain_info::{Pallet, Storage, Config},
         ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Storage, Inherent, Event},
         XcmHandler: cumulus_pallet_xcm_handler::{Pallet, Call, Event<T>, Origin},
+
+        // Cross tokens support
+        Currencies: orml_currencies::{Pallet, Call, Event<T>},
+        Tokens: orml_tokens::{Pallet, Storage, Call, Event<T>, Config<T>},
+        UnknownTokens: orml_unknown_tokens::{Pallet, Storage, Event},
+        XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>},
 
         // Nodle Stack
         PkiTcr: pallet_tcr::<Instance1>::{Pallet, Call, Storage, Event<T>},
@@ -879,6 +966,8 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_tcr, PkiTcr);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_utility, Utility);
+
+            // TODO: add benchs for ORML
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

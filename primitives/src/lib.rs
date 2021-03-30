@@ -20,11 +20,15 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use parity_scale_codec::{Decode, Encode};
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiSignature, OpaqueExtrinsic,
+    MultiSignature, OpaqueExtrinsic, RuntimeDebug,
 };
+use sp_std::{convert::TryFrom, vec::Vec};
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -44,6 +48,9 @@ pub type AccountIndex = u32;
 
 /// Balance of an account.
 pub type Balance = u128;
+
+/// Signed version of balance
+pub type Amount = i128;
 
 /// Type used for expressing timestamp.
 pub type Moment = u64;
@@ -67,3 +74,22 @@ pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
+
+#[derive(Encode, Decode, Eq, PartialEq, Copy, Clone, RuntimeDebug, PartialOrd, Ord)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[repr(u8)]
+pub enum CurrencyId {
+    NODL = 0,
+    DOT = 1,
+}
+
+impl TryFrom<Vec<u8>> for CurrencyId {
+    type Error = ();
+    fn try_from(v: Vec<u8>) -> Result<CurrencyId, ()> {
+        match v.as_slice() {
+            b"NODL" => Ok(CurrencyId::NODL),
+            b"DOT" => Ok(CurrencyId::DOT),
+            _ => Err(()),
+        }
+    }
+}
