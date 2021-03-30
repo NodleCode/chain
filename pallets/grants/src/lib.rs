@@ -156,10 +156,15 @@ decl_module! {
         fn deposit_event() = default;
 
         /// Claim funds that have been vested so far
-        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(2, 2)]
+        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(2, 3)]
         pub fn claim(origin) {
             let who = ensure_signed(origin)?;
             let locked_amount = Self::do_claim(&who);
+
+            if locked_amount.is_zero() {
+                // No more claimable, clear
+                VestingSchedules::<T>::remove(who.clone());
+            }
 
             Self::deposit_event(RawEvent::Claimed(who, locked_amount));
         }
@@ -180,7 +185,7 @@ decl_module! {
 
         /// Cancel all vested schedules for the given user. If there are coins to be
         /// claimed they will be auto claimed for the given user.
-        #[weight = 48_000_000 + T::DbWeight::get().reads_writes(4, 4)]
+        #[weight = 48_000_000 + T::DbWeight::get().reads_writes(4, 5)]
         pub fn cancel_all_vesting_schedules(
             origin,
             who: <T::Lookup as StaticLookup>::Source,
@@ -201,13 +206,14 @@ decl_module! {
                 locked_amount_left,
                 ExistenceRequirement::AllowDeath
             )?;
+            VestingSchedules::<T>::remove(account_with_schedule.clone());
 
             Self::deposit_event(RawEvent::VestingSchedulesCanceled(account_with_schedule));
         }
     }
 }
 
-const VESTING_LOCK_ID: LockIdentifier = *b"nvesting";
+pub const VESTING_LOCK_ID: LockIdentifier = *b"nvesting";
 
 impl<T: Config> Module<T> {
     fn do_claim(who: &T::AccountId) -> BalanceOf<T> {
