@@ -25,7 +25,9 @@ use nodle_chain_runtime::{
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
+use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+use sp_chain_spec::Properties;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
@@ -33,6 +35,14 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 
 type AccountPublic = <Signature as Verify>::Signer;
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+
+fn build_local_properties() -> Properties {
+    let mut props = Properties::new();
+    props.insert("tokenDecimals".to_string(), json!(12));
+    props.insert("tokenSymbol".to_string(), json!("NODL"));
+
+    props
+}
 
 fn session_keys(
     grandpa: GrandpaId,
@@ -246,8 +256,8 @@ pub fn development_config() -> ChainSpec {
         development_config_genesis,
         vec![],
         None,
-        None,
-        None,
+        Some("nodl"),
+        Some(build_local_properties()),
         Default::default(),
     )
 }
@@ -278,8 +288,8 @@ pub fn local_testnet_config() -> ChainSpec {
         local_testnet_genesis,
         vec![],
         None,
-        None,
-        None,
+        Some("nodl"),
+        Some(build_local_properties()),
         Default::default(),
     )
 }
@@ -303,8 +313,8 @@ pub fn dummy_testnet_config() -> ChainSpec {
         dummy_testnet_genesis,
         vec![],
         None,
-        None,
-        None,
+        Some("nodl"),
+        Some(build_local_properties()),
         Default::default(),
     )
 }
