@@ -212,6 +212,8 @@ fn claim_works() {
             assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
             // more are still locked
             assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 1).is_err());
+            // does not clear storage
+            assert!(VestingSchedules::<Runtime>::contains_key(BOB));
 
             System::set_block_number(21);
             // claim more
@@ -219,7 +221,8 @@ fn claim_works() {
             assert_ok!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 10));
             // all used up
             assert_eq!(PalletBalances::free_balance(BOB), 0);
-
+            // clears the storage
+            assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
             // no locks anymore
             assert_eq!(PalletBalances::locks(&BOB), vec![]);
         });
@@ -270,5 +273,35 @@ fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
                 ALICE,
                 10
             ));
+        });
+}
+
+#[test]
+fn cancel_clears_storage() {
+    ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build()
+        .execute_with(|| {
+            let schedule = VestingSchedule {
+                start: 0u64,
+                period: 10u64,
+                period_count: 2u32,
+                per_period: 10u64,
+            };
+            assert_ok!(Vesting::add_vesting_schedule(
+                Origin::signed(ALICE),
+                BOB,
+                schedule.clone()
+            ));
+
+            System::set_block_number(11);
+
+            assert_ok!(Vesting::cancel_all_vesting_schedules(
+                Origin::signed(CancelOrigin::get()),
+                BOB,
+                CancelOrigin::get()
+            ));
+
+            assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
         });
 }
