@@ -68,7 +68,7 @@ impl pallet_balances::Config for Test {
     type Event = Event;
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
     type WeightInfo = ();
 }
 
