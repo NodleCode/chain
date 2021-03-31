@@ -43,6 +43,7 @@ use nodle_chain_primitives::{
 };
 use orml_currencies::BasicCurrencyAdapter;
 use orml_traits::parameter_type_with_key;
+use orml_xcm_support::NativePalletAssetOr;
 use orml_xcm_support::{
     CurrencyIdConverter, IsConcreteWithGeneralKey, MultiCurrencyAdapter, XcmHandler as XcmHandlerT,
 };
@@ -61,7 +62,7 @@ use sp_runtime::{
     transaction_validity::{TransactionSource, TransactionValidity},
     ApplyExtrinsicResult, DispatchResult, FixedPointNumber, ModuleId, Perbill, Perquintill,
 };
-use sp_std::prelude::*;
+use sp_std::{collections::btree_set::BTreeSet, prelude::*};
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
@@ -72,7 +73,7 @@ use xcm_builder::{
     SiblingParachainAsNative, SiblingParachainConvertsVia, SignedAccountId32AsNative,
     SovereignSignedViaLocation,
 };
-use xcm_executor::{traits::NativeAsset, Config, XcmExecutor};
+use xcm_executor::{Config, XcmExecutor};
 
 pub mod constants;
 mod implementations;
@@ -654,13 +655,22 @@ pub type LocalOriginConverter = (
     SignedAccountId32AsNative<NodleNetwork, Origin>,
 );
 
+parameter_types! {
+    pub NativeReserveTokens: BTreeSet<(Vec<u8>, MultiLocation)> = {
+        let mut t = BTreeSet::new();
+        //TODO: might need to add other assets based on orml-tokens
+        t.insert(("AUSD".into(), (Junction::Parent, Junction::Parachain { id: 666 }).into()));
+        t
+    };
+}
+
 pub struct XcmConfig;
 impl Config for XcmConfig {
     type Call = Call;
     type XcmSender = XcmHandler;
     type AssetTransactor = LocalAssetTransactor;
     type OriginConverter = LocalOriginConverter;
-    type IsReserve = NativeAsset;
+    type IsReserve = NativePalletAssetOr<NativeReserveTokens>;
     type IsTeleporter = ();
     type LocationInverter = LocationInverter<Ancestry>;
 }
