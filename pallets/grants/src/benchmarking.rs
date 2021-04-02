@@ -102,7 +102,7 @@ benchmarks! {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
-        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup, config.granter_lookup);
+        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup, config.granter_lookup, true);
         let origin = T::CancelOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 }

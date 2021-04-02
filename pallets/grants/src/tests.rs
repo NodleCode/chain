@@ -232,7 +232,12 @@ fn claim_works() {
 fn cancel_restricted_origin() {
     ExtBuilder::default().build().execute_with(|| {
         assert_noop!(
-            Vesting::cancel_all_vesting_schedules(Origin::signed(ALICE), BOB, CancelOrigin::get()),
+            Vesting::cancel_all_vesting_schedules(
+                Origin::signed(ALICE),
+                BOB,
+                CancelOrigin::get(),
+                false
+            ),
             BadOrigin
         );
     })
@@ -261,7 +266,8 @@ fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
             assert_ok!(Vesting::cancel_all_vesting_schedules(
                 Origin::signed(CancelOrigin::get()),
                 BOB,
-                CancelOrigin::get()
+                CancelOrigin::get(),
+                false
             ));
 
             // Auto claim
@@ -299,7 +305,50 @@ fn cancel_clears_storage() {
             assert_ok!(Vesting::cancel_all_vesting_schedules(
                 Origin::signed(CancelOrigin::get()),
                 BOB,
-                CancelOrigin::get()
+                CancelOrigin::get(),
+                false,
+            ));
+
+            assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+        });
+}
+
+#[test]
+fn cancel_tolerates_corrupted_state() {
+    ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build()
+        .execute_with(|| {
+            let schedule = VestingSchedule {
+                start: 0u64,
+                period: 10u64,
+                period_count: 2u32,
+                per_period: 10u64,
+            };
+            assert_ok!(Vesting::add_vesting_schedule(
+                Origin::signed(ALICE),
+                BOB,
+                schedule.clone()
+            ));
+
+            // We also add some vesting schedules without any balances to simulate
+            // a corrupted / badly canceled state.
+            VestingSchedules::<Runtime>::mutate(BOB, |s| {
+                s.push(VestingSchedule {
+                    start: 0u64,
+                    period: 10u64,
+                    period_count: 2u32,
+                    per_period: 1_000u64, // definitely too much money
+                })
+            });
+
+            System::set_block_number(11);
+
+            assert_ok!(Vesting::cancel_all_vesting_schedules(
+                Origin::signed(CancelOrigin::get()),
+                BOB,
+                CancelOrigin::get(),
+                true,
             ));
 
             assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
