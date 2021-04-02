@@ -22,9 +22,11 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
+
+use crate::Pallet as Allocations;
 
 const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
@@ -37,20 +39,12 @@ benchmarks! {
         let grantee: T::AccountId = account("grantee", u, SEED);
         let oracle: T::AccountId = account("oracle", u, SEED);
 
-        Module::<T>::initialize_members(&[oracle.clone()]);
+        Pallet::<T>::initialize_members(&[oracle.clone()]);
     }: _(RawOrigin::Signed(oracle), grantee, 100u32.into(), vec![1; b as usize])
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_allocate::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(
+	Allocations,
+	crate::tests::new_test_ext(),
+	crate::tests::Test,
+);
