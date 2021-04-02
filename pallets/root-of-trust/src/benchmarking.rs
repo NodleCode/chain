@@ -22,10 +22,16 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
+use frame_benchmarking::{
+	benchmarks,
+	account,
+	impl_benchmark_test_suite,
+};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::{prelude::*, vec};
+
+use crate::Pallet as Rot;
 
 const SEED_MANAGER: u32 = 0;
 
@@ -74,19 +80,8 @@ benchmarks! {
     }: _(RawOrigin::Signed(manager), certificate, child)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_book_slot::<Test>());
-            assert_ok!(test_benchmark_renew_slot::<Test>());
-            assert_ok!(test_benchmark_revoke_slot::<Test>());
-            assert_ok!(test_benchmark_revoke_child::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(
+	Rot,
+	crate::tests::new_test_ext(),
+	crate::tests::Test,
+);
