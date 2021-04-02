@@ -184,12 +184,15 @@ decl_module! {
         }
 
         /// Cancel all vested schedules for the given user. If there are coins to be
-        /// claimed they will be auto claimed for the given user.
-        #[weight = 48_000_000 + T::DbWeight::get().reads_writes(4, 5)]
+        /// claimed they will be auto claimed for the given user. If `limit_to_free_balance`
+        /// is set to true we will not error if the free balance of `who` has less coins
+        /// than what was granted and is being revoked (useful if the state was corrupted).
+        #[weight = 48_000_000 + T::DbWeight::get().reads_writes(5, 5)]
         pub fn cancel_all_vesting_schedules(
             origin,
             who: <T::Lookup as StaticLookup>::Source,
             funds_collector: <T::Lookup as StaticLookup>::Source,
+            limit_to_free_balance: bool,
         ) {
             T::CancelOrigin::try_origin(origin)
                 .map(|_| ())
@@ -198,7 +201,14 @@ decl_module! {
             let account_with_schedule = T::Lookup::lookup(who)?;
             let account_collector = T::Lookup::lookup(funds_collector)?;
 
-            let locked_amount_left = Self::do_claim(&account_with_schedule);
+            let mut locked_amount_left = Self::do_claim(&account_with_schedule);
+            let free_balance = T::Currency::free_balance(&account_with_schedule);
+            if limit_to_free_balance && free_balance < locked_amount_left {
+                locked_amount_left = free_balance;
+            }
+
+            // we need to remove the lock before doing the transfer to avoid
+            // liquidity restrictions
             T::Currency::remove_lock(VESTING_LOCK_ID, &account_with_schedule);
             T::Currency::transfer(
                 &account_with_schedule,

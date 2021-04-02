@@ -32,6 +32,7 @@ const SEED: u32 = 0;
 struct BenchmarkConfig<T: Config> {
     granter: T::AccountId,
     grantee: T::AccountId,
+    granter_lookup: <T::Lookup as StaticLookup>::Source,
     grantee_lookup: <T::Lookup as StaticLookup>::Source,
     collector_lookup: <T::Lookup as StaticLookup>::Source,
     schedule: VestingSchedule<T::BlockNumber, BalanceOf<T>>,
@@ -41,6 +42,7 @@ fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
     let granter: T::AccountId = account("granter", u, SEED);
     let grantee: T::AccountId = account("grantee", u, SEED);
     let collector: T::AccountId = account("collector", u, SEED);
+    let granter_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(granter.clone());
     let grantee_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(grantee.clone());
     let collector_lookup: <T::Lookup as StaticLookup>::Source = T::Lookup::unlookup(collector);
 
@@ -56,6 +58,7 @@ fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
     BenchmarkConfig {
         granter,
         grantee,
+        granter_lookup,
         grantee_lookup,
         collector_lookup,
         schedule,
@@ -99,7 +102,7 @@ benchmarks! {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
-        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup);
+        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup, config.granter_lookup, true);
         let origin = T::CancelOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 }
