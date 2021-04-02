@@ -70,8 +70,8 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	#[pallet::metadata()]
 	pub enum Event<T: Config> {
-        /// Shutdown state was toggled, to either on or off.
-        ShutdownToggled(bool),
+		/// Shutdown state was toggled, to either on or off.
+		ShutdownToggled(bool),
 	}
 
 	#[pallet::storage]
