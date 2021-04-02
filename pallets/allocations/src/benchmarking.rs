@@ -32,19 +32,19 @@ const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
 benchmarks! {
-	allocate {
-		let u in 1 .. 1000;
-		let b in 1 .. MAX_BYTES;
+    allocate {
+        let u in 1 .. 1000;
+        let b in 1 .. MAX_BYTES;
 
-		let grantee: T::AccountId = account("grantee", u, SEED);
-		let oracle: T::AccountId = account("oracle", u, SEED);
+        let grantee: T::AccountId = account("grantee", u, SEED);
+        let oracle: T::AccountId = account("oracle", u, SEED);
 
-		Pallet::<T>::initialize_members(&[oracle.clone()]);
-	}: _(RawOrigin::Signed(oracle), grantee, 100u32.into(), vec![1; b as usize])
+        Pallet::<T>::initialize_members(&[oracle.clone()]);
+    }: _(RawOrigin::Signed(oracle), grantee, 100u32.into(), vec![1; b as usize])
 }
 
 impl_benchmark_test_suite!(
-	Allocations,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
+    Allocations,
+    crate::tests::new_test_ext(),
+    crate::tests::Test,
 );
