@@ -80,11 +80,14 @@ pub mod pallet {
             + Ord
             + Default;
         /// How much a new root certificate costs
+		#[pallet::constant]
         type SlotBookingCost: Get<BalanceOf<Self>>;
         /// How much renewing a root certificate costs
-        type SlotRenewingCost: Get<BalanceOf<Self>>;
+        #[pallet::constant]
+		type SlotRenewingCost: Get<BalanceOf<Self>>;
         /// How long a certificate is considered valid
-        type SlotValidity: Get<Self::BlockNumber>;
+        #[pallet::constant]
+		type SlotValidity: Get<Self::BlockNumber>;
         /// The module receiving funds paid by depositors, typically a company
         /// reserve
         type FundsCollector: OnUnbalanced<NegativeImbalanceOf<Self>>;
