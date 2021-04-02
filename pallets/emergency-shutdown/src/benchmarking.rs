@@ -24,22 +24,22 @@ use super::*;
 
 use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
 use frame_support::{
-	traits::{EnsureOrigin, UnfilteredDispatchable},
+    traits::{EnsureOrigin, UnfilteredDispatchable},
 };
 use sp_std::prelude::*;
 use crate::Pallet as EmergencyShutdown;
 
 benchmarks! {
-	toggle {
-		let u in 0 .. 1000;
+    toggle {
+        let u in 0 .. 1000;
 
-		let call = Call::<T>::toggle();
-		let origin = T::ShutdownOrigin::successful_origin();
-	}: { call.dispatch_bypass_filter(origin)? }
+        let call = Call::<T>::toggle();
+        let origin = T::ShutdownOrigin::successful_origin();
+    }: { call.dispatch_bypass_filter(origin)? }
 }
 
 impl_benchmark_test_suite!(
-	EmergencyShutdown,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
+    EmergencyShutdown,
+    crate::tests::new_test_ext(),
+    crate::tests::Test,
 );

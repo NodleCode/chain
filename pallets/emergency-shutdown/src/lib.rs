@@ -29,52 +29,52 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use frame_support::pallet_prelude::*;
-	use frame_system::pallet_prelude::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
 
-	#[pallet::config]
-	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		type ShutdownOrigin: EnsureOrigin<Self::Origin>;
-	}
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type ShutdownOrigin: EnsureOrigin<Self::Origin>;
+    }
 
-	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
-	pub struct Pallet<T>(PhantomData<T>);
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(PhantomData<T>);
 
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 
-	}
+    }
 
-	#[pallet::call]
-	impl<T: Config> Pallet<T> {
-		/// Toggle the shutdown state if authorized to do so.
-		#[pallet::weight(10_000_000)]
-		pub fn toggle(
-			origin: OriginFor<T>,
-		) -> DispatchResultWithPostInfo {
-			T::ShutdownOrigin::try_origin(origin)
-				.map(|_| ())
-				.or_else(ensure_root)?;
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        /// Toggle the shutdown state if authorized to do so.
+        #[pallet::weight(10_000_000)]
+        pub fn toggle(
+            origin: OriginFor<T>,
+        ) -> DispatchResultWithPostInfo {
+            T::ShutdownOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
 
-			<Shutdown<T>>::put(!Self::shutdown());
-			Self::deposit_event(Event::ShutdownToggled(Self::shutdown()));
+            <Shutdown<T>>::put(!Self::shutdown());
+            Self::deposit_event(Event::ShutdownToggled(Self::shutdown()));
 
-			Ok(().into())
-		}
-	}
+            Ok(().into())
+        }
+    }
 
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	#[pallet::metadata()]
-	pub enum Event<T: Config> {
-		/// Shutdown state was toggled, to either on or off.
-		ShutdownToggled(bool),
-	}
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::metadata()]
+    pub enum Event<T: Config> {
+        /// Shutdown state was toggled, to either on or off.
+        ShutdownToggled(bool),
+    }
 
-	#[pallet::storage]
-	#[pallet::getter(fn shutdown)]
-	pub type Shutdown<T: Config> = StorageValue<_, bool, ValueQuery>;
+    #[pallet::storage]
+    #[pallet::getter(fn shutdown)]
+    pub type Shutdown<T: Config> = StorageValue<_, bool, ValueQuery>;
 
 }
