@@ -898,7 +898,7 @@ construct_runtime!(
         // Nodle Stack
         PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>},
         PkiRootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event, Storage},
+        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event<T>, Storage},
         Allocations: pallet_allocations::{Module, Call, Event<T>, Storage},
         AllocationsOracles: pallet_membership::<Instance5>::{Module, Call, Storage, Event<T>, Config<T>},
     }
