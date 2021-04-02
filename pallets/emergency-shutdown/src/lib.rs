@@ -21,10 +21,9 @@
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
 
-mod benchmarking;
-
 #[cfg(test)]
 mod tests;
+mod benchmarking;
 
 pub use pallet::*;
 
