@@ -22,9 +22,12 @@
 
 use super::*;
 
-use frame_benchmarking::benchmarks;
-use frame_support::traits::UnfilteredDispatchable;
+use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
+use frame_support::{
+    traits::{EnsureOrigin, UnfilteredDispatchable},
+};
 use sp_std::prelude::*;
+use crate::Pallet as EmergencyShutdown;
 
 benchmarks! {
     toggle {
@@ -35,16 +38,8 @@ benchmarks! {
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_toggle::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(
+    EmergencyShutdown,
+    crate::tests::new_test_ext(),
+    crate::tests::Test,
+);

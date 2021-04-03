@@ -39,7 +39,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        TestModule: pallet_emergency_shutdown::{Module, Call, Storage, Event},
+        TestModule: pallet_emergency_shutdown::{Module, Call, Storage, Event<T>},
     }
 );
 
