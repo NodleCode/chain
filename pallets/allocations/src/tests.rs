@@ -82,7 +82,7 @@ impl pallet_balances::Config for Test {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
     type WeightInfo = ();
 }
 
@@ -109,7 +109,7 @@ impl WithAccountId<u64> for Receiver {
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;
