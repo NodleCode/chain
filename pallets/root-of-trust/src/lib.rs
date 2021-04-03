@@ -22,20 +22,24 @@
 //! can be used to let entities represented by their `AccountId` manage certificates
 //! and off-chain certificates in Public Key Infrastructure fashion (SSL / TLS like).
 
-mod benchmarking;
+#[cfg(test)]
 mod tests;
+mod benchmarking;
 
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage,
-    dispatch::DispatchResult,
-    ensure,
-    traits::{ChangeMembers, Currency, ExistenceRequirement, Get, OnUnbalanced, WithdrawReasons},
-    Parameter,
+    traits::{
+        ChangeMembers, Currency, ExistenceRequirement,
+        OnUnbalanced, WithdrawReasons
+    },
 };
-use frame_system::{self as system, ensure_signed};
+use frame_system::{self as system};
 use parity_scale_codec::{Decode, Encode};
-use sp_runtime::traits::{CheckedAdd, MaybeDisplay, MaybeSerializeDeserialize, Member};
+use sp_runtime::{
+    traits::{CheckedAdd, MaybeDisplay},
+};
 use sp_std::{fmt::Debug, prelude::Vec};
+
+pub use pallet::*;
 
 type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as system::Config>::AccountId>>::Balance;
@@ -53,80 +57,60 @@ pub struct RootCertificate<AccountId, CertificateId, BlockNumber> {
     child_revocations: Vec<CertificateId>,
 }
 
-/// The module's configuration trait.
-pub trait Config: system::Config {
-    type Event: From<Event<Self>> + Into<<Self as system::Config>::Event>;
+#[frame_support::pallet]
+pub mod pallet {
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
+    use super::*;
 
-    /// The currency used to represent the voting power
-    type Currency: Currency<Self::AccountId>;
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
 
-    /// How a certificate public key is represented, typically `AccountId`
-    type CertificateId: Member
-        + Parameter
-        + MaybeSerializeDeserialize
-        + Debug
-        + MaybeDisplay
-        + Ord
-        + Default;
-    /// How much a new root certificate costs
-    type SlotBookingCost: Get<BalanceOf<Self>>;
-    /// How much renewing a root certificate costs
-    type SlotRenewingCost: Get<BalanceOf<Self>>;
-    /// How long a certificate is considered valid
-    type SlotValidity: Get<Self::BlockNumber>;
-    /// The module receiving funds paid by depositors, typically a company
-    /// reserve
-    type FundsCollector: OnUnbalanced<NegativeImbalanceOf<Self>>;
-}
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-decl_event!(
-    pub enum Event<T>
-    where
-        AccountId = <T as system::Config>::AccountId,
-        CertificateId = <T as Config>::CertificateId,
-    {
-        /// A new slot has been booked
-        SlotTaken(AccountId, CertificateId),
-        /// An exisitng slot has been renewed (its validity period was extended)
-        SlotRenewed(CertificateId),
-        /// A slot has been revoked by its owner
-        SlotRevoked(CertificateId),
-        /// A child certificate was revoked
-        ChildSlotRevoked(CertificateId, CertificateId),
+        /// The currency used to represent the voting power
+        type Currency: Currency<Self::AccountId>;
+
+        /// How a certificate public key is represented, typically `AccountId`
+        type CertificateId: Member
+            + Parameter
+            + MaybeSerializeDeserialize
+            + Debug
+            + MaybeDisplay
+            + Ord
+            + Default;
+        /// How much a new root certificate costs
+		#[pallet::constant]
+        type SlotBookingCost: Get<BalanceOf<Self>>;
+        /// How much renewing a root certificate costs
+        #[pallet::constant]
+		type SlotRenewingCost: Get<BalanceOf<Self>>;
+        /// How long a certificate is considered valid
+        #[pallet::constant]
+		type SlotValidity: Get<Self::BlockNumber>;
+        /// The module receiving funds paid by depositors, typically a company
+        /// reserve
+        type FundsCollector: OnUnbalanced<NegativeImbalanceOf<Self>>;
     }
-);
 
-decl_error! {
-    pub enum Error for Module<T: Config> {
-        /// `origin` a member, this function may need a member account id
-        NotAMember,
-        /// Slot was already taken, you will need to use another certificate id
-        SlotTaken,
-        /// Not enough funds to pay the fee
-        NotEnoughFunds,
-        /// Slot is no longer valid
-        NoLongerValid,
-        /// `origin` is not the slot owner
-        NotTheOwner,
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(PhantomData<T>);
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+
     }
-}
 
-decl_storage! {
-    trait Store for Module<T: Config> as RootOfTrustModule {
-        Members get(fn members): Vec<T::AccountId>;
-        Slots get(fn slots): map hasher(blake2_128_concat)
-            T::CertificateId => RootCertificate<T::AccountId, T::CertificateId, T::BlockNumber>;
-    }
-}
-
-decl_module! {
-    /// The module declaration.
-    pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        fn deposit_event() = default;
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
 
         /// Book a certificate slot
-        #[weight = 160_000_000]
-        fn book_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
+        #[pallet::weight(160_000_000)]
+        pub fn book_slot(
+            origin: OriginFor<T>,
+            certificate_id: T::CertificateId,
+        ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
             ensure!(Self::is_member(&sender), Error::<T>::NotAMember);
             ensure!(!<Slots<T>>::contains_key(&certificate_id), Error::<T>::SlotTaken);
@@ -147,13 +131,16 @@ decl_module! {
                 child_revocations: Vec::new(),
             });
 
-            Self::deposit_event(RawEvent::SlotTaken(sender, certificate_id));
-            Ok(())
+            Self::deposit_event(Event::SlotTaken(sender, certificate_id));
+            Ok(().into())
         }
 
         /// Renew a non expired slot and make it valid for a longer time
-        #[weight = 150_000_000]
-        fn renew_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
+        #[pallet::weight(150_000_000)]
+        pub fn renew_slot(
+            origin: OriginFor<T>,
+            certificate_id: T::CertificateId,
+        ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
 
             let mut slot = <Slots<T>>::get(&certificate_id);
@@ -168,13 +155,16 @@ decl_module! {
             slot.renewed = <system::Module<T>>::block_number();
             <Slots<T>>::insert(&certificate_id, slot);
 
-            Self::deposit_event(RawEvent::SlotRenewed(certificate_id));
-            Ok(())
+            Self::deposit_event(Event::SlotRenewed(certificate_id));
+            Ok(().into())
         }
 
         /// Revoke a slot before it is expired thus invalidating all child certificates
-        #[weight = 75_000_000]
-        fn revoke_slot(origin, certificate_id: T::CertificateId) -> DispatchResult {
+        #[pallet::weight(75_000_000)]
+        pub fn revoke_slot(
+            origin: OriginFor<T>,
+            certificate_id: T::CertificateId
+        ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
 
             let mut slot = <Slots<T>>::get(&certificate_id);
@@ -184,13 +174,17 @@ decl_module! {
             slot.revoked = true;
             <Slots<T>>::insert(&certificate_id, slot);
 
-            Self::deposit_event(RawEvent::SlotRevoked(certificate_id));
-            Ok(())
+            Self::deposit_event(Event::SlotRevoked(certificate_id));
+            Ok(().into())
         }
 
         /// Mark a slot's child as revoked thus invalidating it
-        #[weight = 75_000_000]
-        fn revoke_child(origin, root: T::CertificateId, child: T::CertificateId) -> DispatchResult {
+        #[pallet::weight(75_000_000)]
+        pub fn revoke_child(
+            origin: OriginFor<T>,
+            root: T::CertificateId,
+            child: T::CertificateId,
+        ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
 
             let mut slot = <Slots<T>>::get(&root);
@@ -201,13 +195,56 @@ decl_module! {
             slot.child_revocations.push(child.clone());
             <Slots<T>>::insert(&root, slot);
 
-            Self::deposit_event(RawEvent::ChildSlotRevoked(root, child));
-            Ok(())
+            Self::deposit_event(Event::ChildSlotRevoked(root, child));
+            Ok(().into())
         }
     }
+
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::metadata(T::AccountId = "AccountId", T::CertificateId = "CertificateId")]
+    pub enum Event<T: Config> {
+        /// A new slot has been booked
+        SlotTaken(T::AccountId, T::CertificateId),
+        /// An exisitng slot has been renewed (its validity period was extended)
+        SlotRenewed(T::CertificateId),
+        /// A slot has been revoked by its owner
+        SlotRevoked(T::CertificateId),
+        /// A child certificate was revoked
+        ChildSlotRevoked(T::CertificateId, T::CertificateId),
+    }
+
+    #[pallet::error]
+    pub enum Error<T> {
+        /// `origin` a member, this function may need a member account id
+        NotAMember,
+        /// Slot was already taken, you will need to use another certificate id
+        SlotTaken,
+        /// Not enough funds to pay the fee
+        NotEnoughFunds,
+        /// Slot is no longer valid
+        NoLongerValid,
+        /// `origin` is not the slot owner
+        NotTheOwner,
+    }
+
+    #[pallet::storage]
+    #[pallet::getter(fn members)]
+    pub type Members<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+
+    #[pallet::storage]
+    #[pallet::getter(fn slots)]
+    pub type Slots<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::CertificateId,
+        RootCertificate<T::AccountId, T::CertificateId, T::BlockNumber>,
+        ValueQuery,
+    >;
 }
 
-impl<T: Config> Module<T> {
+impl<T: Config>  Pallet<T> {
+
     fn is_member(who: &T::AccountId) -> bool {
         Self::members().contains(who)
     }
