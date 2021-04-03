@@ -39,6 +39,9 @@ use sp_runtime::{
 };
 use sp_std::{fmt::Debug, prelude::Vec};
 
+pub mod weights;
+pub use weights::WeightInfo;
+
 pub use pallet::*;
 
 type BalanceOf<T> =
@@ -91,6 +94,8 @@ pub mod pallet {
         /// The module receiving funds paid by depositors, typically a company
         /// reserve
         type FundsCollector: OnUnbalanced<NegativeImbalanceOf<Self>>;
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -106,7 +111,9 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
 
         /// Book a certificate slot
-        #[pallet::weight(160_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::book_slot()
+		)]
         pub fn book_slot(
             origin: OriginFor<T>,
             certificate_id: T::CertificateId,
@@ -136,7 +143,9 @@ pub mod pallet {
         }
 
         /// Renew a non expired slot and make it valid for a longer time
-        #[pallet::weight(150_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::renew_slot()
+		)]
         pub fn renew_slot(
             origin: OriginFor<T>,
             certificate_id: T::CertificateId,
@@ -160,7 +169,9 @@ pub mod pallet {
         }
 
         /// Revoke a slot before it is expired thus invalidating all child certificates
-        #[pallet::weight(75_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::revoke_slot()
+		)]
         pub fn revoke_slot(
             origin: OriginFor<T>,
             certificate_id: T::CertificateId
@@ -179,7 +190,9 @@ pub mod pallet {
         }
 
         /// Mark a slot's child as revoked thus invalidating it
-        #[pallet::weight(75_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::revoke_child()
+		)]
         pub fn revoke_child(
             origin: OriginFor<T>,
             root: T::CertificateId,

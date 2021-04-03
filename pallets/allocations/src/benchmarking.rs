@@ -31,16 +31,34 @@ use crate::Pallet as Allocations;
 const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
+pub struct BenchmarkConfig<T: Config> {
+    grantee: T::AccountId,
+    oracle: T::AccountId
+}
+
+fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
+    let grantee = account("grantee", u, SEED);
+    let oracle = account("oracle", u, SEED);
+
+	let deposit_applying = T::ExistentialDeposit::get();
+
+    T::Currency::make_free_balance_be(&grantee, deposit_applying);
+    T::Currency::make_free_balance_be(&oracle, deposit_applying);
+
+	BenchmarkConfig {
+        grantee,
+        oracle,
+	}
+}
+
 benchmarks! {
     allocate {
-        let u in 1 .. 1000;
         let b in 1 .. MAX_BYTES;
 
-        let grantee: T::AccountId = account("grantee", u, SEED);
-        let oracle: T::AccountId = account("oracle", u, SEED);
+        let config = make_benchmark_config::<T>(0);
 
-        Pallet::<T>::initialize_members(&[oracle.clone()]);
-    }: _(RawOrigin::Signed(oracle), grantee, 100u32.into(), vec![1; b as usize])
+        Pallet::<T>::initialize_members(&[config.oracle.clone()]);
+    }: _(RawOrigin::Signed(config.oracle), config.grantee, 100u32.into(), vec![1; b as usize])
 }
 
 impl_benchmark_test_suite!(

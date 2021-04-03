@@ -77,6 +77,7 @@ ord_parameter_types! {
 impl Config for Test {
     type Event = ();
     type ShutdownOrigin = EnsureSignedBy<Admin, u64>;
+    type WeightInfo = ();
 }
 
 // This function basically just builds a genesis storage key/value store according to

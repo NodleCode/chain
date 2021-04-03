@@ -25,17 +25,23 @@
 mod tests;
 mod benchmarking;
 
+pub mod weights;
+pub use weights::WeightInfo;
+
 pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
+	use super::*;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         type ShutdownOrigin: EnsureOrigin<Self::Origin>;
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -50,7 +56,9 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Toggle the shutdown state if authorized to do so.
-        #[pallet::weight(10_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::toggle()
+		)]
         pub fn toggle(
             origin: OriginFor<T>,
         ) -> DispatchResultWithPostInfo {

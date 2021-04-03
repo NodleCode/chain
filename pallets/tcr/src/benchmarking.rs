@@ -90,27 +90,20 @@ fn do_apply<T: Config<I>, I: 'static>(config: &BenchmarkConfig<T, I>) -> Dispatc
 benchmarks_instance_pallet! {
 
     apply {
-        let u in 0 .. 1000;
         let b in 0 .. MAX_METADATA_SIZE;
 
-        let config = make_benchmark_config::<T, _>(u, b);
+        let config = make_benchmark_config::<T, _>(0, b);
     }: _(RawOrigin::Signed(config.applicant), config.metadata, config.deposit_applying)
 
     counter {
-        let u in 0 .. 1000;
-        let b in 0 .. MAX_METADATA_SIZE;
-
-        let config = make_benchmark_config::<T, _>(u, b);
+        let config = make_benchmark_config::<T, _>(0, 0);
 
         do_apply::<T, I>(&config)?;
     }: _(RawOrigin::Signed(config.counterer), config.applicant, config.deposit_countering)
 
     vote {
-        let u in 0 .. 1000;
-        let b in 0 .. MAX_METADATA_SIZE;
-
-        let config = make_benchmark_config::<T, _>(u, b);
-        let supporting = u % 2 == 0;
+        let config = make_benchmark_config::<T, _>(0, 0);
+        let supporting = true;
 
         do_apply::<T, I>(&config)?;
 
@@ -122,10 +115,7 @@ benchmarks_instance_pallet! {
     }: _(RawOrigin::Signed(config.voter), config.applicant, supporting, config.deposit_voting)
 
     challenge {
-        let u in 0 .. 1000;
-        let b in 0 .. MAX_METADATA_SIZE;
-
-        let config = make_benchmark_config::<T, _>(u, b);
+        let config = make_benchmark_config::<T, _>(0, 0);
 
         do_apply::<T, I>(&config)?;
 

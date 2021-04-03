@@ -31,8 +31,6 @@ use crate::Pallet as EmergencyShutdown;
 
 benchmarks! {
     toggle {
-        let u in 0 .. 1000;
-
         let call = Call::<T>::toggle();
         let origin = T::ShutdownOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }

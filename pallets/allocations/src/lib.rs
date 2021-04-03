@@ -36,6 +36,9 @@ use sp_runtime::{
     Perbill, DispatchResult,
 };
 
+pub mod weights;
+pub use weights::WeightInfo;
+
 pub use pallet::*;
 
 type BalanceOf<T> =
@@ -63,6 +66,9 @@ pub mod pallet {
         /// Runtime existential deposit
         #[pallet::constant]
         type ExistentialDeposit: Get<BalanceOf<Self>>;
+
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -78,7 +84,9 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
 
         /// Can only be called by an oracle, trigger a coin creation and an event
-        #[pallet::weight(50_000_000)]
+		#[pallet::weight(
+			<T as pallet::Config>::WeightInfo::allocate(proof.len() as u32)
+		)]
         pub fn allocate(
             origin: OriginFor<T>,
             to: T::AccountId,

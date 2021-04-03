@@ -38,6 +38,9 @@ use sp_runtime::{
 };
 use sp_std::prelude::Vec;
 
+pub mod weights;
+pub use weights::WeightInfo;
+
 pub use pallet::*;
 
 type BalanceOf<T, I> =
@@ -121,6 +124,8 @@ pub mod pallet {
         type LoosersSlash: Get<Perbill>;
         /// Hook that we call whenever some members are added or removed from the TCR
         type ChangeMembers: ChangeMembers<Self::AccountId>;
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -150,7 +155,9 @@ pub mod pallet {
     impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
         /// Apply to join the TCR, `metadata` can be used to add something like a URL or ID
-        #[pallet::weight(150_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::apply(metadata.len() as u32)
+		)]
         pub fn apply(
             origin: OriginFor<T>,
             metadata: Vec<u8>,
@@ -186,7 +193,9 @@ pub mod pallet {
         }
 
         /// Counter a pending application, this will initiate a challenge
-        #[pallet::weight(100_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::counter()
+		)]
         pub fn counter(
             origin: OriginFor<T>,
             member: T::AccountId,
@@ -213,7 +222,9 @@ pub mod pallet {
         }
 
         /// Vote in support or opposition of a given challenge
-        #[pallet::weight(100_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::vote()
+		)]
         pub fn vote(
             origin: OriginFor<T>,
             member: T::AccountId,
@@ -243,7 +254,9 @@ pub mod pallet {
         }
 
         /// Trigger a new challenge to remove an existing member
-        #[pallet::weight(150_000_000)]
+		#[pallet::weight(
+			T::WeightInfo::challenge()
+		)]
         pub fn challenge(
             origin: OriginFor<T>,
             member: T::AccountId,
