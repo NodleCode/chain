@@ -29,8 +29,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 pub fn wasm_binary_unwrap() -> &'static [u8] {
     WASM_BINARY.expect(
         "Development wasm binary is not available. This means the client is \
-						built with `SKIP_WASM_BUILD` flag and it is only usable for \
-						production chains. Please rebuild with the flag disabled.",
+                        built with `SKIP_WASM_BUILD` flag and it is only usable for \
+                        production chains. Please rebuild with the flag disabled.",
     )
 }
 
@@ -742,7 +742,7 @@ impl pallet_tcr::Config<pallet_tcr::Instance1> for Runtime {
     type FinalizeApplicationPeriod = FinalizeApplicationPeriod;
     type FinalizeChallengePeriod = FinalizeChallengePeriod;
     type ChangeMembers = PkiRootOfTrust;
-	type WeightInfo = pallet_tcr::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_tcr::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -762,14 +762,14 @@ impl pallet_root_of_trust::Config for Runtime {
     type SlotRenewingCost = SlotRenewingCost;
     type SlotValidity = SlotValidity;
     type FundsCollector = CompanyReserve;
-	type WeightInfo = pallet_root_of_trust::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_root_of_trust::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_emergency_shutdown::Config for Runtime {
     type Event = Event;
     type ShutdownOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-	type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -784,7 +784,7 @@ impl pallet_allocations::Config for Runtime {
     type ProtocolFeeReceiver = CompanyReserve;
     type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
     type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
-	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {

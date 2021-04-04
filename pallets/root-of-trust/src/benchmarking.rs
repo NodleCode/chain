@@ -31,7 +31,7 @@ use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::{prelude::*, vec};
 
-use crate::Pallet as Rot;
+use crate::Pallet as RootOfTrust;
 
 const SEED_MANAGER: u32 = 0;
 
@@ -73,7 +73,7 @@ benchmarks! {
 }
 
 impl_benchmark_test_suite!(
-	Rot,
+	RootOfTrust,
 	crate::tests::new_test_ext(),
 	crate::tests::Test,
 );
