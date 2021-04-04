@@ -21,18 +21,14 @@
 //! A module that is called by the `collective` and is in charge of holding
 //! the company funds.
 
-mod benchmarking;
-
 #[cfg(test)]
 mod tests;
+mod benchmarking;
 
 use frame_support::{
-    decl_event, decl_module, decl_storage,
-    traits::{Currency, EnsureOrigin, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
+    traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
     weights::GetDispatchInfo,
-    Parameter,
 };
-use frame_system::{ensure_root, ensure_signed};
 use nodle_support::WithAccountId;
 use sp_runtime::{
     traits::{AccountIdConversion, Dispatchable},
@@ -40,26 +36,141 @@ use sp_runtime::{
 };
 use sp_std::prelude::Box;
 
+pub use pallet::*;
+
 type BalanceOf<T, I> =
     <<T as Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 type NegativeImbalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<
     <T as frame_system::Config>::AccountId,
 >>::NegativeImbalance;
 
-/// The module's configuration trait.
-pub trait Config<I: Instance = DefaultInstance>: frame_system::Config {
-    type Event: From<Event<Self, I>> + Into<<Self as frame_system::Config>::Event>;
-    type ExternalOrigin: EnsureOrigin<Self::Origin>;
-    type Currency: Currency<Self::AccountId>;
-    type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
-    type ModuleId: Get<ModuleId>;
-}
+#[frame_support::pallet]
+pub mod pallet {
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
+    use super::*;
 
-decl_storage! {
-    trait Store for Module<T: Config<I>, I: Instance = DefaultInstance> as Reserve {}
-    add_extra_genesis {
-        build(|_config| {
-            let our_account = &<Module<T, I>>::account_id();
+    #[pallet::config]
+    pub trait Config<I: 'static = ()>: frame_system::Config {
+        type Event: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::Event>;
+        type ExternalOrigin: EnsureOrigin<Self::Origin>;
+        type Currency: Currency<Self::AccountId>;
+        type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+        type ModuleId: Get<ModuleId>;
+    }
+
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T, I=()>(PhantomData<(T, I)>);
+
+    #[pallet::hooks]
+    impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+
+    }
+
+    #[pallet::call]
+    impl<T: Config<I>, I: 'static> Pallet<T, I> {
+
+        /// Spend `amount` funds from the reserve account to `to`.
+        #[pallet::weight(100_000_000)]
+        pub fn spend(
+            origin: OriginFor<T>,
+            to: T::AccountId,
+            amount: BalanceOf<T, I>
+        ) -> DispatchResultWithPostInfo {
+            T::ExternalOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
+
+            let _ = T::Currency::transfer(
+                &Self::account_id(),
+                &to,
+                amount,
+                ExistenceRequirement::KeepAlive
+            );
+
+            Self::deposit_event(Event::SpentFunds(to, amount));
+
+            Ok(().into())
+        }
+
+        /// Deposit `amount` tokens in the treasure account
+        #[pallet::weight(50_000_000)]
+        pub fn tip(
+            origin: OriginFor<T>,
+            amount: BalanceOf<T, I>
+        ) -> DispatchResultWithPostInfo {
+            let tipper = ensure_signed(origin)?;
+
+            let _ = T::Currency::transfer(
+                &tipper,
+                &Self::account_id(),
+                amount,
+                ExistenceRequirement::AllowDeath
+            );
+
+            Self::deposit_event(Event::TipReceived(tipper, amount));
+
+            Ok(().into())
+        }
+
+        /// Dispatch a call as coming from the reserve account
+        #[pallet::weight(
+            (
+                call.get_dispatch_info().weight + 10_000,
+                call.get_dispatch_info().class,
+            )
+        )]
+        pub fn apply_as(
+            origin: OriginFor<T>,
+            call: Box<<T as Config<I>>::Call>
+        ) -> DispatchResultWithPostInfo {
+            T::ExternalOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
+
+            let res = call.dispatch(frame_system::RawOrigin::Root.into());
+
+            Self::deposit_event(
+                Event::ReserveOp(res.map(|_| ()).map_err(|e| e.error)),
+            );
+
+            Ok(().into())
+        }
+    }
+
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T, I> = "Balance")]
+    pub enum Event<T: Config<I>, I: 'static = ()> {
+        /// Some amount was deposited (e.g. for transaction fees).
+        Deposit(BalanceOf<T, I>),
+        /// Some funds were spent from the reserve.
+        SpentFunds(T::AccountId, BalanceOf<T, I>),
+        /// Someone tipped the company reserve
+        TipReceived(T::AccountId, BalanceOf<T, I>),
+        /// We executed a call coming from the company reserve account
+        ReserveOp(DispatchResult),
+    }
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config<I>, I: 'static = ()>{
+		pub phantom: sp_std::marker::PhantomData<(T, I)>,
+	}
+
+	#[cfg(feature = "std")]
+	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
+		fn default() -> Self {
+			Self {
+				phantom: Default::default(),
+			}
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
+		fn build(&self) {
+            let our_account = &<Pallet<T, I>>::account_id();
 
             if T::Currency::free_balance(our_account) < T::Currency::minimum_balance() {
                 let _ = T::Currency::make_free_balance_be(
@@ -67,85 +178,23 @@ decl_storage! {
                     T::Currency::minimum_balance(),
                 );
             }
-        });
-    }
+        }
+	}
 }
 
-decl_event!(
-    pub enum Event<T, I: Instance = DefaultInstance>
-    where
-        AccountId = <T as frame_system::Config>::AccountId,
-        Balance = BalanceOf<T, I>,
-    {
-        /// Some amount was deposited (e.g. for transaction fees).
-        Deposit(Balance),
-        /// Some funds were spent from the reserve.
-        SpentFunds(AccountId, Balance),
-        /// Someone tipped the company reserve
-        TipReceived(AccountId, Balance),
-        /// We executed a call coming from the company reserve account
-        ReserveOp(DispatchResult),
-    }
-);
-
-decl_module! {
-    /// The module declaration.
-    pub struct Module<T: Config<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
-        fn deposit_event() = default;
-
-        /// Spend `amount` funds from the reserve account to `to`.
-        #[weight = 100_000_000]
-        pub fn spend(origin, to: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResult {
-            T::ExternalOrigin::try_origin(origin)
-                .map(|_| ())
-                .or_else(ensure_root)?;
-
-            let _ = T::Currency::transfer(&Self::account_id(), &to, amount, ExistenceRequirement::KeepAlive);
-
-            Self::deposit_event(RawEvent::SpentFunds(to, amount));
-
-            Ok(())
-        }
-
-        /// Deposit `amount` tokens in the treasure account
-        #[weight = 50_000_000]
-        pub fn tip(origin, amount: BalanceOf<T, I>) -> DispatchResult {
-            let tipper = ensure_signed(origin)?;
-
-            let _ = T::Currency::transfer(&tipper, &Self::account_id(), amount, ExistenceRequirement::AllowDeath);
-
-            Self::deposit_event(RawEvent::TipReceived(tipper, amount));
-
-            Ok(())
-        }
-
-        /// Dispatch a call as coming from the reserve account
-        #[weight = (call.get_dispatch_info().weight + 10_000, call.get_dispatch_info().class)]
-        pub fn apply_as(origin, call: Box<<T as Config<I>>::Call>) {
-            T::ExternalOrigin::try_origin(origin)
-                .map(|_| ())
-                .or_else(ensure_root)?;
-
-            let res = call.dispatch(frame_system::RawOrigin::Root.into());
-
-            Self::deposit_event(RawEvent::ReserveOp(res.map(|_| ()).map_err(|e| e.error)));
-        }
-    }
-}
-
-impl<T: Config<I>, I: Instance> WithAccountId<T::AccountId> for Module<T, I> {
+impl<T: Config<I>, I: 'static> WithAccountId<T::AccountId> for Pallet<T, I> {
     fn account_id() -> T::AccountId {
         T::ModuleId::get().into_account()
     }
 }
 
-impl<T: Config<I>, I: Instance> OnUnbalanced<NegativeImbalanceOf<T, I>> for Module<T, I> {
+impl<T: Config<I>, I: 'static> OnUnbalanced<NegativeImbalanceOf<T, I>> for Pallet<T, I> {
     fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<T, I>) {
         let numeric_amount = amount.peek();
 
         // Must resolve into existing but better to be safe.
         let _ = T::Currency::resolve_creating(&Self::account_id(), amount);
 
-        Self::deposit_event(RawEvent::Deposit(numeric_amount));
+        Self::deposit_event(Event::Deposit(numeric_amount));
     }
 }
