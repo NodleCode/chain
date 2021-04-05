@@ -21,9 +21,9 @@
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
 
+mod benchmarking;
 #[cfg(test)]
 mod tests;
-mod benchmarking;
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -32,16 +32,16 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-	use super::*;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         type ShutdownOrigin: EnsureOrigin<Self::Origin>;
-		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -49,19 +49,13 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Toggle the shutdown state if authorized to do so.
-		#[pallet::weight(
-			T::WeightInfo::toggle()
-		)]
-        pub fn toggle(
-            origin: OriginFor<T>,
-        ) -> DispatchResultWithPostInfo {
+        #[pallet::weight(T::WeightInfo::toggle())]
+        pub fn toggle(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::ShutdownOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
@@ -84,5 +78,4 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn shutdown)]
     pub type Shutdown<T: Config> = StorageValue<_, bool, ValueQuery>;
-
 }

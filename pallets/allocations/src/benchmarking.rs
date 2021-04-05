@@ -33,22 +33,19 @@ const SEED: u32 = 0;
 
 pub struct BenchmarkConfig<T: Config> {
     grantee: T::AccountId,
-    oracle: T::AccountId
+    oracle: T::AccountId,
 }
 
 fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
     let grantee = account("grantee", u, SEED);
     let oracle = account("oracle", u, SEED);
 
-	let deposit_applying = T::ExistentialDeposit::get();
+    let deposit_applying = T::ExistentialDeposit::get();
 
     T::Currency::make_free_balance_be(&grantee, deposit_applying);
     T::Currency::make_free_balance_be(&oracle, deposit_applying);
 
-	BenchmarkConfig {
-        grantee,
-        oracle,
-	}
+    BenchmarkConfig { grantee, oracle }
 }
 
 benchmarks! {

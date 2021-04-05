@@ -18,9 +18,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod benchmarking;
 #[cfg(test)]
 mod tests;
-mod benchmarking;
 
 use sp_std::prelude::*;
 
@@ -33,7 +33,7 @@ use nodle_support::WithAccountId;
 
 use sp_runtime::{
     traits::{CheckedAdd, Saturating},
-    Perbill, DispatchResult,
+    DispatchResult, Perbill,
 };
 
 pub mod weights;
@@ -46,13 +46,12 @@ type BalanceOf<T> =
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use super::*;
 
     #[pallet::config]
     pub trait Config: frame_system::Config + pallet_emergency_shutdown::Config {
-
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         type Currency: Currency<Self::AccountId>;
 
@@ -67,8 +66,8 @@ pub mod pallet {
         #[pallet::constant]
         type ExistentialDeposit: Get<BalanceOf<Self>>;
 
-		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -76,15 +75,12 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-
         /// Can only be called by an oracle, trigger a coin creation and an event
-		#[pallet::weight(
+        #[pallet::weight(
 			<T as pallet::Config>::WeightInfo::allocate(proof.len() as u32)
 		)]
         pub fn allocate(
@@ -94,7 +90,10 @@ pub mod pallet {
             proof: Vec<u8>,
         ) -> DispatchResultWithPostInfo {
             Self::ensure_oracle(origin)?;
-            ensure!(!pallet_emergency_shutdown::Module::<T>::shutdown(), Error::<T>::UnderShutdown);
+            ensure!(
+                !pallet_emergency_shutdown::Module::<T>::shutdown(),
+                Error::<T>::UnderShutdown
+            );
 
             let coins_already_allocated = Self::coins_consumed();
             let coins_that_will_be_consumed = coins_already_allocated
@@ -116,10 +115,7 @@ pub mod pallet {
                 &T::ProtocolFeeReceiver::account_id(),
                 amount_for_protocol,
             )?;
-            Self::ensure_satisfy_existential_deposit(
-                &to,
-                amount_for_grantee
-            )?;
+            Self::ensure_satisfy_existential_deposit(&to, amount_for_grantee)?;
 
             <CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
@@ -127,19 +123,14 @@ pub mod pallet {
                 &T::ProtocolFeeReceiver::account_id(),
                 T::Currency::issue(amount_for_protocol),
             );
-            T::Currency::resolve_creating(
-                &to,
-                T::Currency::issue(amount_for_grantee),
-            );
+            T::Currency::resolve_creating(&to, T::Currency::issue(amount_for_grantee));
 
-            Self::deposit_event(
-                Event::NewAllocation(
-                    to,
-                    amount_for_grantee,
-                    amount_for_protocol,
-                    proof
-                )
-            );
+            Self::deposit_event(Event::NewAllocation(
+                to,
+                amount_for_grantee,
+                amount_for_protocol,
+                proof,
+            ));
             Ok(().into())
         }
     }
@@ -173,8 +164,7 @@ pub mod pallet {
     pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 }
 
-impl<T: Config>  Pallet<T> {
-
+impl<T: Config> Pallet<T> {
     pub fn is_oracle(who: T::AccountId) -> bool {
         Self::oracles().contains(&who)
     }

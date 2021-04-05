@@ -22,14 +22,8 @@
 
 use super::*;
 
-use frame_support::{
-	pallet_prelude::{DispatchResultWithPostInfo},
-};
-use frame_benchmarking::{
-	benchmarks_instance_pallet,
-	account,
-	impl_benchmark_test_suite
-};
+use frame_benchmarking::{account, benchmarks_instance_pallet, impl_benchmark_test_suite};
+use frame_support::pallet_prelude::DispatchResultWithPostInfo;
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
@@ -79,7 +73,9 @@ fn make_benchmark_config<T: Config<I>, I: 'static>(u: u32, b: u32) -> BenchmarkC
     }
 }
 
-fn do_apply<T: Config<I>, I: 'static>(config: &BenchmarkConfig<T, I>) -> DispatchResultWithPostInfo {
+fn do_apply<T: Config<I>, I: 'static>(
+    config: &BenchmarkConfig<T, I>,
+) -> DispatchResultWithPostInfo {
     <Module<T, _>>::apply(
         RawOrigin::Signed(config.applicant.clone()).into(),
         config.metadata.clone(),
@@ -125,8 +121,4 @@ benchmarks_instance_pallet! {
     }: _(RawOrigin::Signed(config.challenger), config.applicant, config.deposit_challenging)
 }
 
-impl_benchmark_test_suite!(
-	Tcr,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
-);
+impl_benchmark_test_suite!(Tcr, crate::tests::new_test_ext(), crate::tests::Test,);

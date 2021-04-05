@@ -22,21 +22,16 @@
 //! can be used to let entities represented by their `AccountId` manage certificates
 //! and off-chain certificates in Public Key Infrastructure fashion (SSL / TLS like).
 
+mod benchmarking;
 #[cfg(test)]
 mod tests;
-mod benchmarking;
 
-use frame_support::{
-    traits::{
-        ChangeMembers, Currency, ExistenceRequirement,
-        OnUnbalanced, WithdrawReasons
-    },
+use frame_support::traits::{
+    ChangeMembers, Currency, ExistenceRequirement, OnUnbalanced, WithdrawReasons,
 };
 use frame_system::{self as system};
 use parity_scale_codec::{Decode, Encode};
-use sp_runtime::{
-    traits::{CheckedAdd, MaybeDisplay},
-};
+use sp_runtime::traits::{CheckedAdd, MaybeDisplay};
 use sp_std::{fmt::Debug, prelude::Vec};
 
 pub mod weights;
@@ -62,13 +57,12 @@ pub struct RootCertificate<AccountId, CertificateId, BlockNumber> {
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use super::*;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
-
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         /// The currency used to represent the voting power
@@ -83,19 +77,19 @@ pub mod pallet {
             + Ord
             + Default;
         /// How much a new root certificate costs
-		#[pallet::constant]
+        #[pallet::constant]
         type SlotBookingCost: Get<BalanceOf<Self>>;
         /// How much renewing a root certificate costs
         #[pallet::constant]
-		type SlotRenewingCost: Get<BalanceOf<Self>>;
+        type SlotRenewingCost: Get<BalanceOf<Self>>;
         /// How long a certificate is considered valid
         #[pallet::constant]
-		type SlotValidity: Get<Self::BlockNumber>;
+        type SlotValidity: Get<Self::BlockNumber>;
         /// The module receiving funds paid by depositors, typically a company
         /// reserve
         type FundsCollector: OnUnbalanced<NegativeImbalanceOf<Self>>;
-		/// Weight information for extrinsics in this pallet.
-		type WeightInfo: WeightInfo;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -103,49 +97,53 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-
         /// Book a certificate slot
-		#[pallet::weight(
-			T::WeightInfo::book_slot()
-		)]
+        #[pallet::weight(T::WeightInfo::book_slot())]
         pub fn book_slot(
             origin: OriginFor<T>,
             certificate_id: T::CertificateId,
         ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
             ensure!(Self::is_member(&sender), Error::<T>::NotAMember);
-            ensure!(!<Slots<T>>::contains_key(&certificate_id), Error::<T>::SlotTaken);
+            ensure!(
+                !<Slots<T>>::contains_key(&certificate_id),
+                Error::<T>::SlotTaken
+            );
 
-            match T::Currency::withdraw(&sender, T::SlotBookingCost::get(), WithdrawReasons::all(), ExistenceRequirement::AllowDeath) {
+            match T::Currency::withdraw(
+                &sender,
+                T::SlotBookingCost::get(),
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            ) {
                 Ok(imbalance) => T::FundsCollector::on_unbalanced(imbalance),
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
             let now = <system::Module<T>>::block_number();
-            <Slots<T>>::insert(&certificate_id, RootCertificate {
-                owner: sender.clone(),
-                key: certificate_id.clone(),
-                created: now,
-                renewed: now,
-                revoked: false,
-                validity: T::SlotValidity::get(),
-                child_revocations: Vec::new(),
-            });
+            <Slots<T>>::insert(
+                &certificate_id,
+                RootCertificate {
+                    owner: sender.clone(),
+                    key: certificate_id.clone(),
+                    created: now,
+                    renewed: now,
+                    revoked: false,
+                    validity: T::SlotValidity::get(),
+                    child_revocations: Vec::new(),
+                },
+            );
 
             Self::deposit_event(Event::SlotTaken(sender, certificate_id));
             Ok(().into())
         }
 
         /// Renew a non expired slot and make it valid for a longer time
-		#[pallet::weight(
-			T::WeightInfo::renew_slot()
-		)]
+        #[pallet::weight(T::WeightInfo::renew_slot())]
         pub fn renew_slot(
             origin: OriginFor<T>,
             certificate_id: T::CertificateId,
@@ -156,7 +154,12 @@ pub mod pallet {
             ensure!(Self::is_slot_valid(&slot), Error::<T>::NoLongerValid);
             ensure!(slot.owner == sender, Error::<T>::NotTheOwner);
 
-            match T::Currency::withdraw(&sender, T::SlotRenewingCost::get(), WithdrawReasons::all(), ExistenceRequirement::AllowDeath) {
+            match T::Currency::withdraw(
+                &sender,
+                T::SlotRenewingCost::get(),
+                WithdrawReasons::all(),
+                ExistenceRequirement::AllowDeath,
+            ) {
                 Ok(imbalance) => T::FundsCollector::on_unbalanced(imbalance),
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
@@ -169,12 +172,10 @@ pub mod pallet {
         }
 
         /// Revoke a slot before it is expired thus invalidating all child certificates
-		#[pallet::weight(
-			T::WeightInfo::revoke_slot()
-		)]
+        #[pallet::weight(T::WeightInfo::revoke_slot())]
         pub fn revoke_slot(
             origin: OriginFor<T>,
-            certificate_id: T::CertificateId
+            certificate_id: T::CertificateId,
         ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
 
@@ -190,9 +191,7 @@ pub mod pallet {
         }
 
         /// Mark a slot's child as revoked thus invalidating it
-		#[pallet::weight(
-			T::WeightInfo::revoke_child()
-		)]
+        #[pallet::weight(T::WeightInfo::revoke_child())]
         pub fn revoke_child(
             origin: OriginFor<T>,
             root: T::CertificateId,
@@ -203,7 +202,10 @@ pub mod pallet {
             let mut slot = <Slots<T>>::get(&root);
             ensure!(Self::is_slot_valid(&slot), Error::<T>::NoLongerValid);
             ensure!(slot.owner == sender, Error::<T>::NotTheOwner);
-            ensure!(!slot.child_revocations.contains(&child), Error::<T>::NoLongerValid);
+            ensure!(
+                !slot.child_revocations.contains(&child),
+                Error::<T>::NoLongerValid
+            );
 
             slot.child_revocations.push(child.clone());
             <Slots<T>>::insert(&root, slot);
@@ -256,8 +258,7 @@ pub mod pallet {
     >;
 }
 
-impl<T: Config>  Pallet<T> {
-
+impl<T: Config> Pallet<T> {
     fn is_member(who: &T::AccountId) -> bool {
         Self::members().contains(who)
     }

@@ -130,7 +130,7 @@ impl Config for Test {
     type FinalizeChallengePeriod = FinalizeChallengePeriod;
     type LoosersSlash = LoosersSlash;
     type ChangeMembers = TestChangeMembers;
-	type WeightInfo = ();
+    type WeightInfo = ();
 }
 
 const CANDIDATE: u64 = 1;

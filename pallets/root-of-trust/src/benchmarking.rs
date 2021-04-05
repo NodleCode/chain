@@ -22,11 +22,7 @@
 
 use super::*;
 
-use frame_benchmarking::{
-	benchmarks,
-	account,
-	impl_benchmark_test_suite,
-};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::{prelude::*, vec};
@@ -73,7 +69,7 @@ benchmarks! {
 }
 
 impl_benchmark_test_suite!(
-	RootOfTrust,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
+    RootOfTrust,
+    crate::tests::new_test_ext(),
+    crate::tests::Test,
 );

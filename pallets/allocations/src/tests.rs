@@ -92,7 +92,7 @@ ord_parameter_types! {
 impl pallet_emergency_shutdown::Config for Test {
     type Event = ();
     type ShutdownOrigin = EnsureSignedBy<ShutdownAdmin, u64>;
-	type WeightInfo = ();
+    type WeightInfo = ();
 }
 
 parameter_types! {
@@ -115,7 +115,7 @@ impl Config for Test {
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;
     type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
-	type WeightInfo = ();
+    type WeightInfo = ();
 }
 type Errors = Error<Test>;
 
