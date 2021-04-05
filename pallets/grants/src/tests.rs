@@ -33,7 +33,7 @@ fn add_vesting_schedule_works() {
             assert_eq!(Vesting::vesting_schedules(&BOB), vec![schedule.clone()]);
 
             let vested_event =
-                TestEvent::vesting(RawEvent::VestingScheduleAdded(ALICE, BOB, schedule));
+                TestEvent::vesting(Event::VestingScheduleAdded(ALICE, BOB, schedule));
             assert!(System::events()
                 .iter()
                 .any(|record| record.event == vested_event));
