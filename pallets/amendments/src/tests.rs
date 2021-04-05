@@ -18,10 +18,12 @@
 
 #![cfg(test)]
 
-use super::*;
-use crate::{self as pallet_amendments};
+use sp_std::{prelude::*};
+
 use frame_support::{
-    assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Weight,
+    assert_noop, assert_ok, ord_parameter_types,
+    parameter_types,
+	weights::{Weight},
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
 use parity_scale_codec::Encode;
@@ -33,25 +35,30 @@ use sp_runtime::{
     Perbill,
 };
 
+use crate::{
+	self as amendments,
+	Config,
+};
+
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-    pub enum Test where
-        Block = Block,
-        NodeBlock = Block,
-        UncheckedExtrinsic = UncheckedExtrinsic,
-    {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Config, Storage, Event<T>},
-        Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
-    }
+	pub enum Test where
+		Block = Block,
+		NodeBlock = Block,
+		UncheckedExtrinsic = UncheckedExtrinsic,
+	{
+		System: frame_system::{Module, Call, Storage, Config, Event<T>},
+		Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
+		Amendments: amendments::{Module, Call, Storage, Event<T>},
+	}
 );
 
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-    pub BlockWeights: frame_system::limits::BlockWeights =
-        frame_system::limits::BlockWeights::simple_max(1_000_000);
+	pub BlockWeights: frame_system::limits::BlockWeights =
+		frame_system::limits::BlockWeights::simple_max(1_000_000);
 }
 impl frame_system::Config for Test {
     type Origin = Origin;
@@ -70,7 +77,8 @@ impl frame_system::Config for Test {
     type BlockHashCount = BlockHashCount;
     type Version = ();
     type PalletInfo = PalletInfo;
-    type AccountData = ();
+    // type AccountData = pallet_balances::AccountData<u64>;
+	type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
