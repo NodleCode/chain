@@ -39,7 +39,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        TestModule: pallet_emergency_shutdown::{Module, Call, Storage, Event},
+        TestModule: pallet_emergency_shutdown::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -77,6 +77,7 @@ ord_parameter_types! {
 impl Config for Test {
     type Event = ();
     type ShutdownOrigin = EnsureSignedBy<Admin, u64>;
+    type WeightInfo = ();
 }
 
 // This function basically just builds a genesis storage key/value store according to

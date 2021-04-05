@@ -22,10 +22,12 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::{prelude::*, vec};
+
+use crate::Pallet as RootOfTrust;
 
 const SEED_MANAGER: u32 = 0;
 
@@ -39,34 +41,26 @@ fn register<T: Config>(index: u32) -> Result<T::AccountId, &'static str> {
 
 benchmarks! {
     book_slot {
-        let u in 0 .. 1000;
-
-        let manager = register::<T>(u)?;
+        let manager = register::<T>(0)?;
         let certificate: T::CertificateId = Default::default();
     }: _(RawOrigin::Signed(manager), certificate)
 
     renew_slot {
-        let u in 0 .. 1000;
-
-        let manager = register::<T>(u)?;
+        let manager = register::<T>(0)?;
         let certificate: T::CertificateId = Default::default();
 
         let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
     }: _(RawOrigin::Signed(manager), certificate)
 
     revoke_slot {
-        let u in 0 .. 1000;
-
-        let manager = register::<T>(u)?;
+        let manager = register::<T>(0)?;
         let certificate: T::CertificateId = Default::default();
 
         let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
     }: _(RawOrigin::Signed(manager), certificate)
 
     revoke_child {
-        let u in 0 .. 1000;
-
-        let manager = register::<T>(u)?;
+        let manager = register::<T>(0)?;
         let certificate: T::CertificateId = Default::default();
         let child: T::CertificateId = Default::default();
 
@@ -74,19 +68,8 @@ benchmarks! {
     }: _(RawOrigin::Signed(manager), certificate, child)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_book_slot::<Test>());
-            assert_ok!(test_benchmark_renew_slot::<Test>());
-            assert_ok!(test_benchmark_revoke_slot::<Test>());
-            assert_ok!(test_benchmark_revoke_child::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(
+    RootOfTrust,
+    crate::tests::new_test_ext(),
+    crate::tests::Test,
+);

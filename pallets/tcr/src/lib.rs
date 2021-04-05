@@ -23,22 +23,25 @@
 //! application.
 
 mod benchmarking;
+#[cfg(test)]
 mod tests;
 
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage,
     dispatch::{result::Result, DispatchError, DispatchResult},
-    ensure,
     traits::{ChangeMembers, Currency, Get, Imbalance, ReservableCurrency},
-    IterableStorageMap,
 };
-use frame_system::{self as system, ensure_signed};
+use frame_system::{self as system};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating, Zero},
     Perbill,
 };
 use sp_std::prelude::Vec;
+
+pub mod weights;
+pub use weights::WeightInfo;
+
+pub use pallet::*;
 
 type BalanceOf<T, I> =
     <<T as Config<I>>::Currency as Currency<<T as system::Config>::AccountId>>::Balance;
@@ -87,54 +90,255 @@ impl<AccountId, Balance, BlockNumber> Application<AccountId, Balance, BlockNumbe
     }
 }
 
-/// The module's configuration trait.
-pub trait Config<I: Instance = DefaultInstance>: system::Config {
-    type Event: From<Event<Self, I>> + Into<<Self as system::Config>::Event>;
+#[frame_support::pallet]
+pub mod pallet {
+    use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
 
-    /// The currency used to represent the voting power
-    type Currency: ReservableCurrency<Self::AccountId>;
-    /// Minimum amount of tokens required to apply
-    type MinimumApplicationAmount: Get<BalanceOf<Self, I>>;
-    /// Minimum amount of tokens required to counter an application
-    type MinimumCounterAmount: Get<BalanceOf<Self, I>>;
-    /// Minimum amount of tokens required to challenge a member's application
-    type MinimumChallengeAmount: Get<BalanceOf<Self, I>>;
-    /// How many blocks we need to wait for before validating an application
-    type FinalizeApplicationPeriod: Get<Self::BlockNumber>;
-    /// How many blocks we need to wait for before finalizing a challenge
-    type FinalizeChallengePeriod: Get<Self::BlockNumber>;
-    /// How do we slash loosing parties when challenges are finalized, application's
-    /// member will be slashed at the same value
-    type LoosersSlash: Get<Perbill>;
-    /// Hook that we call whenever some members are added or removed from the TCR
-    type ChangeMembers: ChangeMembers<Self::AccountId>;
-}
+    #[pallet::config]
+    pub trait Config<I: 'static = ()>: frame_system::Config {
+        type Event: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::Event>;
 
-decl_event!(
-    pub enum Event<T, I: Instance = DefaultInstance>
-    where
-        AccountId = <T as system::Config>::AccountId,
-        Balance = BalanceOf<T, I>,
-    {
-        /// Someone applied to join the registry
-        NewApplication(AccountId, Balance),
-        /// Someone countered an application
-        ApplicationCountered(AccountId, AccountId, Balance),
-        /// A new vote for an application has been recorded
-        VoteRecorded(AccountId, AccountId, Balance, bool),
-        /// An application passed without being countered
-        ApplicationPassed(AccountId),
-        /// A member's application is being challenged
-        ApplicationChallenged(AccountId, AccountId, Balance),
-        /// A challenge killed the given application
-        ChallengeRefusedApplication(AccountId),
-        /// A challenge accepted the application
-        ChallengeAcceptedApplication(AccountId),
+        /// The currency used to represent the voting power
+        type Currency: ReservableCurrency<Self::AccountId>;
+        /// Minimum amount of tokens required to apply
+        #[pallet::constant]
+        type MinimumApplicationAmount: Get<BalanceOf<Self, I>>;
+        /// Minimum amount of tokens required to counter an application
+        #[pallet::constant]
+        type MinimumCounterAmount: Get<BalanceOf<Self, I>>;
+        /// Minimum amount of tokens required to challenge a member's application
+        #[pallet::constant]
+        type MinimumChallengeAmount: Get<BalanceOf<Self, I>>;
+        /// How many blocks we need to wait for before validating an application
+        #[pallet::constant]
+        type FinalizeApplicationPeriod: Get<Self::BlockNumber>;
+        /// How many blocks we need to wait for before finalizing a challenge
+        #[pallet::constant]
+        type FinalizeChallengePeriod: Get<Self::BlockNumber>;
+        /// How do we slash loosing parties when challenges are finalized, application's
+        /// member will be slashed at the same value
+        #[pallet::constant]
+        type LoosersSlash: Get<Perbill>;
+        /// Hook that we call whenever some members are added or removed from the TCR
+        type ChangeMembers: ChangeMembers<Self::AccountId>;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
-);
 
-decl_error! {
-    pub enum Error for Module<T: Config<I>, I: Instance> {
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
+
+    #[pallet::hooks]
+    impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+        /// At the end of each blocks, commit applications or challenges as needed
+        fn on_finalize(block: T::BlockNumber) {
+            let (mut new_1, mut old_1) =
+                Self::commit_applications(block).unwrap_or((Vec::new(), Vec::new()));
+            let (new_2, old_2) =
+                Self::resolve_challenges(block).unwrap_or((Vec::new(), Vec::new()));
+
+            // Should never be the same, so should not need some uniq checks
+            new_1.extend(new_2);
+            old_1.extend(old_2);
+
+            new_1.sort();
+            old_1.sort();
+
+            Self::notify_members_change(new_1, old_1);
+        }
+    }
+
+    #[pallet::call]
+    impl<T: Config<I>, I: 'static> Pallet<T, I> {
+        /// Apply to join the TCR, `metadata` can be used to add something like a URL or ID
+        #[pallet::weight(
+			T::WeightInfo::apply(metadata.len() as u32)
+		)]
+        pub fn apply(
+            origin: OriginFor<T>,
+            metadata: Vec<u8>,
+            deposit: BalanceOf<T, I>,
+        ) -> DispatchResultWithPostInfo {
+            let sender = ensure_signed(origin)?;
+            ensure!(
+                deposit >= T::MinimumApplicationAmount::get(),
+                Error::<T, I>::DepositTooSmall
+            );
+            ensure!(
+                !<Applications<T, I>>::contains_key(sender.clone()),
+                Error::<T, I>::ApplicationPending
+            );
+            ensure!(
+                !<Challenges<T, I>>::contains_key(sender.clone()),
+                Error::<T, I>::ApplicationChallenged
+            );
+            ensure!(
+                !<Members<T, I>>::contains_key(sender.clone()),
+                Error::<T, I>::AlreadyMember
+            );
+
+            Self::reserve_for(sender.clone(), deposit)?;
+
+            <Applications<T, I>>::insert(
+                sender.clone(),
+                Application {
+                    candidate: sender.clone(),
+                    candidate_deposit: deposit,
+                    metadata,
+
+                    challenger: None,
+                    challenger_deposit: Zero::zero(),
+
+                    votes_for: Zero::zero(),
+                    voters_for: Vec::new(),
+                    votes_against: Zero::zero(),
+                    voters_against: Vec::new(),
+
+                    created_block: <system::Module<T>>::block_number(),
+                    challenged_block: Zero::zero(),
+                },
+            );
+
+            Self::deposit_event(Event::NewApplication(sender, deposit));
+            Ok(().into())
+        }
+
+        /// Counter a pending application, this will initiate a challenge
+        #[pallet::weight(T::WeightInfo::counter())]
+        pub fn counter(
+            origin: OriginFor<T>,
+            member: T::AccountId,
+            deposit: BalanceOf<T, I>,
+        ) -> DispatchResultWithPostInfo {
+            let sender = ensure_signed(origin)?;
+            ensure!(
+                deposit >= T::MinimumCounterAmount::get(),
+                Error::<T, I>::DepositTooSmall
+            );
+            ensure!(
+                <Applications<T, I>>::contains_key(member.clone()),
+                Error::<T, I>::ApplicationNotFound
+            );
+
+            Self::reserve_for(sender.clone(), deposit)?;
+
+            // Note the use of `take` instead of `get` that will effectively remove
+            // the application from Applications::<T, I>.
+            // We actually move the application out and convert it to a challenge.
+            let mut application = <Applications<T, I>>::take(member.clone());
+            application.challenger = Some(sender.clone());
+            application.challenger_deposit = deposit;
+            application.challenged_block = <system::Module<T>>::block_number();
+
+            <Challenges<T, I>>::insert(member.clone(), application);
+
+            Self::deposit_event(Event::ApplicationCountered(member, sender, deposit));
+            Ok(().into())
+        }
+
+        /// Vote in support or opposition of a given challenge
+        #[pallet::weight(T::WeightInfo::vote())]
+        pub fn vote(
+            origin: OriginFor<T>,
+            member: T::AccountId,
+            supporting: bool,
+            deposit: BalanceOf<T, I>,
+        ) -> DispatchResultWithPostInfo {
+            let sender = ensure_signed(origin)?;
+            ensure!(
+                <Challenges<T, I>>::contains_key(member.clone()),
+                Error::<T, I>::ChallengeNotFound
+            );
+
+            let mut application = <Challenges<T, I>>::get(member.clone());
+
+            if supporting {
+                let new_votes = application
+                    .votes_for
+                    .checked_add(&deposit)
+                    .ok_or_else(|| Error::<T, I>::DepositOverflow)?;
+                application.votes_for = new_votes;
+                application.voters_for.push((sender.clone(), deposit));
+            } else {
+                let new_votes = application
+                    .votes_against
+                    .checked_add(&deposit)
+                    .ok_or_else(|| Error::<T, I>::DepositOverflow)?;
+                application.votes_against = new_votes;
+                application.voters_against.push((sender.clone(), deposit));
+            }
+
+            Self::reserve_for(sender.clone(), deposit)?;
+            <Challenges<T, I>>::insert(member.clone(), application);
+
+            Self::deposit_event(Event::VoteRecorded(member, sender, deposit, supporting));
+            Ok(().into())
+        }
+
+        /// Trigger a new challenge to remove an existing member
+        #[pallet::weight(T::WeightInfo::challenge())]
+        pub fn challenge(
+            origin: OriginFor<T>,
+            member: T::AccountId,
+            deposit: BalanceOf<T, I>,
+        ) -> DispatchResultWithPostInfo {
+            let sender = ensure_signed(origin)?;
+            ensure!(
+                deposit >= T::MinimumChallengeAmount::get(),
+                Error::<T, I>::DepositTooSmall
+            );
+            ensure!(
+                <Members<T, I>>::contains_key(member.clone()),
+                Error::<T, I>::MemberNotFound
+            );
+            ensure!(
+                !<Challenges<T, I>>::contains_key(member.clone()),
+                Error::<T, I>::ApplicationAlreadyChallenged
+            );
+
+            Self::reserve_for(sender.clone(), deposit)?;
+
+            let mut application = <Members<T, I>>::get(member.clone());
+            application.challenger = Some(sender.clone());
+            application.challenger_deposit = deposit;
+            application.challenged_block = <system::Module<T>>::block_number();
+            application.votes_for = Zero::zero();
+            application.voters_for = Vec::new();
+            application.votes_against = Zero::zero();
+            application.voters_against = Vec::new();
+
+            <Challenges<T, I>>::insert(member.clone(), application);
+
+            Self::deposit_event(Event::ApplicationChallenged(member, sender, deposit));
+            Ok(().into())
+        }
+    }
+
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T, I> = "Balance")]
+    pub enum Event<T: Config<I>, I: 'static = ()> {
+        /// Someone applied to join the registry
+        NewApplication(T::AccountId, BalanceOf<T, I>),
+        /// Someone countered an application
+        ApplicationCountered(T::AccountId, T::AccountId, BalanceOf<T, I>),
+        /// A new vote for an application has been recorded
+        VoteRecorded(T::AccountId, T::AccountId, BalanceOf<T, I>, bool),
+        /// An application passed without being countered
+        ApplicationPassed(T::AccountId),
+        /// A member's application is being challenged
+        ApplicationChallenged(T::AccountId, T::AccountId, BalanceOf<T, I>),
+        /// A challenge killed the given application
+        ChallengeRefusedApplication(T::AccountId),
+        /// A challenge accepted the application
+        ChallengeAcceptedApplication(T::AccountId),
+    }
+
+    #[pallet::error]
+    pub enum Error<T, I = ()> {
         /// An application for this Origin is already pending
         ApplicationPending,
         /// A similar application is being challenged
@@ -159,149 +363,39 @@ decl_error! {
         ReserveOverflow,
         UnreserveOverflow,
     }
-}
 
-decl_storage! {
-    trait Store for Module<T: Config<I>, I: Instance = DefaultInstance> as Tcr {
-        /// This keeps track of the applications that have yet to be committed to the registry
-        pub Applications get(fn applications):
-            map hasher(blake2_128_concat) T::AccountId => Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>;
+    /// Proposals that have been made.
+    #[pallet::storage]
+    #[pallet::getter(fn applications)]
+    pub type Applications<T: Config<I>, I: 'static = ()> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+        ValueQuery,
+    >;
 
-        /// This keeps track of the member status / applications being challenged for removal
-        pub Challenges get(fn challenges):
-            map hasher(blake2_128_concat) T::AccountId => Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>;
+    /// This keeps track of the member status / applications being challenged for removal
+    #[pallet::storage]
+    #[pallet::getter(fn challenges)]
+    pub type Challenges<T: Config<I>, I: 'static = ()> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+        ValueQuery,
+    >;
 
-        /// This keeps track of all the registry's members
-        pub Members get(fn members):
-            map hasher(blake2_128_concat) T::AccountId => Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>;
-    }
-}
-
-decl_module! {
-    /// The module declaration.
-    pub struct Module<T: Config<I>, I: Instance = DefaultInstance> for enum Call where origin: T::Origin {
-        fn deposit_event() = default;
-
-        /// Apply to join the TCR, `metadata` can be used to add something like a URL or ID
-        #[weight = 150_000_000]
-        pub fn apply(origin, metadata: Vec<u8>, deposit: BalanceOf<T, I>) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-            ensure!(deposit >= T::MinimumApplicationAmount::get(), Error::<T, I>::DepositTooSmall);
-            ensure!(!<Applications<T, I>>::contains_key(sender.clone()), Error::<T, I>::ApplicationPending);
-            ensure!(!<Challenges<T, I>>::contains_key(sender.clone()), Error::<T, I>::ApplicationChallenged);
-            ensure!(!<Members<T, I>>::contains_key(sender.clone()), Error::<T, I>::AlreadyMember);
-
-            Self::reserve_for(sender.clone(), deposit)?;
-
-            <Applications<T, I>>::insert(sender.clone(), Application {
-                candidate: sender.clone(),
-                candidate_deposit: deposit,
-                metadata,
-
-                challenger: None,
-                challenger_deposit: Zero::zero(),
-
-                votes_for: Zero::zero(),
-                voters_for: Vec::new(),
-                votes_against: Zero::zero(),
-                voters_against: Vec::new(),
-
-                created_block: <system::Module<T>>::block_number(),
-                challenged_block: Zero::zero(),
-            });
-
-            Self::deposit_event(RawEvent::NewApplication(sender, deposit));
-            Ok(())
-        }
-
-        /// Counter a pending application, this will initiate a challenge
-        #[weight = 100_000_000]
-        pub fn counter(origin, member: T::AccountId, deposit: BalanceOf<T, I>) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-            ensure!(deposit >= T::MinimumCounterAmount::get(), Error::<T, I>::DepositTooSmall);
-            ensure!(<Applications<T, I>>::contains_key(member.clone()), Error::<T, I>::ApplicationNotFound);
-
-            Self::reserve_for(sender.clone(), deposit)?;
-
-            // Note the use of `take` instead of `get` that will effectively remove
-            // the application from Applications::<T, I>.
-            // We actually move the application out and convert it to a challenge.
-            let mut application = <Applications<T, I>>::take(member.clone());
-            application.challenger = Some(sender.clone());
-            application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
-
-            <Challenges<T, I>>::insert(member.clone(), application);
-
-            Self::deposit_event(RawEvent::ApplicationCountered(member, sender, deposit));
-            Ok(())
-        }
-
-        /// Vote in support or opposition of a given challenge
-        #[weight = 100_000_000]
-        pub fn vote(origin, member: T::AccountId, supporting: bool, deposit: BalanceOf<T, I>) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-            ensure!(<Challenges<T, I>>::contains_key(member.clone()), Error::<T, I>::ChallengeNotFound);
-
-            let mut application = <Challenges<T, I>>::get(member.clone());
-
-            if supporting {
-                let new_votes = application.votes_for.checked_add(&deposit).ok_or_else(|| Error::<T, I>::DepositOverflow)?;
-                application.votes_for = new_votes;
-                application.voters_for.push((sender.clone(), deposit));
-            } else {
-                let new_votes = application.votes_against.checked_add(&deposit).ok_or_else(|| Error::<T, I>::DepositOverflow)?;
-                application.votes_against = new_votes;
-                application.voters_against.push((sender.clone(), deposit));
-            }
-
-            Self::reserve_for(sender.clone(), deposit)?;
-            <Challenges<T, I>>::insert(member.clone(), application);
-
-            Self::deposit_event(RawEvent::VoteRecorded(member, sender, deposit, supporting));
-            Ok(())
-        }
-
-        /// Trigger a new challenge to remove an existing member
-        #[weight = 150_000_000]
-        pub fn challenge(origin, member: T::AccountId, deposit: BalanceOf<T, I>) -> DispatchResult {
-            let sender = ensure_signed(origin)?;
-            ensure!(deposit >= T::MinimumChallengeAmount::get(), Error::<T, I>::DepositTooSmall);
-            ensure!(<Members<T, I>>::contains_key(member.clone()), Error::<T, I>::MemberNotFound);
-            ensure!(!<Challenges<T, I>>::contains_key(member.clone()), Error::<T, I>::ApplicationAlreadyChallenged);
-
-            Self::reserve_for(sender.clone(), deposit)?;
-
-            let mut application = <Members<T, I>>::get(member.clone());
-            application.challenger = Some(sender.clone());
-            application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
-            application.votes_for = Zero::zero();
-            application.voters_for = Vec::new();
-            application.votes_against = Zero::zero();
-            application.voters_against = Vec::new();
-
-            <Challenges<T, I>>::insert(member.clone(), application);
-
-            Self::deposit_event(RawEvent::ApplicationChallenged(member, sender, deposit));
-            Ok(())
-        }
-
-        /// At the end of each blocks, commit applications or challenges as needed
-        fn on_finalize(block: T::BlockNumber) {
-            let (mut new_1, mut old_1) = Self::commit_applications(block).unwrap_or((Vec::new(), Vec::new()));
-            let (new_2, old_2) = Self::resolve_challenges(block).unwrap_or((Vec::new(), Vec::new()));
-
-            // Should never be the same, so should not need some uniq checks
-            new_1.extend(new_2);
-            old_1.extend(old_2);
-
-            new_1.sort();
-            old_1.sort();
-
-            Self::notify_members_change(new_1, old_1);
-        }
-    }
+    /// This keeps track of all the registry's members
+    #[pallet::storage]
+    #[pallet::getter(fn members)]
+    pub type Members<T: Config<I>, I: 'static = ()> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Application<T::AccountId, BalanceOf<T, I>, T::BlockNumber>,
+        ValueQuery,
+    >;
 }
 
 type FinalizeHelperResultFrom<T> = Result<
@@ -318,7 +412,7 @@ type ResolvedChallengeResultFrom<T, I> = (
     AccountsAndDepositsFromResolvedChallenge<T, I>, // Losers -> will be slashed
 );
 
-impl<T: Config<I>, I: Instance> Module<T, I> {
+impl<T: Config<I>, I: 'static> Pallet<T, I> {
     /// Do not just call `set_lock`, rather increase the locked amount
     fn reserve_for(who: T::AccountId, amount: BalanceOf<T, I>) -> DispatchResult {
         // Make sure we can lock has many funds
@@ -377,7 +471,7 @@ impl<T: Config<I>, I: Instance> Module<T, I> {
                 <Applications<T, I>>::remove(account_id.clone());
                 <Members<T, I>>::insert(account_id.clone(), application.clone());
                 Self::unreserve_for(account_id.clone(), application.candidate_deposit);
-                Self::deposit_event(RawEvent::ApplicationPassed(account_id.clone()));
+                Self::deposit_event(Event::ApplicationPassed(account_id.clone()));
 
                 account_id
             })
@@ -473,7 +567,7 @@ impl<T: Config<I>, I: Instance> Module<T, I> {
     ) -> ResolvedChallengeResultFrom<T, I> {
         <Members<T, I>>::insert(account_id.clone(), application.clone());
 
-        Self::deposit_event(RawEvent::ChallengeAcceptedApplication(account_id));
+        Self::deposit_event(Event::ChallengeAcceptedApplication(account_id));
 
         // The proposal passed, slash `challenger` and `voters_against`
         (
@@ -492,7 +586,7 @@ impl<T: Config<I>, I: Instance> Module<T, I> {
             <Members<T, I>>::remove(application.clone().candidate);
         }
 
-        Self::deposit_event(RawEvent::ChallengeRefusedApplication(account_id));
+        Self::deposit_event(Event::ChallengeRefusedApplication(account_id));
 
         // The proposal did not pass, slash `candidate` and `voters_for`
         (

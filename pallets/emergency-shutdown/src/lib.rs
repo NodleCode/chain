@@ -22,50 +22,60 @@
 //! operations, or resume them
 
 mod benchmarking;
-
 #[cfg(test)]
 mod tests;
 
-use frame_support::{
-    decl_event, decl_module, decl_storage, dispatch::DispatchResult, traits::EnsureOrigin,
-};
-use frame_system::ensure_root;
+pub mod weights;
+pub use weights::WeightInfo;
 
-/// The module's configuration trait.
-pub trait Config: frame_system::Config {
-    type Event: From<Event> + Into<<Self as frame_system::Config>::Event>;
-    type ShutdownOrigin: EnsureOrigin<Self::Origin>;
-}
+pub use pallet::*;
 
-decl_storage! {
-    trait Store for Module<T: Config> as EmergencyShutdown {
-        pub Shutdown get(fn shutdown): bool;
+#[frame_support::pallet]
+pub mod pallet {
+    use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
+
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type ShutdownOrigin: EnsureOrigin<Self::Origin>;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
-}
 
-decl_module! {
-    /// The module declaration.
-    pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        fn deposit_event() = default;
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(PhantomData<T>);
 
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
         /// Toggle the shutdown state if authorized to do so.
-        #[weight = 10_000_000]
-        pub fn toggle(origin) -> DispatchResult {
+        #[pallet::weight(T::WeightInfo::toggle())]
+        pub fn toggle(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             T::ShutdownOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
-            Shutdown::put(!Self::shutdown());
+            <Shutdown<T>>::put(!Self::shutdown());
             Self::deposit_event(Event::ShutdownToggled(Self::shutdown()));
 
-            Ok(())
+            Ok(().into())
         }
     }
-}
 
-decl_event!(
-    pub enum Event {
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::metadata()]
+    pub enum Event<T: Config> {
         /// Shutdown state was toggled, to either on or off.
         ShutdownToggled(bool),
     }
-);
+
+    #[pallet::storage]
+    #[pallet::getter(fn shutdown)]
+    pub type Shutdown<T: Config> = StorageValue<_, bool, ValueQuery>;
+}
