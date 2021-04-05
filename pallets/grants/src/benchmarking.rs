@@ -20,11 +20,19 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
-use frame_support::traits::UnfilteredDispatchable;
+use frame_benchmarking::{
+	benchmarks,
+	account,
+	impl_benchmark_test_suite,
+};
+use frame_support::{
+	traits::{EnsureOrigin, UnfilteredDispatchable},
+};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
+
+use crate::Pallet as Grants;
 
 const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;
@@ -104,18 +112,8 @@ benchmarks! {
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::mock::{ExtBuilder, Test as Runtime};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        ExtBuilder::default().build().execute_with(|| {
-            assert_ok!(test_benchmark_add_vesting_schedule::<Runtime>());
-            assert_ok!(test_benchmark_claim::<Runtime>());
-            assert_ok!(test_benchmark_cancel_all_vesting_schedules::<Runtime>());
-        });
-    }
-}
+impl_benchmark_test_suite!(
+	Grants,
+	crate::mock::ExtBuilder::default().one_hundred_for_alice().build(),
+	crate::mock::Test,
+);
