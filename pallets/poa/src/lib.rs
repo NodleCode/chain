@@ -24,9 +24,7 @@
 #[cfg(test)]
 mod tests;
 
-use frame_support::{
-    traits::{ChangeMembers, InitializeMembers},
-};
+use frame_support::traits::{ChangeMembers, InitializeMembers};
 use pallet_session::SessionManager;
 use sp_runtime::traits::Convert;
 use sp_std::prelude::Vec;
@@ -35,34 +33,27 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use super::*;
 
     #[pallet::config]
-    pub trait Config: frame_system::Config + pallet_session::Config {
-
-    }
+    pub trait Config: frame_system::Config + pallet_session::Config {}
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::call]
-    impl<T: Config> Pallet<T> {
-
-    }
+    impl<T: Config> Pallet<T> {}
 
     #[pallet::storage]
     #[pallet::getter(fn validators)]
     pub type Validators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 }
-
 
 impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
     fn change_members_sorted(

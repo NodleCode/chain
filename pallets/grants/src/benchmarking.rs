@@ -20,14 +20,8 @@
 
 use super::*;
 
-use frame_benchmarking::{
-	benchmarks,
-	account,
-	impl_benchmark_test_suite,
-};
-use frame_support::{
-	traits::{EnsureOrigin, UnfilteredDispatchable},
-};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
@@ -72,38 +66,29 @@ fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
 
 benchmarks! {
     add_vesting_schedule {
-        let u in 1 .. 1000;
-        let b in 0 .. MAX_SCHEDULES;
-
-        let config = create_shared_config::<T>(u);
+        let config = create_shared_config::<T>(1);
 
         // Add some existing schedules according to b
-        for x in 0 .. b {
+        for x in 0 .. MAX_SCHEDULES {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }:  _(RawOrigin::Signed(config.granter), config.grantee_lookup, config.schedule)
 
     claim {
-        let u in 1 .. 1000;
-        let b in 0 .. MAX_SCHEDULES;
-
-        let config = create_shared_config::<T>(u);
+        let config = create_shared_config::<T>(1);
         Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
         // Add some existing schedules according to b
-        for x in 0 .. b {
+        for x in 0 .. MAX_SCHEDULES {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }: _(RawOrigin::Signed(config.grantee))
 
     cancel_all_vesting_schedules {
-        let u in 1 .. 1000;
-        let b in 0 .. MAX_SCHEDULES;
-
-       let config = create_shared_config::<T>(u);
+       let config = create_shared_config::<T>(1);
 
         // Add some existing schedules according to b
-        for x in 0 .. b {
+        for x in 0 .. MAX_SCHEDULES {
             Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
@@ -113,7 +98,9 @@ benchmarks! {
 }
 
 impl_benchmark_test_suite!(
-	Grants,
-	crate::mock::ExtBuilder::default().one_hundred_for_alice().build(),
-	crate::mock::Test,
+    Grants,
+    crate::mock::ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build(),
+    crate::mock::Test,
 );

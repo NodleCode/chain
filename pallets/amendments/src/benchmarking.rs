@@ -22,36 +22,29 @@
 
 use super::*;
 
-use frame_benchmarking::{
-	benchmarks,
-	impl_benchmark_test_suite,
-};
-use frame_support::{
-	traits::{EnsureOrigin, UnfilteredDispatchable},
-};
+use crate::Pallet as Amendments;
+use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
+use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::{Call as SystemCall, RawOrigin as SystemOrigin};
 use sp_std::prelude::*;
-use crate::Pallet as Amendments;
 
 const MAX_BYTES: u32 = 1_024;
 
 benchmarks! {
-
-	propose {
+    propose {
         let b in 1 .. MAX_BYTES;
 
         let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
-        let call = Call::<T>::propose(Box::new(amendment));
+        let call = Call::<T>::propose(Box::new(amendment), b as u32);
         let origin = T::SubmissionOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 
     veto {
-        let b in 1 .. MAX_BYTES;
-
-        let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
+        let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; MAX_BYTES as usize]).into();
         Pallet::<T>::propose(
             SystemOrigin::Root.into(),
-            Box::new(amendment)
+            Box::new(amendment),
+            MAX_BYTES as u32
         )?;
 
         let call = Call::<T>::veto(0);
@@ -59,8 +52,4 @@ benchmarks! {
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-impl_benchmark_test_suite!(
-	Amendments,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
-);
+impl_benchmark_test_suite!(Amendments, crate::tests::new_test_ext(), crate::tests::Test,);

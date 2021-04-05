@@ -18,12 +18,10 @@
 
 #![cfg(test)]
 
-use sp_std::{prelude::*};
+use sp_std::prelude::*;
 
 use frame_support::{
-    assert_noop, assert_ok, ord_parameter_types,
-    parameter_types,
-	weights::{Weight},
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
 use parity_scale_codec::Encode;
@@ -35,30 +33,27 @@ use sp_runtime::{
     Perbill,
 };
 
-use crate::{
-	self as amendments,
-	Config,
-};
+use crate::{self as amendments, Config};
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
-	{
-		System: frame_system::{Module, Call, Storage, Config, Event<T>},
-		Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
-		Amendments: amendments::{Module, Call, Storage, Event<T>},
-	}
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Storage, Config, Event<T>},
+        Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
+        Amendments: amendments::{Module, Call, Storage, Event<T>},
+    }
 );
 
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
-	pub BlockWeights: frame_system::limits::BlockWeights =
-		frame_system::limits::BlockWeights::simple_max(1_000_000);
+    pub BlockWeights: frame_system::limits::BlockWeights =
+        frame_system::limits::BlockWeights::simple_max(1_000_000);
 }
 impl frame_system::Config for Test {
     type Origin = Origin;
@@ -78,7 +73,7 @@ impl frame_system::Config for Test {
     type Version = ();
     type PalletInfo = PalletInfo;
     // type AccountData = pallet_balances::AccountData<u64>;
-	type AccountData = ();
+    type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
@@ -114,6 +109,7 @@ impl Config for Test {
     type Delay = BlockDelay;
     type Scheduler = Scheduler;
     type PalletsOrigin = OriginCaller;
+    type WeightInfo = ();
 }
 
 // This function basically just builds a genesis storage key/value store according to
@@ -132,9 +128,11 @@ fn make_proposal(value: u64) -> Box<Call> {
 #[test]
 fn non_authorized_origin_cannot_trigger_amendment() {
     new_test_ext().execute_with(|| {
+        let proposal = make_proposal(1);
+        let proposal_len: u32 = proposal.using_encoded(|p| p.len() as u32);
         assert_noop!(
-            Amendments::propose(Origin::signed(Hacker::get()), make_proposal(1)),
-            BadOrigin
+            Amendments::propose(Origin::signed(Hacker::get()), proposal, proposal_len,),
+            BadOrigin,
         );
     })
 }
@@ -142,9 +140,12 @@ fn non_authorized_origin_cannot_trigger_amendment() {
 #[test]
 fn call_gets_registered_correctly() {
     new_test_ext().execute_with(|| {
+        let proposal = make_proposal(1);
+        let proposal_len: u32 = proposal.using_encoded(|p| p.len() as u32);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
-            make_proposal(1)
+            proposal,
+            proposal_len,
         ));
     })
 }
@@ -162,9 +163,12 @@ fn non_veto_origin_cannot_veto() {
 #[test]
 fn veto_proposal_before_delay_expired() {
     new_test_ext().execute_with(|| {
+        let proposal = make_proposal(1);
+        let proposal_len: u32 = proposal.using_encoded(|p| p.len() as u32);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
-            make_proposal(1)
+            proposal,
+            proposal_len,
         ));
 
         assert_ok!(Amendments::veto(Origin::signed(Veto::get()), 0));

@@ -22,14 +22,8 @@
 
 use super::*;
 
-use frame_benchmarking::{
-    benchmarks_instance_pallet,
-    account,
-    impl_benchmark_test_suite
-};
-use frame_support::{
-    traits::{EnsureOrigin, UnfilteredDispatchable},
-};
+use frame_benchmarking::{account, benchmarks_instance_pallet, impl_benchmark_test_suite};
+use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Saturating;
 use sp_std::prelude::*;
@@ -54,8 +48,4 @@ benchmarks_instance_pallet! {
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-impl_benchmark_test_suite!(
-    Reserve,
-    crate::tests::new_test_ext(),
-    crate::tests::Test,
-);
+impl_benchmark_test_suite!(Reserve, crate::tests::new_test_ext(), crate::tests::Test,);

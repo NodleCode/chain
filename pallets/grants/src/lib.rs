@@ -18,17 +18,14 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod benchmarking;
 #[cfg(test)]
 mod mock;
 mod tests;
-mod benchmarking;
 
 use frame_support::{
     ensure,
-    traits::{
-        Currency, ExistenceRequirement, LockIdentifier, LockableCurrency,
-        WithdrawReasons,
-    },
+    traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
 };
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
@@ -42,6 +39,9 @@ use sp_std::{
 
 #[cfg(feature = "std")]
 use frame_support::traits::GenesisBuild;
+
+pub mod weights;
+pub use weights::WeightInfo;
 
 pub use pallet::*;
 
@@ -107,15 +107,17 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy>
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use super::*;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
         type CancelOrigin: EnsureOrigin<Self::Origin>;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -123,20 +125,13 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-
-    }
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-
         /// Claim funds that have been vested so far
-        #[pallet::weight(
-            30_000_000 + T::DbWeight::get().reads_writes(2, 3)
-        )]
-        pub fn claim(
-            origin: OriginFor<T>,
-        ) -> DispatchResultWithPostInfo {
+        #[pallet::weight(T::WeightInfo::claim())]
+        pub fn claim(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let who = ensure_signed(origin)?;
             let locked_amount = Self::do_claim(&who);
 
@@ -150,9 +145,7 @@ pub mod pallet {
         }
 
         /// Wire funds to be vested by the receiver
-        #[pallet::weight(
-            48_000_000 + T::DbWeight::get().reads_writes(4, 4)
-        )]
+        #[pallet::weight(T::WeightInfo::add_vesting_schedule())]
         pub fn add_vesting_schedule(
             origin: OriginFor<T>,
             dest: <T::Lookup as StaticLookup>::Source,
@@ -170,9 +163,7 @@ pub mod pallet {
         /// claimed they will be auto claimed for the given user. If `limit_to_free_balance`
         /// is set to true we will not error if the free balance of `who` has less coins
         /// than what was granted and is being revoked (useful if the state was corrupted).
-        #[pallet::weight(
-            48_000_000 + T::DbWeight::get().reads_writes(5, 5)
-        )]
+        #[pallet::weight(T::WeightInfo::cancel_all_vesting_schedules())]
         pub fn cancel_all_vesting_schedules(
             origin: OriginFor<T>,
             who: <T::Lookup as StaticLookup>::Source,
@@ -199,7 +190,7 @@ pub mod pallet {
                 &account_with_schedule,
                 &account_collector,
                 locked_amount_left,
-                ExistenceRequirement::AllowDeath
+                ExistenceRequirement::AllowDeath,
             )?;
             VestingSchedules::<T>::remove(account_with_schedule.clone());
 
@@ -236,17 +227,11 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn vesting_schedules)]
-    pub type VestingSchedules<T: Config> = StorageMap<
-        _,
-        Blake2_128Concat,
-        T::AccountId,
-        Vec<VestingScheduleOf<T>>,
-        ValueQuery,
-    >;
+    pub type VestingSchedules<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<VestingScheduleOf<T>>, ValueQuery>;
 
     #[pallet::genesis_config]
-    pub struct GenesisConfig<T: Config>{
-        pub phantom: sp_std::marker::PhantomData<T>,
+    pub struct GenesisConfig<T: Config> {
         pub vesting: Vec<ScheduledItem<T>>,
     }
 
@@ -254,7 +239,6 @@ pub mod pallet {
     impl<T: Config> Default for GenesisConfig<T> {
         fn default() -> Self {
             Self {
-                phantom: Default::default(),
                 vesting: Default::default(),
             }
         }
@@ -263,60 +247,61 @@ pub mod pallet {
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
-            let grants = self.vesting.iter()
-                .map(|(ref who, schedules)|
+            let grants = self
+                .vesting
+                .iter()
+                .map(|(ref who, schedules)| {
                     (
                         who.clone(),
-                        schedules.iter()
+                        schedules
+                            .iter()
                             .map(
-                                |&(start, period, period_count, per_period)| VestingSchedule
-                                {
-                                    start, period, period_count, per_period
-                                }
+                                |&(start, period, period_count, per_period)| VestingSchedule {
+                                    start,
+                                    period,
+                                    period_count,
+                                    per_period,
+                                },
                             )
-                            .collect::<Vec<_>>()
+                            .collect::<Vec<_>>(),
                     )
-                )
+                })
                 .collect::<Vec<_>>();
 
             // Create the required coins at genesis and add to storage
-            grants.iter()
-                .for_each(|(ref who, schedules)| {
-                    let total_grants = schedules.iter()
-                        .fold(Zero::zero(), |acc: BalanceOf<T>, s| acc.saturating_add(s.locked_amount(Zero::zero())));
-
-                    T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
-                    T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-                    <VestingSchedules<T>>::insert(who, schedules);
+            grants.iter().for_each(|(ref who, schedules)| {
+                let total_grants = schedules.iter().fold(Zero::zero(), |acc: BalanceOf<T>, s| {
+                    acc.saturating_add(s.locked_amount(Zero::zero()))
                 });
+
+                T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
+                T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
+                <VestingSchedules<T>>::insert(who, schedules);
+            });
         }
     }
 }
 
 #[cfg(feature = "std")]
 impl<T: Config> GenesisConfig<T> {
-	/// Direct implementation of `GenesisBuild::build_storage`.
-	///
-	/// Kept in order not to break dependency.
-	pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
-		<Self as GenesisBuild<T>>::build_storage(self)
-	}
+    /// Direct implementation of `GenesisBuild::build_storage`.
+    ///
+    /// Kept in order not to break dependency.
+    pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+        <Self as GenesisBuild<T>>::build_storage(self)
+    }
 
-	/// Direct implementation of `GenesisBuild::assimilate_storage`.
-	///
-	/// Kept in order not to break dependency.
-	pub fn assimilate_storage(
-		&self,
-		storage: &mut sp_runtime::Storage
-	) -> Result<(), String> {
-		<Self as GenesisBuild<T>>::assimilate_storage(self, storage)
-	}
+    /// Direct implementation of `GenesisBuild::assimilate_storage`.
+    ///
+    /// Kept in order not to break dependency.
+    pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
+        <Self as GenesisBuild<T>>::assimilate_storage(self, storage)
+    }
 }
 
 pub const VESTING_LOCK_ID: LockIdentifier = *b"nvesting";
 
-impl<T: Config>  Pallet<T> {
-
+impl<T: Config> Pallet<T> {
     fn do_claim(who: &T::AccountId) -> BalanceOf<T> {
         let locked = Self::locked_balance(who);
         if locked.is_zero() {

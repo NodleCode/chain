@@ -395,6 +395,7 @@ impl pallet_grants::Config for Runtime {
     type Currency = Balances;
     type CancelOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -582,6 +583,7 @@ impl pallet_amendments::Config for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type Delay = AmendmentDelay;
     type PalletsOrigin = OriginCaller;
+    type WeightInfo = pallet_amendments::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -595,6 +597,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = CompanyReserveModuleId;
+    type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -608,6 +611,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = InternationalReserveModuleId;
+    type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -621,6 +625,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = UsaReserveModuleId;
+    type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -887,9 +892,9 @@ construct_runtime!(
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
-        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config, Event<T>},
-        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config, Event<T>},
-        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config, Event<T>},
+        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
+        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config<T>, Event<T>},
+        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config<T>, Event<T>},
         Grants: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
 
         // Neat things

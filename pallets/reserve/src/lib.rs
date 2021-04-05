@@ -21,9 +21,9 @@
 //! A module that is called by the `collective` and is in charge of holding
 //! the company funds.
 
+mod benchmarking;
 #[cfg(test)]
 mod tests;
-mod benchmarking;
 
 use frame_support::{
     traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
@@ -36,6 +36,12 @@ use sp_runtime::{
 };
 use sp_std::prelude::Box;
 
+#[cfg(feature = "std")]
+use frame_support::traits::GenesisBuild;
+
+pub mod weights;
+pub use weights::WeightInfo;
+
 pub use pallet::*;
 
 type BalanceOf<T, I> =
@@ -46,9 +52,9 @@ type NegativeImbalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<
 
 #[frame_support::pallet]
 pub mod pallet {
+    use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
-    use super::*;
 
     #[pallet::config]
     pub trait Config<I: 'static = ()>: frame_system::Config {
@@ -57,26 +63,25 @@ pub mod pallet {
         type Currency: Currency<Self::AccountId>;
         type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
         type ModuleId: Get<ModuleId>;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
-    pub struct Pallet<T, I=()>(PhantomData<(T, I)>);
+    pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
     #[pallet::hooks]
-    impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
-
-    }
+    impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {}
 
     #[pallet::call]
     impl<T: Config<I>, I: 'static> Pallet<T, I> {
-
         /// Spend `amount` funds from the reserve account to `to`.
-        #[pallet::weight(100_000_000)]
+        #[pallet::weight(T::WeightInfo::spend())]
         pub fn spend(
             origin: OriginFor<T>,
             to: T::AccountId,
-            amount: BalanceOf<T, I>
+            amount: BalanceOf<T, I>,
         ) -> DispatchResultWithPostInfo {
             T::ExternalOrigin::try_origin(origin)
                 .map(|_| ())
@@ -86,7 +91,7 @@ pub mod pallet {
                 &Self::account_id(),
                 &to,
                 amount,
-                ExistenceRequirement::KeepAlive
+                ExistenceRequirement::KeepAlive,
             );
 
             Self::deposit_event(Event::SpentFunds(to, amount));
@@ -95,18 +100,15 @@ pub mod pallet {
         }
 
         /// Deposit `amount` tokens in the treasure account
-        #[pallet::weight(50_000_000)]
-        pub fn tip(
-            origin: OriginFor<T>,
-            amount: BalanceOf<T, I>
-        ) -> DispatchResultWithPostInfo {
+        #[pallet::weight(T::WeightInfo::tip())]
+        pub fn tip(origin: OriginFor<T>, amount: BalanceOf<T, I>) -> DispatchResultWithPostInfo {
             let tipper = ensure_signed(origin)?;
 
             let _ = T::Currency::transfer(
                 &tipper,
                 &Self::account_id(),
                 amount,
-                ExistenceRequirement::AllowDeath
+                ExistenceRequirement::AllowDeath,
             );
 
             Self::deposit_event(Event::TipReceived(tipper, amount));
@@ -123,7 +125,7 @@ pub mod pallet {
         )]
         pub fn apply_as(
             origin: OriginFor<T>,
-            call: Box<<T as Config<I>>::Call>
+            call: Box<<T as Config<I>>::Call>,
         ) -> DispatchResultWithPostInfo {
             T::ExternalOrigin::try_origin(origin)
                 .map(|_| ())
@@ -131,9 +133,7 @@ pub mod pallet {
 
             let res = call.dispatch(frame_system::RawOrigin::Root.into());
 
-            Self::deposit_event(
-                Event::ReserveOp(res.map(|_| ()).map_err(|e| e.error)),
-            );
+            Self::deposit_event(Event::ReserveOp(res.map(|_| ()).map_err(|e| e.error)));
 
             Ok(().into())
         }
@@ -153,33 +153,48 @@ pub mod pallet {
         ReserveOp(DispatchResult),
     }
 
-	#[pallet::genesis_config]
-	pub struct GenesisConfig<T: Config<I>, I: 'static = ()>{
-		pub phantom: sp_std::marker::PhantomData<(T, I)>,
-	}
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config<I>, I: 'static = ()> {
+        pub phantom: sp_std::marker::PhantomData<(T, I)>,
+    }
 
-	#[cfg(feature = "std")]
-	impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
-		fn default() -> Self {
-			Self {
-				phantom: Default::default(),
-			}
-		}
-	}
+    #[cfg(feature = "std")]
+    impl<T: Config<I>, I: 'static> Default for GenesisConfig<T, I> {
+        fn default() -> Self {
+            Self {
+                phantom: Default::default(),
+            }
+        }
+    }
 
-	#[pallet::genesis_build]
-	impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
-		fn build(&self) {
+    #[pallet::genesis_build]
+    impl<T: Config<I>, I: 'static> GenesisBuild<T, I> for GenesisConfig<T, I> {
+        fn build(&self) {
             let our_account = &<Pallet<T, I>>::account_id();
 
             if T::Currency::free_balance(our_account) < T::Currency::minimum_balance() {
-                let _ = T::Currency::make_free_balance_be(
-                    our_account,
-                    T::Currency::minimum_balance(),
-                );
+                let _ =
+                    T::Currency::make_free_balance_be(our_account, T::Currency::minimum_balance());
             }
         }
-	}
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: Config<I>, I: 'static> GenesisConfig<T, I> {
+    /// Direct implementation of `GenesisBuild::build_storage`.
+    ///
+    /// Kept in order not to break dependency.
+    pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+        <Self as GenesisBuild<T, I>>::build_storage(self)
+    }
+
+    /// Direct implementation of `GenesisBuild::assimilate_storage`.
+    ///
+    /// Kept in order not to break dependency.
+    pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
+        <Self as GenesisBuild<T, I>>::assimilate_storage(self, storage)
+    }
 }
 
 impl<T: Config<I>, I: 'static> WithAccountId<T::AccountId> for Pallet<T, I> {
