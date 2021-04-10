@@ -81,7 +81,7 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Schedule `amendment` to be executed after the configured time, unless vetoed by `VetoOrigin`
-		#[pallet::weight(
+        #[pallet::weight(
 			(
 				T::WeightInfo::propose(
 					amendment.using_encoded(|x| x.len()) as u32,
@@ -89,7 +89,7 @@ pub mod pallet {
 				DispatchClass::Operational,
 			)
 		)]
-		pub fn propose(
+        pub fn propose(
             origin: OriginFor<T>,
             amendment: Box<T::Amendment>,
         ) -> DispatchResultWithPostInfo {
