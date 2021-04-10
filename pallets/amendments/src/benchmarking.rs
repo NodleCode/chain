@@ -35,7 +35,7 @@ benchmarks! {
         let b in 1 .. MAX_BYTES;
 
         let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
-        let call = Call::<T>::propose(Box::new(amendment), b as u32);
+        let call = Call::<T>::propose(Box::new(amendment));
         let origin = T::SubmissionOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 
@@ -43,8 +43,7 @@ benchmarks! {
         let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; MAX_BYTES as usize]).into();
         Pallet::<T>::propose(
             SystemOrigin::Root.into(),
-            Box::new(amendment),
-            MAX_BYTES as u32
+            Box::new(amendment)
         )?;
 
         let call = Call::<T>::veto(0);

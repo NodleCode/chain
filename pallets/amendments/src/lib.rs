@@ -81,11 +81,17 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Schedule `amendment` to be executed after the configured time, unless vetoed by `VetoOrigin`
-        #[pallet::weight(T::WeightInfo::propose(*_length_bound))]
-        pub fn propose(
+		#[pallet::weight(
+			(
+				T::WeightInfo::propose(
+					amendment.using_encoded(|x| x.len()) as u32,
+				).saturating_add(amendment.get_dispatch_info().weight),
+				DispatchClass::Operational,
+			)
+		)]
+		pub fn propose(
             origin: OriginFor<T>,
             amendment: Box<T::Amendment>,
-            _length_bound: u32,
         ) -> DispatchResultWithPostInfo {
             T::SubmissionOrigin::try_origin(origin)
                 .map(|_| ())

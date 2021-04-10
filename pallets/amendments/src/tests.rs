@@ -129,9 +129,8 @@ fn make_proposal(value: u64) -> Box<Call> {
 fn non_authorized_origin_cannot_trigger_amendment() {
     new_test_ext().execute_with(|| {
         let proposal = make_proposal(1);
-        let proposal_len: u32 = proposal.using_encoded(|p| p.len() as u32);
         assert_noop!(
-            Amendments::propose(Origin::signed(Hacker::get()), proposal, proposal_len,),
+            Amendments::propose(Origin::signed(Hacker::get()), proposal),
             BadOrigin,
         );
     })
@@ -141,11 +140,9 @@ fn non_authorized_origin_cannot_trigger_amendment() {
 fn call_gets_registered_correctly() {
     new_test_ext().execute_with(|| {
         let proposal = make_proposal(1);
-        let proposal_len: u32 = proposal.using_encoded(|p| p.len() as u32);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
             proposal,
-            proposal_len,
         ));
     })
 }
@@ -164,11 +161,9 @@ fn non_veto_origin_cannot_veto() {
 fn veto_proposal_before_delay_expired() {
     new_test_ext().execute_with(|| {
         let proposal = make_proposal(1);
-        let proposal_len: u32 = proposal.using_encoded(|p| p.len() as u32);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
             proposal,
-            proposal_len,
         ));
 
         assert_ok!(Amendments::veto(Origin::signed(Veto::get()), 0));
