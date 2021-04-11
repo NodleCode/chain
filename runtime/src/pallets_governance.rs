@@ -19,21 +19,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, Allocations, Balances, Call, Event, FinancialCommittee, Origin, OriginCaller,
-    RootCommittee, Runtime, Scheduler,
+    constants, Call, Event, FinancialCommittee, Origin, OriginCaller, RootCommittee, Runtime,
+    Scheduler, TechnicalCommittee,
 };
-use frame_support::{parameter_types, weights::Weight};
+use frame_support::parameter_types;
 use nodle_chain_primitives::{AccountId, BlockNumber};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::ModuleId;
 pub use sp_runtime::{Perbill, Perquintill};
-
-impl pallet_grants::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-}
 
 // Shared parameters with all collectives / committees
 parameter_types! {
@@ -55,7 +48,7 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 }
 
 // --- Financial committee
-type FinancialCollective = pallet_collective::Instance3;
+pub type FinancialCollective = pallet_collective::Instance3;
 impl pallet_collective::Config<FinancialCollective> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
@@ -65,6 +58,23 @@ impl pallet_collective::Config<FinancialCollective> for Runtime {
     type WeightInfo = ();
     type MaxMembers = MaxMembers;
     type DefaultVote = pallet_collective::PrimeDefaultVote;
+}
+
+// --- Technical committee
+
+impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
+    type Event = Event;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type RemoveOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type MembershipInitialized = TechnicalCommittee;
+    type MembershipChanged = TechnicalCommittee;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
@@ -109,22 +119,6 @@ impl pallet_membership::Config<pallet_membership::Instance4> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = Allocations;
-    type MembershipChanged = Allocations;
 }
 
 impl pallet_mandate::Config for Runtime {
@@ -187,21 +181,4 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = UsaReserveModuleId;
-}
-
-parameter_types! {
-    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
-        constants::RuntimeBlockWeights::get().max_block;
-    pub const MaxScheduledPerBlock: u32 = 50;
-}
-
-impl pallet_scheduler::Config for Runtime {
-    type Event = Event;
-    type Origin = Origin;
-    type PalletsOrigin = OriginCaller;
-    type Call = Call;
-    type MaximumWeight = MaximumSchedulerWeight;
-    type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
-    type MaxScheduledPerBlock = MaxScheduledPerBlock;
-    type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }

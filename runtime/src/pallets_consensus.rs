@@ -19,10 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants,
-    pallets_governance::{RootCollective, TechnicalCollective},
-    AuthorityDiscovery, Babe, Call, Event, Grandpa, Historical, ImOnline, Offences, PoaSessions,
-    Runtime, TechnicalCommittee,
+    constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Call, Event,
+    Grandpa, Historical, ImOnline, Offences, PoaSessions, Runtime,
 };
 use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
 use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
@@ -154,23 +152,6 @@ impl pallet_session::historical::Config for Runtime {
 }
 
 impl pallet_poa::Config for Runtime {}
-
-// --- Technical committee
-
-impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
-    type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type MembershipInitialized = TechnicalCommittee;
-    type MembershipChanged = TechnicalCommittee;
-}
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type Event = Event;

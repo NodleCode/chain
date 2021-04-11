@@ -19,8 +19,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, implementations::ProxyType, pallets_governance::TechnicalCollective, Balances, Call,
-    CompanyReserve, Event, RandomnessCollectiveFlip, Runtime, Timestamp,
+    constants,
+    implementations::ProxyType,
+    pallets_governance::{FinancialCollective, TechnicalCollective},
+    Balances, Call, CompanyReserve, Event, Origin, OriginCaller, RandomnessCollectiveFlip, Runtime,
+    Timestamp,
 };
 
 use frame_support::{parameter_types, weights::Weight};
@@ -28,6 +31,13 @@ use nodle_chain_primitives::{AccountId, Balance};
 use pallet_contracts::weights::WeightInfo;
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::{traits::BlakeTwo256, Perbill};
+
+impl pallet_grants::Config for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type CancelOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+}
 
 parameter_types! {
     pub const BasicDeposit: Balance = 10 * constants::DOLLARS;       // 258 bytes on-chain
@@ -168,4 +178,21 @@ impl pallet_contracts::Config for Runtime {
     type DeletionQueueDepth = DeletionQueueDepth;
     type DeletionWeightLimit = DeletionWeightLimit;
     type MaxCodeSize = MaxCodeSize;
+}
+
+parameter_types! {
+    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
+        constants::RuntimeBlockWeights::get().max_block;
+    pub const MaxScheduledPerBlock: u32 = 50;
+}
+
+impl pallet_scheduler::Config for Runtime {
+    type Event = Event;
+    type Origin = Origin;
+    type PalletsOrigin = OriginCaller;
+    type Call = Call;
+    type MaximumWeight = MaximumSchedulerWeight;
+    type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
+    type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }
