@@ -57,14 +57,14 @@ use sp_runtime::{
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 
-mod pallets_system;
+pub mod constants;
+mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
-mod pallets_util;
 mod pallets_nodle;
+mod pallets_system;
+mod pallets_util;
 mod version;
-mod implementations;
-pub mod constants;
 
 pub use pallets_consensus::EpochDuration;
 pub use pallets_consensus::SessionKeys;
