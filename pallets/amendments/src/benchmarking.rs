@@ -22,8 +22,9 @@
 
 use super::*;
 
-use frame_benchmarking::benchmarks;
-use frame_support::traits::UnfilteredDispatchable;
+use crate::Pallet as Amendments;
+use frame_benchmarking::{benchmarks, impl_benchmark_test_suite};
+use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::{Call as SystemCall, RawOrigin as SystemOrigin};
 use sp_std::prelude::*;
 
@@ -39,10 +40,8 @@ benchmarks! {
     }: { call.dispatch_bypass_filter(origin)? }
 
     veto {
-        let b in 1 .. MAX_BYTES;
-
-        let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
-        Module::<T>::propose(
+        let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; MAX_BYTES as usize]).into();
+        Pallet::<T>::propose(
             SystemOrigin::Root.into(),
             Box::new(amendment)
         )?;
@@ -52,17 +51,4 @@ benchmarks! {
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_propose::<Test>());
-            assert_ok!(test_benchmark_veto::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(Amendments, crate::tests::new_test_ext(), crate::tests::Test,);

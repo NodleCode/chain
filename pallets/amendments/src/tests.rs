@@ -18,8 +18,8 @@
 
 #![cfg(test)]
 
-use super::*;
-use crate::{self as pallet_amendments};
+use sp_std::prelude::*;
+
 use frame_support::{
     assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Weight,
 };
@@ -33,6 +33,8 @@ use sp_runtime::{
     Perbill,
 };
 
+use crate::{self as amendments, Config};
+
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -42,9 +44,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Config, Storage, Event<T>},
-        Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Module, Call, Storage, Config, Event<T>},
+        Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
+        Amendments: amendments::{Module, Call, Storage, Event<T>},
     }
 );
 
@@ -70,6 +72,7 @@ impl frame_system::Config for Test {
     type BlockHashCount = BlockHashCount;
     type Version = ();
     type PalletInfo = PalletInfo;
+    // type AccountData = pallet_balances::AccountData<u64>;
     type AccountData = ();
     type OnNewAccount = ();
     type OnKilledAccount = ();
@@ -106,6 +109,7 @@ impl Config for Test {
     type Delay = BlockDelay;
     type Scheduler = Scheduler;
     type PalletsOrigin = OriginCaller;
+    type WeightInfo = ();
 }
 
 // This function basically just builds a genesis storage key/value store according to
@@ -124,9 +128,10 @@ fn make_proposal(value: u64) -> Box<Call> {
 #[test]
 fn non_authorized_origin_cannot_trigger_amendment() {
     new_test_ext().execute_with(|| {
+        let proposal = make_proposal(1);
         assert_noop!(
-            Amendments::propose(Origin::signed(Hacker::get()), make_proposal(1)),
-            BadOrigin
+            Amendments::propose(Origin::signed(Hacker::get()), proposal),
+            BadOrigin,
         );
     })
 }
@@ -134,9 +139,10 @@ fn non_authorized_origin_cannot_trigger_amendment() {
 #[test]
 fn call_gets_registered_correctly() {
     new_test_ext().execute_with(|| {
+        let proposal = make_proposal(1);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
-            make_proposal(1)
+            proposal,
         ));
     })
 }
@@ -154,9 +160,10 @@ fn non_veto_origin_cannot_veto() {
 #[test]
 fn veto_proposal_before_delay_expired() {
     new_test_ext().execute_with(|| {
+        let proposal = make_proposal(1);
         assert_ok!(Amendments::propose(
             Origin::signed(Proposer::get()),
-            make_proposal(1)
+            proposal,
         ));
 
         assert_ok!(Amendments::veto(Origin::signed(Veto::get()), 0));

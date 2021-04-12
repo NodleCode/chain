@@ -1,13 +1,32 @@
+/*
+ * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
+ * Copyright (C) 2020  Nodle International
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod benchmarking;
+#[cfg(test)]
+mod mock;
+mod tests;
+
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, ensure,
-    traits::{
-        Currency, EnsureOrigin, ExistenceRequirement, Get, LockIdentifier, LockableCurrency,
-        WithdrawReasons,
-    },
+    ensure,
+    traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
 };
-use frame_system::{ensure_root, ensure_signed};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{AtLeast32Bit, CheckedAdd, Saturating, StaticLookup, Zero},
@@ -18,9 +37,28 @@ use sp_std::{
     vec::Vec,
 };
 
-mod benchmarking;
-mod mock;
-mod tests;
+#[cfg(feature = "std")]
+use frame_support::traits::GenesisBuild;
+
+pub mod weights;
+pub use weights::WeightInfo;
+
+pub use pallet::*;
+
+pub type BalanceOf<T> =
+    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+pub type VestingScheduleOf<T> =
+    VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
+pub type ScheduledGrant<T> = (
+    <T as frame_system::Config>::BlockNumber,
+    <T as frame_system::Config>::BlockNumber,
+    u32,
+    BalanceOf<T>,
+);
+pub type ScheduledItem<T> = (
+    <T as frame_system::Config>::AccountId,
+    Vec<ScheduledGrant<T>>,
+);
 
 /// The vesting schedule.
 ///
@@ -67,97 +105,33 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy>
     }
 }
 
-pub type BalanceOf<T> =
-    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-pub type VestingScheduleOf<T> =
-    VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
-pub type ScheduledGrant<T> = (
-    <T as frame_system::Config>::BlockNumber,
-    <T as frame_system::Config>::BlockNumber,
-    u32,
-    BalanceOf<T>,
-);
-pub type ScheduledItem<T> = (
-    <T as frame_system::Config>::AccountId,
-    Vec<ScheduledGrant<T>>,
-);
+#[frame_support::pallet]
+pub mod pallet {
+    use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
 
-pub trait Config: frame_system::Config {
-    type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
-    type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
-    type CancelOrigin: EnsureOrigin<Self::Origin>;
-}
-
-decl_storage! {
-    trait Store for Module<T: Config> as Vesting {
-        /// Vesting schedules of an account.
-        pub VestingSchedules get(fn vesting_schedules): map hasher(blake2_128_concat) T::AccountId => Vec<VestingScheduleOf<T>>;
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
+        type CancelOrigin: EnsureOrigin<Self::Origin>;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
-    add_extra_genesis {
-        config(vesting): Vec<ScheduledItem<T>>;
-        build(|config: &GenesisConfig<T>| {
-            let grants = config.vesting.iter()
-                .map(|(ref who, schedules)|
-                    (
-                        who.clone(),
-                        schedules.iter()
-                            .map(|&(start, period, period_count, per_period)| VestingSchedule {
-                                start, period, period_count, per_period
-                            })
-                            .collect::<Vec<_>>()
-                    )
-                )
-                .collect::<Vec<_>>();
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(PhantomData<T>);
 
-            // Create the required coins at genesis and add to storage
-            grants.iter()
-                .for_each(|(ref who, schedules)| {
-                    let total_grants = schedules.iter()
-                        .fold(Zero::zero(), |acc: BalanceOf<T>, s| acc.saturating_add(s.locked_amount(Zero::zero())));
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-                    T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
-                    T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-                    <VestingSchedules<T>>::insert(who, schedules);
-                });
-        });
-    }
-}
-
-decl_event!(
-    pub enum Event<T> where
-        <T as frame_system::Config>::AccountId,
-        Balance = BalanceOf<T>,
-        VestingSchedule = VestingScheduleOf<T>
-    {
-        /// Added new vesting schedule (from, to, vesting_schedule)
-        VestingScheduleAdded(AccountId, AccountId, VestingSchedule),
-        /// Claimed vesting (who, locked_amount)
-        Claimed(AccountId, Balance),
-        /// Canceled all vesting schedules (who)
-        VestingSchedulesCanceled(AccountId),
-    }
-);
-
-decl_error! {
-    /// Error for vesting module.
-    pub enum Error for Module<T: Config> {
-        ZeroVestingPeriod,
-        ZeroVestingPeriodCount,
-        NumOverflow,
-        InsufficientBalanceToLock,
-    }
-}
-
-decl_module! {
-    pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        type Error = Error<T>;
-
-        fn deposit_event() = default;
-
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
         /// Claim funds that have been vested so far
-        #[weight = 30_000_000 + T::DbWeight::get().reads_writes(2, 3)]
-        pub fn claim(origin) {
+        #[pallet::weight(T::WeightInfo::claim())]
+        pub fn claim(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let who = ensure_signed(origin)?;
             let locked_amount = Self::do_claim(&who);
 
@@ -166,34 +140,36 @@ decl_module! {
                 VestingSchedules::<T>::remove(who.clone());
             }
 
-            Self::deposit_event(RawEvent::Claimed(who, locked_amount));
+            Self::deposit_event(Event::Claimed(who, locked_amount));
+            Ok(().into())
         }
 
         /// Wire funds to be vested by the receiver
-        #[weight = 48_000_000 + T::DbWeight::get().reads_writes(4, 4)]
+        #[pallet::weight(T::WeightInfo::add_vesting_schedule())]
         pub fn add_vesting_schedule(
-            origin,
+            origin: OriginFor<T>,
             dest: <T::Lookup as StaticLookup>::Source,
             schedule: VestingScheduleOf<T>,
-        ) {
+        ) -> DispatchResultWithPostInfo {
             let from = ensure_signed(origin)?;
             let to = T::Lookup::lookup(dest)?;
             Self::do_add_vesting_schedule(&from, &to, schedule.clone())?;
 
-            Self::deposit_event(RawEvent::VestingScheduleAdded(from, to, schedule));
+            Self::deposit_event(Event::VestingScheduleAdded(from, to, schedule));
+            Ok(().into())
         }
 
         /// Cancel all vested schedules for the given user. If there are coins to be
         /// claimed they will be auto claimed for the given user. If `limit_to_free_balance`
         /// is set to true we will not error if the free balance of `who` has less coins
         /// than what was granted and is being revoked (useful if the state was corrupted).
-        #[weight = 48_000_000 + T::DbWeight::get().reads_writes(5, 5)]
+        #[pallet::weight(T::WeightInfo::cancel_all_vesting_schedules())]
         pub fn cancel_all_vesting_schedules(
-            origin,
+            origin: OriginFor<T>,
             who: <T::Lookup as StaticLookup>::Source,
             funds_collector: <T::Lookup as StaticLookup>::Source,
             limit_to_free_balance: bool,
-        ) {
+        ) -> DispatchResultWithPostInfo {
             T::CancelOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
@@ -214,18 +190,118 @@ decl_module! {
                 &account_with_schedule,
                 &account_collector,
                 locked_amount_left,
-                ExistenceRequirement::AllowDeath
+                ExistenceRequirement::AllowDeath,
             )?;
             VestingSchedules::<T>::remove(account_with_schedule.clone());
 
-            Self::deposit_event(RawEvent::VestingSchedulesCanceled(account_with_schedule));
+            Self::deposit_event(Event::VestingSchedulesCanceled(account_with_schedule));
+
+            Ok(().into())
         }
+    }
+
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::metadata(
+        T::AccountId = "AccountId",
+        BalanceOf<T> = "Balance",
+        T::CertificateId = "CertificateId",
+        VestingScheduleOf<T> = "VestingSchedule",
+    )]
+    pub enum Event<T: Config> {
+        /// Added new vesting schedule (from, to, vesting_schedule)
+        VestingScheduleAdded(T::AccountId, T::AccountId, VestingScheduleOf<T>),
+        /// Claimed vesting (who, locked_amount)
+        Claimed(T::AccountId, BalanceOf<T>),
+        /// Canceled all vesting schedules (who)
+        VestingSchedulesCanceled(T::AccountId),
+    }
+
+    #[pallet::error]
+    pub enum Error<T> {
+        ZeroVestingPeriod,
+        ZeroVestingPeriodCount,
+        NumOverflow,
+        InsufficientBalanceToLock,
+    }
+
+    #[pallet::storage]
+    #[pallet::getter(fn vesting_schedules)]
+    pub type VestingSchedules<T: Config> =
+        StorageMap<_, Blake2_128Concat, T::AccountId, Vec<VestingScheduleOf<T>>, ValueQuery>;
+
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config> {
+        pub vesting: Vec<ScheduledItem<T>>,
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self {
+                vesting: Default::default(),
+            }
+        }
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+            let grants = self
+                .vesting
+                .iter()
+                .map(|(ref who, schedules)| {
+                    (
+                        who.clone(),
+                        schedules
+                            .iter()
+                            .map(
+                                |&(start, period, period_count, per_period)| VestingSchedule {
+                                    start,
+                                    period,
+                                    period_count,
+                                    per_period,
+                                },
+                            )
+                            .collect::<Vec<_>>(),
+                    )
+                })
+                .collect::<Vec<_>>();
+
+            // Create the required coins at genesis and add to storage
+            grants.iter().for_each(|(ref who, schedules)| {
+                let total_grants = schedules.iter().fold(Zero::zero(), |acc: BalanceOf<T>, s| {
+                    acc.saturating_add(s.locked_amount(Zero::zero()))
+                });
+
+                T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
+                T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
+                <VestingSchedules<T>>::insert(who, schedules);
+            });
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: Config> GenesisConfig<T> {
+    /// Direct implementation of `GenesisBuild::build_storage`.
+    ///
+    /// Kept in order not to break dependency.
+    pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+        <Self as GenesisBuild<T>>::build_storage(self)
+    }
+
+    /// Direct implementation of `GenesisBuild::assimilate_storage`.
+    ///
+    /// Kept in order not to break dependency.
+    pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
+        <Self as GenesisBuild<T>>::assimilate_storage(self, storage)
     }
 }
 
 pub const VESTING_LOCK_ID: LockIdentifier = *b"nvesting";
 
-impl<T: Config> Module<T> {
+impl<T: Config> Pallet<T> {
     fn do_claim(who: &T::AccountId) -> BalanceOf<T> {
         let locked = Self::locked_balance(who);
         if locked.is_zero() {
