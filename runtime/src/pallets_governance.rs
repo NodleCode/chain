@@ -35,6 +35,7 @@ parameter_types! {
     pub const MaxMembers: u32 = 50;
 }
 
+// --- Technical committee
 pub type TechnicalCollective = pallet_collective::Instance2;
 impl pallet_collective::Config<TechnicalCollective> for Runtime {
     type Origin = Origin;
@@ -46,21 +47,6 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
     type MaxMembers = MaxMembers;
     type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
-
-// --- Financial committee
-pub type FinancialCollective = pallet_collective::Instance3;
-impl pallet_collective::Config<FinancialCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
-    type MotionDuration = MotionDuration;
-    type MaxProposals = MaxProposals;
-    type WeightInfo = ();
-    type MaxMembers = MaxMembers;
-    type DefaultVote = pallet_collective::PrimeDefaultVote;
-}
-
-// --- Technical committee
 
 impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type Event = Event;
@@ -75,6 +61,19 @@ impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
+}
+
+// --- Financial committee
+pub type FinancialCollective = pallet_collective::Instance3;
+impl pallet_collective::Config<FinancialCollective> for Runtime {
+    type Origin = Origin;
+    type Proposal = Call;
+    type Event = Event;
+    type MotionDuration = MotionDuration;
+    type MaxProposals = MaxProposals;
+    type WeightInfo = ();
+    type MaxMembers = MaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
@@ -93,7 +92,6 @@ impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
 }
 
 // --- Root committee
-
 pub type RootCollective = pallet_collective::Instance4;
 impl pallet_collective::Config<RootCollective> for Runtime {
     type Origin = Origin;
@@ -119,29 +117,6 @@ impl pallet_membership::Config<pallet_membership::Instance4> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
-}
-
-impl pallet_mandate::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, RootCollective>;
-}
-
-parameter_types! {
-    pub const AmendmentDelay: BlockNumber = 2 * constants::DAYS;
-}
-
-impl pallet_amendments::Config for Runtime {
-    type Event = Event;
-    type Amendment = Call;
-    type Scheduler = Scheduler;
-    type SubmissionOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type VetoOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type Delay = AmendmentDelay;
-    type PalletsOrigin = OriginCaller;
 }
 
 parameter_types! {
@@ -181,4 +156,27 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = UsaReserveModuleId;
+}
+
+impl pallet_mandate::Config for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, RootCollective>;
+}
+
+parameter_types! {
+    pub const AmendmentDelay: BlockNumber = 2 * constants::DAYS;
+}
+
+impl pallet_amendments::Config for Runtime {
+    type Event = Event;
+    type Amendment = Call;
+    type Scheduler = Scheduler;
+    type SubmissionOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type VetoOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type Delay = AmendmentDelay;
+    type PalletsOrigin = OriginCaller;
 }
