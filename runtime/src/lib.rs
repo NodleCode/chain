@@ -108,9 +108,9 @@ construct_runtime!(
         Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>},
         Amendments: pallet_amendments::{Module, Call, Storage, Event<T>},
         Mandate: pallet_mandate::{Module, Call, Event},
-        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config, Event<T>},
-        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config, Event<T>},
-        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config, Event<T>},
+        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
+        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config<T>, Event<T>},
+        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config<T>, Event<T>},
         Grants: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
 
         // Neat things

@@ -99,6 +99,7 @@ impl Config for Test {
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = Call;
     type ModuleId = ReserveModuleId;
+    type WeightInfo = ();
 }
 type TestCurrency = <Test as Config>::Currency;
 

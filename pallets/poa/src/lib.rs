@@ -24,31 +24,38 @@
 #[cfg(test)]
 mod tests;
 
-use frame_support::{
-    decl_module, decl_storage,
-    traits::{ChangeMembers, InitializeMembers},
-};
+use frame_support::traits::{ChangeMembers, InitializeMembers};
 use pallet_session::SessionManager;
 use sp_runtime::traits::Convert;
 use sp_std::prelude::Vec;
 
-/// The module's configuration trait.
-pub trait Config: frame_system::Config + pallet_session::Config {}
+pub use pallet::*;
 
-decl_storage! {
-    trait Store for Module<T: Config> as Poa {
-        Validators get(fn validators): Vec<T::AccountId>;
-    }
+#[frame_support::pallet]
+pub mod pallet {
+    use super::*;
+    use frame_support::pallet_prelude::*;
+    use frame_system::pallet_prelude::*;
+
+    #[pallet::config]
+    pub trait Config: frame_system::Config + pallet_session::Config {}
+
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(PhantomData<T>);
+
+    #[pallet::hooks]
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {}
+
+    #[pallet::storage]
+    #[pallet::getter(fn validators)]
+    pub type Validators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 }
 
-decl_module! {
-    /// The module declaration.
-    pub struct Module<T: Config> for enum Call where origin: T::Origin {
-        // Nothing, just an empty shell for declaration purposes
-    }
-}
-
-impl<T: Config> ChangeMembers<T::AccountId> for Module<T> {
+impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
     fn change_members_sorted(
         _incoming: &[T::AccountId],
         _outgoing: &[T::AccountId],
@@ -58,7 +65,7 @@ impl<T: Config> ChangeMembers<T::AccountId> for Module<T> {
     }
 }
 
-impl<T: Config> InitializeMembers<T::AccountId> for Module<T> {
+impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
     fn initialize_members(init: &[T::AccountId]) {
         <Validators<T>>::put(init);
         // Shouldn't need a flag update here as this should happen at genesis
@@ -76,7 +83,7 @@ impl<T: Config> Convert<T::AccountId, Option<FullIdentification>> for FullIdenti
 }
 
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
-impl<T: Config> SessionManager<T::AccountId> for Module<T> {
+impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
     fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
         Some(<Validators<T>>::get())
     }
@@ -86,7 +93,7 @@ impl<T: Config> SessionManager<T::AccountId> for Module<T> {
 }
 
 impl<T: Config> pallet_session::historical::SessionManager<T::AccountId, FullIdentification>
-    for Module<T>
+    for Pallet<T>
 {
     fn new_session(new_index: SessionIndex) -> Option<Vec<(T::AccountId, FullIdentification)>> {
         <Self as pallet_session::SessionManager<_>>::new_session(new_index).map(|validators| {

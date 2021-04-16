@@ -22,25 +22,25 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks_instance};
-use frame_support::traits::UnfilteredDispatchable;
+use frame_benchmarking::{account, benchmarks_instance_pallet, impl_benchmark_test_suite};
+use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Saturating;
 use sp_std::prelude::*;
 
+use crate::Pallet as Reserve;
+
 const SEED: u32 = 0;
 
-benchmarks_instance! {
+benchmarks_instance_pallet! {
     tip {
-        let u in 0 .. 1000;
-        let tipper = account("caller", u, SEED);
+        let tipper = account("caller", 0, SEED);
         let value = 100u32.into();
         let _ = T::Currency::make_free_balance_be(&tipper, value);
     }: _(RawOrigin::Signed(tipper), value)
 
     spend {
-        let u in 0 .. 1000;
-        let dest = account("dest", u, SEED);
+        let dest = account("dest", 0, SEED);
         let value = T::Currency::minimum_balance().saturating_mul(100u32.into());
 
         let call = Call::<T, I>::spend(dest, value);
@@ -48,17 +48,4 @@ benchmarks_instance! {
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_tip::<Test>());
-            assert_ok!(test_benchmark_spend::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(Reserve, crate::tests::new_test_ext(), crate::tests::Test,);
