@@ -130,6 +130,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = CompanyReserveModuleId;
+	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -143,6 +144,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = InternationalReserveModuleId;
+	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -156,6 +158,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
     type ModuleId = UsaReserveModuleId;
+	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_mandate::Config for Runtime {
@@ -179,4 +182,5 @@ impl pallet_amendments::Config for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type Delay = AmendmentDelay;
     type PalletsOrigin = OriginCaller;
+	type WeightInfo = pallet_amendments::weights::SubstrateWeight<Runtime>;
 }
