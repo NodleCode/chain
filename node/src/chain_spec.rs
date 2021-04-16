@@ -23,6 +23,10 @@ use nodle_chain_runtime::{
     ImOnlineConfig, IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig,
 };
+
+#[cfg(feature = "with-staking")]
+use nodle_chain_runtime::{StakerStatus, StakingConfig};
+
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use serde_json::json;
@@ -139,6 +143,9 @@ pub fn testnet_genesis(
 
     const ENDOWMENT: Balance = 100 * NODL;
 
+    #[cfg(feature = "with-staking")]
+    const STASH: Balance = ENDOWMENT / 1_000;
+
     GenesisConfig {
         // Core
         frame_system: Some(SystemConfig {
@@ -200,6 +207,18 @@ pub fn testnet_genesis(
         pallet_authority_discovery: Some(AuthorityDiscoveryConfig { keys: vec![] }),
         pallet_grandpa: Some(GrandpaConfig {
             authorities: vec![],
+        }),
+        #[cfg(feature = "with-staking")]
+        pallet_curveless_staking: Some(StakingConfig {
+            validator_count: initial_authorities.len() as u32 * 2,
+            minimum_validator_count: initial_authorities.len() as u32,
+            stakers: initial_authorities
+                .iter()
+                .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+                .collect(),
+            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+            slash_reward_fraction: Perbill::from_percent(10),
+            ..Default::default()
         }),
         pallet_membership_Instance2: Some(ValidatorsSetConfig {
             members: initial_authorities
