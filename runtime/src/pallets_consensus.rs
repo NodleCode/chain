@@ -20,10 +20,31 @@
 
 use crate::{
     constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Call, Event,
-    Grandpa, Historical, ImOnline, Offences, PoaSessions, Runtime,
+    Grandpa, Historical, ImOnline, Offences, Runtime,
 };
+
+#[cfg(not(feature = "with-staking"))]
+use crate::PoaSessions;
+
+#[cfg(feature = "with-staking")]
+use crate::{Balances, Session, Staking, Timestamp};
+
 use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
+
+#[cfg(feature = "with-staking")]
+use frame_support::{
+    traits::U128CurrencyToVote,
+    weights::{constants::BlockExecutionWeight, DispatchClass},
+};
+
+#[cfg(feature = "with-staking")]
+use frame_system::EnsureRoot;
+
 use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
+
+#[cfg(feature = "with-staking")]
+use nodle_chain_primitives::Balance;
+
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_core::{
@@ -36,6 +57,14 @@ use sp_runtime::{
     transaction_validity::TransactionPriority,
     Perbill,
 };
+
+#[cfg(feature = "with-staking")]
+use sp_runtime::ModuleId;
+
+#[cfg(feature = "with-staking")]
+#[cfg(any(feature = "std", test))]
+pub use pallet_curveless_staking::StakerStatus;
+
 use sp_std::prelude::*;
 
 impl_opaque_keys! {
@@ -133,6 +162,7 @@ parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
 }
 
+#[cfg(not(feature = "with-staking"))]
 impl pallet_session::Config for Runtime {
     type SessionManager = PoaSessions;
     type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
@@ -146,13 +176,16 @@ impl pallet_session::Config for Runtime {
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
+#[cfg(not(feature = "with-staking"))]
 impl pallet_session::historical::Config for Runtime {
     type FullIdentification = pallet_poa::FullIdentification;
     type FullIdentificationOf = pallet_poa::FullIdentificationOf<Runtime>;
 }
 
+#[cfg(not(feature = "with-staking"))]
 impl pallet_poa::Config for Runtime {}
 
+#[cfg(not(feature = "with-staking"))]
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type Event = Event;
     type AddOrigin =
@@ -167,6 +200,93 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = PoaSessions;
     type MembershipChanged = PoaSessions;
+}
+
+#[cfg(feature = "with-staking")]
+impl pallet_session::Config for Runtime {
+    type SessionManager = Staking;
+    type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+    type ShouldEndSession = Babe;
+    type Event = Event;
+    type Keys = SessionKeys;
+    type ValidatorId = AccountId;
+    type ValidatorIdOf = ConvertInto;
+    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
+    type NextSessionRotation = Babe;
+    type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+}
+
+#[cfg(feature = "with-staking")]
+impl pallet_session::historical::Config for Runtime {
+    type FullIdentification = pallet_curveless_staking::Exposure<AccountId, Balance>;
+    type FullIdentificationOf = pallet_curveless_staking::ExposureOf<Runtime>;
+}
+
+#[cfg(feature = "with-staking")]
+parameter_types! {
+    // pub const SessionsPerEra: sp_staking::SessionIndex = 6;
+    // pub const BondingDuration: pallet_curveless_staking::EraIndex = 24 * 28;
+    pub const SlashDeferDuration: pallet_curveless_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
+    pub const MaxNominatorRewardedPerValidator: u32 = 256;
+    pub const ElectionLookahead: BlockNumber = constants::EPOCH_DURATION_IN_BLOCKS / 4;
+    pub const MaxIterations: u32 = 10;
+    // 0.05%. The higher the value, the more strict solution acceptance becomes.
+    pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
+    pub OffchainSolutionWeightLimit: Weight = constants::RuntimeBlockWeights::get()
+        .get(DispatchClass::Normal)
+        .max_extrinsic.expect("Normal extrinsics have a weight limit configured; qed")
+        .saturating_sub(BlockExecutionWeight::get());
+    pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    /// We prioritize im-online heartbeats over election solution submission.
+    pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
+}
+
+#[cfg(feature = "with-staking")]
+impl pallet_curveless_staking::Config for Runtime {
+    type Currency = Balances;
+    type UnixTime = Timestamp;
+    type CurrencyToVote = U128CurrencyToVote;
+    type RewardRemainder = ();
+    type Event = Event;
+    type Slash = (); // send the slashed funds to the treasury.
+    type SessionsPerEra = SessionsPerEra;
+    type BondingDuration = BondingDuration;
+    type SlashDeferDuration = SlashDeferDuration;
+    /// A super-majority of the council can cancel the slash.
+    type SlashCancelOrigin = EnsureRoot<AccountId>;
+    type SessionInterface = Self;
+    type NextNewSession = Session;
+    type ElectionLookahead = ElectionLookahead;
+    type Call = Call;
+    type MaxIterations = MaxIterations;
+    type MinSolutionScoreBump = MinSolutionScoreBump;
+    type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+    type UnsignedPriority = StakingUnsignedPriority;
+    // The unsigned solution weight targeted by the OCW. We set it to the maximum possible value of
+    // a single extrinsic.
+    type OffchainSolutionWeightLimit = OffchainSolutionWeightLimit;
+    type WeightInfo = pallet_curveless_staking::weights::SubstrateWeight<Runtime>;
+    type PalletId = StakingPalletId;
+}
+
+#[cfg(feature = "with-staking")]
+impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
+    type Event = Event;
+    type AddOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RemoveOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    // TODO :: Have to revisit this change.
+    // type MembershipInitialized = Staking;
+    // type MembershipChanged = Staking;
+    type MembershipInitialized = ();
+    type MembershipChanged = ();
 }
 
 parameter_types! {
