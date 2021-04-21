@@ -22,14 +22,17 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks_instance};
+use frame_benchmarking::{account, benchmarks_instance_pallet, impl_benchmark_test_suite};
+use frame_support::pallet_prelude::DispatchResultWithPostInfo;
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
+
+use crate::Pallet as Tcr;
 
 const SEED: u32 = 0;
 const MAX_METADATA_SIZE: u32 = 1000;
 
-pub struct BenchmarkConfig<T: Config<I>, I: Instance> {
+pub struct BenchmarkConfig<T: Config<I>, I: 'static> {
     applicant: T::AccountId,
     challenger: T::AccountId,
     counterer: T::AccountId,
@@ -41,7 +44,7 @@ pub struct BenchmarkConfig<T: Config<I>, I: Instance> {
     deposit_voting: BalanceOf<T, I>,
 }
 
-fn make_benchmark_config<T: Config<I>, I: Instance>(u: u32, b: u32) -> BenchmarkConfig<T, I> {
+fn make_benchmark_config<T: Config<I>, I: 'static>(u: u32, b: u32) -> BenchmarkConfig<T, I> {
     let applicant = account("applicant", u, SEED);
     let challenger = account("challenger", u, SEED);
     let counterer = account("counterer", u, SEED);
@@ -70,41 +73,37 @@ fn make_benchmark_config<T: Config<I>, I: Instance>(u: u32, b: u32) -> Benchmark
     }
 }
 
-fn do_apply<T: Config<I>, I: Instance>(config: &BenchmarkConfig<T, I>) -> DispatchResult {
-    <Module<T, _>>::apply(
+fn do_apply<T: Config<I>, I: 'static>(
+    config: &BenchmarkConfig<T, I>,
+) -> DispatchResultWithPostInfo {
+    <Pallet<T, _>>::apply(
         RawOrigin::Signed(config.applicant.clone()).into(),
         config.metadata.clone(),
         config.deposit_applying,
     )
 }
 
-benchmarks_instance! {
+benchmarks_instance_pallet! {
+
     apply {
-        let u in 0 .. 1000;
         let b in 0 .. MAX_METADATA_SIZE;
 
-        let config = make_benchmark_config::<T, _>(u, b);
+        let config = make_benchmark_config::<T, _>(0, b);
     }: _(RawOrigin::Signed(config.applicant), config.metadata, config.deposit_applying)
 
     counter {
-        let u in 0 .. 1000;
-        let b in 0 .. MAX_METADATA_SIZE;
-
-        let config = make_benchmark_config::<T, _>(u, b);
+        let config = make_benchmark_config::<T, _>(0, 0);
 
         do_apply::<T, I>(&config)?;
     }: _(RawOrigin::Signed(config.counterer), config.applicant, config.deposit_countering)
 
     vote {
-        let u in 0 .. 1000;
-        let b in 0 .. MAX_METADATA_SIZE;
-
-        let config = make_benchmark_config::<T, _>(u, b);
-        let supporting = u % 2 == 0;
+        let config = make_benchmark_config::<T, _>(0, 0);
+        let supporting = true;
 
         do_apply::<T, I>(&config)?;
 
-        let _ = <Module<T, _>>::counter(
+        let _ = <Pallet<T, _>>::counter(
             RawOrigin::Signed(config.counterer.clone()).into(),
             config.applicant.clone(),
             config.deposit_countering
@@ -112,32 +111,14 @@ benchmarks_instance! {
     }: _(RawOrigin::Signed(config.voter), config.applicant, supporting, config.deposit_voting)
 
     challenge {
-        let u in 0 .. 1000;
-        let b in 0 .. MAX_METADATA_SIZE;
-
-        let config = make_benchmark_config::<T, _>(u, b);
+        let config = make_benchmark_config::<T, _>(0, 0);
 
         do_apply::<T, I>(&config)?;
 
-        let _ = <Module<T, _>>::commit_applications(
-            T::FinalizeApplicationPeriod::get() + <system::Module<T>>::block_number()
+        let _ = <Pallet<T, _>>::commit_applications(
+            T::FinalizeApplicationPeriod::get() + <system::Pallet<T>>::block_number()
         );
     }: _(RawOrigin::Signed(config.challenger), config.applicant, config.deposit_challenging)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::{new_test_ext, Test};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        new_test_ext().execute_with(|| {
-            assert_ok!(test_benchmark_apply::<Test>());
-            assert_ok!(test_benchmark_counter::<Test>());
-            assert_ok!(test_benchmark_vote::<Test>());
-            assert_ok!(test_benchmark_challenge::<Test>());
-        });
-    }
-}
+impl_benchmark_test_suite!(Tcr, crate::tests::new_test_ext(), crate::tests::Test,);
