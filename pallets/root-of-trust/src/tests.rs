@@ -106,6 +106,7 @@ impl pallet_tcr::Config for Test {
     type FinalizeChallengePeriod = FinalizeChallengePeriod;
     type LoosersSlash = LoosersSlash;
     type ChangeMembers = TestModule;
+    type WeightInfo = ();
 }
 parameter_types! {
     pub const SlotBookingCost: u64 = 1000;
@@ -120,6 +121,7 @@ impl Config for Test {
     type SlotRenewingCost = SlotRenewingCost;
     type SlotValidity = SlotValidity;
     type FundsCollector = ();
+    type WeightInfo = ();
 }
 
 type TestCurrency = <Test as Config>::Currency;

@@ -80,6 +80,7 @@ impl Config for Test {
     type Event = Event;
     type Currency = PalletBalances;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
+    type WeightInfo = ();
 }
 
 pub const ALICE: AccountId = 1;

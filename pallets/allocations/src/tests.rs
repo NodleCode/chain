@@ -40,7 +40,7 @@ frame_support::construct_runtime!(
     {
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
         Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event},
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
         Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
     }
 );
@@ -92,6 +92,7 @@ ord_parameter_types! {
 impl pallet_emergency_shutdown::Config for Test {
     type Event = ();
     type ShutdownOrigin = EnsureSignedBy<ShutdownAdmin, u64>;
+    type WeightInfo = ();
 }
 
 parameter_types! {
@@ -114,6 +115,7 @@ impl Config for Test {
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;
     type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
+    type WeightInfo = ();
 }
 type Errors = Error<Test>;
 

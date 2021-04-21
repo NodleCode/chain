@@ -20,11 +20,13 @@
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks};
-use frame_support::traits::UnfilteredDispatchable;
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
+
+use crate::Pallet as Grants;
 
 const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;
@@ -64,58 +66,41 @@ fn create_shared_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
 
 benchmarks! {
     add_vesting_schedule {
-        let u in 1 .. 1000;
-        let b in 0 .. MAX_SCHEDULES;
-
-        let config = create_shared_config::<T>(u);
+        let config = create_shared_config::<T>(1);
 
         // Add some existing schedules according to b
-        for x in 0 .. b {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        for x in 0 .. MAX_SCHEDULES {
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }:  _(RawOrigin::Signed(config.granter), config.grantee_lookup, config.schedule)
 
     claim {
-        let u in 1 .. 1000;
-        let b in 0 .. MAX_SCHEDULES;
-
-        let config = create_shared_config::<T>(u);
-        Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        let config = create_shared_config::<T>(1);
+        Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
         // Add some existing schedules according to b
-        for x in 0 .. b {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        for x in 0 .. MAX_SCHEDULES {
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }: _(RawOrigin::Signed(config.grantee))
 
     cancel_all_vesting_schedules {
-        let u in 1 .. 1000;
-        let b in 0 .. MAX_SCHEDULES;
-
-       let config = create_shared_config::<T>(u);
+       let config = create_shared_config::<T>(1);
 
         // Add some existing schedules according to b
-        for x in 0 .. b {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        for x in 0 .. MAX_SCHEDULES {
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
-        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup);
+        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup, true);
         let origin = T::CancelOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::mock::{ExtBuilder, Test as Runtime};
-    use frame_support::assert_ok;
-
-    #[test]
-    fn test_benchmarks() {
-        ExtBuilder::default().build().execute_with(|| {
-            assert_ok!(test_benchmark_add_vesting_schedule::<Runtime>());
-            assert_ok!(test_benchmark_claim::<Runtime>());
-            assert_ok!(test_benchmark_cancel_all_vesting_schedules::<Runtime>());
-        });
-    }
-}
+impl_benchmark_test_suite!(
+    Grants,
+    crate::mock::ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build(),
+    crate::mock::Test,
+);

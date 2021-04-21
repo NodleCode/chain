@@ -23,6 +23,10 @@ use nodle_chain_runtime::{
     IndicesConfig, ParachainInfoConfig, RootMembershipConfig, SystemConfig,
     TechnicalMembershipConfig, WASM_BINARY,
 };
+
+#[cfg(feature = "enable-contracts")]
+use nodle_chain_runtime::ContractsConfig;
+
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -224,7 +228,12 @@ pub fn testnet_genesis(
         pallet_grants: GrantsConfig {
             vesting: vested_grants,
         },
-
+        #[cfg(feature = "enable-contracts")]
+        pallet_contracts: Some(ContractsConfig {
+            current_schedule: pallet_contracts::Schedule {
+                ..Default::default()
+            },
+        }),
         // Governance
         // Technical Committee
         pallet_collective_Instance2: Default::default(),
