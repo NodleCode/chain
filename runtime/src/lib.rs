@@ -300,6 +300,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_amendments, Amendments);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
+			#[cfg(feature = "enable-contracts")]
             add_benchmark!(params, batches, pallet_contracts, Contracts);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_grants, Grants);
