@@ -20,9 +20,13 @@ use cumulus_primitives_core::ParaId;
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
     constants::*, BalancesConfig, FinancialMembershipConfig, GenesisConfig, GrantsConfig,
-    IndicesConfig, ParachainInfoConfig, RootMembershipConfig, SystemConfig, ContractsConfig,
+    IndicesConfig, ParachainInfoConfig, RootMembershipConfig, SystemConfig,
     TechnicalMembershipConfig, WASM_BINARY,
 };
+
+#[cfg(feature = "enable-contracts")]
+use nodle_chain_runtime::ContractsConfig;
+
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -224,7 +228,8 @@ pub fn testnet_genesis(
         pallet_grants: GrantsConfig {
             vesting: vested_grants,
         },
-		pallet_contracts: Some(ContractsConfig {
+        #[cfg(feature = "enable-contracts")]
+        pallet_contracts: Some(ContractsConfig {
             current_schedule: pallet_contracts::Schedule {
                 ..Default::default()
             },

@@ -93,7 +93,7 @@ construct_runtime!(
         Utility: pallet_utility::{Pallet, Call, Event},
         Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
-		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
+        // Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
 
         // Cumulus parachain
         ParachainInfo: parachain_info::{Pallet, Storage, Config},
@@ -226,7 +226,8 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber>
+    #[cfg(feature = "enable-contracts")]
+    impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber>
     for Runtime
     {
         fn call(

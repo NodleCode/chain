@@ -27,6 +27,7 @@ use crate::{
 
 use frame_support::{parameter_types, weights::Weight};
 use nodle_chain_primitives::{AccountId, Balance};
+#[cfg(feature = "enable-contracts")]
 use pallet_contracts::weights::WeightInfo;
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::{traits::BlakeTwo256, Perbill};
@@ -132,6 +133,7 @@ impl pallet_multisig::Config for Runtime {
     type WeightInfo = ();
 }
 
+#[cfg(feature = "enable-contracts")]
 parameter_types! {
     pub const TombstoneDeposit: Balance = constants::deposit(
         1,
@@ -157,6 +159,7 @@ parameter_types! {
         constants::RuntimeBlockWeights::get().max_block;
 }
 
+#[cfg(feature = "enable-contracts")]
 impl pallet_contracts::Config for Runtime {
     type Time = Timestamp;
     type Randomness = RandomnessCollectiveFlip;
