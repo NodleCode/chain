@@ -93,6 +93,7 @@ construct_runtime!(
         Utility: pallet_utility::{Pallet, Call, Event},
         Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
+		Contracts: pallet_contracts::{Pallet, Call, Config<T>, Storage, Event<T>},
 
         // Cumulus parachain
         ParachainInfo: parachain_info::{Pallet, Storage, Config},
@@ -225,6 +226,33 @@ sp_api::impl_runtime_apis! {
         }
     }
 
+	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber>
+    for Runtime
+    {
+        fn call(
+            origin: AccountId,
+            dest: AccountId,
+            value: Balance,
+            gas_limit: u64,
+            input_data: Vec<u8>,
+        ) -> pallet_contracts_primitives::ContractExecResult {
+            Contracts::bare_call(origin, dest, value, gas_limit, input_data)
+        }
+
+        fn get_storage(
+            address: AccountId,
+            key: [u8; 32],
+        ) -> pallet_contracts_primitives::GetStorageResult {
+            Contracts::get_storage(address, key)
+        }
+
+        fn rent_projection(
+            address: AccountId,
+        ) -> pallet_contracts_primitives::RentProjectionResult<BlockNumber> {
+            Contracts::rent_projection(address)
+        }
+    }
+
     impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<
         Block,
         Balance,
@@ -271,6 +299,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_amendments, Amendments);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
+            add_benchmark!(params, batches, pallet_contracts, Contracts);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_grants, Grants);
             add_benchmark!(params, batches, pallet_identity, Identity);

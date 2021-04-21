@@ -20,7 +20,7 @@ use cumulus_primitives_core::ParaId;
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
     constants::*, BalancesConfig, FinancialMembershipConfig, GenesisConfig, GrantsConfig,
-    IndicesConfig, ParachainInfoConfig, RootMembershipConfig, SystemConfig,
+    IndicesConfig, ParachainInfoConfig, RootMembershipConfig, SystemConfig, ContractsConfig,
     TechnicalMembershipConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
@@ -224,7 +224,11 @@ pub fn testnet_genesis(
         pallet_grants: GrantsConfig {
             vesting: vested_grants,
         },
-
+		pallet_contracts: Some(ContractsConfig {
+            current_schedule: pallet_contracts::Schedule {
+                ..Default::default()
+            },
+        }),
         // Governance
         // Technical Committee
         pallet_collective_Instance2: Default::default(),
