@@ -18,29 +18,28 @@
 
 #![cfg(test)]
 
-use super::*;
 use crate as nodle_staking;
-
+use crate::*;
 use frame_support::{
     assert_ok, parameter_types,
     traits::{
         Currency, ExistenceRequirement, FindAuthor, Get, OnFinalize, OnInitialize,
-        OneSessionHandler,
+        OneSessionHandler, OnUnbalanced, Imbalance,
     },
     weights::{constants::RocksDbWeight, Weight},
     IterableStorageMap, StorageDoubleMap, StorageMap, StorageValue,
 };
 use sp_core::H256;
 use sp_io;
-// use sp_npos_elections::{
-//     reduce, to_support_map, ElectionScore, EvaluateSupport, ExtendedBalance, StakedAssignment,
-// };
 use sp_runtime::{
     testing::{Header, TestXt, UintAuthorityId},
     traits::{IdentityLookup, Zero},
     ModuleId, Perbill,
 };
-// use sp_staking::offence::{OffenceDetails, OnOffenceHandler};
+use sp_staking::{
+	SessionIndex,
+	offence::{OffenceDetails, OnOffenceHandler}
+};
 use std::{cell::RefCell, collections::HashSet};
 
 pub const INIT_TIMESTAMP: u64 = 30_000;
@@ -51,6 +50,45 @@ pub(crate) type AccountId = u64;
 pub(crate) type AccountIndex = u64;
 pub(crate) type BlockNumber = u64;
 pub(crate) type Balance = u128;
+
+thread_local! {
+    static SESSION: RefCell<(Vec<AccountId>, HashSet<AccountId>)> = RefCell::new(Default::default());
+}
+
+/// Another session handler struct to test on_disabled.
+pub struct OtherSessionHandler;
+impl OneSessionHandler<AccountId> for OtherSessionHandler {
+    type Key = UintAuthorityId;
+
+    fn on_genesis_session<'a, I: 'a>(_: I)
+    where
+        I: Iterator<Item = (&'a AccountId, Self::Key)>,
+        AccountId: 'a,
+    {
+    }
+
+    fn on_new_session<'a, I: 'a>(_: bool, validators: I, _: I)
+    where
+        I: Iterator<Item = (&'a AccountId, Self::Key)>,
+        AccountId: 'a,
+    {
+        SESSION.with(|x| {
+            *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), HashSet::new())
+        });
+    }
+
+    fn on_disabled(validator_index: usize) {
+        SESSION.with(|d| {
+            let mut d = d.borrow_mut();
+            let value = d.0[validator_index];
+            d.1.insert(value);
+        })
+    }
+}
+
+impl sp_runtime::BoundToRuntimeAppPublic for OtherSessionHandler {
+    type Public = UintAuthorityId;
+}
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -65,9 +103,20 @@ frame_support::construct_runtime!(
         Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
         Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
         NodleStaking: nodle_staking::{Module, Call, Config<T>, Storage, Event<T>},
-        // Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+        Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
     }
 );
+
+/// Author of block is always 11
+pub struct Author11;
+impl FindAuthor<AccountId> for Author11 {
+    fn find_author<'a, I>(_digests: I) -> Option<AccountId>
+    where
+        I: 'a + IntoIterator<Item = (frame_support::ConsensusEngineId, &'a [u8])>,
+    {
+        Some(11)
+    }
+}
 
 parameter_types! {
     pub const BlockHashCount: u64 = 250;
@@ -118,7 +167,37 @@ impl pallet_balances::Config for Test {
     type AccountStore = System;
     type WeightInfo = ();
 }
-
+parameter_types! {
+    pub const UncleGenerations: u64 = 0;
+    pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(25);
+}
+sp_runtime::impl_opaque_keys! {
+    pub struct SessionKeys {
+        pub other: OtherSessionHandler,
+    }
+}
+impl pallet_session::Config for Test {
+    type SessionManager = pallet_session::historical::NoteHistoricalRoot<Test, NodleStaking>;
+    type Keys = SessionKeys;
+    type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+    type SessionHandler = (OtherSessionHandler,);
+    type Event = Event;
+    type ValidatorId = AccountId;
+    type ValidatorIdOf = nodle_staking::StashOf<Test>;
+    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
+    type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+    type WeightInfo = ();
+}
+impl pallet_session::historical::Config for Test {
+    type FullIdentification = nodle_staking::ValidatorSnapshot<AccountId, Balance>;
+    type FullIdentificationOf = nodle_staking::ValidatorSnapshotOf<Test>;
+}
+impl pallet_authorship::Config for Test {
+    type FindAuthor = Author11;
+    type UncleGenerations = UncleGenerations;
+    type FilterUncle = ();
+    type EventHandler = Module<Test>;
+}
 parameter_types! {
     pub const MinimumPeriod: u64 = 5;
 }
@@ -139,6 +218,7 @@ parameter_types! {
     pub const MinValidatorStake: u128 = 10;
     pub const MinNominatorStake: u128 = 5;
     pub const MinNomination: u128 = 3;
+	pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
 }
 impl Config for Test {
     type Event = Event;
@@ -154,7 +234,25 @@ impl Config for Test {
     type MinValidatorPoolStake = MinValidatorStake;
     type MinNominatorStake = MinNominatorStake;
     type MinNomination = MinNomination;
+	type RewardRemainder = RewardRemainderMock;
+	type PalletId = StakingPalletId;
 }
+
+thread_local! {
+	pub static REWARD_REMAINDER_UNBALANCED: RefCell<u128> = RefCell::new(0);
+}
+
+pub struct RewardRemainderMock;
+
+impl OnUnbalanced<NegativeImbalanceOf<Test>> for RewardRemainderMock {
+	fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<Test>) {
+		REWARD_REMAINDER_UNBALANCED.with(|v| {
+			*v.borrow_mut() += amount.peek();
+		});
+		drop(amount);
+	}
+}
+
 
 pub struct ExtBuilder {
     invulnerables: Vec<AccountId>,
@@ -274,4 +372,92 @@ pub(crate) fn events() -> Vec<pallet::Event<Test>> {
 pub(crate) fn set_author(round: u32, acc: u64, pts: u32) {
     <Points<Test>>::mutate(round, |p| *p += pts);
     <AwardedPts<Test>>::mutate(round, acc, |p| *p += pts);
+}
+
+pub(crate) fn mint_rewards(amount: Balance) {
+    let imbalance = <pallet_balances::Module<Test> as Currency<AccountId>>::issue(amount);
+    NodleStaking::on_unbalanced(imbalance);
+
+	println!(
+		"last event {:#?}",
+		mock::last_event()
+	);
+}
+
+pub(crate) fn active_round() -> SessionIndex {
+    NodleStaking::round().current
+}
+
+/// Progress to the given block, triggering session and era changes as we progress.
+///
+/// This will finalize the previous block, initialize up to the given block, essentially simulating
+/// a block import/propose process where we first initialize the block, then execute some stuff (not
+/// in the function), and then finalize the block.
+pub(crate) fn run_to_block(n: BlockNumber) {
+    NodleStaking::on_finalize(System::block_number());
+    for b in (System::block_number() + 1)..=n {
+        System::set_block_number(b);
+        Session::on_initialize(b);
+        NodleStaking::on_initialize(b);
+        Timestamp::set_timestamp(System::block_number() * BLOCK_TIME + INIT_TIMESTAMP);
+        if b != n {
+            NodleStaking::on_finalize(System::block_number());
+        }
+    }
+}
+
+/// Progresses from the current block number (whatever that may be) to the `P * session_index + 1`.
+pub(crate) fn start_session(session_index: SessionIndex) {
+    let end: u64 = if Offset::get().is_zero() {
+        (session_index as u64) * Period::get()
+    } else {
+        Offset::get() + (session_index.saturating_sub(1) as u64) * Period::get()
+    };
+    run_to_block(end);
+    // session must have progressed properly.
+    assert_eq!(
+        Session::current_index(),
+        session_index,
+        "current session index = {}, expected = {}",
+        Session::current_index(),
+        session_index,
+    );
+}
+
+/// Progress until the given Session.
+pub(crate) fn start_active_session(session_index: SessionIndex) {
+    assert_eq!(active_round(), session_index);
+	start_session(session_index);
+	println!(
+		"last event {:#?}",
+		mock::last_event()
+	);
+    assert_eq!(active_round(), session_index + 1);
+}
+
+
+pub(crate) fn bond_validator(ctrl: AccountId, val: Balance) {
+    let _ = Balances::make_free_balance_be(&ctrl, val);
+    assert_ok!(NodleStaking::join_validator_pool(
+        Origin::signed(ctrl),
+        val,
+    ));
+
+	// println!(
+	// 	"last event {:#?}",
+	// 	mock::last_event()
+	// );
+}
+
+pub(crate) fn bond_nominator(
+    ctrl: AccountId,
+    val: Balance,
+    target: AccountId,
+) {
+    let _ = Balances::make_free_balance_be(&ctrl, val);
+    assert_ok!(NodleStaking::nominate(
+        Origin::signed(ctrl),
+		target,
+        val,
+    ));
 }

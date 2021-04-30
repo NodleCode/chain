@@ -21,6 +21,8 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use sp_std::if_std;
+
 #[cfg(test)]
 mod mock;
 #[cfg(test)]
@@ -36,68 +38,75 @@ pub use pallet::*;
 
 #[pallet]
 pub mod pallet {
-    // use super::*;
+    use super::*;
     use crate::set::OrderedSet;
-    use frame_support::pallet_prelude::*;
-    use frame_support::traits::{Currency, Get, Imbalance, ReservableCurrency};
+    use frame_support::{
+		pallet_prelude::*,
+		traits::{
+			Currency, Get, Imbalance, ReservableCurrency,
+			ExistenceRequirement, WithdrawReasons, OnUnbalanced,
+		},
+	};
     use frame_system::pallet_prelude::*;
     use frame_system::{self as system};
     use pallet_session::historical;
-    use parity_scale_codec::{Decode, Encode};
+	use parity_scale_codec::{Decode, Encode};
     use sp_runtime::{
-        traits::{AtLeast32BitUnsigned, Convert, Zero},
-        Perbill, RuntimeDebug,
+        traits::{
+			AccountIdConversion, Saturating,
+			AtLeast32BitUnsigned, Convert, Zero
+		},
+        Perbill, RuntimeDebug, ModuleId,
     };
     use sp_staking::SessionIndex;
-    use sp_std::cmp::Ordering;
 
-    pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
+	// use sp_std::{
+	// 	cmp::Ordering,
+	// };
+
+	use sp_std::{
+		collections::btree_map::BTreeMap,
+		cmp::Ordering,
+		convert::{From, TryInto},
+		mem::size_of,
+		prelude::*,
+		result,
+	};
+
+	pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
 
     // syntactic sugar for logging.
-    #[macro_export]
-    macro_rules! log {
+    // #[macro_export]
+    // macro_rules! log {
+	// 	($level:tt, $patter:expr $(, $values:expr)* $(,)?) => {
+	// 		log::$level!(
+	// 			target: crate::LOG_TARGET,
+	// 			concat!("[{:?}] 💸 ", $patter), <frame_system::Pallet<T>>::block_number() $(, $values)*
+	// 		)
+	// 	};
+	// }
+
+	// syntactic sugar for logging.
+	#[macro_export]
+	macro_rules! log {
 		($level:tt, $patter:expr $(, $values:expr)* $(,)?) => {
-			log::$level!(
+			frame_support::debug::$level!(
 				target: crate::LOG_TARGET,
-				concat!("[{:?}] 💸 ", $patter), <frame_system::Pallet<T>>::block_number() $(, $values)*
+				$patter $(, $values)*
 			)
 		};
 	}
 
-    #[derive(Default, Clone, Encode, Decode, RuntimeDebug)]
-    pub struct Bond<AccountId, Balance> {
-        pub owner: AccountId,
-        pub amount: Balance,
-    }
-
-    impl<A, B: Default> Bond<A, B> {
-        fn from_owner(owner: A) -> Self {
-            Bond {
-                owner,
-                amount: B::default(),
-            }
-        }
-    }
-
-    impl<AccountId: Ord, Balance> Eq for Bond<AccountId, Balance> {}
-
-    impl<AccountId: Ord, Balance> Ord for Bond<AccountId, Balance> {
-        fn cmp(&self, other: &Self) -> Ordering {
-            self.owner.cmp(&other.owner)
-        }
-    }
-
-    impl<AccountId: Ord, Balance> PartialOrd for Bond<AccountId, Balance> {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    impl<AccountId: Ord, Balance> PartialEq for Bond<AccountId, Balance> {
-        fn eq(&self, other: &Self) -> bool {
-            self.owner == other.owner
-        }
-    }
+	#[macro_export]
+	macro_rules! logprn {
+		($level:tt, $patter:expr $(, $values:expr)* $(,)?) => {
+			if_std! {
+				println!(
+					$patter $(, $values)*
+				);
+			}
+		};
+	}
 
     #[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug)]
     /// The activity status of the validator
@@ -190,7 +199,43 @@ pub mod pallet {
         }
     }
 
-    #[derive(Default, Encode, Decode, RuntimeDebug)]
+	#[derive(Default, Clone, Encode, Decode, RuntimeDebug)]
+	// #[derive(Default, PartialEq, Eq, PartialOrd, Ord, Clone, Encode, Decode, RuntimeDebug)]
+	pub struct Bond<AccountId, Balance> {
+		pub owner: AccountId,
+		pub amount: Balance,
+	}
+
+	impl<A, B: Default> Bond<A, B> {
+		fn from_owner(owner: A) -> Self {
+			Bond {
+				owner,
+				amount: B::default(),
+			}
+		}
+	}
+
+	impl<AccountId: Ord, Balance> Eq for Bond<AccountId, Balance> {}
+
+	impl<AccountId: Ord, Balance> PartialEq for Bond<AccountId, Balance> {
+		fn eq(&self, other: &Self) -> bool {
+			self.owner == other.owner
+		}
+	}
+
+	impl<AccountId: Ord, Balance> Ord for Bond<AccountId, Balance> {
+		fn cmp(&self, other: &Self) -> Ordering {
+			self.owner.cmp(&other.owner)
+		}
+	}
+
+	impl<AccountId: Ord, Balance> PartialOrd for Bond<AccountId, Balance> {
+		fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+			Some(self.cmp(other))
+		}
+	}
+
+    #[derive(Clone, Default, Encode, Decode, RuntimeDebug)]
     /// Snapshot of validator state at the start of the round for which they are selected
     pub struct ValidatorSnapshot<AccountId, Balance> {
         pub bond: Balance,
@@ -207,6 +252,33 @@ pub mod pallet {
             }
         }
     }
+
+	impl<AccountId: Ord, Balance> Eq for ValidatorSnapshot<AccountId, Balance> {}
+
+	impl<AccountId: Ord, Balance> PartialEq for ValidatorSnapshot<AccountId, Balance>
+	{
+		fn eq(&self, other: &Self) -> bool {
+			self.nominators == other.nominators
+		}
+	}
+
+	// impl<AccountId: Ord, Balance> PartialEq for ValidatorSnapshot<AccountId, Balance> {
+	// 	fn eq(&self, other: &Self) -> bool {
+	// 		self.nominators == other.nominators
+	// 	}
+	// }
+
+	// impl<AccountId: Ord, Balance> Ord for ValidatorSnapshot<AccountId, Balance> {
+	// 	fn cmp(&self, other: &Self) -> Ordering {
+	// 		self.owner.cmp(&other.owner)
+	// 	}
+	// }
+
+	// impl<AccountId: Ord, Balance> PartialOrd for ValidatorSnapshot<AccountId, Balance> {
+	// 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+	// 		Some(self.cmp(other))
+	// 	}
+	// }
 
     #[derive(Encode, Decode, RuntimeDebug)]
     pub struct Nominator<AccountId, Balance> {
@@ -350,8 +422,12 @@ pub mod pallet {
     }
 
     type RewardPoint = u32;
-    pub type BalanceOf<T> =
+    type BalanceOf<T> =
         <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
+	pub type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
+		<T as frame_system::Config>::AccountId,
+	>>::NegativeImbalance;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -380,6 +456,12 @@ pub mod pallet {
         type MinNomination: Get<BalanceOf<Self>>;
         /// Minimum stake for any registered on-chain account to become a nominator
         type MinNominatorStake: Get<BalanceOf<Self>>;
+		/// Tokens have been minted and are unused for validator-reward.
+		/// See [Era payout](./index.html#era-payout).
+		type RewardRemainder: OnUnbalanced<NegativeImbalanceOf<Self>>;
+		/// This pallet's module id. Used to derivate a dedicated account id to store session
+		/// rewards for validators and nominators in.
+		type PalletId: Get<ModuleId>;
     }
 
     #[pallet::pallet]
@@ -950,6 +1032,18 @@ pub mod pallet {
     pub type Staked<T: Config> =
         StorageMap<_, Twox64Concat, SessionIndex, BalanceOf<T>, ValueQuery>;
 
+	#[pallet::storage]
+	#[pallet::getter(fn session_accumulated_balance)]
+	/// Accumulated balances for the last Session Round
+	pub type SessionAccumulatedBalance<T: Config> =
+		StorageMap<_, Twox64Concat, SessionIndex, BalanceOf<T>, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn session_validator_reward)]
+	/// Validator reward for the Session
+	pub type SessionValidatorReward<T: Config> =
+		StorageMap<_, Twox64Concat, SessionIndex, BalanceOf<T>, ValueQuery>;
+
     #[pallet::storage]
     #[pallet::getter(fn points)]
     /// Total points awarded to validator for block production in the round
@@ -1089,11 +1183,11 @@ pub mod pallet {
             Ok(().into())
         }
 
-        // Calculate round issuance based on total staked for the given round
-        fn compute_issuance(staked: BalanceOf<T>) -> BalanceOf<T> {
-            // TODO :: issuance model ideal for nodle
-            return staked;
-        }
+        // // Calculate round issuance based on total staked for the given round
+        // fn compute_issuance(staked: BalanceOf<T>) -> BalanceOf<T> {
+        //     // TODO :: issuance model ideal for nodle
+        //     return staked;
+        // }
 
         fn pay_stakers(next: SessionIndex) {
             let mint = |amt: BalanceOf<T>, to: T::AccountId| {
@@ -1103,45 +1197,43 @@ pub mod pallet {
                     }
                 }
             };
-            let duration = T::BondDuration::get();
+
             let validator_fee = <ValidatorCommission<T>>::get();
-            if next > duration {
-                let round_to_payout = next - duration;
-                let total = <Points<T>>::get(round_to_payout);
-                let total_staked = <Staked<T>>::get(round_to_payout);
-                let issuance = Self::compute_issuance(total_staked);
-                for (val, pts) in <AwardedPts<T>>::drain_prefix(round_to_payout) {
-                    let pct_due = Perbill::from_rational_approximation(pts, total);
-                    let mut amt_due = pct_due * issuance;
-                    if amt_due <= T::Currency::minimum_balance() {
-                        continue;
-                    }
-                    // Take the snapshot of block author and nominations
-                    let state = <AtStake<T>>::take(round_to_payout, &val);
-                    if state.nominators.is_empty() {
-                        // solo collator with no nominators
-                        mint(amt_due, val.clone());
-                    } else {
-                        // pay collator first; commission + due_portion
-                        let val_pct = Perbill::from_rational_approximation(state.bond, state.total);
-                        let commission = validator_fee * amt_due;
-                        let val_due = if commission > T::Currency::minimum_balance() {
-                            amt_due -= commission;
-                            (val_pct * amt_due) + commission
-                        } else {
-                            // commission is negligible so not applied
-                            val_pct * amt_due
-                        };
-                        mint(val_due, val.clone());
-                        // pay nominators due portion
-                        for Bond { owner, amount } in state.nominators {
-                            let percent = Perbill::from_rational_approximation(amount, state.total);
-                            let due = percent * amt_due;
-                            mint(due, owner);
-                        }
-                    }
-                }
-            }
+			let total = <Points<T>>::get(next);
+			// let total_staked = <Staked<T>>::get(next);
+			// let issuance = Self::compute_issuance(total_staked);
+			let issuance = Self::session_validator_reward(next);
+			for (val, pts) in <AwardedPts<T>>::drain_prefix(next) {
+				let pct_due = Perbill::from_rational_approximation(pts, total);
+				let mut amt_due = pct_due * issuance;
+				if amt_due <= T::Currency::minimum_balance() {
+					continue;
+				}
+				// Take the snapshot of block author and nominations
+				let state = <AtStake<T>>::take(next, &val);
+				if state.nominators.is_empty() {
+					// solo collator with no nominators
+					mint(amt_due, val.clone());
+				} else {
+					// pay collator first; commission + due_portion
+					let val_pct = Perbill::from_rational_approximation(state.bond, state.total);
+					let commission = validator_fee * amt_due;
+					let val_due = if commission > T::Currency::minimum_balance() {
+						amt_due -= commission;
+						(val_pct * amt_due) + commission
+					} else {
+						// commission is negligible so not applied
+						val_pct * amt_due
+					};
+					mint(val_due, val.clone());
+					// pay nominators due portion
+					for Bond { owner, amount } in state.nominators {
+						let percent = Perbill::from_rational_approximation(amount, state.total);
+						let due = percent * amt_due;
+						mint(due, owner);
+					}
+				}
+			}
         }
         fn execute_delayed_validator_exits(next: SessionIndex) {
             let remain_exits = <ExitQueue<T>>::get()
@@ -1227,7 +1319,7 @@ pub mod pallet {
         /// relatively to their points.
         ///
         /// COMPLEXITY: Complexity is `number_of_validator_to_reward x current_elected_len`.
-        pub fn reward_by_ids(validators_points: impl IntoIterator<Item = (T::AccountId, u32)>) {
+        fn reward_by_ids(validators_points: impl IntoIterator<Item = (T::AccountId, u32)>) {
             let now = <Round<T>>::get().current;
             for (validator, points) in validators_points.into_iter() {
                 let score_points = <AwardedPts<T>>::get(now, &validator) + points;
@@ -1235,6 +1327,26 @@ pub mod pallet {
                 <Points<T>>::mutate(now, |x| *x += points);
             }
         }
+		/// Clear session information for given session index
+		fn clear_session_information(round: SessionIndex) {
+			<Staked<T>>::remove(round);
+			<Points<T>>::remove(round);
+			<AtStake<T>>::remove_prefix(round);
+			<AwardedPts<T>>::remove_prefix(round);
+
+			// Not only clean the stored rewards but also withdraw them away
+			match T::Currency::withdraw(
+				&T::PalletId::get().into_account(),
+				SessionAccumulatedBalance::<T>::take(round),
+				WithdrawReasons::all(),
+				ExistenceRequirement::KeepAlive,
+			) {
+				Ok(imbalance) => T::RewardRemainder::on_unbalanced(imbalance),
+				Err(_) => frame_support::print(
+					"Warning: an error happened when trying to handle active session rewards remainder",
+				),
+			};
+		}
     }
 
     /// Add reward points to block authors:
@@ -1263,15 +1375,21 @@ pub mod pallet {
     /// some session can lag in between the newest session planned and the latest session started.
     impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
         fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
-            log!(trace, "planning new_session({})", new_index);
+            log!(debug, "planning new_session({})", new_index);
+			logprn!(debug, "planning new_session({})", new_index);
             let mut round = <Round<T>>::get();
-            let current_block_number = system::Pallet::<T>::block_number();
+
+			// Clear the DB cached state of last session
+			Self::clear_session_information( round.current );
+
             // mutate round
+			let current_block_number = system::Pallet::<T>::block_number();
             round.update(current_block_number, new_index);
+
             // start next round
             <Round<T>>::put(round);
             // select top collator candidates for next round
-            let (collator_count, total_staked) = Self::select_session_validators(new_index);
+            let (validator_count, total_staked) = Self::select_session_validators(new_index);
 
             // snapshot total stake
             <Staked<T>>::insert(round.current, <Total<T>>::get());
@@ -1279,14 +1397,16 @@ pub mod pallet {
             Self::deposit_event(Event::NewRound(
                 round.first,
                 new_index,
-                collator_count,
+                validator_count,
                 total_staked,
             ));
 
             Some(Self::selected_validators())
         }
         fn start_session(start_index: SessionIndex) {
-            log!(trace, "starting start_session({})", start_index);
+            log!(debug, "starting start_session({})", start_index);
+			logprn!(debug, "starting start_session({})", start_index);
+
             // Self::start_session(start_index)
             // execute all delayed validator exits
             Self::execute_delayed_validator_exits(start_index);
@@ -1294,10 +1414,21 @@ pub mod pallet {
             // Self::apply_unapplied_slashes(active_era);
         }
         fn end_session(end_index: SessionIndex) {
-            log!(trace, "ending end_session({})", end_index);
-            // Self::end_session(end_index)
-            // pay all stakers for T::BondDuration rounds ago
-            Self::pay_stakers(end_index);
+            log!(debug, "ending end_session({})", end_index);
+			logprn!(debug, "ending end_session({})", end_index);
+
+			let round = Self::round();
+			if round.current == end_index {
+				let payout = Self::session_accumulated_balance( end_index );
+
+				// Self::deposit_event(RawEvent::EraPayout(active_era.index, payout, Zero::zero()));
+
+				// Set ending session reward.
+				<SessionValidatorReward<T>>::insert(&end_index, payout);
+
+				// pay all stakers for T::BondDuration rounds ago
+				Self::pay_stakers(end_index);
+			}
         }
     }
 
@@ -1326,27 +1457,6 @@ pub mod pallet {
         }
     }
 
-    /// A typed conversion from stash account ID to the active exposure of nominators
-    /// on that account.
-    ///
-    /// Active exposure is the exposure of the validator set currently validating, i.e. in
-    /// `active_era`. It can differ from the latest planned exposure in `current_era`.
-    pub struct ValidatorSnapshotOf<T>(sp_std::marker::PhantomData<T>);
-
-    impl<T: Config> Convert<T::AccountId, Option<ValidatorSnapshot<T::AccountId, BalanceOf<T>>>>
-        for ValidatorSnapshotOf<T>
-    {
-        fn convert(
-            validator: T::AccountId,
-        ) -> Option<ValidatorSnapshot<T::AccountId, BalanceOf<T>>> {
-            let now = <Round<T>>::get().current;
-            if <AtStake<T>>::contains_key(now, &validator) {
-                Some(<Pallet<T>>::at_stake(now, &validator))
-            } else {
-                None
-            }
-        }
-    }
     /// Means for interacting with a specialized version of the `session` trait.
     ///
     /// This is needed because `Staking` sets the `ValidatorIdOf` of the `pallet_session::Config`
@@ -1394,21 +1504,63 @@ pub mod pallet {
             <pallet_session::historical::Module<T>>::prune_up_to(up_to);
         }
     }
-}
 
-#[cfg(feature = "std")]
-impl<T: Config> GenesisConfig<T> {
-    /// Direct implementation of `GenesisBuild::build_storage`.
-    ///
-    /// Kept in order not to break dependency.
-    pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
-        <Self as GenesisBuild<T>>::build_storage(self)
-    }
+	/// A typed conversion from stash account ID to the active exposure of nominators
+	/// on that account.
+	///
+	/// Active exposure is the exposure of the validator set currently validating, i.e. in
+	/// `active_era`. It can differ from the latest planned exposure in `current_era`.
+	pub struct ValidatorSnapshotOf<T>(sp_std::marker::PhantomData<T>);
 
-    /// Direct implementation of `GenesisBuild::assimilate_storage`.
-    ///
-    /// Kept in order not to break dependency.
-    pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
-        <Self as GenesisBuild<T>>::assimilate_storage(self, storage)
-    }
+	impl<T: Config> Convert<T::AccountId, Option<ValidatorSnapshot<T::AccountId, BalanceOf<T>>>>
+		for ValidatorSnapshotOf<T>
+	{
+		fn convert(
+			validator: T::AccountId,
+		) -> Option<ValidatorSnapshot<T::AccountId, BalanceOf<T>>> {
+			let now = <Round<T>>::get().current;
+			if <AtStake<T>>::contains_key(now, &validator) {
+				Some(<Pallet<T>>::at_stake(now, &validator))
+			} else {
+				None
+			}
+		}
+	}
+
+	/// A `Convert` implementation that finds the stash of the given controller account,
+	/// if any.
+	pub struct StashOf<T>(sp_std::marker::PhantomData<T>);
+
+	impl<T: Config> Convert<T::AccountId, Option<T::AccountId>> for StashOf<T> {
+		fn convert(validator: T::AccountId) -> Option<T::AccountId> {
+			<Pallet<T>>::validator_state(&validator).map(|l| l.id)
+		}
+	}
+
+	impl<T: Config> OnUnbalanced<NegativeImbalanceOf<T>> for Pallet<T> {
+		fn on_nonzero_unbalanced(imbalance: NegativeImbalanceOf<T>) {
+			let round = Self::round();
+			SessionAccumulatedBalance::<T>::mutate(round.current, |v: &mut BalanceOf<T>| {
+				*v = v.saturating_add(imbalance.peek())
+			});
+			T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
+		}
+	}
+
+	#[cfg(feature = "std")]
+	impl<T: Config> GenesisConfig<T> {
+		/// Direct implementation of `GenesisBuild::build_storage`.
+		///
+		/// Kept in order not to break dependency.
+		pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+			<Self as GenesisBuild<T>>::build_storage(self)
+		}
+
+		/// Direct implementation of `GenesisBuild::assimilate_storage`.
+		///
+		/// Kept in order not to break dependency.
+		pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
+			<Self as GenesisBuild<T>>::assimilate_storage(self, storage)
+		}
+	}
 }

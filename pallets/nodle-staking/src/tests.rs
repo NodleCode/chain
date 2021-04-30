@@ -17,12 +17,23 @@
  */
 
 use super::*;
+// use mock::*;
+use crate::mock::{
+	Origin,
+	System, Timestamp, Balances,
+	NodleStaking, Session, Test,
+	ExtBuilder,	Event as MetaEvent,
+	roll_to, last_event, events,
+	set_author, mint_rewards, active_round,
+	run_to_block, start_session,
+	start_active_session, bond_validator,
+	bond_nominator,
+};
 use frame_support::{
     assert_noop, assert_ok,
     traits::{Currency, OnFinalize, OnInitialize, ReservableCurrency},
     StorageMap,
 };
-use mock::*;
 use pallet_balances::Error as BalancesError;
 use sp_runtime::{
     assert_eq_error_rate,
@@ -45,4 +56,64 @@ fn set_invulnerables_works() {
             BadOrigin
         );
     });
+}
+
+#[test]
+fn payout_creates_controller() {
+    ExtBuilder::default()
+        .build_and_execute(|| {
+            let balance = 1000;
+            // Create a validator:
+            bond_validator(10, balance);
+
+			assert_eq!(
+				last_event(),
+				MetaEvent::nodle_staking(
+					Event::JoinedValidatorPool(
+						10,
+						balance,
+						1000,
+					),
+				),
+			);
+
+            // Create a nominator
+            bond_nominator(1337, 100, 10);
+
+			assert_eq!(
+				last_event(),
+				MetaEvent::nodle_staking(
+					Event::Nomination(
+						1337,
+						100,
+						10,
+						1100,
+					),
+				),
+			);
+
+            mock::mint_rewards(1_000_000);
+
+            mock::start_active_session(1);
+
+			// println!(
+			// 	"Actv Sess 1 event {:#?}",
+			// 	mock::events()
+			// );
+
+			mock::mint_rewards(1_000_000);
+            // NodleStaking::reward_by_ids(vec![(11, 1)]);
+
+            mock::start_active_session(2);
+
+			// println!(
+			// 	"Actv Sess 2 event {:#?}",
+			// 	mock::events()
+			// );
+
+            // assert_ok!(NodleStaking::payout_stakers(Origin::signed(1337), 11, 1));
+
+            // // Controller is created
+            // assert!(Balances::free_balance(1337) > 0);
+        })
 }
