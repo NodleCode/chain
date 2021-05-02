@@ -23,8 +23,8 @@ use crate::*;
 use frame_support::{
     assert_ok, parameter_types,
     traits::{
-        Currency, ExistenceRequirement, FindAuthor, Get, OnFinalize, OnInitialize,
-        OneSessionHandler, OnUnbalanced, Imbalance,
+        Currency, ExistenceRequirement, FindAuthor, Get, Imbalance, OnFinalize, OnInitialize,
+        OnUnbalanced, OneSessionHandler,
     },
     weights::{constants::RocksDbWeight, Weight},
     IterableStorageMap, StorageDoubleMap, StorageMap, StorageValue,
@@ -37,8 +37,8 @@ use sp_runtime::{
     ModuleId, Perbill,
 };
 use sp_staking::{
-	SessionIndex,
-	offence::{OffenceDetails, OnOffenceHandler}
+    offence::{OffenceDetails, OnOffenceHandler},
+    SessionIndex,
 };
 use std::{cell::RefCell, collections::HashSet};
 
@@ -208,8 +208,6 @@ impl pallet_timestamp::Config for Test {
     type WeightInfo = ();
 }
 parameter_types! {
-    pub const MinBlocksPerRound: u32 = 3;
-    pub const DefaultBlocksPerRound: u32 = 5;
     pub const BondDuration: u32 = 2;
     pub const MinSelectedValidators: u32 = 5;
     pub const MaxNominatorsPerValidator: u32 = 4;
@@ -218,13 +216,11 @@ parameter_types! {
     pub const MinValidatorStake: u128 = 10;
     pub const MinNominatorStake: u128 = 5;
     pub const MinNomination: u128 = 3;
-	pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
 }
 impl Config for Test {
     type Event = Event;
     type Currency = Balances;
-    type MinBlocksPerRound = MinBlocksPerRound;
-    type DefaultBlocksPerRound = DefaultBlocksPerRound;
     type BondDuration = BondDuration;
     type MinSelectedValidators = MinSelectedValidators;
     type MaxNominatorsPerValidator = MaxNominatorsPerValidator;
@@ -234,25 +230,24 @@ impl Config for Test {
     type MinValidatorPoolStake = MinValidatorStake;
     type MinNominatorStake = MinNominatorStake;
     type MinNomination = MinNomination;
-	type RewardRemainder = RewardRemainderMock;
-	type PalletId = StakingPalletId;
+    type RewardRemainder = RewardRemainderMock;
+    type PalletId = StakingPalletId;
 }
 
 thread_local! {
-	pub static REWARD_REMAINDER_UNBALANCED: RefCell<u128> = RefCell::new(0);
+    pub static REWARD_REMAINDER_UNBALANCED: RefCell<u128> = RefCell::new(0);
 }
 
 pub struct RewardRemainderMock;
 
 impl OnUnbalanced<NegativeImbalanceOf<Test>> for RewardRemainderMock {
-	fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<Test>) {
-		REWARD_REMAINDER_UNBALANCED.with(|v| {
-			*v.borrow_mut() += amount.peek();
-		});
-		drop(amount);
-	}
+    fn on_nonzero_unbalanced(amount: NegativeImbalanceOf<Test>) {
+        REWARD_REMAINDER_UNBALANCED.with(|v| {
+            *v.borrow_mut() += amount.peek();
+        });
+        drop(amount);
+    }
 }
-
 
 pub struct ExtBuilder {
     invulnerables: Vec<AccountId>,
@@ -262,6 +257,14 @@ pub struct ExtBuilder {
     validators: Vec<(AccountId, Balance)>,
     // [nominator, validator, nomination_amount]
     nominators: Vec<(AccountId, AccountId, Balance)>,
+    validator_pool: bool,
+    validator_count: u32,
+    minimum_validator_count: u32,
+    fair: bool,
+    num_validators: Option<u32>,
+    nominate: bool,
+    has_stakers: bool,
+    initialize_first_session: bool,
 }
 
 impl Default for ExtBuilder {
@@ -271,6 +274,14 @@ impl Default for ExtBuilder {
             balances: vec![],
             nominators: vec![],
             validators: vec![],
+            validator_pool: false,
+            validator_count: 2,
+            minimum_validator_count: 0,
+            fair: true,
+            num_validators: None,
+            nominate: true,
+            has_stakers: true,
+            initialize_first_session: true,
         }
     }
 }
@@ -280,17 +291,14 @@ impl ExtBuilder {
         self.invulnerables = invulnerables;
         self
     }
-
     pub(crate) fn with_balances(mut self, balances: Vec<(AccountId, Balance)>) -> Self {
         self.balances = balances;
         self
     }
-
     pub(crate) fn with_validators(mut self, validators: Vec<(AccountId, Balance)>) -> Self {
         self.validators = validators;
         self
     }
-
     pub(crate) fn with_nominators(
         mut self,
         nominators: Vec<(AccountId, AccountId, Balance)>,
@@ -298,24 +306,106 @@ impl ExtBuilder {
         self.nominators = nominators;
         self
     }
-
+    pub fn validator_pool(mut self, validator_pool: bool) -> Self {
+        self.validator_pool = validator_pool;
+        self
+    }
+    pub fn validator_count(mut self, count: u32) -> Self {
+        self.validator_count = count;
+        self
+    }
+    pub fn minimum_validator_count(mut self, count: u32) -> Self {
+        self.minimum_validator_count = count;
+        self
+    }
+    pub fn fair(mut self, is_fair: bool) -> Self {
+        self.fair = is_fair;
+        self
+    }
+    pub fn num_validators(mut self, num_validators: u32) -> Self {
+        self.num_validators = Some(num_validators);
+        self
+    }
+    pub(crate) fn has_stakers(mut self, has: bool) -> Self {
+        self.has_stakers = has;
+        self
+    }
+    pub(crate) fn initialize_first_session(mut self, init: bool) -> Self {
+        self.initialize_first_session = init;
+        self
+    }
+    pub(crate) fn nominate(mut self, nominate: bool) -> Self {
+        self.nominate = nominate;
+        self
+    }
     pub fn build(self) -> sp_io::TestExternalities {
+        sp_tracing::try_init_simple();
         let mut storage = frame_system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap();
 
-        pallet_balances::GenesisConfig::<Test> {
-            balances: self.balances,
-        }
-        .assimilate_storage(&mut storage)
-        .expect("Pallet balances storage can be assimilated");
+        let balance_factor = if ExistentialDeposit::get() > 1 {
+            256
+        } else {
+            1
+        };
 
-        let mut stakers: Vec<(AccountId, Option<AccountId>, Balance)> = Vec::new();
-        for validator in self.validators {
-            stakers.push((validator.0, None, validator.1));
+        let num_validators = self.num_validators.unwrap_or(self.validator_count);
+        // Check that the number of validators is sensible.
+        assert!(num_validators <= 8);
+        let validators = (0..num_validators)
+            .map(|x| ((x + 1) * 10 + 1) as AccountId)
+            .collect::<Vec<_>>();
+
+        let _ = pallet_balances::GenesisConfig::<Test> {
+            balances: vec![
+                (1, 10 * balance_factor),
+                (2, 20 * balance_factor),
+                (3, 300 * balance_factor),
+                (4, 400 * balance_factor),
+                (10, balance_factor),
+                (11, balance_factor * 1000),
+                (20, balance_factor),
+                (21, balance_factor * 2000),
+                (30, balance_factor),
+                (31, balance_factor * 2000),
+                (40, balance_factor),
+                (41, balance_factor * 2000),
+                (50, balance_factor),
+                (51, balance_factor * 2000),
+                (60, balance_factor),
+                (61, balance_factor * 2000),
+                (70, balance_factor),
+                (71, balance_factor * 2000),
+                (80, balance_factor),
+                (81, balance_factor * 2000),
+                (100, 2000 * balance_factor),
+                (101, 2000 * balance_factor),
+                // This allows us to have a total_payout different from 0.
+                (999, 1_000_000_000_000),
+            ],
         }
-        for nominator in self.nominators {
-            stakers.push((nominator.0, Some(nominator.1), nominator.2));
+        .assimilate_storage(&mut storage);
+
+        let mut stakers: Vec<(AccountId, Option<AccountId>, Balance)> = vec![];
+        if self.has_stakers {
+            let stake_21 = if self.fair { 1000 } else { 2000 };
+            let stake_31 = if self.validator_pool {
+                balance_factor * 1000
+            } else {
+                1
+            };
+            let nominated_101 = if self.nominate { Some(11) } else { None };
+
+            stakers = vec![
+                // (controller, staked_amount)
+                (11, None, balance_factor * 1000),
+                (21, None, stake_21),
+                (31, None, stake_31),
+                (41, None, balance_factor * 1000),
+                // nominator
+                (101, nominated_101, balance_factor * 500),
+            ];
         }
 
         let _ = nodle_staking::GenesisConfig::<Test> {
@@ -325,8 +415,40 @@ impl ExtBuilder {
         }
         .assimilate_storage(&mut storage);
 
+        let _ = pallet_session::GenesisConfig::<Test> {
+            keys: validators
+                .iter()
+                .map(|x| {
+                    (
+                        *x,
+                        *x,
+                        SessionKeys {
+                            other: UintAuthorityId(*x as u64),
+                        },
+                    )
+                })
+                .collect(),
+        }
+        .assimilate_storage(&mut storage);
+
         let mut ext = sp_io::TestExternalities::from(storage);
-        ext.execute_with(|| System::set_block_number(1));
+        ext.execute_with(|| {
+            let validators = Session::validators();
+            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
+        });
+
+        if self.initialize_first_session {
+            // We consider all test to start after timestamp is initialized This must be ensured by
+            // having `timestamp::on_initialize` called before `staking::on_initialize`. Also, if
+            // session length is 1, then it is already triggered.
+            ext.execute_with(|| {
+                System::set_block_number(1);
+                Session::on_initialize(1);
+                NodleStaking::on_initialize(1);
+                Timestamp::set_timestamp(INIT_TIMESTAMP);
+            });
+        }
+
         ext
     }
 
@@ -378,14 +500,7 @@ pub(crate) fn mint_rewards(amount: Balance) {
     let imbalance = <pallet_balances::Module<Test> as Currency<AccountId>>::issue(amount);
     NodleStaking::on_unbalanced(imbalance);
 
-	println!(
-		"last event {:#?}",
-		mock::last_event()
-	);
-}
-
-pub(crate) fn active_round() -> SessionIndex {
-    NodleStaking::round().current
+    println!("last event {:#?}", mock::last_event());
 }
 
 /// Progress to the given block, triggering session and era changes as we progress.
@@ -426,38 +541,34 @@ pub(crate) fn start_session(session_index: SessionIndex) {
 
 /// Progress until the given Session.
 pub(crate) fn start_active_session(session_index: SessionIndex) {
-    assert_eq!(active_round(), session_index);
-	start_session(session_index);
-	println!(
-		"last event {:#?}",
-		mock::last_event()
-	);
-    assert_eq!(active_round(), session_index + 1);
+    start_session(session_index);
+    println!("last event {:#?}", mock::last_event());
+    assert_eq!(NodleStaking::active_session(), session_index);
 }
-
 
 pub(crate) fn bond_validator(ctrl: AccountId, val: Balance) {
     let _ = Balances::make_free_balance_be(&ctrl, val);
-    assert_ok!(NodleStaking::join_validator_pool(
-        Origin::signed(ctrl),
-        val,
-    ));
+    assert_ok!(NodleStaking::join_validator_pool(Origin::signed(ctrl), val));
 
-	// println!(
-	// 	"last event {:#?}",
-	// 	mock::last_event()
-	// );
+    // println!(
+    // 	"last event {:#?}",
+    // 	mock::last_event()
+    // );
 }
 
-pub(crate) fn bond_nominator(
-    ctrl: AccountId,
-    val: Balance,
-    target: AccountId,
-) {
+pub(crate) fn bond_nominator(ctrl: AccountId, val: Balance, target: AccountId) {
     let _ = Balances::make_free_balance_be(&ctrl, val);
-    assert_ok!(NodleStaking::nominate(
-        Origin::signed(ctrl),
-		target,
-        val,
-    ));
+    assert_ok!(NodleStaking::nominate(Origin::signed(ctrl), target, val));
+}
+
+pub(crate) fn validators_in_pool() -> Vec<AccountId> {
+    NodleStaking::validator_pool()
+        .0
+        .into_iter()
+        .map(|s| s.owner)
+        .collect()
+}
+
+pub(crate) fn selected_validators() -> Vec<AccountId> {
+    NodleStaking::selected_validators()
 }
