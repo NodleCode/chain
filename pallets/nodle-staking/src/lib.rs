@@ -42,14 +42,14 @@ pub mod pallet {
     use frame_support::{
         pallet_prelude::*,
         traits::{
-            Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced,
-			ReservableCurrency, WithdrawReasons,
+            Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced, ReservableCurrency,
+            WithdrawReasons,
         },
     };
     use frame_system::pallet_prelude::*;
     use frame_system::{self as system};
     use pallet_session::historical;
-    use parity_scale_codec::{HasCompact, Decode, Encode};
+    use parity_scale_codec::{Decode, Encode, HasCompact};
     use sp_runtime::{
         traits::{AccountIdConversion, AtLeast32BitUnsigned, Convert, Saturating, Zero},
         ModuleId, Perbill, RuntimeDebug,
@@ -58,7 +58,7 @@ pub mod pallet {
 
     use sp_std::{cmp::Ordering, convert::From, prelude::*};
 
-	pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
+    pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
 
     // syntactic sugar for logging.
     #[macro_export]
@@ -327,181 +327,182 @@ pub mod pallet {
         }
     }
 
-	/// A pending slash record. The value of the slash has been computed but not applied yet,
-	/// rather deferred for several eras.
-	#[derive(Encode, Decode, Default, RuntimeDebug)]
-	pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
-		/// The stash ID of the offending validator.
-		pub(crate) validator: AccountId,
-		/// The validator's own slash.
-		pub(crate) own: Balance,
-		/// All other slashed stakers and amounts.
-		pub(crate) others: Vec<(AccountId, Balance)>,
-		/// Reporters of the offence; bounty payout recipients.
-		pub(crate) reporters: Vec<AccountId>,
-		/// The amount of payout.
-		pub(crate) payout: Balance,
-	}
+    /// A pending slash record. The value of the slash has been computed but not applied yet,
+    /// rather deferred for several eras.
+    #[derive(Encode, Decode, Default, RuntimeDebug)]
+    pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
+        /// The stash ID of the offending validator.
+        pub(crate) validator: AccountId,
+        /// The validator's own slash.
+        pub(crate) own: Balance,
+        /// All other slashed stakers and amounts.
+        pub(crate) others: Vec<(AccountId, Balance)>,
+        /// Reporters of the offence; bounty payout recipients.
+        pub(crate) reporters: Vec<AccountId>,
+        /// The amount of payout.
+        pub(crate) payout: Balance,
+    }
 
-	/// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
-	#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-	pub struct UnlockChunk<Balance: HasCompact> {
-		/// Amount of funds to be unlocked.
-		#[codec(compact)]
-		value: Balance,
-		/// Era number at which point it'll be unlocked.
-		#[codec(compact)]
-		era: SessionIndex,
-	}
+    /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
+    #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+    pub struct UnlockChunk<Balance: HasCompact> {
+        /// Amount of funds to be unlocked.
+        #[codec(compact)]
+        value: Balance,
+        /// Era number at which point it'll be unlocked.
+        #[codec(compact)]
+        era: SessionIndex,
+    }
 
-	/// The ledger of a (bonded) controller.
-	#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-	pub struct StakingLedger<AccountId, Balance: HasCompact> {
-		/// The controller account whose balance is actually locked and at stake.
-		pub controller: AccountId,
-		/// The total amount of the controller's balance that we are currently accounting for.
-		/// It's just `active` plus all the `unlocking` balances.
-		#[codec(compact)]
-		pub total: Balance,
-		/// The total amount of the controller's balance that will be at stake in any forthcoming
-		/// rounds.
-		#[codec(compact)]
-		pub active: Balance,
-		/// Any balance that is becoming free, which may eventually be transferred out
-		/// of the controller (assuming it doesn't get slashed first).
-		pub unlocking: Vec<UnlockChunk<Balance>>,
-		/// List of eras for which the stakers behind a validator have claimed rewards. Only updated
-		/// for validators.
-		pub claimed_rewards: Vec<SessionIndex>,
-	}
+    /// The ledger of a (bonded) controller.
+    #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+    pub struct StakingLedger<AccountId, Balance: HasCompact> {
+        /// The controller account whose balance is actually locked and at stake.
+        pub controller: AccountId,
+        /// The total amount of the controller's balance that we are currently accounting for.
+        /// It's just `active` plus all the `unlocking` balances.
+        #[codec(compact)]
+        pub total: Balance,
+        /// The total amount of the controller's balance that will be at stake in any forthcoming
+        /// rounds.
+        #[codec(compact)]
+        pub active: Balance,
+        /// Any balance that is becoming free, which may eventually be transferred out
+        /// of the controller (assuming it doesn't get slashed first).
+        pub unlocking: Vec<UnlockChunk<Balance>>,
+        /// List of eras for which the stakers behind a validator have claimed rewards. Only updated
+        /// for validators.
+        pub claimed_rewards: Vec<SessionIndex>,
+    }
 
-	impl<
-		AccountId,
-		Balance: HasCompact + Copy + Saturating + AtLeast32BitUnsigned,
-	> StakingLedger<AccountId, Balance> {
-		/// Remove entries from `unlocking` that are sufficiently old and reduce the
-		/// total by the sum of their balances.
-		fn consolidate_unlocked(self, current_session: SessionIndex) -> Self {
-			let mut total = self.total;
-			let unlocking = self.unlocking.into_iter()
-				.filter(|chunk| if chunk.era > current_session {
-					true
-				} else {
-					total = total.saturating_sub(chunk.value);
-					false
-				})
-				.collect();
+    impl<AccountId, Balance: HasCompact + Copy + Saturating + AtLeast32BitUnsigned>
+        StakingLedger<AccountId, Balance>
+    {
+        /// Remove entries from `unlocking` that are sufficiently old and reduce the
+        /// total by the sum of their balances.
+        fn consolidate_unlocked(self, current_session: SessionIndex) -> Self {
+            let mut total = self.total;
+            let unlocking = self
+                .unlocking
+                .into_iter()
+                .filter(|chunk| {
+                    if chunk.era > current_session {
+                        true
+                    } else {
+                        total = total.saturating_sub(chunk.value);
+                        false
+                    }
+                })
+                .collect();
 
-			Self {
-				controller: self.controller,
-				total,
-				active: self.active,
-				unlocking,
-				claimed_rewards: self.claimed_rewards
-			}
-		}
+            Self {
+                controller: self.controller,
+                total,
+                active: self.active,
+                unlocking,
+                claimed_rewards: self.claimed_rewards,
+            }
+        }
 
-		/// Re-bond funds that were scheduled for unlocking.
-		fn rebond(mut self, value: Balance) -> Self {
-			let mut unlocking_balance: Balance = Zero::zero();
+        /// Re-bond funds that were scheduled for unlocking.
+        fn rebond(mut self, value: Balance) -> Self {
+            let mut unlocking_balance: Balance = Zero::zero();
 
-			while let Some(last) = self.unlocking.last_mut() {
-				if unlocking_balance + last.value <= value {
-					unlocking_balance += last.value;
-					self.active += last.value;
-					self.unlocking.pop();
-				} else {
-					let diff = value - unlocking_balance;
+            while let Some(last) = self.unlocking.last_mut() {
+                if unlocking_balance + last.value <= value {
+                    unlocking_balance += last.value;
+                    self.active += last.value;
+                    self.unlocking.pop();
+                } else {
+                    let diff = value - unlocking_balance;
 
-					unlocking_balance += diff;
-					self.active += diff;
-					last.value -= diff;
-				}
+                    unlocking_balance += diff;
+                    self.active += diff;
+                    last.value -= diff;
+                }
 
-				if unlocking_balance >= value {
-					break
-				}
-			}
+                if unlocking_balance >= value {
+                    break;
+                }
+            }
 
-			self
-		}
-	}
+            self
+        }
+    }
 
-	impl<AccountId, Balance> StakingLedger<AccountId, Balance> where
-		Balance: AtLeast32BitUnsigned + Saturating + Copy,
-	{
-		/// Slash the validator for a given amount of balance. This can grow the value
-		/// of the slash in the case that the validator has less than `minimum_balance`
-		/// active funds. Returns the amount of funds actually slashed.
-		///
-		/// Slashes from `active` funds first, and then `unlocking`, starting with the
-		/// chunks that are closest to unlocking.
-		pub(crate) fn slash(
-			&mut self,
-			mut value: Balance,
-			minimum_balance: Balance,
-		) -> Balance {
-			let pre_total = self.total;
-			let total = &mut self.total;
-			let active = &mut self.active;
+    impl<AccountId, Balance> StakingLedger<AccountId, Balance>
+    where
+        Balance: AtLeast32BitUnsigned + Saturating + Copy,
+    {
+        /// Slash the validator for a given amount of balance. This can grow the value
+        /// of the slash in the case that the validator has less than `minimum_balance`
+        /// active funds. Returns the amount of funds actually slashed.
+        ///
+        /// Slashes from `active` funds first, and then `unlocking`, starting with the
+        /// chunks that are closest to unlocking.
+        pub(crate) fn slash(&mut self, mut value: Balance, minimum_balance: Balance) -> Balance {
+            let pre_total = self.total;
+            let total = &mut self.total;
+            let active = &mut self.active;
 
-			let slash_out_of = |
-				total_remaining: &mut Balance,
-				target: &mut Balance,
-				value: &mut Balance,
-			| {
-				let mut slash_from_target = (*value).min(*target);
+            let slash_out_of =
+                |total_remaining: &mut Balance, target: &mut Balance, value: &mut Balance| {
+                    let mut slash_from_target = (*value).min(*target);
 
-				if !slash_from_target.is_zero() {
-					*target -= slash_from_target;
+                    if !slash_from_target.is_zero() {
+                        *target -= slash_from_target;
 
-					// don't leave a dust balance in the staking system.
-					if *target <= minimum_balance {
-						slash_from_target += *target;
-						*value += sp_std::mem::replace(target, Zero::zero());
-					}
+                        // don't leave a dust balance in the staking system.
+                        if *target <= minimum_balance {
+                            slash_from_target += *target;
+                            *value += sp_std::mem::replace(target, Zero::zero());
+                        }
 
-					*total_remaining = total_remaining.saturating_sub(slash_from_target);
-					*value -= slash_from_target;
-				}
-			};
+                        *total_remaining = total_remaining.saturating_sub(slash_from_target);
+                        *value -= slash_from_target;
+                    }
+                };
 
-			slash_out_of(total, active, &mut value);
+            slash_out_of(total, active, &mut value);
 
-			let i = self.unlocking.iter_mut()
-				.map(|chunk| {
-					slash_out_of(total, &mut chunk.value, &mut value);
-					chunk.value
-				})
-				.take_while(|value| value.is_zero()) // take all fully-consumed chunks out.
-				.count();
+            let i = self
+                .unlocking
+                .iter_mut()
+                .map(|chunk| {
+                    slash_out_of(total, &mut chunk.value, &mut value);
+                    chunk.value
+                })
+                .take_while(|value| value.is_zero()) // take all fully-consumed chunks out.
+                .count();
 
-			// kill all drained chunks.
-			let _ = self.unlocking.drain(..i);
+            // kill all drained chunks.
+            let _ = self.unlocking.drain(..i);
 
-			pre_total.saturating_sub(*total)
-		}
-	}
+            pre_total.saturating_sub(*total)
+        }
+    }
 
     type RewardPoint = u32;
     pub type BalanceOf<T> =
         <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-	pub type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
-		<T as frame_system::Config>::AccountId>>::PositiveImbalance;
+    pub type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
+        <T as frame_system::Config>::AccountId,
+    >>::PositiveImbalance;
 
     pub type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
-        <T as frame_system::Config>::AccountId>>::NegativeImbalance;
+        <T as frame_system::Config>::AccountId,
+    >>::NegativeImbalance;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		/// The currency type
+        /// The currency type
         type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
-		/// Handler for the unbalanced reduction when slashing a staker.
-		type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
-		/// Handler for the unbalanced increment when rewarding a staker.
-		type Reward: OnUnbalanced<PositiveImbalanceOf<Self>>;
+        /// Handler for the unbalanced reduction when slashing a staker.
+        type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
+        /// Handler for the unbalanced increment when rewarding a staker.
+        type Reward: OnUnbalanced<PositiveImbalanceOf<Self>>;
         /// Number of rounds that validators remain bonded before exit request is executed
         type BondDuration: Get<SessionIndex>;
         /// Minimum number of selected validators every round
@@ -529,6 +530,7 @@ pub mod pallet {
     }
 
     #[pallet::pallet]
+    #[pallet::generate_store(pub(crate) trait Store)]
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
@@ -613,7 +615,10 @@ pub mod pallet {
         /// to prevent selection as a validator, but unbonding
         /// is executed with a delay of `BondDuration` rounds.
         #[pallet::weight(10_000)]
-        pub fn exit_validators_pool(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+        pub fn exit_validators_pool(
+            origin: OriginFor<T>,
+            num_slashing_spans: u32,
+        ) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
             let mut state = <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
             ensure!(!state.is_leaving(), Error::<T>::AlreadyLeaving);
@@ -627,6 +632,7 @@ pub mod pallet {
                 }),
                 Error::<T>::AlreadyLeaving,
             );
+            slashing::clear_slash_metadata::<T>(&validator, num_slashing_spans)?;
             state.leave_validators_pool(when);
             let mut candidates = <ValidatorPool<T>>::get();
             if candidates.remove(&Bond::from_owner(validator.clone())) {
@@ -785,8 +791,14 @@ pub mod pallet {
         }
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
         #[pallet::weight(0)]
-        pub fn quit_nominators(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+        pub fn quit_nominators(
+            origin: OriginFor<T>,
+            num_slashing_spans: u32,
+        ) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
+
+            slashing::clear_slash_metadata::<T>(&acc, num_slashing_spans)?;
+
             let nominator = <NominatorState<T>>::get(&acc).ok_or(Error::<T>::NominatorDNE)?;
             for bond in nominator.nominations.0 {
                 Self::nominator_leaves_validator(acc.clone(), bond.owner.clone())?;
@@ -883,7 +895,7 @@ pub mod pallet {
         NominationDNE,
         Underflow,
         CannotSetBelowMin,
-		IncorrectSlashingSpans,
+        IncorrectSlashingSpans,
     }
 
     #[pallet::event]
@@ -929,9 +941,9 @@ pub mod pallet {
         ValidatorCommissionSet(Perbill, Perbill),
         /// Set blocks per round [current_round, first_block, old, new]
         BlocksPerRoundSet(SessionIndex, T::BlockNumber, u32, u32),
-		/// One validator (and its nominators) has been slashed by the given amount.
-		/// \[validator, amount\]
-		Slash(T::AccountId, BalanceOf<T>),
+        /// One validator (and its nominators) has been slashed by the given amount.
+        /// \[validator, amount\]
+        Slash(T::AccountId, BalanceOf<T>),
     }
 
     /// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
@@ -939,27 +951,27 @@ pub mod pallet {
     /// invulnerables) and restricted to testnets.
     #[pallet::storage]
     #[pallet::getter(fn invulnerables)]
-    type Invulnerables<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub(crate) type Invulnerables<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn total)]
     /// Total capital locked by this staking pallet
-    type Total<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+    pub(crate) type Total<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn active_session)]
     /// Current session index
-    type ActiveSession<T: Config> = StorageValue<_, SessionIndex, ValueQuery>;
+    pub(crate) type ActiveSession<T: Config> = StorageValue<_, SessionIndex, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn validator_commission)]
     /// Commission percent taken off of rewards for all validators
-    type ValidatorCommission<T: Config> = StorageValue<_, Perbill, ValueQuery>;
+    pub(crate) type ValidatorCommission<T: Config> = StorageValue<_, Perbill, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn validator_state)]
     /// Get validator state associated with an account if account is collating else None
-    type ValidatorState<T: Config> = StorageMap<
+    pub(crate) type ValidatorState<T: Config> = StorageMap<
         _,
         Twox64Concat,
         T::AccountId,
@@ -970,7 +982,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn nominator_state)]
     /// Get nominator state associated with an account if account is nominating else None
-    type NominatorState<T: Config> = StorageMap<
+    pub(crate) type NominatorState<T: Config> = StorageMap<
         _,
         Twox64Concat,
         T::AccountId,
@@ -981,29 +993,29 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn total_selected)]
     /// The total validators selected every round
-    type TotalSelected<T: Config> = StorageValue<_, u32, ValueQuery>;
+    pub(crate) type TotalSelected<T: Config> = StorageValue<_, u32, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn selected_validators)]
     /// The validators selected for the current round
-    type SelectedValidators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub(crate) type SelectedValidators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn validator_pool)]
     /// The pool of validator validators, each with their total backing stake
-    type ValidatorPool<T: Config> =
+    pub(crate) type ValidatorPool<T: Config> =
         StorageValue<_, OrderedSet<Bond<T::AccountId, BalanceOf<T>>>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn exit_queue)]
     /// A queue of validators awaiting exit `BondDuration` delay after request
-    type ExitQueue<T: Config> =
+    pub(crate) type ExitQueue<T: Config> =
         StorageValue<_, OrderedSet<Bond<T::AccountId, SessionIndex>>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn at_stake)]
     /// Snapshot of validator nomination stake at the start of the round
-    pub type AtStake<T: Config> = StorageDoubleMap<
+    pub(crate) type AtStake<T: Config> = StorageDoubleMap<
         _,
         Twox64Concat,
         SessionIndex,
@@ -1016,30 +1028,31 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn staked)]
     /// Total backing stake for selected validators in the round
-    pub type Staked<T: Config> =
+    pub(crate) type Staked<T: Config> =
         StorageMap<_, Twox64Concat, SessionIndex, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn session_accumulated_balance)]
     /// Accumulated balances for the last Session Round
-    pub type SessionAccumulatedBalance<T: Config> =
+    pub(crate) type SessionAccumulatedBalance<T: Config> =
         StorageMap<_, Twox64Concat, SessionIndex, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn session_validator_reward)]
     /// Validator reward for the Session
-    pub type SessionValidatorReward<T: Config> =
+    pub(crate) type SessionValidatorReward<T: Config> =
         StorageMap<_, Twox64Concat, SessionIndex, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn points)]
     /// Total points awarded to validator for block production in the round
-    pub type Points<T: Config> = StorageMap<_, Twox64Concat, SessionIndex, RewardPoint, ValueQuery>;
+    pub(crate) type Points<T: Config> =
+        StorageMap<_, Twox64Concat, SessionIndex, RewardPoint, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn awarded_pts)]
     /// Points for each validator per round
-    pub type AwardedPts<T: Config> = StorageDoubleMap<
+    pub(crate) type AwardedPts<T: Config> = StorageDoubleMap<
         _,
         Twox64Concat,
         SessionIndex,
@@ -1049,44 +1062,71 @@ pub mod pallet {
         ValueQuery,
     >;
 
-	/// All unapplied slashes that are queued for later.
-	#[pallet::storage]
-	#[pallet::getter(fn unapplied_slashes)]
-	/// Total backing stake for selected validators in the round
-	pub type UnappliedSlashes<T: Config> = StorageMap<
-		_,
-		Twox64Concat,
-		SessionIndex,
-		Vec<UnappliedSlash<T::AccountId, BalanceOf<T>>>,
-		ValueQuery
-	>;
+    /// All unapplied slashes that are queued for later.
+    #[pallet::storage]
+    #[pallet::getter(fn unapplied_slashes)]
+    /// Total backing stake for selected validators in the round
+    pub(crate) type UnappliedSlashes<T: Config> = StorageMap<
+        _,
+        Twox64Concat,
+        SessionIndex,
+        Vec<UnappliedSlash<T::AccountId, BalanceOf<T>>>,
+        ValueQuery,
+    >;
 
-	/// Map from all (unlocked) "controller" accounts to the info regarding the staking.
-	#[pallet::storage]
-	#[pallet::getter(fn ledger)]
-	pub type Ledger<T: Config> = StorageMap<
-		_,
-		Blake2_128Concat,
-		T::AccountId,
-		StakingLedger<T::AccountId,
-		BalanceOf<T>>,
-		OptionQuery
-	>;
+    /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
+    #[pallet::storage]
+    #[pallet::getter(fn ledger)]
+    pub(crate) type Ledger<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        StakingLedger<T::AccountId, BalanceOf<T>>,
+        OptionQuery,
+    >;
 
-	#[pallet::storage]
-	#[pallet::getter(fn slashing_spans)]
-	pub type SlashingSpans<T: Config> =
-		StorageMap<_, Twox64Concat, T::AccountId, slashing::SlashingSpans, OptionQuery>;
+    #[pallet::storage]
+    #[pallet::getter(fn slashing_spans)]
+    pub(crate) type SlashingSpans<T: Config> =
+        StorageMap<_, Twox64Concat, T::AccountId, slashing::SlashingSpans, OptionQuery>;
 
-	#[pallet::storage]
-	#[pallet::getter(fn span_slash)]
-	pub type SpanSlash<T: Config> = StorageMap<
-		_,
-		Twox64Concat,
-		(T::AccountId, slashing::SpanIndex),
-		slashing::SpanRecord<BalanceOf<T>>,
-		ValueQuery,
-	>;
+    #[pallet::storage]
+    #[pallet::getter(fn span_slash)]
+    pub(crate) type SpanSlash<T: Config> = StorageMap<
+        _,
+        Twox64Concat,
+        (T::AccountId, slashing::SpanIndex),
+        slashing::SpanRecord<BalanceOf<T>>,
+        ValueQuery,
+    >;
+
+    /// All slashing events on validators, mapped by session to the highest
+    /// slash proportion and slash value of the session.
+    #[pallet::storage]
+    #[pallet::getter(fn validator_slash_in_session)]
+    pub(crate) type ValidatorSlashInSession<T: Config> = StorageDoubleMap<
+        _,
+        Twox64Concat,
+        SessionIndex,
+        Twox64Concat,
+        T::AccountId,
+        (Perbill, BalanceOf<T>),
+        OptionQuery,
+    >;
+
+    /// All slashing events on nominators,
+    /// mapped by session to the highest slash value of the session.
+    #[pallet::storage]
+    #[pallet::getter(fn nominator_slash_in_session)]
+    pub(crate) type NominatorSlashInSession<T: Config> = StorageDoubleMap<
+        _,
+        Twox64Concat,
+        SessionIndex,
+        Twox64Concat,
+        T::AccountId,
+        BalanceOf<T>,
+        OptionQuery,
+    >;
 
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
@@ -1426,30 +1466,27 @@ pub mod pallet {
 				),
 			};
         }
-		/// Update the ledger for a controller.
-		///
-		/// This will also update the stash lock.
-		pub(crate) fn update_ledger(
-			controller: &T::AccountId,
-			ledger: &StakingLedger<T::AccountId, BalanceOf<T>>
-		) -> DispatchResultWithPostInfo {
-			// TODO :: Have to remove it
-			// T::Currency::set_lock(
-			// 	STAKING_ID,
-			// 	&ledger.controller,
-			// 	ledger.total,
-			// 	WithdrawReasons::all(),
-			// );
+        /// Update the ledger for a controller.
+        ///
+        /// This will also update the stash lock.
+        pub(crate) fn update_ledger(
+            controller: &T::AccountId,
+            ledger: &StakingLedger<T::AccountId, BalanceOf<T>>,
+        ) -> DispatchResultWithPostInfo {
+            // TODO :: Have to remove it
+            // T::Currency::set_lock(
+            // 	STAKING_ID,
+            // 	&ledger.controller,
+            // 	ledger.total,
+            // 	WithdrawReasons::all(),
+            // );
 
-			T::Currency::reserve(
-				&ledger.controller,
-				ledger.total,
-			)?;
+            T::Currency::reserve(&ledger.controller, ledger.total)?;
 
-			<Ledger<T>>::insert(controller, ledger);
+            <Ledger<T>>::insert(controller, ledger);
 
-			Ok(().into())
-		}
+            Ok(().into())
+        }
     }
     /// Add reward points to block authors:
     /// * 20 points to the block producer for producing a (non-uncle) block in the relay chain,
