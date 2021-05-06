@@ -313,33 +313,6 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
-fn dummy_testnet_genesis() -> GenesisConfig {
-    testnet_genesis(
-        vec![get_authority_keys_from_seed("Alice")],
-        vec![],
-        vec![],
-        Some(vec![get_account_id_from_seed::<sr25519::Public>(
-            "Alice//stash",
-        )]),
-        Some(vec![]),
-    )
-}
-
-/// Dummy testnet config no balances, alice is a validator
-pub fn dummy_testnet_config() -> ChainSpec {
-    ChainSpec::from_genesis(
-        "Dummy Network",
-        "dummy_network",
-        ChainType::Live,
-        dummy_testnet_genesis,
-        vec![],
-        None,
-        Some("nodl"),
-        Some(build_local_properties()),
-        Default::default(),
-    )
-}
-
 /// Arcadia config, from json chainspec
 pub fn arcadia_config() -> ChainSpec {
     ChainSpec::from_json_bytes(&include_bytes!("../res/arcadia.json")[..]).unwrap()
@@ -363,11 +336,6 @@ pub(crate) mod tests {
     #[test]
     fn test_create_local_testnet_chain_spec() {
         local_testnet_config().build_storage().unwrap();
-    }
-
-    #[test]
-    fn test_create_dummy_testnet_chain_spec() {
-        dummy_testnet_config().build_storage().unwrap();
     }
 
     #[test]
