@@ -318,7 +318,9 @@ fn dummy_testnet_genesis() -> GenesisConfig {
         vec![get_authority_keys_from_seed("Alice")],
         vec![],
         vec![],
-        Some(vec![]),
+        Some(vec![get_account_id_from_seed::<sr25519::Public>(
+            "Alice//stash",
+        )]),
         Some(vec![]),
     )
 }
@@ -361,6 +363,11 @@ pub(crate) mod tests {
     #[test]
     fn test_create_local_testnet_chain_spec() {
         local_testnet_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_create_dummy_testnet_chain_spec() {
+        dummy_testnet_config().build_storage().unwrap();
     }
 
     #[test]
