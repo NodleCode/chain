@@ -147,3 +147,11 @@ fn new_session_return_members() {
         assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
     })
 }
+
+#[test]
+fn return_none_if_set_empty() {
+    new_test_ext().execute_with(|| {
+        TestModule::initialize_members(&[]);
+        assert_eq!(TestModule::new_session(0), None);
+    })
+}
