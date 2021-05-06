@@ -85,7 +85,12 @@ impl<T: Config> Convert<T::AccountId, Option<FullIdentification>> for FullIdenti
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
     fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
-        Some(<Validators<T>>::get())
+        let all_keys = Validators::<T>::get();
+        if all_keys.is_empty() {
+            None
+        } else {
+            Some(all_keys)
+        }
     }
 
     fn start_session(_: SessionIndex) {}
