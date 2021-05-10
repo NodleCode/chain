@@ -17,6 +17,7 @@
  */
 
 use frame_support::{
+    debug,
     migration::{put_storage_value, StorageIterator},
     traits::OnRuntimeUpgrade,
     weights::{constants::RocksDbWeight, Weight},
@@ -36,8 +37,20 @@ impl OnRuntimeUpgrade for GrantsMigration {
     fn on_runtime_upgrade() -> Weight {
         // Buffer to account for misc checks
         let mut weight: Weight = 1_000;
+        let mut grants_done: u32 = 0;
 
-        sp_runtime::print("🕊️ Starting grants migration...");
+        debug::RuntimeLogger::init();
+        debug::print!("🕊️ Starting grants migration...");
+
+        // The network was stopped at block 2_756_825 and later at 58_000, we also
+        // add a buffer of 20_000 to account for ops time from us. We simply remove
+        // those blocks from the start value since the network restarts at block 0.
+        let previous_network_stopped_at: BlockNumber =
+            2_756_825.saturating_add(58_000).saturating_add(20_000);
+        debug::print!(
+            "🕊️ Correcting grants by {} blocks",
+            previous_network_stopped_at
+        );
 
         for (account_id, grants) in
             StorageIterator::<Vec<VestingSchedule<BlockNumber, Balance>>>::new(
@@ -46,13 +59,8 @@ impl OnRuntimeUpgrade for GrantsMigration {
             )
             .drain()
         {
-            // The network was stopped at block 2_756_825 and later at 58_000, we also
-            // add a buffer of 20_000 to account for ops time from us. We simply remove
-            // those blocks from the start value since the network restarts at block 0.
-            let previous_network_stopped_at =
-                2_756_825.saturating_add(58_000).saturating_add(20_000);
             put_storage_value(
-                b"Grants", // Note how we are switching from Vesting to Grants
+                b"Vesting",
                 b"VestingSchedules",
                 &account_id,
                 grants
@@ -66,10 +74,12 @@ impl OnRuntimeUpgrade for GrantsMigration {
                     })
                     .collect::<Vec<_>>(),
             );
+
             weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+            grants_done = grants_done.saturating_add(1);
         }
 
-        sp_runtime::print("🕊️ Grants migration done...");
+        debug::print!("🕊️ Corrected grants for {} accounts", grants_done);
 
         weight
     }
