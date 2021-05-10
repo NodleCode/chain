@@ -73,7 +73,7 @@ impl InstanceFilter<Call> for ProxyType {
             ProxyType::NonTransfer => !matches!(
                 c,
                 Call::Balances(..)
-                    | Call::Grants(..)
+                    | Call::Vesting(..)
                     | Call::Indices(pallet_indices::Call::transfer(..))
             ),
             ProxyType::Governance => matches!(

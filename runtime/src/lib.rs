@@ -118,7 +118,7 @@ macro_rules! construct_nodle_runtime {
 				CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 				InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config<T>, Event<T>},
 				UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config<T>, Event<T>},
-				Grants: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
+				Vesting: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
 
 				// Neat things
 				Identity: pallet_identity::{Module, Call, Storage, Event<T>},
