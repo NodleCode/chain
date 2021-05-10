@@ -441,7 +441,7 @@ sp_api::impl_runtime_apis! {
             #[cfg(feature = "with-staking")]
             add_benchmark!(params, batches, pallet_curveless_staking, Staking);
 
-            add_benchmark!(params, batches, pallet_grants, Grants);
+            add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_identity, Identity);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_indices, Indices);
