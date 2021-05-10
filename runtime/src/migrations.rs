@@ -46,9 +46,11 @@ impl OnRuntimeUpgrade for GrantsMigration {
             )
             .drain()
         {
-            // The network was stopped at block 2_756_825. We simply remove those blocks from
-            // the start value since the network restarts at block 0.
-            let previous_network_stopped_at = 2_756_825;
+            // The network was stopped at block 2_756_825 and later at 58_000, we also
+            // add a buffer of 20_000 to account for ops time from us. We simply remove
+            // those blocks from the start value since the network restarts at block 0.
+            let previous_network_stopped_at =
+                2_756_825.saturating_add(58_000).saturating_add(20_000);
             put_storage_value(
                 b"Grants", // Note how we are switching from Vesting to Grants
                 b"VestingSchedules",
