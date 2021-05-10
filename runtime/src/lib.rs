@@ -144,7 +144,7 @@ macro_rules! construct_nodle_runtime {
 #[cfg(not(feature = "with-staking"))]
 construct_nodle_runtime! {
     // Consensus
-    PoaSessions: pallet_poa::{Module, Storage},
+    Poa: pallet_poa::{Module, Storage},
 }
 
 #[cfg(feature = "with-staking")]
