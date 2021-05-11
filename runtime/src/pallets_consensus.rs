@@ -24,7 +24,7 @@ use crate::{
 };
 
 #[cfg(not(feature = "with-staking"))]
-use crate::PoaSessions;
+use crate::Poa;
 
 #[cfg(feature = "with-staking")]
 use crate::{Balances, Session, Staking, Timestamp};
@@ -164,7 +164,7 @@ parameter_types! {
 
 #[cfg(not(feature = "with-staking"))]
 impl pallet_session::Config for Runtime {
-    type SessionManager = PoaSessions;
+    type SessionManager = Poa;
     type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
     type Event = Event;
@@ -198,8 +198,8 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type PrimeOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = PoaSessions;
-    type MembershipChanged = PoaSessions;
+    type MembershipInitialized = Poa;
+    type MembershipChanged = Poa;
 }
 
 #[cfg(feature = "with-staking")]

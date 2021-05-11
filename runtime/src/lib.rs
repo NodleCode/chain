@@ -29,8 +29,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 pub fn wasm_binary_unwrap() -> &'static [u8] {
     WASM_BINARY.expect(
         "Development wasm binary is not available. This means the client is \
-                        built with `SKIP_WASM_BUILD` flag and it is only usable for \
-                        production chains. Please rebuild with the flag disabled.",
+        built with `SKIP_WASM_BUILD` flag and it is only usable for \
+        production chains. Please rebuild with the flag disabled.",
     )
 }
 
@@ -63,6 +63,7 @@ pub use pallets_consensus::StakerStatus;
 
 pub mod constants;
 mod implementations;
+mod migrations;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -117,7 +118,7 @@ macro_rules! construct_nodle_runtime {
 				CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>},
 				InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config<T>, Event<T>},
 				UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config<T>, Event<T>},
-				Grants: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
+				Vesting: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
 
 				// Neat things
 				Identity: pallet_identity::{Module, Call, Storage, Event<T>},
@@ -143,7 +144,7 @@ macro_rules! construct_nodle_runtime {
 #[cfg(not(feature = "with-staking"))]
 construct_nodle_runtime! {
     // Consensus
-    PoaSessions: pallet_poa::{Module, Storage},
+    Poa: pallet_poa::{Module, Storage},
 }
 
 #[cfg(feature = "with-staking")]
@@ -185,6 +186,7 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllModules,
+    migrations::GrantsMigration,
 >;
 
 sp_api::impl_runtime_apis! {
@@ -439,7 +441,7 @@ sp_api::impl_runtime_apis! {
             #[cfg(feature = "with-staking")]
             add_benchmark!(params, batches, pallet_curveless_staking, Staking);
 
-            add_benchmark!(params, batches, pallet_grants, Grants);
+            add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_identity, Identity);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_indices, Indices);
