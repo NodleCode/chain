@@ -19,9 +19,9 @@
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
-    ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, GrantsConfig,
-    ImOnlineConfig, IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
-    TechnicalMembershipConfig, ValidatorsSetConfig,
+    ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
+    IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
 };
 
 #[cfg(feature = "with-staking")]
@@ -179,7 +179,7 @@ pub fn testnet_genesis(
                 }),
         }),
         pallet_indices: Some(IndicesConfig { indices: vec![] }),
-        pallet_grants: Some(GrantsConfig {
+        pallet_grants: Some(VestingConfig {
             vesting: vested_grants,
         }),
         pallet_contracts: Some(ContractsConfig {
@@ -305,31 +305,6 @@ pub fn local_testnet_config() -> ChainSpec {
         "local_testnet",
         ChainType::Local,
         local_testnet_genesis,
-        vec![],
-        None,
-        Some("nodl"),
-        Some(build_local_properties()),
-        Default::default(),
-    )
-}
-
-fn dummy_testnet_genesis() -> GenesisConfig {
-    testnet_genesis(
-        vec![get_authority_keys_from_seed("Alice")],
-        vec![],
-        vec![],
-        Some(vec![]),
-        Some(vec![]),
-    )
-}
-
-/// Dummy testnet config no balances, alice is a validator
-pub fn dummy_testnet_config() -> ChainSpec {
-    ChainSpec::from_genesis(
-        "Dummy Network",
-        "dummy_network",
-        ChainType::Live,
-        dummy_testnet_genesis,
         vec![],
         None,
         Some("nodl"),
