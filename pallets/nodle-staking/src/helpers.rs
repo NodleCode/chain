@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 //! Some helper functions/macros for this crate.
 
@@ -53,12 +53,12 @@ macro_rules! tst_log {
 /// Extract current function name
 #[macro_export]
 macro_rules! function {
-	() => {{
-																																																						fn f() {}
-																																																						fn type_name_of<T>(_: T) -> &'static str {
-																																																							std::any::type_name::<T>()
-																																																						}
-																																																						let name = type_name_of(f);
-																																																						&name[..name.len() - 3]
-																																																					}};
+    () => {{
+            fn f() {}
+            fn type_name_of<T>(_: T) -> &'static str {
+                std::any::type_name::<T>()
+            }
+            let name = type_name_of(f);
+            &name[..name.len() - 3]
+        }};
 }
