@@ -418,7 +418,7 @@ pub mod pallet {
 
     /// A pending slash record. The value of the slash has been computed but not applied yet,
     /// rather deferred for several eras.
-    #[derive(Encode, Decode, Default, RuntimeDebug)]
+    #[derive(Encode, Decode, Default, RuntimeDebug, Clone)]
     pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
         /// The stash ID of the offending validator.
         pub(crate) validator: AccountId,
@@ -457,6 +457,8 @@ pub mod pallet {
         type BondedDuration: Get<SessionIndex>;
         /// Number of sessions that slashes are deferred by, after computation.
         type SlashDeferDuration: Get<SessionIndex>;
+        /// The origin which can cancel a deferred slash. Root can always do this.
+        type SlashCancelOrigin: EnsureOrigin<Self::Origin>;
         /// Minimum number of selected validators every round
         type MinSelectedValidators: Get<u32>;
         /// Maximum nominators per validator
@@ -833,6 +835,40 @@ pub mod pallet {
             ));
             Ok(().into())
         }
+        /// Cancel enactment of a deferred slash.
+        ///
+        /// Can be called by the `T::SlashCancelOrigin`.
+        ///
+        /// Parameters: session index and validator list of the slashes for that session to kill.
+        #[pallet::weight(10_000)]
+        pub fn cancel_deferred_slash(
+            origin: OriginFor<T>,
+            session_idx: SessionIndex,
+            controllers: Vec<T::AccountId>,
+        ) -> DispatchResultWithPostInfo {
+            T::SlashCancelOrigin::ensure_origin(origin)?;
+
+            let apply_at = session_idx.saturating_add(T::SlashDeferDuration::get());
+
+            ensure!(!controllers.is_empty(), Error::<T>::EmptyTargets);
+            ensure!(
+                <UnappliedSlashes<T>>::contains_key(apply_at),
+                Error::<T>::InvalidSessionIndex
+            );
+
+            <UnappliedSlashes<T>>::mutate(&apply_at, |unapplied| {
+                for controller_acc in controllers {
+                    unapplied.retain(|ustat| {
+                        if ustat.validator == controller_acc {
+                            false
+                        } else {
+                            true
+                        }
+                    });
+                }
+            });
+            Ok(().into())
+        }
     }
 
     #[pallet::error]
@@ -855,6 +891,8 @@ pub mod pallet {
         Underflow,
         CannotSetBelowMin,
         IncorrectSlashingSpans,
+        EmptyTargets,
+        InvalidSessionIndex,
     }
 
     #[pallet::event]
@@ -907,6 +945,7 @@ pub mod pallet {
         /// not be processed. \[session_index\]
         OldSlashingReportDiscarded(SessionIndex),
         PayReporterReward(T::AccountId, BalanceOf<T>),
+        DeferredUnappliedSlash(SessionIndex, T::AccountId),
     }
 
     /// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
@@ -1588,6 +1627,15 @@ pub mod pallet {
                 }
             };
         }
+        /// Apply previously-unapplied slashes on the beginning of a new session, after a delay.
+        fn apply_unapplied_slashes(active_session: SessionIndex) {
+            if <UnappliedSlashes<T>>::contains_key(active_session) {
+                let session_slashes = <UnappliedSlashes<T>>::take(&active_session);
+                for unapplied_slash in session_slashes {
+                    slashing::apply_slash::<T>(unapplied_slash);
+                }
+            }
+        }
     }
 
     /// A `Convert` implementation that finds the stash of the given controller account,
@@ -1726,8 +1774,8 @@ pub mod pallet {
             // execute all delayed validator exits
             Self::execute_delayed_validator_exits(start_index);
 
-            // TODO :: handling slashes
-            // Self::apply_unapplied_slashes(active_era);
+            // Handle the unapplied deferd slashes
+            Self::apply_unapplied_slashes(start_index);
         }
         fn end_session(end_index: SessionIndex) {
             log!(
@@ -1959,10 +2007,17 @@ pub mod pallet {
                         }
                     } else {
                         // defer to end of some `slash_defer_duration` from now.
-                        let apply_at = active_session.saturating_sub(slash_defer_duration);
-                        <Self as Store>::UnappliedSlashes::mutate(apply_at, move |for_later| {
-                            for_later.push(unapplied)
+                        let apply_at = active_session.saturating_add(slash_defer_duration);
+
+                        <Self as Store>::UnappliedSlashes::mutate(apply_at, |for_later| {
+                            for_later.push(unapplied.clone())
                         });
+
+                        <Pallet<T>>::deposit_event(Event::DeferredUnappliedSlash(
+                            active_session,
+                            unapplied.validator,
+                        ));
+
                         add_db_reads_writes(1, 1);
                     }
                 } else {

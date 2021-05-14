@@ -2176,6 +2176,8 @@ fn slashing_nominators_by_span_max() {
         assert_eq!(mock::balances(&21), (1000, 1000));
         assert_eq!(mock::balances(&101), (1000, 1000));
 
+        let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
+
         let exposure_11 = NodleStaking::at_stake(NodleStaking::active_session(), 11);
         let exposure_21 = NodleStaking::at_stake(NodleStaking::active_session(), 21);
         let nominated_value_11 = exposure_11
@@ -2209,13 +2211,11 @@ fn slashing_nominators_by_span_max() {
         expected.append(&mut new1);
         assert_eq!(mock::events(), expected);
 
+        let nominator101_prev_slashed_val = Perbill::from_percent(10) * nominated_value_11;
         assert_eq!(mock::balances(&11), (1000, 900));
         assert_eq!(
             mock::balances(&101),
-            (
-                1000,
-                1000 - (Perbill::from_percent(10) * nominated_value_11),
-            )
+            (1000, 1000 - nominator101_prev_slashed_val,)
         );
 
         let expected_spans = vec![
@@ -2231,9 +2231,8 @@ fn slashing_nominators_by_span_max() {
             },
         ];
 
-        let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
-
-        assert_eq!(get_span(11).iter().collect::<Vec<_>>(), expected_spans,);
+        assert_eq!(get_span(11).iter().collect::<Vec<_>>(), expected_spans);
+        assert_eq!(get_span(101).iter().collect::<Vec<_>>(), expected_spans);
 
         // second slash: higher era, higher value, same span.
         on_offence_in_session(
@@ -2248,22 +2247,549 @@ fn slashing_nominators_by_span_max() {
             3,
         );
 
+        // Since on same span for 101, slash_value = 150 - 50 = 100
         let mut new2 = vec![Event::Slash(21, 300), Event::Slash(101, 100)];
 
         expected.append(&mut new2);
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&11), (1000, 900));
         assert_eq!(mock::balances(&21), (1000, 700));
+        assert_eq!(mock::balances(&101), (1000, 850));
+
+        let nominator101_prev_slashed_val =
+            (Perbill::from_percent(30) * nominated_value_21) - nominator101_prev_slashed_val;
 
         assert_eq!(
             mock::balances(&101),
-            (
-                1000,
-                1000 - (Perbill::from_percent(30) * nominated_value_21),
-            )
+            (1000, 950 - nominator101_prev_slashed_val)
         );
+
+        let expected_spans = vec![
+            slashing::SlashingSpan {
+                index: 1,
+                start: 4,
+                length: None,
+            },
+            slashing::SlashingSpan {
+                index: 0,
+                start: 1,
+                length: Some(3),
+            },
+        ];
+
+        assert_eq!(get_span(21).iter().collect::<Vec<_>>(), expected_spans);
+        assert_eq!(get_span(101).iter().collect::<Vec<_>>(), expected_spans);
+
+        on_offence_in_session(
+            &[OffenceDetails {
+                offender: (
+                    11,
+                    NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                ),
+                reporters: vec![],
+            }],
+            &[Perbill::from_percent(20)],
+            2,
+        );
+
+        // Only Validator-11 is slashed, and Nominator-101 is not slashed since
+        // Here slash value is less than the Span Max.
+        let mut new3 = vec![Event::Slash(11, 100)];
+
+        expected.append(&mut new3);
+        assert_eq!(mock::events(), expected);
 
         // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
     });
+}
+
+#[test]
+fn slashes_are_summed_across_spans() {
+    ExtBuilder::default().build_and_execute(|| {
+        assert_ok!(NodleStaking::nominate(Origin::signed(101), 21, 500));
+        mock::start_active_session(1);
+        mock::start_active_session(2);
+        mock::start_active_session(3);
+
+        let mut expected = vec![
+            Event::Nomination(101, 500, 21, 1500),
+            Event::ValidatorChosen(2, 21, 1500),
+            Event::ValidatorChosen(2, 11, 1500),
+            Event::ValidatorChosen(2, 41, 1000),
+            Event::NewSession(5, 2, 3, 4000),
+            Event::ValidatorChosen(3, 21, 1500),
+            Event::ValidatorChosen(3, 11, 1500),
+            Event::ValidatorChosen(3, 41, 1000),
+            Event::NewSession(10, 3, 3, 4000),
+            Event::ValidatorChosen(4, 21, 1500),
+            Event::ValidatorChosen(4, 11, 1500),
+            Event::ValidatorChosen(4, 41, 1000),
+            Event::NewSession(15, 4, 3, 4000),
+        ];
+
+        assert_eq!(mock::events(), expected);
+
+        assert_eq!(mock::balances(&11), (1000, 1000));
+        assert_eq!(mock::balances(&21), (1000, 1000));
+        assert_eq!(mock::balances(&101), (1000, 1000));
+
+        let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
+
+        on_offence_now(
+            &[OffenceDetails {
+                offender: (
+                    21,
+                    NodleStaking::at_stake(NodleStaking::active_session(), 21),
+                ),
+                reporters: vec![],
+            }],
+            &[Perbill::from_percent(10)],
+        );
+
+        let mut new1 = vec![Event::Slash(21, 100), Event::Slash(101, 50)];
+
+        expected.append(&mut new1);
+        assert_eq!(mock::events(), expected);
+
+        assert_eq!(mock::balances(&21), (1000, 900));
+        assert_eq!(mock::balances(&101), (1000, 950));
+
+        let expected_spans = vec![
+            slashing::SlashingSpan {
+                index: 1,
+                start: 4,
+                length: None,
+            },
+            slashing::SlashingSpan {
+                index: 0,
+                start: 1,
+                length: Some(3),
+            },
+        ];
+
+        assert_eq!(get_span(21).iter().collect::<Vec<_>>(), expected_spans,);
+
+        assert_ok!(NodleStaking::validator_activate(Origin::signed(21)));
+
+        mock::start_active_session(5);
+
+        on_offence_now(
+            &[OffenceDetails {
+                offender: (
+                    21,
+                    NodleStaking::at_stake(NodleStaking::active_session(), 21),
+                ),
+                reporters: vec![],
+            }],
+            &[Perbill::from_percent(10)],
+        );
+
+        let mut new2 = vec![
+            Event::ValidatorActive(3, 21),
+            Event::ValidatorChosen(5, 11, 1500),
+            Event::ValidatorChosen(5, 21, 1350),
+            Event::ValidatorChosen(5, 41, 1000),
+            Event::NewSession(20, 5, 3, 3850),
+            Event::ValidatorChosen(6, 11, 1500),
+            Event::ValidatorChosen(6, 21, 1350),
+            Event::ValidatorChosen(6, 41, 1000),
+            Event::NewSession(25, 6, 3, 3850),
+            Event::Slash(21, 90),
+            Event::Slash(101, 45),
+        ];
+
+        expected.append(&mut new2);
+        assert_eq!(mock::events(), expected);
+
+        assert_eq!(mock::balances(&21), (1000, 810));
+        assert_eq!(mock::balances(&101), (1000, 905));
+
+        let expected_spans = vec![
+            slashing::SlashingSpan {
+                index: 2,
+                start: 6,
+                length: None,
+            },
+            slashing::SlashingSpan {
+                index: 1,
+                start: 4,
+                length: Some(2),
+            },
+            slashing::SlashingSpan {
+                index: 0,
+                start: 1,
+                length: Some(3),
+            },
+        ];
+        assert_eq!(get_span(21).iter().collect::<Vec<_>>(), expected_spans);
+
+        // tst_log!(
+        //     debug,
+        //     "[{:#?}]=> - {:#?}",
+        //     line!(),
+        //     get_span(21).iter().collect::<Vec<_>>()
+        // );
+
+        // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+    });
+}
+
+#[test]
+fn deferred_slashes_are_deferred() {
+    ExtBuilder::default()
+        .slash_defer_duration(2)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&11), (1000, 1000));
+            assert_eq!(mock::balances(&101), (1500, 500));
+
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        11,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(10)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new1 = vec![Event::DeferredUnappliedSlash(1, 11)];
+
+            expected.append(&mut new1);
+            assert_eq!(mock::events(), expected);
+
+            mock::start_active_session(2);
+
+            let mut new2 = vec![
+                Event::ValidatorChosen(3, 41, 1000),
+                Event::ValidatorChosen(3, 21, 1000),
+                Event::NewSession(10, 3, 2, 2000),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(mock::events(), expected);
+
+            // Ensure slash occur at start of 3 session ( 1 + 2 [deferred duration] )
+            mock::start_active_session(3);
+
+            let mut new3 = vec![
+                Event::Slash(11, 100),
+                Event::Slash(101, 50),
+                Event::ValidatorChosen(4, 41, 1000),
+                Event::ValidatorChosen(4, 21, 1000),
+                Event::NewSession(15, 4, 2, 2000),
+            ];
+            expected.append(&mut new3);
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&11), (1000, 900));
+            assert_eq!(mock::balances(&101), (1500, 450));
+        })
+}
+
+#[test]
+fn remove_deferred() {
+    ExtBuilder::default()
+        .slash_defer_duration(2)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&11), (1000, 1000));
+            assert_eq!(mock::balances(&101), (1500, 500));
+
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        11,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(10)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new1 = vec![Event::DeferredUnappliedSlash(1, 11)];
+
+            expected.append(&mut new1);
+            assert_eq!(mock::events(), expected);
+
+            mock::start_active_session(2);
+
+            let mut new2 = vec![
+                Event::ValidatorChosen(3, 41, 1000),
+                Event::ValidatorChosen(3, 21, 1000),
+                Event::NewSession(10, 3, 2, 2000),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(mock::events(), expected);
+
+            on_offence_in_session(
+                &[OffenceDetails {
+                    offender: (11, NodleStaking::at_stake(1, 11)),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(15)],
+                1,
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new3 = vec![Event::DeferredUnappliedSlash(2, 11)];
+
+            expected.append(&mut new3);
+            assert_eq!(mock::events(), expected);
+
+            // fails if empty
+            assert_noop!(
+                NodleStaking::cancel_deferred_slash(Origin::root(), 1, vec![]),
+                Error::<Test>::EmptyTargets
+            );
+
+            assert_ok!(NodleStaking::cancel_deferred_slash(
+                Origin::root(),
+                1,
+                vec![11],
+            ));
+
+            mock::start_active_session(3);
+
+            assert_eq!(mock::balances(&11), (1000, 1000));
+            assert_eq!(mock::balances(&101), (1500, 500));
+
+            let mut new4 = vec![
+                Event::ValidatorChosen(4, 41, 1000),
+                Event::ValidatorChosen(4, 21, 1000),
+                Event::NewSession(15, 4, 2, 2000),
+            ];
+
+            expected.append(&mut new4);
+            assert_eq!(mock::events(), expected);
+
+            mock::start_active_session(4);
+
+            // Ensure deffered slash event have fired.
+            assert_eq!(mock::balances(&11), (1000, 950));
+            assert_eq!(mock::balances(&101), (1500, 475));
+
+            let mut new5 = vec![
+                Event::Slash(11, 50),
+                Event::Slash(101, 25),
+                Event::ValidatorChosen(5, 41, 1000),
+                Event::ValidatorChosen(5, 21, 1000),
+                Event::NewSession(20, 5, 2, 2000),
+            ];
+
+            expected.append(&mut new5);
+            assert_eq!(mock::events(), expected);
+
+            // tst_log!(
+            //     debug,
+            //     "[{:#?}]=> - {:#?}",
+            //     line!(),
+            //     get_span(21).iter().collect::<Vec<_>>()
+            // );
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+        })
+}
+
+#[test]
+fn remove_multi_deferred() {
+    ExtBuilder::default()
+        .slash_defer_duration(2)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&11), (1000, 1000));
+            assert_eq!(mock::balances(&101), (1500, 500));
+
+            // Add 11 to Unapplied Slash Q
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        11,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(10)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new1 = vec![Event::DeferredUnappliedSlash(1, 11)];
+
+            expected.append(&mut new1);
+            assert_eq!(mock::events(), expected);
+
+            // Add 21 to Unapplied Slash Q
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        21,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 21),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(10)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new2 = vec![Event::DeferredUnappliedSlash(1, 21)];
+
+            expected.append(&mut new2);
+            assert_eq!(mock::events(), expected);
+
+            // Add 11 to Unapplied Slash Q [25%]
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        11,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(25)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new3 = vec![Event::DeferredUnappliedSlash(1, 11)];
+
+            expected.append(&mut new3);
+            assert_eq!(mock::events(), expected);
+
+            // Add 42 with exposure of 11 to Unapplied Slash Q [25%]
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        42,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(25)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new4 = vec![Event::DeferredUnappliedSlash(1, 42)];
+
+            expected.append(&mut new4);
+            assert_eq!(mock::events(), expected);
+
+            // Add 69 with exposure of 11 to Unapplied Slash Q [25%]
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        69,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(25)],
+            );
+
+            // Since slash is deffered,
+            // Ensure deffered unapplied slashing events
+            let mut new5 = vec![Event::DeferredUnappliedSlash(1, 69)];
+
+            expected.append(&mut new5);
+            assert_eq!(mock::events(), expected);
+
+            // mock::SLASH_DEFER_DURATION.saturating_add(NodleStaking::active_session());
+            // let apply_at = mock::SLASH_DEFER_DURATION
+            //     .with(|v| *v.get() + NodleStaking::active_session());
+
+            let apply_at =
+                NodleStaking::active_session() + mock::SLASH_DEFER_DURATION.with(|l| *l.borrow());
+
+            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 5);
+
+            assert_noop!(
+                NodleStaking::cancel_deferred_slash(Origin::root(), 1, vec![]),
+                Error::<Test>::EmptyTargets
+            );
+
+            assert_noop!(
+                NodleStaking::cancel_deferred_slash(Origin::root(), apply_at, vec![11]),
+                Error::<Test>::InvalidSessionIndex
+            );
+
+            assert_ok!(NodleStaking::cancel_deferred_slash(
+                Origin::root(),
+                1,
+                vec![11]
+            ),);
+
+            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 3);
+
+            assert_ok!(NodleStaking::cancel_deferred_slash(
+                Origin::root(),
+                1,
+                vec![69]
+            ),);
+
+            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 2);
+
+            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[0].validator, 21);
+            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[1].validator, 42);
+
+            mock::start_active_session(4);
+
+            let mut new6 = vec![
+                Event::ValidatorChosen(3, 41, 1000),
+                Event::NewSession(10, 3, 1, 1000),
+                Event::Slash(21, 100),
+                Event::ValidatorChosen(4, 41, 1000),
+                Event::NewSession(15, 4, 1, 1000),
+                Event::ValidatorChosen(5, 41, 1000),
+                Event::NewSession(20, 5, 1, 1000),
+            ];
+
+            expected.append(&mut new6);
+            assert_eq!(mock::events(), expected);
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+
+            // tst_log!(
+            //     debug,
+            //     "[{:#?}]=> - [{:#?}] | [{:#?}]",
+            //     line!(),
+            //     apply_at,
+            //     <UnappliedSlashes<Test>>::get(&apply_at)
+            // );
+        })
 }

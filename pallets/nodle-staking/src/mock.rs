@@ -126,7 +126,7 @@ parameter_types! {
     pub const MaxLocks: u32 = 1024;
     // pub static SessionsPerEra: SessionIndex = 3;
     pub static ExistentialDeposit: Balance = 1;
-    // pub static SlashDeferDuration: EraIndex = 0;
+    pub static SlashDeferDuration: SessionIndex = 0;
     pub static ElectionLookahead: BlockNumber = 0;
     pub static Period: BlockNumber = 5;
     pub static Offset: BlockNumber = 0;
@@ -216,7 +216,6 @@ parameter_types! {
     pub const MinValidatorStake: u128 = 10;
     pub const MinNominatorStake: u128 = 5;
     pub const MinNomination: u128 = 3;
-    pub const SlashDeferDuration: SessionIndex = 0;
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
 }
 impl Config for Test {
@@ -237,6 +236,7 @@ impl Config for Test {
     type Slash = ();
     type Reward = ();
     type SlashDeferDuration = SlashDeferDuration;
+    type SlashCancelOrigin = frame_system::EnsureRoot<Self::AccountId>;
     type SessionInterface = Self;
 }
 
@@ -355,6 +355,11 @@ impl ExtBuilder {
     #[allow(dead_code)]
     pub(crate) fn nominate(mut self, nominate: bool) -> Self {
         self.nominate = nominate;
+        self
+    }
+    #[allow(dead_code)]
+    pub fn slash_defer_duration(self, session_idx: SessionIndex) -> Self {
+        SLASH_DEFER_DURATION.with(|v| *v.borrow_mut() = session_idx);
         self
     }
     pub(crate) fn tst_staking_build(self) -> sp_io::TestExternalities {
