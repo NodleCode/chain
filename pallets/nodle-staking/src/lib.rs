@@ -120,7 +120,7 @@ pub mod pallet {
         }
     }
 
-    #[derive(Encode, Decode, RuntimeDebug)]
+    #[derive(Encode, Decode, Clone, RuntimeDebug)]
     /// Global validator state with commission fee, bonded stake, and nominations
     pub struct Validator<AccountId, Balance> {
         pub id: AccountId,
@@ -277,7 +277,7 @@ pub mod pallet {
     // 	}
     // }
 
-    #[derive(Encode, Decode, RuntimeDebug)]
+    #[derive(Encode, Decode, Clone, RuntimeDebug)]
     pub struct Nominator<AccountId, Balance> {
         pub nominations: OrderedSet<Bond<AccountId, Balance>>,
         pub total: Balance,
@@ -751,7 +751,6 @@ pub mod pallet {
 
             Ok(().into())
         }
-
         /// Revoke an existing nomination
         #[pallet::weight(10_000)]
         pub fn nominator_denominate(
@@ -792,6 +791,7 @@ pub mod pallet {
             let before = validator_state.total;
             validator_state.inc_nominator(nominator.clone(), more);
             let after = validator_state.total;
+            <Total<T>>::mutate(|x| *x += more);
             if validator_state.is_active() {
                 Self::update_validators_pool(validator.clone(), validator_state.total);
             }
@@ -824,20 +824,25 @@ pub mod pallet {
                 nominations.total >= T::MinNominatorStake::get(),
                 Error::<T>::NominatorBondBelowMin
             );
+
             let mut validator_state =
                 <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
             T::Currency::unreserve(&nominator, less);
             let before = validator_state.total;
             validator_state.dec_nominator(nominator.clone(), less);
             let after = validator_state.total;
+            <Total<T>>::mutate(|x| *x -= less);
             if validator_state.is_active() {
                 Self::update_validators_pool(validator.clone(), validator_state.total);
             }
+
             <ValidatorState<T>>::insert(&validator, validator_state);
             <NominatorState<T>>::insert(&nominator, nominations);
+
             Self::deposit_event(Event::NominationDecreased(
                 nominator, validator, before, after,
             ));
+
             Ok(().into())
         }
         /// Cancel enactment of a deferred slash.
@@ -1265,13 +1270,13 @@ pub mod pallet {
                 line!(),
                 validator
             );
-            let mut validators = <ValidatorPool<T>>::get();
-            validators.remove(&Bond::from_owner(validator.clone()));
-            validators.insert(Bond {
-                owner: validator,
-                amount: total,
+            <ValidatorPool<T>>::mutate(|validators| {
+                validators.remove(&Bond::from_owner(validator.clone()));
+                validators.insert(Bond {
+                    owner: validator,
+                    amount: total,
+                });
             });
-            <ValidatorPool<T>>::put(validators);
         }
         // ensure validator is active before calling
         pub fn remove_from_validators_pool(validator: T::AccountId) {
@@ -1282,11 +1287,10 @@ pub mod pallet {
                 line!(),
                 validator
             );
-            let mut validators = <ValidatorPool<T>>::get();
-            validators.remove(&Bond::from_owner(validator.clone()));
-            <ValidatorPool<T>>::put(validators);
+            <ValidatorPool<T>>::mutate(|validators| {
+                validators.remove(&Bond::from_owner(validator.clone()));
+            });
         }
-
         pub(crate) fn validator_deactivate(controller: &T::AccountId) {
             log!(
                 trace,
@@ -1295,7 +1299,6 @@ pub mod pallet {
                 line!(),
                 controller
             );
-
             <ValidatorState<T>>::mutate(&controller, |maybe_validator| {
                 if let Some(valid_state) = maybe_validator {
                     valid_state.go_offline();
@@ -1303,44 +1306,47 @@ pub mod pallet {
                 }
             });
         }
-
         fn nominator_leaves_validator(
             nominator: T::AccountId,
             validator: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            let mut state = <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
-            let mut exists: Option<BalanceOf<T>> = None;
-            let noms = state
-                .nominators
-                .0
-                .into_iter()
-                .filter_map(|nom| {
-                    if nom.owner != nominator {
-                        Some(nom)
-                    } else {
-                        exists = Some(nom.amount);
-                        None
+            <ValidatorState<T>>::try_mutate_exists(
+                validator.clone(),
+                |maybe_validator| -> DispatchResultWithPostInfo {
+                    let mut state = maybe_validator.as_mut().ok_or(<Error<T>>::ValidatorDNE)?;
+                    let mut exists: Option<BalanceOf<T>> = None;
+                    let noms = state
+                        .clone()
+                        .nominators
+                        .0
+                        .into_iter()
+                        .filter_map(|nom| {
+                            if nom.owner != nominator {
+                                Some(nom)
+                            } else {
+                                exists = Some(nom.amount);
+                                None
+                            }
+                        })
+                        .collect();
+                    let nominator_stake = exists.ok_or(<Error<T>>::ValidatorDNE)?;
+                    let nominators = OrderedSet::from(noms);
+                    T::Currency::unreserve(&nominator, nominator_stake);
+                    state.nominators = nominators;
+                    state.total -= nominator_stake;
+                    if state.is_active() {
+                        Self::update_validators_pool(validator.clone(), state.total);
                     }
-                })
-                .collect();
-            let nominator_stake = exists.ok_or(Error::<T>::ValidatorDNE)?;
-            let nominators = OrderedSet::from(noms);
-            T::Currency::unreserve(&nominator, nominator_stake);
-            state.nominators = nominators;
-            state.total -= nominator_stake;
-            if state.is_active() {
-                Self::update_validators_pool(validator.clone(), state.total);
-            }
-            let new_total_locked = <Total<T>>::get() - nominator_stake;
-            <Total<T>>::put(new_total_locked);
-            let new_total = state.total;
-            <ValidatorState<T>>::insert(&validator, state);
-            Self::deposit_event(Event::NominatorLeftValidator(
-                nominator,
-                validator,
-                nominator_stake,
-                new_total,
-            ));
+                    <Total<T>>::mutate(|x| *x -= nominator_stake);
+                    Self::deposit_event(Event::NominatorLeftValidator(
+                        nominator,
+                        validator,
+                        nominator_stake,
+                        state.total,
+                    ));
+                    Ok(().into())
+                },
+            )?;
             Ok(().into())
         }
 
@@ -1348,9 +1354,10 @@ pub mod pallet {
             acc: T::AccountId,
             validator: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            let mut nominator = <NominatorState<T>>::get(&acc).ok_or(Error::<T>::NominatorDNE)?;
-            let old_total = nominator.total;
-            let remaining = nominator
+            let mut nominator_state =
+                <NominatorState<T>>::get(&acc).ok_or(<Error<T>>::NominatorDNE)?;
+            let old_total = nominator_state.total;
+            let remaining = nominator_state
                 .rm_nomination(validator.clone())
                 .ok_or(Error::<T>::NominationDNE)?;
 
@@ -1361,11 +1368,11 @@ pub mod pallet {
             Self::nominator_leaves_validator(acc.clone(), validator)?;
 
             // edge case; if no nominations remaining, leave set of nominators
-            if nominator.nominations.0.len().is_zero() {
-                <NominatorState<T>>::remove(&acc);
+            if nominator_state.nominations.0.len().is_zero() {
+                <NominatorState<T>>::remove(acc.clone());
                 Self::deposit_event(Event::NominatorLeft(acc, old_total));
             } else {
-                <NominatorState<T>>::insert(&acc, nominator);
+                <NominatorState<T>>::insert(acc.clone(), nominator_state);
             }
 
             Ok(().into())
