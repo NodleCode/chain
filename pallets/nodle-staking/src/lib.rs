@@ -540,7 +540,7 @@ pub mod pallet {
         }
         /// Join the set of validators pool
         #[pallet::weight(10_000)]
-        pub fn join_validator_pool(
+        pub fn validator_join_pool(
             origin: OriginFor<T>,
             bond: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
@@ -561,11 +561,11 @@ pub mod pallet {
             );
             T::Currency::reserve(&acc, bond)?;
             let validator = Validator::new(acc.clone(), bond);
-            let new_total = <Total<T>>::get() + bond;
-            <Total<T>>::put(new_total);
+
+            <Total<T>>::mutate(|x| *x += bond);
             <ValidatorState<T>>::insert(&acc, validator);
             <ValidatorPool<T>>::put(validators);
-            Self::deposit_event(Event::JoinedValidatorPool(acc, bond, new_total));
+            Self::deposit_event(Event::JoinedValidatorPool(acc, bond, Self::total()));
             Ok(().into())
         }
         /// Request to exit the validators pool. If successful,
@@ -575,25 +575,34 @@ pub mod pallet {
         #[pallet::weight(10_000)]
         pub fn exit_validators_pool(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
-            let mut state = <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
-            ensure!(!state.is_leaving(), Error::<T>::AlreadyLeaving);
-            let mut exits = <ExitQueue<T>>::get();
-            let now = Self::active_session();
-            let when = now + T::BondedDuration::get();
+
+            ensure!(Self::is_validator(&validator), Error::<T>::ValidatorDNE);
+
             ensure!(
-                exits.insert(Bond {
-                    owner: validator.clone(),
-                    amount: when
-                }),
+                !Self::validator_state(&validator).unwrap().is_leaving(),
                 Error::<T>::AlreadyLeaving,
             );
-            state.leave_validators_pool(when);
-            let mut validators = <ValidatorPool<T>>::get();
-            if validators.remove(&Bond::from_owner(validator.clone())) {
-                <ValidatorPool<T>>::put(validators);
-            }
-            <ExitQueue<T>>::put(exits);
-            <ValidatorState<T>>::insert(&validator, state);
+
+            let now = Self::active_session();
+            let when = now + T::BondedDuration::get();
+
+            <ExitQueue<T>>::mutate(|exits| {
+                exits.insert(Bond {
+                    owner: validator.clone(),
+                    amount: when,
+                });
+            });
+
+            <ValidatorState<T>>::mutate(&validator, |maybe_validator| {
+                if let Some(state) = maybe_validator {
+                    state.leave_validators_pool(when);
+                }
+            });
+
+            <ValidatorPool<T>>::mutate(|validators| {
+                validators.remove(&Bond::from_owner(validator.clone()));
+            });
+
             Self::deposit_event(Event::ValidatorScheduledExit(now, validator, when));
             Ok(().into())
         }
@@ -604,17 +613,30 @@ pub mod pallet {
             more: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
-            let mut state = <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
-            ensure!(!state.is_leaving(), Error::<T>::CannotActivateIfLeaving);
+
+            ensure!(Self::is_validator(&validator), Error::<T>::ValidatorDNE);
+
+            ensure!(
+                !Self::validator_state(&validator).unwrap().is_leaving(),
+                Error::<T>::CannotActivateIfLeaving,
+            );
+
             T::Currency::reserve(&validator, more)?;
-            let before = state.bond;
-            state.bond_more(more);
-            let after = state.bond;
-            if state.is_active() {
-                Self::update_validators_pool(validator.clone(), state.total);
-            }
-            <ValidatorState<T>>::insert(&validator, state);
-            Self::deposit_event(Event::ValidatorBondedMore(validator, before, after));
+
+            <ValidatorState<T>>::mutate(validator.clone(), |maybe_validator| {
+                if let Some(state) = maybe_validator {
+                    let before = state.bond;
+                    state.bond_more(more);
+                    let after = state.bond;
+                    state.go_online();
+                    if state.is_active() {
+                        Self::update_validators_pool(validator.clone(), state.total);
+                    }
+                    <Total<T>>::mutate(|x| *x += more);
+                    Self::deposit_event(Event::ValidatorBondedMore(validator, before, after));
+                }
+            });
+
             Ok(().into())
         }
         /// Bond less for validator
@@ -624,132 +646,115 @@ pub mod pallet {
             less: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
-            let mut state = <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
 
-            ensure!(!state.is_leaving(), Error::<T>::CannotActivateIfLeaving,);
-            let before = state.bond;
-            let after = state.bond_less(less).ok_or(Error::<T>::Underflow)?;
+            ensure!(Self::is_validator(&validator), Error::<T>::ValidatorDNE);
 
-            ensure!(
-                after >= T::MinValidatorPoolStake::get(),
-                Error::<T>::ValidatorBondBelowMin
-            );
-            T::Currency::unreserve(&validator, less);
-            if state.is_active() {
-                Self::update_validators_pool(validator.clone(), state.total);
+            if let Some(mut state) = Self::validator_state(&validator) {
+                ensure!(!state.is_leaving(), Error::<T>::CannotActivateIfLeaving);
+
+                let before = state.bond;
+                let after = state.bond_less(less).ok_or(Error::<T>::Underflow)?;
+                ensure!(
+                    after >= T::MinValidatorPoolStake::get(),
+                    Error::<T>::ValidatorBondBelowMin
+                );
+
+                T::Currency::unreserve(&validator, less);
+
+                if state.is_active() {
+                    Self::update_validators_pool(validator.clone(), state.total);
+                }
+                <Total<T>>::mutate(|x| *x -= less);
+                <ValidatorState<T>>::insert(&validator, state);
+                Self::deposit_event(Event::ValidatorBondedLess(validator, before, after));
             }
-            <ValidatorState<T>>::insert(&validator, state);
-            Self::deposit_event(Event::ValidatorBondedLess(validator, before, after));
-            Ok(().into())
-        }
-        /// Rejoin the set of validators pool if validator is deactivated
-        /// due to slashing.
-        #[pallet::weight(0)]
-        pub fn validator_activate(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
-            let controller = ensure_signed(origin)?;
-
-            let _ = Self::change_validator_state(&controller, true)?;
-
-            Self::deposit_event(Event::ValidatorActive(Self::active_session(), controller));
-
             Ok(().into())
         }
         /// If caller is not a nominator, then join the set of nominators
         /// If caller is a nominator, then makes nomination to change their nomination state
         #[pallet::weight(10_000)]
-        pub fn nominate(
+        pub fn nominator_nominate(
             origin: OriginFor<T>,
             validator: T::AccountId,
             amount: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
-            let acc = ensure_signed(origin)?;
-            if let Some(mut nominator) = <NominatorState<T>>::get(&acc) {
-                // nomination after first
-                ensure!(
-                    amount >= T::MinNomination::get(),
-                    Error::<T>::NominationBelowMin
-                );
-                ensure!(
-                    (nominator.nominations.0.len() as u32) < T::MaxValidatorPerNominator::get(),
-                    Error::<T>::ExceedMaxValidatorPerNom,
-                );
-                let mut state =
-                    <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
-                ensure!(
-                    (state.nominators.0.len() as u32) < T::MaxNominatorsPerValidator::get(),
-                    Error::<T>::TooManyNominators
-                );
+            let nominator_acc = ensure_signed(origin)?;
 
+            // cannot be a validator candidate and nominator with same AccountId
+            ensure!(
+                !Self::is_validator(&nominator_acc),
+                Error::<T>::ValidatorExists
+            );
+
+            ensure!(
+                amount >= T::MinNomination::get(),
+                Error::<T>::NominationBelowMin
+            );
+
+            let mut validator_state =
+                <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
+
+            let mut do_add_nomination = true;
+            let mut nominator_state = if Self::is_nominator(&nominator_acc) {
+                Self::nominator_state(&nominator_acc).ok_or(Error::<T>::NominatorDNE)?
+            } else {
+                do_add_nomination = false;
+                Nominator::new(validator.clone(), amount)
+            };
+
+            ensure!(
+                (nominator_state.nominations.0.len() as u32) < T::MaxValidatorPerNominator::get(),
+                Error::<T>::ExceedMaxValidatorPerNom,
+            );
+
+            ensure!(
+                (validator_state.nominators.0.len() as u32) < T::MaxNominatorsPerValidator::get(),
+                Error::<T>::TooManyNominators,
+            );
+
+            if do_add_nomination {
                 ensure!(
-                    nominator.add_nomination(Bond {
+                    nominator_state.add_nomination(Bond {
                         owner: validator.clone(),
                         amount
                     }),
                     Error::<T>::AlreadyNominatedValidator,
                 );
-
-                let nomination = Bond {
-                    owner: acc.clone(),
-                    amount,
-                };
-                ensure!(
-                    state.nominators.insert(nomination),
-                    Error::<T>::NominatorExists
-                );
-
-                T::Currency::reserve(&acc, amount)?;
-                let new_total = state.total + amount;
-                if state.is_active() {
-                    Self::update_validators_pool(validator.clone(), new_total);
-                }
-                let new_total_locked = <Total<T>>::get() + amount;
-                <Total<T>>::put(new_total_locked);
-                state.total = new_total;
-                <ValidatorState<T>>::insert(&validator, state);
-                <NominatorState<T>>::insert(&acc, nominator);
-                Self::deposit_event(Event::Nomination(acc, amount, validator, new_total));
-            } else {
-                // first nomination
-                ensure!(
-                    amount >= T::MinNominatorStake::get(),
-                    Error::<T>::NominatorBondBelowMin
-                );
-                // cannot be a validator candidate and nominator with same AccountId
-                ensure!(!Self::is_validator(&acc), Error::<T>::ValidatorExists);
-                let mut state =
-                    <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
-
-                ensure!(
-                    (state.nominators.0.len() as u32) <= T::MaxNominatorsPerValidator::get(),
-                    Error::<T>::TooManyNominators
-                );
-
-                let nomination = Bond {
-                    owner: acc.clone(),
-                    amount,
-                };
-                ensure!(
-                    state.nominators.insert(nomination),
-                    Error::<T>::NominatorExists
-                );
-
-                T::Currency::reserve(&acc, amount)?;
-                let new_total = state.total + amount;
-                if state.is_active() {
-                    Self::update_validators_pool(validator.clone(), new_total);
-                }
-                let new_total_locked = <Total<T>>::get() + amount;
-                <Total<T>>::put(new_total_locked);
-                state.total = new_total;
-                <ValidatorState<T>>::insert(&validator, state);
-                <NominatorState<T>>::insert(&acc, Nominator::new(validator.clone(), amount));
-                Self::deposit_event(Event::Nomination(acc, amount, validator, new_total));
             }
+
+            let nomination = Bond {
+                owner: nominator_acc.clone(),
+                amount,
+            };
+            ensure!(
+                validator_state.nominators.insert(nomination),
+                Error::<T>::NominatorExists,
+            );
+
+            T::Currency::reserve(&nominator_acc, amount)?;
+            validator_state.total += amount;
+            let validator_new_total = validator_state.total;
+            if validator_state.is_active() {
+                Self::update_validators_pool(validator.clone(), validator_state.total);
+            }
+
+            <Total<T>>::mutate(|x| *x += amount);
+            <ValidatorState<T>>::insert(&validator, validator_state);
+            <NominatorState<T>>::insert(&nominator_acc, nominator_state);
+
+            Self::deposit_event(Event::Nomination(
+                nominator_acc,
+                amount,
+                validator,
+                validator_new_total,
+            ));
+
             Ok(().into())
         }
+
         /// Revoke an existing nomination
         #[pallet::weight(10_000)]
-        pub fn revoke_nomination(
+        pub fn nominator_denominate(
             origin: OriginFor<T>,
             validator: T::AccountId,
         ) -> DispatchResultWithPostInfo {
@@ -757,7 +762,7 @@ pub mod pallet {
         }
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
         #[pallet::weight(0)]
-        pub fn leave_nominators(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+        pub fn nominator_denominate_all(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
             let nominator = <NominatorState<T>>::get(&acc).ok_or(Error::<T>::NominatorDNE)?;
@@ -841,7 +846,7 @@ pub mod pallet {
         ///
         /// Parameters: session index and validator list of the slashes for that session to kill.
         #[pallet::weight(10_000)]
-        pub fn cancel_deferred_slash(
+        pub fn slash_cancel_deferred(
             origin: OriginFor<T>,
             session_idx: SessionIndex,
             controllers: Vec<T::AccountId>,
@@ -1182,13 +1187,13 @@ pub mod pallet {
                     "Account does not have enough balance to bond."
                 );
                 let _ = if let Some(nominated_val) = opt_val {
-                    <Pallet<T>>::nominate(
+                    <Pallet<T>>::nominator_nominate(
                         T::Origin::from(Some(actor.clone()).into()),
                         nominated_val.clone(),
                         balance,
                     )
                 } else {
-                    <Pallet<T>>::join_validator_pool(
+                    <Pallet<T>>::validator_join_pool(
                         T::Origin::from(Some(actor.clone()).into()),
                         balance,
                     )
@@ -1282,52 +1287,21 @@ pub mod pallet {
             <ValidatorPool<T>>::put(validators);
         }
 
-        pub fn change_validator_state(
-            controller: &T::AccountId,
-            go_online: bool,
-        ) -> DispatchResultWithPostInfo {
+        pub(crate) fn validator_deactivate(controller: &T::AccountId) {
             log!(
                 trace,
-                "[{:#?}]:[{:#?}] - Acc[{:#?}] | go_online[{:#?}]",
+                "[{:#?}]:[{:#?}] - Acc[{:#?}]",
                 function!(),
                 line!(),
-                controller,
-                go_online,
+                controller
             );
 
-            let mut valid_state =
-                <ValidatorState<T>>::get(&controller).ok_or(Error::<T>::ValidatorDNE)?;
-
-            if go_online {
-                ensure!(!valid_state.is_active(), Error::<T>::AlreadyActive);
-                ensure!(
-                    !valid_state.is_leaving(),
-                    Error::<T>::CannotActivateIfLeaving
-                );
-                ensure!(
-                    valid_state.bond >= T::MinValidatorPoolStake::get(),
-                    Error::<T>::ValidatorBondBelowMin
-                );
-                valid_state.go_online();
-                log!(
-                    trace,
-                    "[{:#?}]:[{:#?}] - Acc[{:#?}] | state[{:#?}]",
-                    function!(),
-                    line!(),
-                    controller,
-                    valid_state.state,
-                );
-
-                Self::update_validators_pool(controller.clone(), valid_state.total);
-            } else {
-                ensure!(valid_state.is_active(), Error::<T>::AlreadyOffline);
-                valid_state.go_offline();
-                Self::remove_from_validators_pool(controller.clone());
-            }
-
-            <ValidatorState<T>>::insert(controller, valid_state);
-
-            Ok(().into())
+            <ValidatorState<T>>::mutate(&controller, |maybe_validator| {
+                if let Some(valid_state) = maybe_validator {
+                    valid_state.go_offline();
+                    Self::remove_from_validators_pool(controller.clone());
+                }
+            });
         }
 
         fn nominator_leaves_validator(

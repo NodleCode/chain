@@ -291,7 +291,7 @@ pub(crate) fn compute_slash<T: Config>(
                 spans.span_index(),
                 now
             );
-            let _ = <Pallet<T>>::change_validator_state(params.controller, false);
+            let _ = <Pallet<T>>::validator_deactivate(params.controller);
 
             // make sure to disable validator till the end of this session
             let _ = T::SessionInterface::disable_validator(params.controller);
@@ -337,7 +337,7 @@ fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
             spans.span_index(),
             params.now,
         );
-        let _ = <Pallet<T>>::change_validator_state(params.controller, false);
+        let _ = <Pallet<T>>::validator_deactivate(params.controller);
 
         // make sure to disable validator till the end of this session
         let _ = T::SessionInterface::disable_validator(params.controller);
@@ -603,59 +603,59 @@ fn do_slash_validator<T: Config>(
     reward_payout: &mut BalanceOf<T>,
     slashed_imbalance: &mut NegativeImbalanceOf<T>,
 ) {
-    let mut state = match <Pallet<T> as Store>::ValidatorState::get(&controller) {
-        Some(state) => state,
-        None => return, // nothing to do.
-    };
+    <Pallet<T> as Store>::ValidatorState::mutate(&controller, |validator_state| {
+        if let Some(validator_state) = validator_state {
+            let slashed_value = validator_state.slash(value, T::Currency::minimum_balance());
 
-    let slashed_value = state.slash(value, T::Currency::minimum_balance());
+            log!(
+                trace,
+                "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
+                function!(),
+                line!(),
+                value,
+                slashed_value,
+                T::Currency::minimum_balance()
+            );
 
-    log!(
-        trace,
-        "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
-        function!(),
-        line!(),
-        value,
-        slashed_value,
-        T::Currency::minimum_balance()
-    );
+            if !slashed_value.is_zero() {
+                let pre_balance_stat = (
+                    T::Currency::free_balance(controller),
+                    T::Currency::reserved_balance(controller),
+                );
 
-    if !slashed_value.is_zero() {
-        let pre_balance_stat = (
-            T::Currency::free_balance(controller),
-            T::Currency::reserved_balance(controller),
-        );
+                let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+                slashed_imbalance.subsume(imbalance);
 
-        let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
-        slashed_imbalance.subsume(imbalance);
+                <Pallet<T> as Store>::Total::mutate(|x| *x -= slashed_value);
 
-        let cur_balance_stat = (
-            T::Currency::free_balance(controller),
-            T::Currency::reserved_balance(controller),
-        );
+                let cur_balance_stat = (
+                    T::Currency::free_balance(controller),
+                    T::Currency::reserved_balance(controller),
+                );
 
-        log!(
-            trace,
-            "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
-            function!(),
-            line!(),
-            pre_balance_stat,
-            cur_balance_stat,
-        );
+                log!(
+                    trace,
+                    "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
+                    function!(),
+                    line!(),
+                    pre_balance_stat,
+                    cur_balance_stat,
+                );
 
-        if !missing.is_zero() {
-            // deduct overslash from the reward payout
-            *reward_payout = reward_payout.saturating_sub(missing);
+                if !missing.is_zero() {
+                    // deduct overslash from the reward payout
+                    *reward_payout = reward_payout.saturating_sub(missing);
+                }
+
+                if validator_state.is_active() {
+                    <Pallet<T>>::update_validators_pool(controller.clone(), validator_state.total);
+                }
+
+                // trigger the event
+                <Pallet<T>>::deposit_event(Event::Slash(controller.clone(), slashed_value));
+            }
         }
-
-        // TODO :: Should be taken care as part of next session validator selection
-        // <Pallet<T>>::update_validators_pool(controller.clone(), state.total);
-
-        <Pallet<T> as Store>::ValidatorState::insert(&controller, state);
-
-        // trigger the event
-        <Pallet<T>>::deposit_event(Event::Slash(controller.clone(), slashed_value));
-    }
+    });
 }
 
 fn do_slash_nominator<T: Config>(
@@ -665,64 +665,71 @@ fn do_slash_nominator<T: Config>(
     reward_payout: &mut BalanceOf<T>,
     slashed_imbalance: &mut NegativeImbalanceOf<T>,
 ) {
-    let mut state = match <Pallet<T> as Store>::NominatorState::get(&controller) {
-        Some(state) => state,
-        None => return, // nothing to do.
-    };
+    <Pallet<T> as Store>::NominatorState::mutate(&controller, |nominator_state| {
+        if let Some(nominator_state) = nominator_state {
+            let slashed_value = nominator_state.slash_nomination(
+                validator.clone(),
+                value,
+                T::Currency::minimum_balance(),
+            );
 
-    let slashed_value =
-        state.slash_nomination(validator.clone(), value, T::Currency::minimum_balance());
+            log!(
+                trace,
+                "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
+                function!(),
+                line!(),
+                value,
+                slashed_value,
+                T::Currency::minimum_balance(),
+            );
 
-    log!(
-        trace,
-        "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
-        function!(),
-        line!(),
-        value,
-        slashed_value,
-        T::Currency::minimum_balance(),
-    );
+            if !slashed_value.is_zero() {
+                let pre_balance_stat = (
+                    T::Currency::free_balance(controller),
+                    T::Currency::reserved_balance(controller),
+                );
 
-    if !slashed_value.is_zero() {
-        let pre_balance_stat = (
-            T::Currency::free_balance(controller),
-            T::Currency::reserved_balance(controller),
-        );
+                <Pallet<T> as Store>::ValidatorState::mutate(&validator, |validator_state| {
+                    if let Some(validator_state) = validator_state {
+                        validator_state.dec_nominator(controller.clone(), slashed_value);
+                        if validator_state.is_active() {
+                            <Pallet<T>>::update_validators_pool(
+                                validator.clone(),
+                                validator_state.total,
+                            );
+                        }
+                    }
+                });
 
-        let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
-        slashed_imbalance.subsume(imbalance);
+                let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+                slashed_imbalance.subsume(imbalance);
 
-        let cur_balance_stat = (
-            T::Currency::free_balance(controller),
-            T::Currency::reserved_balance(controller),
-        );
+                <Pallet<T> as Store>::Total::mutate(|x| *x -= slashed_value);
 
-        log!(
-            trace,
-            "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
-            function!(),
-            line!(),
-            pre_balance_stat,
-            cur_balance_stat,
-        );
+                let cur_balance_stat = (
+                    T::Currency::free_balance(controller),
+                    T::Currency::reserved_balance(controller),
+                );
 
-        if !missing.is_zero() {
-            // deduct overslash from the reward payout
-            *reward_payout = reward_payout.saturating_sub(missing);
+                log!(
+                    trace,
+                    "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
+                    function!(),
+                    line!(),
+                    pre_balance_stat,
+                    cur_balance_stat,
+                );
+
+                if !missing.is_zero() {
+                    // deduct overslash from the reward payout
+                    *reward_payout = reward_payout.saturating_sub(missing);
+                }
+
+                // trigger the event
+                <Pallet<T>>::deposit_event(Event::Slash(controller.clone(), value));
+            }
         }
-
-        if let Some(mut validator_state) = <ValidatorState<T>>::get(&validator) {
-            validator_state.dec_nominator(controller.clone(), value);
-            // TODO :: Should be taken care as part of next session validator selection
-            // <Pallet<T>>::update_validators_pool(validator.clone(), validator_state.total);
-            <ValidatorState<T>>::insert(&validator, validator_state);
-        }
-
-        <Pallet<T> as Store>::NominatorState::insert(&controller, state);
-
-        // trigger the event
-        <Pallet<T>>::deposit_event(Event::Slash(controller.clone(), value));
-    }
+    });
 }
 
 /// Apply a previously-unapplied slash.

@@ -47,19 +47,19 @@ fn join_validator_pool_works() {
         .tst_staking_build()
         .execute_with(|| {
             assert_noop!(
-                NodleStaking::join_validator_pool(Origin::signed(1), 11u128,),
+                NodleStaking::validator_join_pool(Origin::signed(1), 11u128,),
                 Error::<Test>::ValidatorExists,
             );
             assert_noop!(
-                NodleStaking::join_validator_pool(Origin::signed(3), 11u128,),
+                NodleStaking::validator_join_pool(Origin::signed(3), 11u128,),
                 Error::<Test>::NominatorExists,
             );
             assert_noop!(
-                NodleStaking::join_validator_pool(Origin::signed(7), 9u128,),
+                NodleStaking::validator_join_pool(Origin::signed(7), 9u128,),
                 Error::<Test>::ValidatorBondBelowMin,
             );
             assert_noop!(
-                NodleStaking::join_validator_pool(Origin::signed(8), 10u128,),
+                NodleStaking::validator_join_pool(Origin::signed(8), 10u128,),
                 DispatchError::Module {
                     index: 3,
                     error: 3,
@@ -67,7 +67,7 @@ fn join_validator_pool_works() {
                 }
             );
             assert!(System::events().is_empty());
-            assert_ok!(NodleStaking::join_validator_pool(Origin::signed(7), 10u128,));
+            assert_ok!(NodleStaking::validator_join_pool(Origin::signed(7), 10u128,));
             assert_eq!(
                 last_event(),
                 MetaEvent::nodle_staking(Event::JoinedValidatorPool(7, 10u128, 1110u128))
@@ -109,7 +109,7 @@ fn validator_activate_works() {
             ValidatorStatus::Idle
         );
 
-        assert_ok!(NodleStaking::validator_activate(Origin::signed(11)));
+        assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
 
         assert_eq!(
             NodleStaking::validator_state(11).unwrap().state,
@@ -137,6 +137,23 @@ fn validator_exit_executes_after_delay() {
         .tst_staking_build()
         .execute_with(|| {
             mock::start_active_session(4);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 700),
+                Event::ValidatorChosen(2, 2, 400),
+                Event::NewSession(5, 2, 2, 1100),
+                Event::ValidatorChosen(3, 1, 700),
+                Event::ValidatorChosen(3, 2, 400),
+                Event::NewSession(10, 3, 2, 1100),
+                Event::ValidatorChosen(4, 1, 700),
+                Event::ValidatorChosen(4, 2, 400),
+                Event::NewSession(15, 4, 2, 1100),
+                Event::ValidatorChosen(5, 1, 700),
+                Event::ValidatorChosen(5, 2, 400),
+                Event::NewSession(20, 5, 2, 1100),
+            ];
+            assert_eq!(mock::events(), expected);
+
             assert_noop!(
                 NodleStaking::exit_validators_pool(Origin::signed(3)),
                 Error::<Test>::ValidatorDNE,
@@ -153,19 +170,7 @@ fn validator_exit_executes_after_delay() {
             // we must exclude leaving collators from rewards while
             // holding them retroactively accountable for previous faults
             // (within the last T::SlashingWindow blocks)
-            let expected = vec![
-                Event::ValidatorChosen(2, 1, 700),
-                Event::ValidatorChosen(2, 2, 400),
-                Event::NewSession(5, 2, 2, 1100),
-                Event::ValidatorChosen(3, 1, 700),
-                Event::ValidatorChosen(3, 2, 400),
-                Event::NewSession(10, 3, 2, 1100),
-                Event::ValidatorChosen(4, 1, 700),
-                Event::ValidatorChosen(4, 2, 400),
-                Event::NewSession(15, 4, 2, 1100),
-                Event::ValidatorChosen(5, 1, 700),
-                Event::ValidatorChosen(5, 2, 400),
-                Event::NewSession(20, 5, 2, 1100),
+            let mut new1 = vec![
                 Event::ValidatorChosen(6, 1, 700),
                 Event::ValidatorChosen(6, 2, 400),
                 Event::NewSession(25, 6, 2, 1100),
@@ -183,7 +188,11 @@ fn validator_exit_executes_after_delay() {
                 Event::ValidatorChosen(11, 1, 700),
                 Event::NewSession(50, 11, 1, 700),
             ];
+            expected.append(&mut new1);
             assert_eq!(events(), expected);
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
         });
 }
 
@@ -244,7 +253,7 @@ fn validator_selection_chooses_top_candidates() {
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::join_validator_pool(Origin::signed(6), 69u128));
+            assert_ok!(NodleStaking::validator_join_pool(Origin::signed(6), 69u128));
 
             assert_eq!(
                 mock::last_event(),
@@ -484,14 +493,14 @@ fn validator_commission() {
             ];
             assert_eq!(mock::events(), expected);
 
-            assert_ok!(NodleStaking::join_validator_pool(Origin::signed(4), 20u128));
+            assert_ok!(NodleStaking::validator_join_pool(Origin::signed(4), 20u128));
             assert_eq!(
                 last_event(),
                 MetaEvent::nodle_staking(Event::JoinedValidatorPool(4, 20u128, 60u128))
             );
             mock::run_to_block(9);
-            assert_ok!(NodleStaking::nominate(Origin::signed(5), 4, 10));
-            assert_ok!(NodleStaking::nominate(Origin::signed(6), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(5), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
             mock::run_to_block(11);
 
             let mut new1 = vec![
@@ -566,18 +575,18 @@ fn multiple_nominations() {
             assert_eq!(events(), expected);
 
             assert_noop!(
-                NodleStaking::nominate(Origin::signed(6), 1, 10),
+                NodleStaking::nominator_nominate(Origin::signed(6), 1, 10),
                 Error::<Test>::AlreadyNominatedValidator,
             );
             assert_noop!(
-                NodleStaking::nominate(Origin::signed(6), 2, 2),
+                NodleStaking::nominator_nominate(Origin::signed(6), 2, 2),
                 Error::<Test>::NominationBelowMin,
             );
-            assert_ok!(NodleStaking::nominate(Origin::signed(6), 2, 10));
-            assert_ok!(NodleStaking::nominate(Origin::signed(6), 3, 10));
-            assert_ok!(NodleStaking::nominate(Origin::signed(6), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
             assert_noop!(
-                NodleStaking::nominate(Origin::signed(6), 5, 10),
+                NodleStaking::nominator_nominate(Origin::signed(6), 5, 10),
                 Error::<Test>::ExceedMaxValidatorPerNom,
             );
             mock::run_to_block(16);
@@ -605,9 +614,9 @@ fn multiple_nominations() {
 
             mock::run_to_block(21);
 
-            assert_ok!(NodleStaking::nominate(Origin::signed(7), 2, 80));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 2, 80));
             assert_noop!(
-                NodleStaking::nominate(Origin::signed(7), 3, 11),
+                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11),
                 DispatchError::Module {
                     index: 3,
                     error: 3,
@@ -615,7 +624,7 @@ fn multiple_nominations() {
                 },
             );
             assert_noop!(
-                NodleStaking::nominate(Origin::signed(10), 2, 10),
+                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10),
                 Error::<Test>::TooManyNominators
             );
 
@@ -885,36 +894,36 @@ fn revoke_nomination_or_leave_nominators() {
         .execute_with(|| {
             mock::run_to_block(4);
             assert_noop!(
-                NodleStaking::revoke_nomination(Origin::signed(1), 2),
+                NodleStaking::nominator_denominate(Origin::signed(1), 2),
                 Error::<Test>::NominatorDNE,
             );
             assert_noop!(
-                NodleStaking::revoke_nomination(Origin::signed(6), 2),
+                NodleStaking::nominator_denominate(Origin::signed(6), 2),
                 Error::<Test>::NominationDNE,
             );
             assert_noop!(
-                NodleStaking::leave_nominators(Origin::signed(1)),
+                NodleStaking::nominator_denominate_all(Origin::signed(1)),
                 Error::<Test>::NominatorDNE,
             );
-            assert_ok!(NodleStaking::nominate(Origin::signed(6), 2, 3));
-            assert_ok!(NodleStaking::nominate(Origin::signed(6), 3, 3));
-            assert_ok!(NodleStaking::revoke_nomination(Origin::signed(6), 1));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 3));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 3));
+            assert_ok!(NodleStaking::nominator_denominate(Origin::signed(6), 1));
             assert_noop!(
-                NodleStaking::revoke_nomination(Origin::signed(6), 2),
+                NodleStaking::nominator_denominate(Origin::signed(6), 2),
                 Error::<Test>::NominatorBondBelowMin,
             );
             assert_noop!(
-                NodleStaking::revoke_nomination(Origin::signed(6), 3),
+                NodleStaking::nominator_denominate(Origin::signed(6), 3),
                 Error::<Test>::NominatorBondBelowMin,
             );
             // can revoke both remaining by calling leave nominators
-            assert_ok!(NodleStaking::leave_nominators(Origin::signed(6)));
+            assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
             // this leads to 8 leaving set of nominators
             assert_noop!(
-                NodleStaking::revoke_nomination(Origin::signed(8), 2),
+                NodleStaking::nominator_denominate(Origin::signed(8), 2),
                 Error::<Test>::NominatorBondBelowMin,
             );
-            assert_ok!(NodleStaking::leave_nominators(Origin::signed(8)));
+            assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(8)));
         });
 }
 
@@ -980,10 +989,10 @@ fn payouts_follow_nomination_changes() {
             mock::mint_rewards(1_000_000);
             // 1. ensure nominators are paid for 2 rounds after they leave
             assert_noop!(
-                NodleStaking::leave_nominators(Origin::signed(66)),
+                NodleStaking::nominator_denominate_all(Origin::signed(66)),
                 Error::<Test>::NominatorDNE
             );
-            assert_ok!(NodleStaking::leave_nominators(Origin::signed(6)));
+            assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
             mock::run_to_block(16);
 
             let mut new2 = vec![
@@ -1023,7 +1032,7 @@ fn payouts_follow_nomination_changes() {
             expected.append(&mut new3);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominate(Origin::signed(8), 1, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 1, 10));
 
             mock::run_to_block(31);
 
@@ -1208,6 +1217,7 @@ fn reward_validator_slashing_validator_does_not_overflow() {
             Points::<Test>::insert(3, 1);
             AwardedPts::<Test>::insert(3, 81, 1);
             SessionAccumulatedBalance::<Test>::insert(3, stake);
+            assert_eq!(NodleStaking::total(), 36893488147419106730);
 
             // --- Session 4:
             // Trigger payout for Session 3
@@ -1301,8 +1311,9 @@ fn nominators_also_get_slashed_pro_rata() {
         // 101 is a nominator for 11
         assert_eq!(initial_exposure.nominators.first().unwrap().owner, 101,);
 
-        assert_eq!(mock::balances(&11), (1000, 1000),);
-        assert_eq!(mock::balances(&101), (1500, 500),);
+        assert_eq!(mock::balances(&11), (1000, 1000));
+        assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(NodleStaking::total(), 3500);
 
         // staked values;
         let nominator_stake = NodleStaking::nominator_state(101).unwrap().total;
@@ -1310,13 +1321,6 @@ fn nominators_also_get_slashed_pro_rata() {
         let exposed_stake = initial_exposure.total;
         let exposed_validator = initial_exposure.bond;
         let exposed_nominator = initial_exposure.nominators.first().unwrap().amount;
-
-        tst_log!(
-            trace,
-            "[{:#?}]=> Acc-11 is_disabled[{:#?}]",
-            line!(),
-            mock::is_disabled(11)
-        );
 
         mock::on_offence_now(
             &[OffenceDetails {
@@ -1334,6 +1338,7 @@ fn nominators_also_get_slashed_pro_rata() {
         // both stakes must have been decreased.
         assert!(NodleStaking::nominator_state(101).unwrap().total < nominator_stake);
         assert!(NodleStaking::validator_state(11).unwrap().bond < validator_stake);
+        assert_eq!(NodleStaking::total(), 3425);
 
         let slash_amount = slash_percent * exposed_stake;
         let validator_share =
@@ -1383,6 +1388,7 @@ fn offence_deselects_validator_even_when_slash_is_zero() {
 
         assert!(Session::validators().contains(&11));
         assert!(<ValidatorState<Test>>::contains_key(11));
+        assert_eq!(NodleStaking::total(), 3500);
 
         let slash_percent = Perbill::from_percent(0);
         let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
@@ -1420,6 +1426,7 @@ fn offence_deselects_validator_even_when_slash_is_zero() {
         ];
         expected.append(&mut new2);
         assert_eq!(events(), expected);
+        assert_eq!(NodleStaking::total(), 3500);
 
         // TODO :: Have to check this
         // assert!(is_disabled(11));
@@ -1443,6 +1450,8 @@ fn slashing_performed_according_exposure() {
 
         assert_eq!(mock::balances(&11), (1000, 1000));
         assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(NodleStaking::total(), 3500);
+
         let validator_balance = mock::balances(&11).0;
 
         assert_eq!(
@@ -1473,6 +1482,7 @@ fn slashing_performed_according_exposure() {
         // The validator controller account should be slashed for 250 (50% of 500).
         assert_eq!(mock::balances(&11), (1000, validator_balance - 250));
         assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(NodleStaking::total(), 3250);
     });
 }
 
@@ -1496,6 +1506,7 @@ fn slash_in_old_span_does_not_deselect() {
         );
 
         assert!(Session::validators().contains(&11));
+        assert_eq!(NodleStaking::total(), 3500);
 
         on_offence_now(
             &[OffenceDetails {
@@ -1515,14 +1526,14 @@ fn slash_in_old_span_does_not_deselect() {
 
         mock::start_active_session(2);
 
-        assert_ok!(NodleStaking::validator_activate(Origin::signed(11)));
+        assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
         assert_eq!(
             NodleStaking::validator_state(11).unwrap().state,
             ValidatorStatus::Active
         );
         assert_eq!(
             mock::last_event(),
-            MetaEvent::nodle_staking(Event::ValidatorActive(2, 11))
+            MetaEvent::nodle_staking(Event::ValidatorBondedMore(11, 800, 810))
         );
 
         mock::start_active_session(3);
@@ -1533,14 +1544,14 @@ fn slash_in_old_span_does_not_deselect() {
             Event::ValidatorChosen(3, 41, 1000),
             Event::ValidatorChosen(3, 21, 1000),
             Event::NewSession(10, 3, 2, 2000),
-            Event::ValidatorActive(2, 11),
-            Event::ValidatorChosen(4, 11, 1200),
+            Event::ValidatorBondedMore(11, 800, 810),
+            Event::ValidatorChosen(4, 11, 1210),
             Event::ValidatorChosen(4, 41, 1000),
             Event::ValidatorChosen(4, 21, 1000),
-            Event::NewSession(15, 4, 3, 3200),
+            Event::NewSession(15, 4, 3, 3210),
         ];
         expected.append(&mut new2);
-        assert_eq!(events(), expected);
+        assert_eq!(mock::events(), expected);
 
         mock::start_active_session(6);
 
@@ -1565,19 +1576,19 @@ fn slash_in_old_span_does_not_deselect() {
 
         // Ensure Validator 11 & nominator are slashed
         let mut new3 = vec![
-            Event::ValidatorChosen(5, 11, 1200),
+            Event::ValidatorChosen(5, 11, 1210),
             Event::ValidatorChosen(5, 41, 1000),
             Event::ValidatorChosen(5, 21, 1000),
-            Event::NewSession(20, 5, 3, 3200),
-            Event::ValidatorChosen(6, 11, 1200),
+            Event::NewSession(20, 5, 3, 3210),
+            Event::ValidatorChosen(6, 11, 1210),
             Event::ValidatorChosen(6, 41, 1000),
             Event::ValidatorChosen(6, 21, 1000),
-            Event::NewSession(25, 6, 3, 3200),
-            Event::ValidatorChosen(7, 11, 1200),
+            Event::NewSession(25, 6, 3, 3210),
+            Event::ValidatorChosen(7, 11, 1210),
             Event::ValidatorChosen(7, 41, 1000),
             Event::ValidatorChosen(7, 21, 1000),
-            Event::NewSession(30, 7, 3, 3200),
-            Event::Slash(11, 80),
+            Event::NewSession(30, 7, 3, 3210),
+            Event::Slash(11, 81),
             Event::Slash(101, 40),
         ];
         expected.append(&mut new3);
@@ -1610,25 +1621,12 @@ fn reporters_receive_their_slice() {
         ];
         assert_eq!(events(), expected);
 
-        tst_log!(
-            debug,
-            "[{:#?}]=> {:#?}",
-            line!(),
-            NodleStaking::at_stake(NodleStaking::active_session(), 11).total,
-        );
-
         assert_eq!(
             NodleStaking::at_stake(NodleStaking::active_session(), 11).total,
             initial_balance
         );
 
-        tst_log!(
-            debug,
-            "[{:#?}]=> Acc-1[{:#?}] | Acc-2[{:#?}]",
-            line!(),
-            Balances::free_balance(1),
-            Balances::free_balance(2)
-        );
+        assert_eq!(NodleStaking::total(), 3500);
 
         on_offence_now(
             &[OffenceDetails {
@@ -1649,14 +1647,7 @@ fn reporters_receive_their_slice() {
         ];
         expected.append(&mut new2);
         assert_eq!(events(), expected);
-
-        tst_log!(
-            debug,
-            "[{:#?}]=> Acc-1[{:#?}] | Acc-2[{:#?}]",
-            line!(),
-            Balances::free_balance(1),
-            Balances::free_balance(2)
-        );
+        assert_eq!(NodleStaking::total(), 2750);
 
         // F1 * (reward_proportion * slash - 0)
         // 50% * (10% * initial_balance / 2)
@@ -1664,6 +1655,7 @@ fn reporters_receive_their_slice() {
         let reward_each = reward / 2; // split into two pieces.
         assert_eq!(Balances::free_balance(1), 10 + reward_each);
         assert_eq!(Balances::free_balance(2), 20 + reward_each);
+        assert_eq!(NodleStaking::total(), 2750);
     });
 }
 
@@ -1684,17 +1676,11 @@ fn subsequent_reports_in_same_span_pay_out_less() {
 
         let initial_balance = NodleStaking::validator_state(11).unwrap().total;
 
-        tst_log!(
-            debug,
-            "[{:#?}]=> {:#?}",
-            line!(),
-            NodleStaking::at_stake(NodleStaking::active_session(), 11).total,
-        );
-
         assert_eq!(
             NodleStaking::at_stake(NodleStaking::active_session(), 11).total,
             initial_balance
         );
+        assert_eq!(NodleStaking::total(), 3500);
 
         tst_log!(
             debug,
@@ -1721,6 +1707,7 @@ fn subsequent_reports_in_same_span_pay_out_less() {
         ];
         expected.append(&mut new1);
         assert_eq!(events(), expected);
+        assert_eq!(NodleStaking::total(), 3200);
 
         // F1 * (reward_proportion * slash - 0)
         // 50% * (10% * initial_balance * 20%)
@@ -1756,6 +1743,7 @@ fn subsequent_reports_in_same_span_pay_out_less() {
         assert_eq!(events(), expected);
 
         assert_eq!(Balances::free_balance(1), 10 + prior_payout + reward);
+        assert_eq!(NodleStaking::total(), 3125);
     });
 }
 
@@ -1777,7 +1765,11 @@ fn invulnerables_are_not_slashed() {
 
             Balances::make_free_balance_be(&201, 1000);
 
-            assert_ok!(NodleStaking::nominate(Origin::signed(201), 21, 500));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(201),
+                21,
+                500
+            ));
 
             mock::start_active_session(3);
 
@@ -1798,6 +1790,7 @@ fn invulnerables_are_not_slashed() {
 
             assert_eq!(mock::balances(&11), (1000, 1000));
             assert_eq!(mock::balances(&21), (1000, 1000));
+            assert_eq!(NodleStaking::total(), 4000);
 
             let valid21_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 21);
             let validator21_initial_bond = valid21_exposure.bond;
@@ -1836,6 +1829,7 @@ fn invulnerables_are_not_slashed() {
 
             // The validator 11 hasn't been slashed, but 21 has been.
             assert_eq!(mock::balances(&11), (1000, 1000));
+            assert_eq!(NodleStaking::total(), 3700);
             // 2000 - (0.2 * initial_balance)
             assert_eq!(
                 mock::balances(&21),
@@ -1855,6 +1849,7 @@ fn invulnerables_are_not_slashed() {
                     (500, initial_bond - (2 * initial_bond / 10)),
                 );
             }
+            assert_eq!(NodleStaking::total(), 3700);
         });
 }
 
@@ -1873,6 +1868,7 @@ fn dont_slash_if_fraction_is_zero() {
         assert_eq!(events(), expected);
 
         assert_eq!(Balances::free_balance(11), 1000);
+        assert_eq!(NodleStaking::total(), 3500);
 
         on_offence_now(
             &[OffenceDetails {
@@ -1890,6 +1886,7 @@ fn dont_slash_if_fraction_is_zero() {
 
         // The validator hasn't been slashed. The new era is not forced.
         assert_eq!(Balances::free_balance(11), 1000);
+        assert_eq!(NodleStaking::total(), 3500);
     });
 }
 
@@ -1911,6 +1908,7 @@ fn only_slash_for_max_in_session() {
         assert_eq!(mock::balances(&11), (1000, 1000));
         assert_eq!(mock::balances(&21), (1000, 1000));
         assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(NodleStaking::total(), 3500);
 
         on_offence_now(
             &[OffenceDetails {
@@ -1929,6 +1927,7 @@ fn only_slash_for_max_in_session() {
 
         assert_eq!(mock::balances(&11), (1000, 500));
         assert_eq!(mock::balances(&101), (1500, 250));
+        assert_eq!(NodleStaking::total(), 2750);
 
         on_offence_now(
             &[OffenceDetails {
@@ -1970,6 +1969,7 @@ fn only_slash_for_max_in_session() {
         // The validator got slashed 10% more.
         assert_eq!(mock::balances(&11), (1000, 400));
         assert_eq!(mock::balances(&101), (1500, 200));
+        assert_eq!(NodleStaking::total(), 2600);
     })
 }
 
@@ -2000,6 +2000,8 @@ fn garbage_collection_after_slashing() {
             ];
             assert_eq!(events(), expected);
 
+            assert_eq!(NodleStaking::total(), 641000);
+
             on_offence_now(
                 &[OffenceDetails {
                     offender: (
@@ -2018,6 +2020,7 @@ fn garbage_collection_after_slashing() {
 
             assert_eq!(balances(&11).1, validator_stake - (validator_stake / 10));
             assert_eq!(balances(&101).1, nominator_stake - (nominator_stake / 10));
+            assert_eq!(NodleStaking::total(), 602600);
 
             assert!(<SlashingSpans<Test>>::get(&11).is_some());
 
@@ -2045,6 +2048,7 @@ fn garbage_collection_after_slashing() {
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
+            assert_eq!(NodleStaking::total(), 257004);
 
             assert_eq!(balances(&11).1, ExistentialDeposit::get());
             // assert_eq!(balances(&11).1, ExistentialDeposit::get());
@@ -2081,6 +2085,7 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         // pre-slash balance
         assert_eq!(mock::balances(&11), (1000, 1000));
         assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(NodleStaking::total(), 3500);
 
         let exposure_11 = NodleStaking::at_stake(NodleStaking::active_session(), &11);
         let exposure_21 = NodleStaking::at_stake(NodleStaking::active_session(), &21);
@@ -2104,6 +2109,7 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         // post-slash balance
         assert_eq!(mock::balances(&11), (1000, 900));
         assert_eq!(mock::balances(&101), (1500, 450));
+        assert_eq!(NodleStaking::total(), 3350);
 
         // Validator-11 is deactivated
         assert_eq!(
@@ -2127,28 +2133,34 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         assert_eq!(events(), expected);
 
         // activate validator 11 in session 3
-        assert_ok!(NodleStaking::validator_activate(Origin::signed(11)));
+        assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
 
         mock::start_active_session(4);
 
         // ensure validator 11 is part of session 5
 
         let mut new2 = vec![
-            Event::ValidatorActive(3, 11),
-            Event::ValidatorChosen(5, 11, 1350),
+            Event::ValidatorBondedMore(11, 900, 910),
+            Event::ValidatorChosen(5, 11, 1360),
             Event::ValidatorChosen(5, 41, 1000),
             Event::ValidatorChosen(5, 21, 1000),
-            Event::NewSession(20, 5, 3, 3350),
+            Event::NewSession(20, 5, 3, 3360),
         ];
         expected.append(&mut new2);
         assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::total(), 3360);
     });
 }
 
 #[test]
 fn slashing_nominators_by_span_max() {
     ExtBuilder::default().build_and_execute(|| {
-        assert_ok!(NodleStaking::nominate(Origin::signed(101), 21, 500));
+        assert_ok!(NodleStaking::nominator_nominate(
+            Origin::signed(101),
+            21,
+            500
+        ));
 
         mock::start_active_session(1);
         mock::start_active_session(2);
@@ -2175,6 +2187,7 @@ fn slashing_nominators_by_span_max() {
         assert_eq!(mock::balances(&11), (1000, 1000));
         assert_eq!(mock::balances(&21), (1000, 1000));
         assert_eq!(mock::balances(&101), (1000, 1000));
+        assert_eq!(NodleStaking::total(), 4000);
 
         let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
 
@@ -2217,6 +2230,7 @@ fn slashing_nominators_by_span_max() {
             mock::balances(&101),
             (1000, 1000 - nominator101_prev_slashed_val,)
         );
+        assert_eq!(NodleStaking::total(), 3850);
 
         let expected_spans = vec![
             slashing::SlashingSpan {
@@ -2255,6 +2269,7 @@ fn slashing_nominators_by_span_max() {
 
         assert_eq!(mock::balances(&21), (1000, 700));
         assert_eq!(mock::balances(&101), (1000, 850));
+        assert_eq!(NodleStaking::total(), 3450);
 
         let nominator101_prev_slashed_val =
             (Perbill::from_percent(30) * nominated_value_21) - nominator101_prev_slashed_val;
@@ -2298,6 +2313,7 @@ fn slashing_nominators_by_span_max() {
 
         expected.append(&mut new3);
         assert_eq!(mock::events(), expected);
+        assert_eq!(NodleStaking::total(), 3350);
 
         // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
     });
@@ -2306,7 +2322,11 @@ fn slashing_nominators_by_span_max() {
 #[test]
 fn slashes_are_summed_across_spans() {
     ExtBuilder::default().build_and_execute(|| {
-        assert_ok!(NodleStaking::nominate(Origin::signed(101), 21, 500));
+        assert_ok!(NodleStaking::nominator_nominate(
+            Origin::signed(101),
+            21,
+            500
+        ));
         mock::start_active_session(1);
         mock::start_active_session(2);
         mock::start_active_session(3);
@@ -2332,6 +2352,7 @@ fn slashes_are_summed_across_spans() {
         assert_eq!(mock::balances(&11), (1000, 1000));
         assert_eq!(mock::balances(&21), (1000, 1000));
         assert_eq!(mock::balances(&101), (1000, 1000));
+        assert_eq!(NodleStaking::total(), 4000);
 
         let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
 
@@ -2353,6 +2374,7 @@ fn slashes_are_summed_across_spans() {
 
         assert_eq!(mock::balances(&21), (1000, 900));
         assert_eq!(mock::balances(&101), (1000, 950));
+        assert_eq!(NodleStaking::total(), 3850);
 
         let expected_spans = vec![
             slashing::SlashingSpan {
@@ -2369,7 +2391,7 @@ fn slashes_are_summed_across_spans() {
 
         assert_eq!(get_span(21).iter().collect::<Vec<_>>(), expected_spans,);
 
-        assert_ok!(NodleStaking::validator_activate(Origin::signed(21)));
+        assert_ok!(NodleStaking::validator_bond_more(Origin::signed(21), 10));
 
         mock::start_active_session(5);
 
@@ -2385,24 +2407,24 @@ fn slashes_are_summed_across_spans() {
         );
 
         let mut new2 = vec![
-            Event::ValidatorActive(3, 21),
+            Event::ValidatorBondedMore(21, 900, 910),
             Event::ValidatorChosen(5, 11, 1500),
-            Event::ValidatorChosen(5, 21, 1350),
+            Event::ValidatorChosen(5, 21, 1360),
             Event::ValidatorChosen(5, 41, 1000),
-            Event::NewSession(20, 5, 3, 3850),
+            Event::NewSession(20, 5, 3, 3860),
             Event::ValidatorChosen(6, 11, 1500),
-            Event::ValidatorChosen(6, 21, 1350),
+            Event::ValidatorChosen(6, 21, 1360),
             Event::ValidatorChosen(6, 41, 1000),
-            Event::NewSession(25, 6, 3, 3850),
-            Event::Slash(21, 90),
+            Event::NewSession(25, 6, 3, 3860),
+            Event::Slash(21, 91),
             Event::Slash(101, 45),
         ];
-
         expected.append(&mut new2);
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&21), (1000, 810));
+        assert_eq!(mock::balances(&21), (990, 819));
         assert_eq!(mock::balances(&101), (1000, 905));
+        assert_eq!(NodleStaking::total(), 3724);
 
         let expected_spans = vec![
             slashing::SlashingSpan {
@@ -2451,6 +2473,7 @@ fn deferred_slashes_are_deferred() {
 
             assert_eq!(mock::balances(&11), (1000, 1000));
             assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(NodleStaking::total(), 3500);
 
             on_offence_now(
                 &[OffenceDetails {
@@ -2480,6 +2503,7 @@ fn deferred_slashes_are_deferred() {
 
             expected.append(&mut new2);
             assert_eq!(mock::events(), expected);
+            assert_eq!(NodleStaking::total(), 3500);
 
             // Ensure slash occur at start of 3 session ( 1 + 2 [deferred duration] )
             mock::start_active_session(3);
@@ -2496,6 +2520,7 @@ fn deferred_slashes_are_deferred() {
 
             assert_eq!(mock::balances(&11), (1000, 900));
             assert_eq!(mock::balances(&101), (1500, 450));
+            assert_eq!(NodleStaking::total(), 3350);
         })
 }
 
@@ -2516,6 +2541,7 @@ fn remove_deferred() {
 
             assert_eq!(mock::balances(&11), (1000, 1000));
             assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(NodleStaking::total(), 3500);
 
             on_offence_now(
                 &[OffenceDetails {
@@ -2545,6 +2571,7 @@ fn remove_deferred() {
 
             expected.append(&mut new2);
             assert_eq!(mock::events(), expected);
+            assert_eq!(NodleStaking::total(), 3500);
 
             on_offence_in_session(
                 &[OffenceDetails {
@@ -2564,11 +2591,11 @@ fn remove_deferred() {
 
             // fails if empty
             assert_noop!(
-                NodleStaking::cancel_deferred_slash(Origin::root(), 1, vec![]),
+                NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![]),
                 Error::<Test>::EmptyTargets
             );
 
-            assert_ok!(NodleStaking::cancel_deferred_slash(
+            assert_ok!(NodleStaking::slash_cancel_deferred(
                 Origin::root(),
                 1,
                 vec![11],
@@ -2578,6 +2605,7 @@ fn remove_deferred() {
 
             assert_eq!(mock::balances(&11), (1000, 1000));
             assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(NodleStaking::total(), 3500);
 
             let mut new4 = vec![
                 Event::ValidatorChosen(4, 41, 1000),
@@ -2604,13 +2632,7 @@ fn remove_deferred() {
 
             expected.append(&mut new5);
             assert_eq!(mock::events(), expected);
-
-            // tst_log!(
-            //     debug,
-            //     "[{:#?}]=> - {:#?}",
-            //     line!(),
-            //     get_span(21).iter().collect::<Vec<_>>()
-            // );
+            assert_eq!(NodleStaking::total(), 3425);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
         })
@@ -2633,6 +2655,7 @@ fn remove_multi_deferred() {
 
             assert_eq!(mock::balances(&11), (1000, 1000));
             assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(NodleStaking::total(), 3500);
 
             // Add 11 to Unapplied Slash Q
             on_offence_now(
@@ -2695,7 +2718,7 @@ fn remove_multi_deferred() {
             on_offence_now(
                 &[OffenceDetails {
                     offender: (
-                        42,
+                        41,
                         NodleStaking::at_stake(NodleStaking::active_session(), 11),
                     ),
                     reporters: vec![],
@@ -2705,7 +2728,7 @@ fn remove_multi_deferred() {
 
             // Since slash is deffered,
             // Ensure deffered unapplied slashing events
-            let mut new4 = vec![Event::DeferredUnappliedSlash(1, 42)];
+            let mut new4 = vec![Event::DeferredUnappliedSlash(1, 41)];
 
             expected.append(&mut new4);
             assert_eq!(mock::events(), expected);
@@ -2739,16 +2762,16 @@ fn remove_multi_deferred() {
             assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 5);
 
             assert_noop!(
-                NodleStaking::cancel_deferred_slash(Origin::root(), 1, vec![]),
+                NodleStaking::slash_cancel_deferred(Origin::root(), 1, vec![]),
                 Error::<Test>::EmptyTargets
             );
 
             assert_noop!(
-                NodleStaking::cancel_deferred_slash(Origin::root(), apply_at, vec![11]),
+                NodleStaking::slash_cancel_deferred(Origin::root(), apply_at, vec![11]),
                 Error::<Test>::InvalidSessionIndex
             );
 
-            assert_ok!(NodleStaking::cancel_deferred_slash(
+            assert_ok!(NodleStaking::slash_cancel_deferred(
                 Origin::root(),
                 1,
                 vec![11]
@@ -2756,7 +2779,7 @@ fn remove_multi_deferred() {
 
             assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 3);
 
-            assert_ok!(NodleStaking::cancel_deferred_slash(
+            assert_ok!(NodleStaking::slash_cancel_deferred(
                 Origin::root(),
                 1,
                 vec![69]
@@ -2765,22 +2788,22 @@ fn remove_multi_deferred() {
             assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at).len(), 2);
 
             assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[0].validator, 21);
-            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[1].validator, 42);
+            assert_eq!(<UnappliedSlashes<Test>>::get(&apply_at)[1].validator, 41);
 
             mock::start_active_session(4);
 
             let mut new6 = vec![
-                Event::ValidatorChosen(3, 41, 1000),
-                Event::NewSession(10, 3, 1, 1000),
+                Event::NewSession(10, 3, 0, 0),
                 Event::Slash(21, 100),
-                Event::ValidatorChosen(4, 41, 1000),
-                Event::NewSession(15, 4, 1, 1000),
-                Event::ValidatorChosen(5, 41, 1000),
-                Event::NewSession(20, 5, 1, 1000),
+                Event::Slash(41, 250),
+                Event::NewSession(15, 4, 0, 0),
+                Event::NewSession(20, 5, 0, 0),
             ];
 
             expected.append(&mut new6);
             assert_eq!(mock::events(), expected);
+
+            assert_eq!(NodleStaking::total(), 3150);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
 

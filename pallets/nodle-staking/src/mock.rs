@@ -621,7 +621,7 @@ pub(crate) fn start_active_session(session_index: SessionIndex) {
 
 pub(crate) fn bond_validator(ctrl: AccountId, val: Balance) {
     let _ = Balances::make_free_balance_be(&ctrl, val);
-    assert_ok!(NodleStaking::join_validator_pool(Origin::signed(ctrl), val));
+    assert_ok!(NodleStaking::validator_join_pool(Origin::signed(ctrl), val));
 
     // println!(
     // 	"last event {:#?}",
@@ -631,7 +631,11 @@ pub(crate) fn bond_validator(ctrl: AccountId, val: Balance) {
 
 pub(crate) fn bond_nominator(ctrl: AccountId, val: Balance, target: AccountId) {
     let _ = Balances::make_free_balance_be(&ctrl, val);
-    assert_ok!(NodleStaking::nominate(Origin::signed(ctrl), target, val));
+    assert_ok!(NodleStaking::nominator_nominate(
+        Origin::signed(ctrl),
+        target,
+        val
+    ));
 }
 
 pub(crate) fn validators_in_pool() -> Vec<AccountId> {
