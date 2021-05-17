@@ -127,6 +127,7 @@ parameter_types! {
     // pub static SessionsPerEra: SessionIndex = 3;
     pub static ExistentialDeposit: Balance = 1;
     pub static SlashDeferDuration: SessionIndex = 0;
+    pub static BondedDuration: u32 = 2;
     pub static ElectionLookahead: BlockNumber = 0;
     pub static Period: BlockNumber = 5;
     pub static Offset: BlockNumber = 0;
@@ -207,7 +208,6 @@ impl pallet_timestamp::Config for Test {
     type WeightInfo = ();
 }
 parameter_types! {
-    pub const BondedDuration: u32 = 2;
     pub const MinSelectedValidators: u32 = 5;
     pub const MaxNominatorsPerValidator: u32 = 4;
     pub const MaxValidatorPerNominator: u32 = 4;
@@ -360,6 +360,11 @@ impl ExtBuilder {
     #[allow(dead_code)]
     pub fn slash_defer_duration(self, session_idx: SessionIndex) -> Self {
         SLASH_DEFER_DURATION.with(|v| *v.borrow_mut() = session_idx);
+        self
+    }
+    #[allow(dead_code)]
+    pub fn bonded_duration(self, session_idx: SessionIndex) -> Self {
+        BONDED_DURATION.with(|v| *v.borrow_mut() = session_idx);
         self
     }
     pub(crate) fn tst_staking_build(self) -> sp_io::TestExternalities {

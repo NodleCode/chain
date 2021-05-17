@@ -253,6 +253,16 @@ pub(crate) fn compute_slash<T: Config>(
             controller,
             &(slash, own_slash),
         );
+
+        log!(
+            trace,
+            "[{:#?}]:[{:#?}] - Update ValidatorSlashInSession SI-[{:#?}] | S-[{:#?}]] | OS-[{:#?}]]",
+            function!(),
+            line!(),
+			slash_session,
+            slash,
+            own_slash,
+        );
     } else {
         // we slash based on the max in era - this new event is not the max,
         // so neither the validator or any nominators will need an update.
@@ -261,6 +271,12 @@ pub(crate) fn compute_slash<T: Config>(
         // pays out some reward even if the latest report is not max-in-era.
         // we opt to avoid the nominator lookups and edits and leave more rewards
         // for more drastic misbehavior.
+        log!(
+            trace,
+            "[{:#?}]:[{:#?}] - Nop on ValidatorSlashInSession",
+            function!(),
+            line!()
+        );
         return None;
     }
 

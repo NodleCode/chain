@@ -526,18 +526,6 @@ pub mod pallet {
             Self::deposit_event(Event::TotalSelectedSet(old, new));
             Ok(().into())
         }
-        #[pallet::weight(10_000)]
-        /// Set the commission for all validators
-        pub fn set_validator_commission(
-            origin: OriginFor<T>,
-            pct: Perbill,
-        ) -> DispatchResultWithPostInfo {
-            frame_system::ensure_root(origin)?;
-            let old = <ValidatorCommission<T>>::get();
-            <ValidatorCommission<T>>::put(pct);
-            Self::deposit_event(Event::ValidatorCommissionSet(old, pct));
-            Ok(().into())
-        }
         /// Join the set of validators pool
         #[pallet::weight(10_000)]
         pub fn validator_join_pool(
@@ -1377,13 +1365,6 @@ pub mod pallet {
 
             Ok(().into())
         }
-
-        // // Calculate round issuance based on total staked for the given round
-        // fn compute_issuance(staked: BalanceOf<T>) -> BalanceOf<T> {
-        //     // TODO :: issuance model ideal for nodle
-        //     return staked;
-        // }
-
         fn pay_stakers(next: SessionIndex) {
             log!(
                 trace,

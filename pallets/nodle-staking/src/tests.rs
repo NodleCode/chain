@@ -1488,119 +1488,173 @@ fn slashing_performed_according_exposure() {
 
 #[test]
 fn slash_in_old_span_does_not_deselect() {
-    ExtBuilder::default().build_and_execute(|| {
-        mock::start_active_session(1);
+    ExtBuilder::default()
+        .bonded_duration(10)
+        .build_and_execute(|| {
+            mock::start_active_session(5);
 
-        let mut expected = vec![
-            Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
-            Event::ValidatorChosen(2, 21, 1000),
-            Event::NewSession(5, 2, 3, 3500),
-        ];
-        assert_eq!(events(), expected);
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+                Event::ValidatorChosen(3, 11, 1500),
+                Event::ValidatorChosen(3, 41, 1000),
+                Event::ValidatorChosen(3, 21, 1000),
+                Event::NewSession(10, 3, 3, 3500),
+                Event::ValidatorChosen(4, 11, 1500),
+                Event::ValidatorChosen(4, 41, 1000),
+                Event::ValidatorChosen(4, 21, 1000),
+                Event::NewSession(15, 4, 3, 3500),
+                Event::ValidatorChosen(5, 11, 1500),
+                Event::ValidatorChosen(5, 41, 1000),
+                Event::ValidatorChosen(5, 21, 1000),
+                Event::NewSession(20, 5, 3, 3500),
+                Event::ValidatorChosen(6, 11, 1500),
+                Event::ValidatorChosen(6, 41, 1000),
+                Event::ValidatorChosen(6, 21, 1000),
+                Event::NewSession(25, 6, 3, 3500),
+            ];
+            assert_eq!(events(), expected);
 
-        assert!(<ValidatorState<Test>>::contains_key(11));
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Active
-        );
+            assert!(<ValidatorState<Test>>::contains_key(11));
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
 
-        assert!(Session::validators().contains(&11));
-        assert_eq!(NodleStaking::total(), 3500);
+            assert!(Session::validators().contains(&11));
+            assert_eq!(NodleStaking::total(), 3500);
 
-        on_offence_now(
-            &[OffenceDetails {
-                offender: (
-                    11,
-                    NodleStaking::at_stake(NodleStaking::active_session(), 11),
-                ),
-                reporters: vec![],
-            }],
-            &[Perbill::from_percent(20)],
-        );
+            on_offence_now(
+                &[OffenceDetails {
+                    offender: (
+                        11,
+                        NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                    ),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(20)],
+            );
 
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Idle
-        );
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Idle
+            );
 
-        mock::start_active_session(2);
+            let mut new1 = vec![Event::Slash(11, 200), Event::Slash(101, 100)];
 
-        assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Active
-        );
-        assert_eq!(
-            mock::last_event(),
-            MetaEvent::nodle_staking(Event::ValidatorBondedMore(11, 800, 810))
-        );
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+            assert_eq!(NodleStaking::total(), 3200);
 
-        mock::start_active_session(3);
+            mock::start_active_session(8);
 
-        let mut new2 = vec![
-            Event::Slash(11, 200),
-            Event::Slash(101, 100),
-            Event::ValidatorChosen(3, 41, 1000),
-            Event::ValidatorChosen(3, 21, 1000),
-            Event::NewSession(10, 3, 2, 2000),
-            Event::ValidatorBondedMore(11, 800, 810),
-            Event::ValidatorChosen(4, 11, 1210),
-            Event::ValidatorChosen(4, 41, 1000),
-            Event::ValidatorChosen(4, 21, 1000),
-            Event::NewSession(15, 4, 3, 3210),
-        ];
-        expected.append(&mut new2);
-        assert_eq!(mock::events(), expected);
+            let mut new2 = vec![
+                Event::ValidatorChosen(7, 41, 1000),
+                Event::ValidatorChosen(7, 21, 1000),
+                Event::NewSession(30, 7, 2, 2000),
+                Event::ValidatorChosen(8, 41, 1000),
+                Event::ValidatorChosen(8, 21, 1000),
+                Event::NewSession(35, 8, 2, 2000),
+                Event::ValidatorChosen(9, 41, 1000),
+                Event::ValidatorChosen(9, 21, 1000),
+                Event::NewSession(40, 9, 2, 2000),
+            ];
 
-        mock::start_active_session(6);
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+            assert_eq!(NodleStaking::total(), 3200);
 
-        tst_log!(
-            debug,
-            "[{:#?}]=> - {:#?}",
-            line!(),
-            NodleStaking::bonded_sessions()
-        );
+            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+            assert_eq!(
+                mock::last_event(),
+                MetaEvent::nodle_staking(Event::ValidatorBondedMore(11, 800, 810))
+            );
 
-        on_offence_in_session(
-            &[OffenceDetails {
-                offender: (
-                    11,
-                    NodleStaking::at_stake(NodleStaking::active_session(), 11),
-                ),
-                reporters: vec![],
-            }],
-            &[Perbill::from_percent(10)],
-            4,
-        );
+            mock::start_active_session(11);
 
-        // Ensure Validator 11 & nominator are slashed
-        let mut new3 = vec![
-            Event::ValidatorChosen(5, 11, 1210),
-            Event::ValidatorChosen(5, 41, 1000),
-            Event::ValidatorChosen(5, 21, 1000),
-            Event::NewSession(20, 5, 3, 3210),
-            Event::ValidatorChosen(6, 11, 1210),
-            Event::ValidatorChosen(6, 41, 1000),
-            Event::ValidatorChosen(6, 21, 1000),
-            Event::NewSession(25, 6, 3, 3210),
-            Event::ValidatorChosen(7, 11, 1210),
-            Event::ValidatorChosen(7, 41, 1000),
-            Event::ValidatorChosen(7, 21, 1000),
-            Event::NewSession(30, 7, 3, 3210),
-            Event::Slash(11, 81),
-            Event::Slash(101, 40),
-        ];
-        expected.append(&mut new3);
-        assert_eq!(events(), expected);
+            let mut new3 = vec![
+                Event::ValidatorBondedMore(11, 800, 810),
+                Event::ValidatorChosen(10, 11, 1210),
+                Event::ValidatorChosen(10, 41, 1000),
+                Event::ValidatorChosen(10, 21, 1000),
+                Event::NewSession(45, 10, 3, 3210),
+                Event::ValidatorChosen(11, 11, 1210),
+                Event::ValidatorChosen(11, 41, 1000),
+                Event::ValidatorChosen(11, 21, 1000),
+                Event::NewSession(50, 11, 3, 3210),
+                Event::ValidatorChosen(12, 11, 1210),
+                Event::ValidatorChosen(12, 41, 1000),
+                Event::ValidatorChosen(12, 21, 1000),
+                Event::NewSession(55, 12, 3, 3210),
+            ];
+            expected.append(&mut new3);
+            assert_eq!(mock::events(), expected);
+            assert_eq!(NodleStaking::total(), 3210);
 
-        // Ensure Validator 11 is not deactivated
-        // TODO :: Have to bringin cfg parameter for history depth.
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Active
-        );
-    });
+            mock::start_active_session(14);
+
+            let bonded_sess_state1 = vec![4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+            assert_eq!(NodleStaking::bonded_sessions(), bonded_sess_state1);
+
+            let mut new4 = vec![
+                Event::ValidatorChosen(13, 11, 1210),
+                Event::ValidatorChosen(13, 41, 1000),
+                Event::ValidatorChosen(13, 21, 1000),
+                Event::NewSession(60, 13, 3, 3210),
+                Event::ValidatorChosen(14, 11, 1210),
+                Event::ValidatorChosen(14, 41, 1000),
+                Event::ValidatorChosen(14, 21, 1000),
+                Event::NewSession(65, 14, 3, 3210),
+                Event::ValidatorChosen(15, 11, 1210),
+                Event::ValidatorChosen(15, 41, 1000),
+                Event::ValidatorChosen(15, 21, 1000),
+                Event::NewSession(70, 15, 3, 3210),
+            ];
+            expected.append(&mut new4);
+            assert_eq!(mock::events(), expected);
+            assert_eq!(NodleStaking::total(), 3210);
+
+            on_offence_in_session(
+                &[OffenceDetails {
+                    offender: (11, NodleStaking::at_stake(5, 11)),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(10)],
+                5,
+            );
+
+            // Ensure no new events
+            // Since slash 10% is less-than prev-slash 20%.
+            assert_eq!(events(), expected);
+
+            on_offence_in_session(
+                &[OffenceDetails {
+                    offender: (11, NodleStaking::at_stake(5, 11)),
+                    reporters: vec![],
+                }],
+                &[Perbill::from_percent(30)],
+                5,
+            );
+
+            // Ensure Validator 11 & nominator are slashed
+            let mut new5 = vec![Event::Slash(11, 100), Event::Slash(101, 50)];
+            expected.append(&mut new5);
+            assert_eq!(events(), expected);
+            assert_eq!(NodleStaking::total(), 3060);
+
+            // Ensure Validator 11 is not deactivated
+            // Since offence incident is reported on old slash span.
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active,
+            );
+        });
 }
 
 #[test]
