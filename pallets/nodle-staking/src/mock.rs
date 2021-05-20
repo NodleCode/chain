@@ -21,12 +21,13 @@
 use crate as nodle_staking;
 use crate::*;
 use frame_support::{
-    assert_ok, parameter_types,
+    assert_ok, ord_parameter_types, parameter_types,
     traits::{
         Currency, FindAuthor, Imbalance, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler,
     },
     weights::constants::RocksDbWeight,
 };
+use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_io;
 use sp_runtime::{
@@ -207,6 +208,9 @@ impl pallet_timestamp::Config for Test {
     type MinimumPeriod = MinimumPeriod;
     type WeightInfo = ();
 }
+ord_parameter_types! {
+    pub const CancelOrigin: AccountId = 42;
+}
 parameter_types! {
     pub const MinSelectedValidators: u32 = 5;
     pub const MaxNominatorsPerValidator: u32 = 4;
@@ -238,6 +242,7 @@ impl Config for Test {
     type SlashDeferDuration = SlashDeferDuration;
     type SlashCancelOrigin = frame_system::EnsureRoot<Self::AccountId>;
     type SessionInterface = Self;
+    type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 }
 
 thread_local! {

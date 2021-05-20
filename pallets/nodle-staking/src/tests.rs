@@ -20,7 +20,7 @@ use super::{Error, ValidatorSnapshot};
 use crate::mock::{
     balances, bond_nominator, bond_validator, events, is_disabled, last_event,
     on_offence_in_session, on_offence_now, set_author, start_session, Balance, Balances,
-    Event as MetaEvent, ExtBuilder, NodleStaking, Origin, Session, System, Test,
+    CancelOrigin, Event as MetaEvent, ExtBuilder, NodleStaking, Origin, Session, System, Test,
 };
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::{traits::BadOrigin, traits::Zero, Perbill};
@@ -2141,16 +2141,32 @@ fn payouts_follow_nomination_changes() {
 #[test]
 fn set_invulnerables_works() {
     ExtBuilder::default().build_and_execute(|| {
-        let new_set = vec![1, 2, 3, 4];
+        let new_set1 = vec![1, 2];
+
         assert_ok!(NodleStaking::set_invulnerables(
             Origin::root(),
-            new_set.clone()
+            new_set1.clone()
         ));
-        assert_eq!(NodleStaking::invulnerables(), new_set);
+        assert_eq!(NodleStaking::invulnerables(), new_set1);
+
+        let mut expected = vec![Event::NewInvulnerables([1, 2].to_vec())];
+        assert_eq!(events(), expected);
+
+        let new_set2 = vec![3, 4];
+
+        assert_ok!(NodleStaking::set_invulnerables(
+            Origin::signed(CancelOrigin::get()),
+            new_set2.clone()
+        ));
+        assert_eq!(NodleStaking::invulnerables(), new_set2);
+
+        let mut new1 = vec![Event::NewInvulnerables([3, 4].to_vec())];
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
 
         // cannot set with non-root.
         assert_noop!(
-            NodleStaking::set_invulnerables(Origin::signed(1), new_set.clone()),
+            NodleStaking::set_invulnerables(Origin::signed(1), new_set2.clone()),
             BadOrigin
         );
     });

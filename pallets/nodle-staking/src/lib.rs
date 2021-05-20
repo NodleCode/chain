@@ -561,6 +561,7 @@ pub mod pallet {
         /// This pallet's module id. Used to derivate a dedicated account id to store session
         /// rewards for validators and nominators in.
         type PalletId: Get<ModuleId>;
+        type CancelOrigin: EnsureOrigin<Self::Origin>;
     }
 
     #[pallet::pallet]
@@ -580,7 +581,9 @@ pub mod pallet {
             origin: OriginFor<T>,
             invulnerables: Vec<T::AccountId>,
         ) -> DispatchResultWithPostInfo {
-            ensure_root(origin)?;
+            T::CancelOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
             <Invulnerables<T>>::put(&invulnerables);
             Self::deposit_event(Event::NewInvulnerables(invulnerables));
             Ok(().into())
@@ -592,7 +595,9 @@ pub mod pallet {
             origin: OriginFor<T>,
             new: u32,
         ) -> DispatchResultWithPostInfo {
-            frame_system::ensure_root(origin)?;
+            T::CancelOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
             ensure!(
                 new >= T::MinSelectedValidators::get(),
                 Error::<T>::CannotSetBelowMin
