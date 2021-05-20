@@ -50,8 +50,8 @@ pub mod pallet {
     use frame_support::{
         pallet_prelude::*,
         traits::{
-            Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced, ReservableCurrency,
-            WithdrawReasons,
+            Currency, ExistenceRequirement, Get, Imbalance, LockIdentifier, LockableCurrency,
+            OnUnbalanced, WithdrawReasons,
         },
     };
     use frame_system::pallet_prelude::*;
@@ -60,13 +60,17 @@ pub mod pallet {
     use parity_scale_codec::{Decode, Encode, HasCompact};
     use sp_runtime::{
         traits::{AccountIdConversion, AtLeast32BitUnsigned, Convert, Saturating, Zero},
-        ModuleId, Perbill, RuntimeDebug,
+        DispatchResult, ModuleId, Perbill, RuntimeDebug,
     };
     use sp_staking::{
         offence::{Offence, OffenceDetails, OffenceError, OnOffenceHandler, ReportOffence},
         SessionIndex,
     };
     use sp_std::{cmp::Ordering, convert::From, prelude::*};
+
+    pub(crate) const STAKING_ID: LockIdentifier = *b"staking ";
+
+    pub const MAX_UNLOCKING_CHUNKS: usize = 32;
 
     #[derive(Default, Clone, Encode, Decode, RuntimeDebug)]
     pub struct Bond<AccountId, Balance> {
@@ -103,6 +107,15 @@ pub mod pallet {
         }
     }
 
+    /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
+    #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, Copy)]
+    pub struct UnlockChunk<Balance> {
+        /// Amount of funds to be unlocked.
+        value: Balance,
+        /// Session number at which point it'll be unlocked.
+        session_idx: SessionIndex,
+    }
+
     #[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug)]
     /// The activity status of the validator
     pub enum ValidatorStatus {
@@ -125,9 +138,11 @@ pub mod pallet {
     pub struct Validator<AccountId, Balance> {
         pub id: AccountId,
         pub bond: Balance,
+        pub nomi_bond_total: Balance,
         pub nominators: OrderedSet<Bond<AccountId, Balance>>,
         pub total: Balance,
         pub state: ValidatorStatus,
+        pub unlocking: Vec<UnlockChunk<Balance>>,
     }
 
     impl<
@@ -140,9 +155,11 @@ pub mod pallet {
             Validator {
                 id,
                 bond,
+                nomi_bond_total: Zero::zero(),
                 nominators: OrderedSet::new(),
                 total,
                 state: ValidatorStatus::default(), // default active
+                unlocking: Vec::new(),
             }
         }
         pub fn is_active(&self) -> bool {
@@ -159,7 +176,7 @@ pub mod pallet {
         pub fn bond_less(&mut self, less: B) -> Option<B> {
             if self.bond > less {
                 self.bond -= less;
-                self.total -= less;
+                // self.total -= less;
                 Some(self.bond)
             } else {
                 None
@@ -169,6 +186,7 @@ pub mod pallet {
             for x in &mut self.nominators.0 {
                 if x.owner == nominator {
                     x.amount += more;
+                    self.nomi_bond_total += more;
                     self.total += more;
                     return;
                 }
@@ -178,6 +196,7 @@ pub mod pallet {
             for x in &mut self.nominators.0 {
                 if x.owner == nominator {
                     x.amount -= less;
+                    self.nomi_bond_total -= less;
                     self.total -= less;
                     return;
                 }
@@ -204,7 +223,7 @@ pub mod pallet {
         ///
         /// Slashes from `active` funds first, and then `unlocking`, starting with the
         /// chunks that are closest to unlocking.
-        pub(crate) fn slash(&mut self, value: Balance, minimum_balance: Balance) -> Balance {
+        pub(crate) fn slash(&mut self, mut value: Balance, minimum_balance: Balance) -> Balance {
             let pre_total = self.total;
             let total = &mut self.total;
             let active = &mut self.bond;
@@ -227,9 +246,36 @@ pub mod pallet {
                     }
                 };
 
-            slash_out_of(total, active, &value);
+            slash_out_of(total, active, &mut value);
+
+            let i = self
+                .unlocking
+                .iter_mut()
+                .map(|chunk| {
+                    slash_out_of(total, &mut chunk.value, &mut value);
+                    chunk.value
+                })
+                .take_while(|value| value.is_zero()) // take all fully-consumed chunks out.
+                .count();
+
+            // kill all drained chunks.
+            let _ = self.unlocking.drain(..i);
 
             pre_total.saturating_sub(*total)
+        }
+        pub fn consolidate_unlocked(&mut self, current_session: SessionIndex) -> Balance {
+            let mut total = self.total;
+            self.unlocking.retain(|&chunk| {
+                if chunk.session_idx > current_session {
+                    true
+                } else {
+                    total = total.saturating_sub(chunk.value);
+                    false
+                }
+            });
+            let unlocked_val = self.total.saturating_sub(total);
+            self.total = total;
+            return unlocked_val;
         }
     }
 
@@ -241,12 +287,16 @@ pub mod pallet {
         pub total: Balance,
     }
 
-    impl<A: Clone, B: Copy> From<Validator<A, B>> for ValidatorSnapshot<A, B> {
+    impl<
+            A: Clone,
+            B: Copy + sp_std::ops::AddAssign + sp_std::ops::Add<Output = B> + sp_std::ops::SubAssign,
+        > From<Validator<A, B>> for ValidatorSnapshot<A, B>
+    {
         fn from(other: Validator<A, B>) -> ValidatorSnapshot<A, B> {
             ValidatorSnapshot {
                 bond: other.bond,
                 nominators: other.nominators.0,
-                total: other.total,
+                total: other.bond + other.nomi_bond_total,
             }
         }
     }
@@ -259,28 +309,12 @@ pub mod pallet {
         }
     }
 
-    // impl<AccountId: Ord, Balance> PartialEq for ValidatorSnapshot<AccountId, Balance> {
-    // 	fn eq(&self, other: &Self) -> bool {
-    // 		self.nominators == other.nominators
-    // 	}
-    // }
-
-    // impl<AccountId: Ord, Balance> Ord for ValidatorSnapshot<AccountId, Balance> {
-    // 	fn cmp(&self, other: &Self) -> Ordering {
-    // 		self.owner.cmp(&other.owner)
-    // 	}
-    // }
-
-    // impl<AccountId: Ord, Balance> PartialOrd for ValidatorSnapshot<AccountId, Balance> {
-    // 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-    // 		Some(self.cmp(other))
-    // 	}
-    // }
-
     #[derive(Encode, Decode, Clone, RuntimeDebug)]
     pub struct Nominator<AccountId, Balance> {
         pub nominations: OrderedSet<Bond<AccountId, Balance>>,
         pub total: Balance,
+        pub active_bond: Balance,
+        pub unlocking: Vec<UnlockChunk<Balance>>,
     }
 
     impl<
@@ -299,12 +333,15 @@ pub mod pallet {
                     amount,
                 }]),
                 total: amount,
+                active_bond: amount,
+                unlocking: Vec::new(),
             }
         }
         pub fn add_nomination(&mut self, bond: Bond<AccountId, Balance>) -> bool {
             let amt = bond.amount;
             if self.nominations.insert(bond) {
                 self.total += amt;
+                self.active_bond += amt;
                 true
             } else {
                 false
@@ -329,8 +366,9 @@ pub mod pallet {
                 .collect();
             if let Some(balance) = amt {
                 self.nominations = OrderedSet::from(nominations);
-                self.total -= balance;
-                Some(self.total)
+                // self.total -= balance;
+                self.active_bond -= balance;
+                Some(self.active_bond)
             } else {
                 None
             }
@@ -341,6 +379,7 @@ pub mod pallet {
                 if x.owner == validator {
                     x.amount += more;
                     self.total += more;
+                    self.active_bond += more;
                     return Some(x.amount);
                 }
             }
@@ -358,7 +397,8 @@ pub mod pallet {
                 if x.owner == validator {
                     if x.amount > less {
                         x.amount -= less;
-                        self.total -= less;
+                        // self.total -= less;
+                        self.active_bond -= less;
                         return Some(Some(x.amount));
                     } else {
                         // underflow error; should rm entire nomination if x.amount == validator
@@ -384,35 +424,69 @@ pub mod pallet {
         pub(crate) fn slash_nomination(
             &mut self,
             validator: AccountId,
-            value: Balance,
+            mut value: Balance,
             minimum_balance: Balance,
         ) -> Balance {
             let pre_total = self.total;
             let total = &mut self.total;
+            let pre_active_bond = self.active_bond;
+            let active_bond = &mut self.active_bond;
 
             let slash_out_of =
-                |total_remaining: &mut Balance, target: &mut Balance, value: &Balance| {
+                |total_remaining: &mut Balance, target: &mut Balance, value: &mut Balance| {
                     let mut slash_from_target = (*value).min(*target);
 
                     if !slash_from_target.is_zero() {
                         *target -= slash_from_target;
+                        *total_remaining = total_remaining.saturating_sub(slash_from_target);
 
-                        // Make sure not drop below ED
-                        if *target <= minimum_balance {
-                            let diff_val = minimum_balance.saturating_sub(*target);
+                        if *total_remaining <= minimum_balance {
+                            let diff_val = minimum_balance.saturating_sub(*total_remaining);
                             *target += diff_val;
+                            *total_remaining += diff_val;
                             slash_from_target -= diff_val;
                         }
-                        *total_remaining = total_remaining.saturating_sub(slash_from_target);
+                        *value -= slash_from_target;
                     }
                 };
 
             for x in &mut self.nominations.0 {
                 if x.owner == validator {
-                    slash_out_of(total, &mut x.amount, &value);
+                    slash_out_of(active_bond, &mut x.amount, &mut value);
                 }
             }
+
+            *total -= pre_active_bond.saturating_sub(*active_bond);
+
+            let i = self
+                .unlocking
+                .iter_mut()
+                .map(|chunk| {
+                    slash_out_of(total, &mut chunk.value, &mut value);
+                    chunk.value
+                })
+                .take_while(|value| value.is_zero()) // take all fully-consumed chunks out.
+                .count();
+
+            // kill all drained chunks.
+            let _ = self.unlocking.drain(..i);
+
             pre_total.saturating_sub(*total)
+        }
+
+        pub fn consolidate_unlocked(&mut self, current_session: SessionIndex) -> Balance {
+            let mut total = self.total;
+            self.unlocking.retain(|&chunk| {
+                if chunk.session_idx > current_session {
+                    true
+                } else {
+                    total = total.saturating_sub(chunk.value);
+                    false
+                }
+            });
+            let unlocked_val = self.total.saturating_sub(total);
+            self.total = total;
+            return unlocked_val;
         }
     }
 
@@ -447,8 +521,10 @@ pub mod pallet {
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-        /// The currency type
-        type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+        // /// The currency type
+        // type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
+        /// The staking balance.
+        type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
         /// Handler for the unbalanced reduction when slashing a staker.
         type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
         /// Handler for the unbalanced increment when rewarding a staker.
@@ -547,7 +623,18 @@ pub mod pallet {
                 }),
                 Error::<T>::ValidatorExists
             );
-            T::Currency::reserve(&acc, bond)?;
+
+            let validator_free_balance = T::Currency::free_balance(&acc);
+            ensure!(
+                validator_free_balance >= bond,
+                Error::<T>::InsufficientBalance
+            );
+
+            system::Pallet::<T>::inc_consumers(&acc).map_err(|_| Error::<T>::BadState)?;
+
+            // T::Currency::reserve(&acc, bond)?;
+            T::Currency::set_lock(STAKING_ID, &acc, bond, WithdrawReasons::all());
+
             let validator = Validator::new(acc.clone(), bond);
 
             <Total<T>>::mutate(|x| *x += bond);
@@ -561,7 +648,7 @@ pub mod pallet {
         /// to prevent selection as a validator, but unbonding
         /// is executed with a delay of `BondedDuration` rounds.
         #[pallet::weight(10_000)]
-        pub fn exit_validators_pool(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+        pub fn validator_exit_pool(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
 
             ensure!(Self::is_validator(&validator), Error::<T>::ValidatorDNE);
@@ -604,21 +691,36 @@ pub mod pallet {
 
             ensure!(Self::is_validator(&validator), Error::<T>::ValidatorDNE);
 
+            let valid_state = Self::validator_state(&validator).ok_or(Error::<T>::ValidatorDNE)?;
+
             ensure!(
-                !Self::validator_state(&validator).unwrap().is_leaving(),
+                !valid_state.is_leaving(),
                 Error::<T>::CannotActivateIfLeaving,
             );
 
-            T::Currency::reserve(&validator, more)?;
+            let validator_free_balance = T::Currency::free_balance(&validator);
+            ensure!(
+                validator_free_balance >= valid_state.bond + more,
+                Error::<T>::InsufficientBalance,
+            );
 
             <ValidatorState<T>>::mutate(validator.clone(), |maybe_validator| {
                 if let Some(state) = maybe_validator {
                     let before = state.bond;
                     state.bond_more(more);
+                    T::Currency::set_lock(
+                        STAKING_ID,
+                        &validator,
+                        state.bond,
+                        WithdrawReasons::all(),
+                    );
                     let after = state.bond;
                     state.go_online();
                     if state.is_active() {
-                        Self::update_validators_pool(validator.clone(), state.total);
+                        Self::update_validators_pool(
+                            validator.clone(),
+                            state.bond + state.nomi_bond_total,
+                        );
                     }
                     <Total<T>>::mutate(|x| *x += more);
                     Self::deposit_event(Event::ValidatorBondedMore(validator, before, after));
@@ -646,13 +748,31 @@ pub mod pallet {
                     after >= T::MinValidatorPoolStake::get(),
                     Error::<T>::ValidatorBondBelowMin
                 );
+                ensure!(
+                    state.unlocking.len() < MAX_UNLOCKING_CHUNKS,
+                    Error::<T>::NoMoreChunks,
+                );
 
-                T::Currency::unreserve(&validator, less);
-
+                // `state.total` is locked for bonding duration to handle the slash,
+                //  But for upcoming validator selection,
+                //  State in validator pool is updated with ( validator bond + nominator bond).
                 if state.is_active() {
-                    Self::update_validators_pool(validator.clone(), state.total);
+                    Self::update_validators_pool(
+                        validator.clone(),
+                        state.bond + state.nomi_bond_total,
+                    );
                 }
+
+                // Update the overall total, since there is change in
+                // active total.
                 <Total<T>>::mutate(|x| *x -= less);
+
+                // T::Currency::unreserve(&validator, less);
+                state.unlocking.push(UnlockChunk {
+                    value: less,
+                    session_idx: Self::active_session() + T::BondedDuration::get(),
+                });
+
                 <ValidatorState<T>>::insert(&validator, state);
                 Self::deposit_event(Event::ValidatorBondedLess(validator, before, after));
             }
@@ -700,13 +820,24 @@ pub mod pallet {
                 Error::<T>::TooManyNominators,
             );
 
+            let nominator_free_balance = T::Currency::free_balance(&nominator_acc);
+
             if do_add_nomination {
+                ensure!(
+                    nominator_free_balance >= nominator_state.total + amount,
+                    Error::<T>::InsufficientBalance
+                );
                 ensure!(
                     nominator_state.add_nomination(Bond {
                         owner: validator.clone(),
                         amount
                     }),
                     Error::<T>::AlreadyNominatedValidator,
+                );
+            } else {
+                ensure!(
+                    nominator_free_balance >= amount,
+                    Error::<T>::InsufficientBalance
                 );
             }
 
@@ -719,7 +850,15 @@ pub mod pallet {
                 Error::<T>::NominatorExists,
             );
 
-            T::Currency::reserve(&nominator_acc, amount)?;
+            // T::Currency::reserve(&nominator_acc, amount)?;
+            T::Currency::set_lock(
+                STAKING_ID,
+                &nominator_acc,
+                nominator_state.total,
+                WithdrawReasons::all(),
+            );
+
+            validator_state.nomi_bond_total += amount;
             validator_state.total += amount;
             let validator_new_total = validator_state.total;
             if validator_state.is_active() {
@@ -745,7 +884,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             validator: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            Self::nominator_revokes_validator(ensure_signed(origin)?, validator)
+            Self::nominator_revokes_validator(ensure_signed(origin)?, validator, false)
         }
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
         #[pallet::weight(0)]
@@ -753,11 +892,11 @@ pub mod pallet {
             let acc = ensure_signed(origin)?;
 
             let nominator = <NominatorState<T>>::get(&acc).ok_or(Error::<T>::NominatorDNE)?;
+
             for bond in nominator.nominations.0 {
-                Self::nominator_leaves_validator(acc.clone(), bond.owner.clone())?;
+                Self::nominator_revokes_validator(acc.clone(), bond.owner.clone(), true)?;
             }
-            <NominatorState<T>>::remove(&acc);
-            Self::deposit_event(Event::NominatorLeft(acc, nominator.total));
+
             Ok(().into())
         }
         /// Bond more for nominators with respect to a specific validator
@@ -775,7 +914,21 @@ pub mod pallet {
             let _ = nominations
                 .inc_nomination(validator.clone(), more)
                 .ok_or(Error::<T>::NominationDNE)?;
-            T::Currency::reserve(&nominator, more)?;
+
+            let nominator_free_balance = T::Currency::free_balance(&nominator);
+            ensure!(
+                nominator_free_balance >= nominations.total,
+                Error::<T>::InsufficientBalance
+            );
+
+            // T::Currency::reserve(&nominator, more)?;
+            T::Currency::set_lock(
+                STAKING_ID,
+                &nominator,
+                nominations.total,
+                WithdrawReasons::all(),
+            );
+
             let before = validator_state.total;
             validator_state.inc_nominator(nominator.clone(), more);
             let after = validator_state.total;
@@ -809,19 +962,33 @@ pub mod pallet {
                 Error::<T>::NominationBelowMin
             );
             ensure!(
-                nominations.total >= T::MinNominatorStake::get(),
+                nominations.active_bond >= T::MinNominatorStake::get(),
                 Error::<T>::NominatorBondBelowMin
+            );
+
+            ensure!(
+                nominations.unlocking.len() < MAX_UNLOCKING_CHUNKS,
+                Error::<T>::NoMoreChunks,
             );
 
             let mut validator_state =
                 <ValidatorState<T>>::get(&validator).ok_or(Error::<T>::ValidatorDNE)?;
-            T::Currency::unreserve(&nominator, less);
-            let before = validator_state.total;
+
+            // T::Currency::unreserve(&nominator, less);
+            nominations.unlocking.push(UnlockChunk {
+                value: less,
+                session_idx: Self::active_session() + T::BondedDuration::get(),
+            });
+
+            let before = validator_state.bond + validator_state.nomi_bond_total;
             validator_state.dec_nominator(nominator.clone(), less);
-            let after = validator_state.total;
+            let after = validator_state.bond + validator_state.nomi_bond_total;
             <Total<T>>::mutate(|x| *x -= less);
             if validator_state.is_active() {
-                Self::update_validators_pool(validator.clone(), validator_state.total);
+                Self::update_validators_pool(
+                    validator.clone(),
+                    validator_state.bond + validator_state.nomi_bond_total,
+                );
             }
 
             <ValidatorState<T>>::insert(&validator, validator_state);
@@ -830,6 +997,54 @@ pub mod pallet {
             Self::deposit_event(Event::NominationDecreased(
                 nominator, validator, before, after,
             ));
+
+            Ok(().into())
+        }
+        #[pallet::weight(10_000)]
+        pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+            let acc = ensure_signed(origin)?;
+
+            let curr_session = Self::active_session();
+            let mut unlocked_bal = Zero::zero();
+            let mut new_total = Zero::zero();
+
+            if Self::is_validator(&acc) {
+                <ValidatorState<T>>::mutate(&acc, |maybe_validator| {
+                    if let Some(state) = maybe_validator {
+                        let pre_total = state.total.saturating_sub(state.nomi_bond_total);
+                        unlocked_bal = state.consolidate_unlocked(curr_session);
+                        new_total = pre_total.saturating_sub(unlocked_bal);
+                    }
+                });
+
+                if unlocked_bal > Zero::zero() {
+                    // <Total<T>>::mutate(|x| *x -= unlocked_bal);
+                    T::Currency::set_lock(STAKING_ID, &acc, new_total, WithdrawReasons::all());
+                }
+
+                Self::deposit_event(Event::Withdrawn(acc, unlocked_bal));
+            } else if Self::is_nominator(&acc) {
+                if let Some(mut nominator_state) = Self::nominator_state(&acc) {
+                    let old_total = nominator_state.total;
+                    unlocked_bal = nominator_state.consolidate_unlocked(curr_session);
+                    new_total = nominator_state.total;
+
+                    if unlocked_bal > Zero::zero() {
+                        // <Total<T>>::mutate(|x| *x -= unlocked_bal);
+                        T::Currency::set_lock(STAKING_ID, &acc, new_total, WithdrawReasons::all());
+                    }
+
+                    Self::deposit_event(Event::Withdrawn(acc.clone(), unlocked_bal));
+
+                    if nominator_state.nominations.0.len().is_zero() {
+                        T::Currency::remove_lock(STAKING_ID, &acc);
+                        <NominatorState<T>>::remove(acc.clone());
+                        Self::deposit_event(Event::NominatorLeft(acc.clone(), old_total));
+                    } else {
+                        <NominatorState<T>>::insert(acc.clone(), nominator_state);
+                    }
+                }
+            }
 
             Ok(().into())
         }
@@ -878,6 +1093,7 @@ pub mod pallet {
         ValidatorBondBelowMin,
         NominationBelowMin,
         NominatorBondBelowMin,
+        InsufficientBalance,
         AlreadyOffline,
         AlreadyActive,
         AlreadyLeaving,
@@ -891,6 +1107,8 @@ pub mod pallet {
         IncorrectSlashingSpans,
         EmptyTargets,
         InvalidSessionIndex,
+        NoMoreChunks,
+        BadState,
     }
 
     #[pallet::event]
@@ -944,6 +1162,9 @@ pub mod pallet {
         OldSlashingReportDiscarded(SessionIndex),
         PayReporterReward(T::AccountId, BalanceOf<T>),
         DeferredUnappliedSlash(SessionIndex, T::AccountId),
+        /// An account has called `withdraw_unbonded` and removed unbonding chunks worth `Balance`
+        /// from the unlocking queue. \[controller_account, amount\]
+        Withdrawn(T::AccountId, BalanceOf<T>),
     }
 
     /// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
@@ -1179,6 +1400,7 @@ pub mod pallet {
                     T::Currency::free_balance(&actor) >= balance,
                     "Account does not have enough balance to bond."
                 );
+
                 let _ = if let Some(nominated_val) = opt_val {
                     <Pallet<T>>::nominator_nominate(
                         T::Origin::from(Some(actor.clone()).into()),
@@ -1253,10 +1475,11 @@ pub mod pallet {
         pub fn update_validators_pool(validator: T::AccountId, total: BalanceOf<T>) {
             log!(
                 trace,
-                "[{:#?}]:[{:#?}] | Own[{:#?}]",
+                "[{:#?}]:[{:#?}] | Own[{:#?}] | Tot[{:#?}]",
                 function!(),
                 line!(),
-                validator
+                validator,
+                total,
             );
             <ValidatorPool<T>>::mutate(|validators| {
                 validators.remove(&Bond::from_owner(validator.clone()));
@@ -1319,8 +1542,11 @@ pub mod pallet {
                         .collect();
                     let nominator_stake = exists.ok_or(<Error<T>>::ValidatorDNE)?;
                     let nominators = OrderedSet::from(noms);
-                    T::Currency::unreserve(&nominator, nominator_stake);
+
+                    // T::Currency::unreserve(&nominator, nominator_stake);
+
                     state.nominators = nominators;
+                    state.nomi_bond_total -= nominator_stake;
                     state.total -= nominator_stake;
                     if state.is_active() {
                         Self::update_validators_pool(validator.clone(), state.total);
@@ -1341,30 +1567,62 @@ pub mod pallet {
         fn nominator_revokes_validator(
             acc: T::AccountId,
             validator: T::AccountId,
+            do_force: bool,
         ) -> DispatchResultWithPostInfo {
             let mut nominator_state =
                 <NominatorState<T>>::get(&acc).ok_or(<Error<T>>::NominatorDNE)?;
-            let old_total = nominator_state.total;
+
+            ensure!(
+                nominator_state.unlocking.len() < MAX_UNLOCKING_CHUNKS,
+                Error::<T>::NoMoreChunks,
+            );
+
+            let old_active_bond = nominator_state.active_bond;
             let remaining = nominator_state
                 .rm_nomination(validator.clone())
                 .ok_or(Error::<T>::NominationDNE)?;
 
-            ensure!(
-                remaining >= T::MinNominatorStake::get(),
-                Error::<T>::NominatorBondBelowMin
-            );
+            if !do_force {
+                ensure!(
+                    remaining >= T::MinNominatorStake::get(),
+                    Error::<T>::NominatorBondBelowMin
+                );
+            }
+
             Self::nominator_leaves_validator(acc.clone(), validator)?;
 
-            // edge case; if no nominations remaining, leave set of nominators
-            if nominator_state.nominations.0.len().is_zero() {
-                <NominatorState<T>>::remove(acc.clone());
-                Self::deposit_event(Event::NominatorLeft(acc, old_total));
-            } else {
-                <NominatorState<T>>::insert(acc.clone(), nominator_state);
-            }
+            nominator_state.unlocking.push(UnlockChunk {
+                value: old_active_bond - nominator_state.active_bond,
+                session_idx: Self::active_session() + T::BondedDuration::get(),
+            });
+
+            <NominatorState<T>>::insert(acc.clone(), nominator_state);
 
             Ok(().into())
         }
+
+        fn validator_revokes_nomination(nominator_acc: T::AccountId, validator: T::AccountId) {
+            <NominatorState<T>>::mutate(&nominator_acc, |maybe_nominator_state| {
+                if let Some(nominator_state) = maybe_nominator_state.as_mut() {
+                    let old_active_bond = nominator_state.active_bond;
+
+                    if let Some(_remaining) = nominator_state.rm_nomination(validator.clone()) {
+                        nominator_state.unlocking.push(UnlockChunk {
+                            value: old_active_bond - nominator_state.active_bond,
+                            session_idx: Self::active_session(),
+                        });
+
+                        Self::deposit_event(Event::NominatorLeftValidator(
+                            nominator_acc.clone(),
+                            validator,
+                            old_active_bond - nominator_state.active_bond,
+                            Zero::zero(),
+                        ));
+                    }
+                }
+            });
+        }
+
         fn pay_stakers(next: SessionIndex) {
             log!(
                 trace,
@@ -1468,27 +1726,27 @@ pub mod pallet {
                         Some(x)
                     } else {
                         if let Some(state) = <ValidatorState<T>>::get(&x.owner) {
+                            // revoke all nominations
                             for bond in state.nominators.0 {
-                                // return stake to nominator
-                                T::Currency::unreserve(&bond.owner, bond.amount);
-                                // remove nomination from nominator state
-                                if let Some(mut nominator) = <NominatorState<T>>::get(&bond.owner) {
-                                    if let Some(remaining) =
-                                        nominator.rm_nomination(x.owner.clone())
-                                    {
-                                        if remaining.is_zero() {
-                                            <NominatorState<T>>::remove(&bond.owner);
-                                        } else {
-                                            <NominatorState<T>>::insert(&bond.owner, nominator);
-                                        }
-                                    }
-                                }
+                                Self::validator_revokes_nomination(
+                                    bond.owner.clone(),
+                                    x.owner.clone(),
+                                );
                             }
-                            // return stake to collator
-                            T::Currency::unreserve(&state.id, state.bond);
-                            let new_total = <Total<T>>::get() - state.total;
+                            // return stake to validator
+                            let mut unlock_chunk_total = Zero::zero();
+                            let _ = state.unlocking.iter().map(|chunk| {
+                                unlock_chunk_total += chunk.value;
+                            });
+
+                            let new_total =
+                                <Total<T>>::get() - state.total.saturating_sub(unlock_chunk_total);
                             <Total<T>>::put(new_total);
+
+                            T::Currency::remove_lock(STAKING_ID, &x.owner);
+
                             <ValidatorState<T>>::remove(&x.owner);
+
                             Self::deposit_event(Event::ValidatorLeft(
                                 x.owner,
                                 state.total,
@@ -1520,7 +1778,7 @@ pub mod pallet {
             for account in top_validators.iter() {
                 let state = <ValidatorState<T>>::get(&account)
                     .expect("all members of ValidatorQ must be validators");
-                let amount = state.total;
+                let amount = state.bond + state.nomi_bond_total;
                 let exposure: ValidatorSnapshot<T::AccountId, BalanceOf<T>> = state.into();
                 <AtStake<T>>::insert(next, account, exposure);
                 validators_count += 1u32;
@@ -1553,6 +1811,26 @@ pub mod pallet {
                 <Points<T>>::mutate(now, |x| *x += points);
             }
         }
+
+        /// Remove all associated data of a stash account from the staking system.
+        ///
+        /// Assumes storage is upgraded before calling.
+        ///
+        /// This is called:
+        /// - after a `withdraw_unbonded()` call that frees all of a stash's bonded balance.
+        /// - through `reap_stash()` if the balance has fallen to zero (through slashing).
+        #[allow(dead_code)]
+        fn kill_state_info(controller: &T::AccountId, num_slashing_spans: u32) -> DispatchResult {
+            slashing::clear_slash_metadata::<T>(controller, num_slashing_spans)?;
+
+            <ValidatorState<T>>::remove(controller);
+            <NominatorState<T>>::remove(controller);
+
+            system::Pallet::<T>::dec_consumers(controller);
+
+            Ok(())
+        }
+
         /// Clear session information for given session index
         fn clear_session_information(session_idx: SessionIndex) {
             log!(

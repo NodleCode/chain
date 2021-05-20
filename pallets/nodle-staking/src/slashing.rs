@@ -23,7 +23,7 @@ use super::{
 };
 use frame_support::{
     ensure,
-    traits::{Currency, Imbalance, OnUnbalanced, ReservableCurrency},
+    traits::{Currency, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons},
 };
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
@@ -253,16 +253,6 @@ pub(crate) fn compute_slash<T: Config>(
             controller,
             &(slash, own_slash),
         );
-
-        log!(
-            trace,
-            "[{:#?}]:[{:#?}] - Update ValidatorSlashInSession SI-[{:#?}] | S-[{:#?}]] | OS-[{:#?}]]",
-            function!(),
-            line!(),
-			slash_session,
-            slash,
-            own_slash,
-        );
     } else {
         // we slash based on the max in era - this new event is not the max,
         // so neither the validator or any nominators will need an update.
@@ -271,12 +261,6 @@ pub(crate) fn compute_slash<T: Config>(
         // pays out some reward even if the latest report is not max-in-era.
         // we opt to avoid the nominator lookups and edits and leave more rewards
         // for more drastic misbehavior.
-        log!(
-            trace,
-            "[{:#?}]:[{:#?}] - Nop on ValidatorSlashInSession",
-            function!(),
-            line!()
-        );
         return None;
     }
 
@@ -621,6 +605,10 @@ fn do_slash_validator<T: Config>(
 ) {
     <Pallet<T> as Store>::ValidatorState::mutate(&controller, |validator_state| {
         if let Some(validator_state) = validator_state {
+            let old_active_bond = validator_state.bond;
+            let valid_pre_total = validator_state
+                .total
+                .saturating_sub(validator_state.nomi_bond_total);
             let slashed_value = validator_state.slash(value, T::Currency::minimum_balance());
 
             log!(
@@ -634,20 +622,25 @@ fn do_slash_validator<T: Config>(
             );
 
             if !slashed_value.is_zero() {
-                let pre_balance_stat = (
-                    T::Currency::free_balance(controller),
-                    T::Currency::reserved_balance(controller),
-                );
+                let pre_balance_stat = T::Currency::free_balance(controller);
 
-                let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+                // let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+                let (imbalance, missing) = T::Currency::slash(controller, slashed_value);
                 slashed_imbalance.subsume(imbalance);
 
-                <Pallet<T> as Store>::Total::mutate(|x| *x -= slashed_value);
-
-                let cur_balance_stat = (
-                    T::Currency::free_balance(controller),
-                    T::Currency::reserved_balance(controller),
+                T::Currency::set_lock(
+                    crate::STAKING_ID,
+                    &controller,
+                    valid_pre_total.saturating_sub(slashed_value),
+                    WithdrawReasons::all(),
                 );
+
+                // Consider only the value slashed on active bond.
+                <Pallet<T> as Store>::Total::mutate(|x| {
+                    *x -= old_active_bond.saturating_sub(validator_state.bond)
+                });
+
+                let cur_balance_stat = T::Currency::free_balance(controller);
 
                 log!(
                     trace,
@@ -683,6 +676,8 @@ fn do_slash_nominator<T: Config>(
 ) {
     <Pallet<T> as Store>::NominatorState::mutate(&controller, |nominator_state| {
         if let Some(nominator_state) = nominator_state {
+            let old_active_bond = nominator_state.active_bond;
+
             let slashed_value = nominator_state.slash_nomination(
                 validator.clone(),
                 value,
@@ -700,10 +695,7 @@ fn do_slash_nominator<T: Config>(
             );
 
             if !slashed_value.is_zero() {
-                let pre_balance_stat = (
-                    T::Currency::free_balance(controller),
-                    T::Currency::reserved_balance(controller),
-                );
+                let pre_balance_stat = T::Currency::free_balance(controller);
 
                 <Pallet<T> as Store>::ValidatorState::mutate(&validator, |validator_state| {
                     if let Some(validator_state) = validator_state {
@@ -717,15 +709,24 @@ fn do_slash_nominator<T: Config>(
                     }
                 });
 
-                let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+                // let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+                let (imbalance, missing) = T::Currency::slash(controller, slashed_value);
                 slashed_imbalance.subsume(imbalance);
 
-                <Pallet<T> as Store>::Total::mutate(|x| *x -= slashed_value);
-
-                let cur_balance_stat = (
-                    T::Currency::free_balance(controller),
-                    T::Currency::reserved_balance(controller),
+                T::Currency::set_lock(
+                    crate::STAKING_ID,
+                    &controller,
+                    nominator_state.total,
+                    WithdrawReasons::all(),
                 );
+
+                // <Pallet<T> as Store>::Total::mutate(|x| *x -= slashed_value);
+                // Consider only the value slashed on active bond.
+                <Pallet<T> as Store>::Total::mutate(|x| {
+                    *x -= old_active_bond.saturating_sub(nominator_state.active_bond)
+                });
+
+                let cur_balance_stat = T::Currency::free_balance(controller);
 
                 log!(
                     trace,
@@ -742,7 +743,7 @@ fn do_slash_nominator<T: Config>(
                 }
 
                 // trigger the event
-                <Pallet<T>>::deposit_event(Event::Slash(controller.clone(), value));
+                <Pallet<T>>::deposit_event(Event::Slash(controller.clone(), slashed_value));
             }
         }
     });

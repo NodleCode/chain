@@ -545,7 +545,11 @@ impl ExtBuilder {
 }
 
 pub(crate) fn balances(who: &AccountId) -> (Balance, Balance) {
-    (Balances::free_balance(who), Balances::reserved_balance(who))
+    // (Balances::free_balance(who), Balances::reserved_balance(who))
+    (
+        Balances::free_balance(who),
+        Balances::free_balance(who) - Balances::usable_balance(who),
+    )
 }
 
 pub fn is_disabled(controller: AccountId) -> bool {

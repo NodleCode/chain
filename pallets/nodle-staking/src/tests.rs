@@ -20,11 +20,10 @@ use super::{Error, ValidatorSnapshot};
 use crate::mock::{
     balances, bond_nominator, bond_validator, events, is_disabled, last_event,
     on_offence_in_session, on_offence_now, set_author, start_session, Balance, Balances,
-    Event as MetaEvent, ExistentialDeposit, ExtBuilder, NodleStaking, Origin, Session, System,
-    Test,
+    Event as MetaEvent, ExtBuilder, NodleStaking, Origin, Session, System, Test,
 };
 use frame_support::{assert_noop, assert_ok, traits::Currency};
-use sp_runtime::{traits::BadOrigin, traits::Zero, DispatchError, Perbill};
+use sp_runtime::{traits::BadOrigin, traits::Zero, Perbill};
 
 use sp_staking::offence::OffenceDetails;
 
@@ -60,11 +59,7 @@ fn join_validator_pool_works() {
             );
             assert_noop!(
                 NodleStaking::validator_join_pool(Origin::signed(8), 10u128,),
-                DispatchError::Module {
-                    index: 3,
-                    error: 3,
-                    message: Some("InsufficientBalance")
-                }
+                Error::<Test>::InsufficientBalance,
             );
             assert!(System::events().is_empty());
             assert_ok!(NodleStaking::validator_join_pool(Origin::signed(7), 10u128,));
@@ -78,8 +73,26 @@ fn join_validator_pool_works() {
 #[test]
 fn validator_activate_works() {
     ExtBuilder::default().build_and_execute(|| {
+        mock::start_active_session(1);
+
+        let mut expected = vec![
+            Event::ValidatorChosen(2, 11, 1500),
+            Event::ValidatorChosen(2, 41, 1000),
+            Event::ValidatorChosen(2, 21, 1000),
+            Event::NewSession(5, 2, 3, 3500),
+        ];
+        assert_eq!(events(), expected);
+
         assert!(Session::validators().contains(&11));
         assert!(<ValidatorState<Test>>::contains_key(11));
+
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(Balances::total_balance(&11), 2000);
+
+        assert_eq!(mock::balances(&101), (2000, 500));
+        assert_eq!(Balances::total_balance(&101), 2000);
+
+        assert_eq!(NodleStaking::total(), 3500);
 
         let slash_percent = Perbill::from_percent(0);
         let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
@@ -109,12 +122,33 @@ fn validator_activate_works() {
             ValidatorStatus::Idle
         );
 
+        assert_noop!(
+            NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+            Error::<Test>::InsufficientBalance,
+        );
+
         assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+
+        let mut new1 = vec![Event::ValidatorBondedMore(11, 1000, 1010)];
+
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
+
+        assert_eq!(mock::balances(&11), (2000, 1010));
+        assert_eq!(Balances::total_balance(&11), 2000);
+
+        assert_eq!(mock::balances(&101), (2000, 500));
+        assert_eq!(Balances::total_balance(&101), 2000);
+
+        assert_eq!(NodleStaking::total(), 3510);
 
         assert_eq!(
             NodleStaking::validator_state(11).unwrap().state,
             ValidatorStatus::Active
         );
+
+        // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+        // panic!("S-1");
     });
 }
 
@@ -154,22 +188,37 @@ fn validator_exit_executes_after_delay() {
             ];
             assert_eq!(mock::events(), expected);
 
+            assert_eq!(mock::balances(&1), (1000, 500));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&3), (100, 100));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 100));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&2), (300, 200));
+            assert_eq!(Balances::total_balance(&2), 300);
+
+            assert_eq!(mock::balances(&5), (100, 100));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 100));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(NodleStaking::total(), 1100);
+
             assert_noop!(
-                NodleStaking::exit_validators_pool(Origin::signed(3)),
+                NodleStaking::validator_exit_pool(Origin::signed(3)),
                 Error::<Test>::ValidatorDNE,
             );
             mock::start_active_session(6);
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(2)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
             assert_eq!(
                 last_event(),
                 MetaEvent::nodle_staking(Event::ValidatorScheduledExit(6, 2, 8)),
             );
-            let info = NodleStaking::validator_state(&2).unwrap();
-            assert_eq!(info.state, ValidatorStatus::Leaving(8));
-            mock::start_active_session(10);
-            // we must exclude leaving collators from rewards while
-            // holding them retroactively accountable for previous faults
-            // (within the last T::SlashingWindow blocks)
+
             let mut new1 = vec![
                 Event::ValidatorChosen(6, 1, 700),
                 Event::ValidatorChosen(6, 2, 400),
@@ -178,18 +227,70 @@ fn validator_exit_executes_after_delay() {
                 Event::ValidatorChosen(7, 2, 400),
                 Event::NewSession(30, 7, 2, 1100),
                 Event::ValidatorScheduledExit(6, 2, 8),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            let info = NodleStaking::validator_state(&2).unwrap();
+            assert_eq!(info.state, ValidatorStatus::Leaving(8));
+            mock::start_active_session(9);
+            // we must exclude leaving collators from rewards while
+            // holding them retroactively accountable for previous faults
+            // (within the last T::SlashingWindow blocks)
+            let mut new2 = vec![
                 Event::ValidatorChosen(8, 1, 700),
                 Event::NewSession(35, 8, 1, 700),
+                Event::NominatorLeftValidator(5, 2, 100, 0),
+                Event::NominatorLeftValidator(6, 2, 100, 0),
                 Event::ValidatorLeft(2, 400, 700),
                 Event::ValidatorChosen(9, 1, 700),
                 Event::NewSession(40, 9, 1, 700),
                 Event::ValidatorChosen(10, 1, 700),
                 Event::NewSession(45, 10, 1, 700),
-                Event::ValidatorChosen(11, 1, 700),
-                Event::NewSession(50, 11, 1, 700),
             ];
-            expected.append(&mut new1);
+            expected.append(&mut new2);
             assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (1000, 500));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&3), (100, 100));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 100));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&2), (300, 0));
+            assert_eq!(Balances::total_balance(&2), 300);
+
+            assert_eq!(mock::balances(&5), (100, 100));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 100));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(NodleStaking::total(), 700);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(5)));
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+
+            let mut new3 = vec![
+                Event::Withdrawn(5, 100),
+                Event::NominatorLeft(5, 100),
+                Event::Withdrawn(6, 100),
+                Event::NominatorLeft(6, 100),
+            ];
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&5), (100, 0));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 0));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(NodleStaking::total(), 700);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
             // panic!("S-1");
@@ -213,7 +314,7 @@ fn validator_selection_chooses_top_candidates() {
         .with_validators(vec![(1, 100), (2, 90), (3, 80), (4, 70), (5, 60), (6, 50)])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(8);
+            mock::start_active_session(4);
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 100),
@@ -222,36 +323,81 @@ fn validator_selection_chooses_top_candidates() {
                 Event::ValidatorChosen(2, 4, 70),
                 Event::ValidatorChosen(2, 5, 60),
                 Event::NewSession(5, 2, 5, 400),
-            ];
-            assert_eq!(events(), expected);
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(6)));
-            assert_eq!(
-                last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(1, 6, 3)),
-            );
-            let info = NodleStaking::validator_state(&6).unwrap();
-            assert_eq!(info.state, ValidatorStatus::Leaving(3));
-
-            mock::run_to_block(16);
-            let mut new1 = vec![
-                Event::ValidatorScheduledExit(1, 6, 3),
                 Event::ValidatorChosen(3, 1, 100),
                 Event::ValidatorChosen(3, 2, 90),
                 Event::ValidatorChosen(3, 3, 80),
                 Event::ValidatorChosen(3, 4, 70),
                 Event::ValidatorChosen(3, 5, 60),
                 Event::NewSession(10, 3, 5, 400),
-                Event::ValidatorLeft(6, 50, 400),
                 Event::ValidatorChosen(4, 1, 100),
                 Event::ValidatorChosen(4, 2, 90),
                 Event::ValidatorChosen(4, 3, 80),
                 Event::ValidatorChosen(4, 4, 70),
                 Event::ValidatorChosen(4, 5, 60),
                 Event::NewSession(15, 4, 5, 400),
+                Event::ValidatorChosen(5, 1, 100),
+                Event::ValidatorChosen(5, 2, 90),
+                Event::ValidatorChosen(5, 3, 80),
+                Event::ValidatorChosen(5, 4, 70),
+                Event::ValidatorChosen(5, 5, 60),
+                Event::NewSession(20, 5, 5, 400),
+            ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&1), (1000, 100));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&2), (1000, 90));
+            assert_eq!(Balances::total_balance(&2), 1000);
+
+            assert_eq!(mock::balances(&3), (1000, 80));
+            assert_eq!(Balances::total_balance(&3), 1000);
+
+            assert_eq!(mock::balances(&4), (1000, 70));
+            assert_eq!(Balances::total_balance(&4), 1000);
+
+            assert_eq!(mock::balances(&5), (1000, 60));
+            assert_eq!(Balances::total_balance(&5), 1000);
+
+            assert_eq!(mock::balances(&6), (1000, 50));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 450);
+
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
+            assert_eq!(
+                last_event(),
+                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(4, 6, 6)),
+            );
+            let info = NodleStaking::validator_state(&6).unwrap();
+            assert_eq!(info.state, ValidatorStatus::Leaving(6));
+
+            mock::start_active_session(6);
+
+            let mut new1 = vec![
+                Event::ValidatorScheduledExit(4, 6, 6),
+                Event::ValidatorChosen(6, 1, 100),
+                Event::ValidatorChosen(6, 2, 90),
+                Event::ValidatorChosen(6, 3, 80),
+                Event::ValidatorChosen(6, 4, 70),
+                Event::ValidatorChosen(6, 5, 60),
+                Event::NewSession(25, 6, 5, 400),
+                Event::ValidatorLeft(6, 50, 400),
+                Event::ValidatorChosen(7, 1, 100),
+                Event::ValidatorChosen(7, 2, 90),
+                Event::ValidatorChosen(7, 3, 80),
+                Event::ValidatorChosen(7, 4, 70),
+                Event::ValidatorChosen(7, 5, 60),
+                Event::NewSession(30, 7, 5, 400),
             ];
 
             expected.append(&mut new1);
             assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&6), (1000, 0));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 400);
 
             assert_ok!(NodleStaking::validator_join_pool(Origin::signed(6), 69u128));
 
@@ -260,25 +406,86 @@ fn validator_selection_chooses_top_candidates() {
                 MetaEvent::nodle_staking(Event::JoinedValidatorPool(6, 69, 469u128))
             );
 
-            mock::run_to_block(25);
+            mock::start_active_session(8);
 
             let mut new2 = vec![
                 Event::JoinedValidatorPool(6, 69, 469),
-                Event::ValidatorChosen(5, 1, 100),
-                Event::ValidatorChosen(5, 2, 90),
-                Event::ValidatorChosen(5, 3, 80),
-                Event::ValidatorChosen(5, 4, 70),
-                Event::ValidatorChosen(5, 6, 69),
-                Event::NewSession(20, 5, 5, 409),
-                Event::ValidatorChosen(6, 1, 100),
-                Event::ValidatorChosen(6, 2, 90),
-                Event::ValidatorChosen(6, 3, 80),
-                Event::ValidatorChosen(6, 4, 70),
-                Event::ValidatorChosen(6, 6, 69),
-                Event::NewSession(25, 6, 5, 409),
+                Event::ValidatorChosen(8, 1, 100),
+                Event::ValidatorChosen(8, 2, 90),
+                Event::ValidatorChosen(8, 3, 80),
+                Event::ValidatorChosen(8, 4, 70),
+                Event::ValidatorChosen(8, 6, 69),
+                Event::NewSession(35, 8, 5, 409),
+                Event::ValidatorChosen(9, 1, 100),
+                Event::ValidatorChosen(9, 2, 90),
+                Event::ValidatorChosen(9, 3, 80),
+                Event::ValidatorChosen(9, 4, 70),
+                Event::ValidatorChosen(9, 6, 69),
+                Event::NewSession(40, 9, 5, 409),
             ];
             expected.append(&mut new2);
             assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&6), (1000, 69));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 469);
+
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(3)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(4)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(5)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
+
+            let mut new3 = vec![
+                Event::ValidatorScheduledExit(8, 1, 10),
+                Event::ValidatorScheduledExit(8, 2, 10),
+                Event::ValidatorScheduledExit(8, 3, 10),
+                Event::ValidatorScheduledExit(8, 4, 10),
+                Event::ValidatorScheduledExit(8, 5, 10),
+                Event::ValidatorScheduledExit(8, 6, 10),
+            ];
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(10);
+
+            let mut new4 = vec![
+                Event::NewSession(45, 10, 0, 0),
+                Event::ValidatorLeft(1, 100, 369),
+                Event::ValidatorLeft(2, 90, 279),
+                Event::ValidatorLeft(3, 80, 199),
+                Event::ValidatorLeft(4, 70, 129),
+                Event::ValidatorLeft(5, 60, 69),
+                Event::ValidatorLeft(6, 69, 0),
+                Event::NewSession(50, 11, 0, 0),
+            ];
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (1000, 0));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&2), (1000, 0));
+            assert_eq!(Balances::total_balance(&2), 1000);
+
+            assert_eq!(mock::balances(&3), (1000, 0));
+            assert_eq!(Balances::total_balance(&3), 1000);
+
+            assert_eq!(mock::balances(&4), (1000, 0));
+            assert_eq!(Balances::total_balance(&4), 1000);
+
+            assert_eq!(mock::balances(&5), (1000, 0));
+            assert_eq!(Balances::total_balance(&5), 1000);
+
+            assert_eq!(mock::balances(&6), (1000, 0));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 0);
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
         });
 }
 
@@ -299,7 +506,7 @@ fn exit_queue() {
         .with_validators(vec![(1, 100), (2, 90), (3, 80), (4, 70), (5, 60), (6, 50)])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(8);
+            mock::start_active_session(4);
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 100),
@@ -308,55 +515,156 @@ fn exit_queue() {
                 Event::ValidatorChosen(2, 4, 70),
                 Event::ValidatorChosen(2, 5, 60),
                 Event::NewSession(5, 2, 5, 400),
-            ];
-            assert_eq!(events(), expected);
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(6)));
-            assert_eq!(
-                last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(1, 6, 3)),
-            );
-            mock::run_to_block(11);
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(5)));
-            assert_eq!(
-                last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(2, 5, 4))
-            );
-            mock::run_to_block(16);
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(4)));
-            assert_eq!(
-                last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(3, 4, 5))
-            );
-            assert_noop!(
-                NodleStaking::exit_validators_pool(Origin::signed(4)),
-                Error::<Test>::AlreadyLeaving,
-            );
-            mock::run_to_block(21);
-
-            let mut new1 = vec![
-                Event::ValidatorScheduledExit(1, 6, 3),
                 Event::ValidatorChosen(3, 1, 100),
                 Event::ValidatorChosen(3, 2, 90),
                 Event::ValidatorChosen(3, 3, 80),
                 Event::ValidatorChosen(3, 4, 70),
                 Event::ValidatorChosen(3, 5, 60),
                 Event::NewSession(10, 3, 5, 400),
-                Event::ValidatorScheduledExit(2, 5, 4),
-                Event::ValidatorLeft(6, 50, 400),
                 Event::ValidatorChosen(4, 1, 100),
                 Event::ValidatorChosen(4, 2, 90),
                 Event::ValidatorChosen(4, 3, 80),
                 Event::ValidatorChosen(4, 4, 70),
-                Event::NewSession(15, 4, 4, 340),
-                Event::ValidatorScheduledExit(3, 4, 5),
-                Event::ValidatorLeft(5, 60, 340),
+                Event::ValidatorChosen(4, 5, 60),
+                Event::NewSession(15, 4, 5, 400),
                 Event::ValidatorChosen(5, 1, 100),
                 Event::ValidatorChosen(5, 2, 90),
                 Event::ValidatorChosen(5, 3, 80),
-                Event::NewSession(20, 5, 3, 270),
+                Event::ValidatorChosen(5, 4, 70),
+                Event::ValidatorChosen(5, 5, 60),
+                Event::NewSession(20, 5, 5, 400),
             ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&1), (1000, 100));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&2), (1000, 90));
+            assert_eq!(Balances::total_balance(&2), 1000);
+
+            assert_eq!(mock::balances(&3), (1000, 80));
+            assert_eq!(Balances::total_balance(&3), 1000);
+
+            assert_eq!(mock::balances(&4), (1000, 70));
+            assert_eq!(Balances::total_balance(&4), 1000);
+
+            assert_eq!(mock::balances(&5), (1000, 60));
+            assert_eq!(Balances::total_balance(&5), 1000);
+
+            assert_eq!(mock::balances(&6), (1000, 50));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 450);
+
+            mock::start_active_session(5);
+
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
+
+            let mut new1 = vec![
+                Event::ValidatorChosen(6, 1, 100),
+                Event::ValidatorChosen(6, 2, 90),
+                Event::ValidatorChosen(6, 3, 80),
+                Event::ValidatorChosen(6, 4, 70),
+                Event::ValidatorChosen(6, 5, 60),
+                Event::NewSession(25, 6, 5, 400),
+                Event::ValidatorScheduledExit(5, 6, 7),
+            ];
+
             expected.append(&mut new1);
             assert_eq!(events(), expected);
+
+            mock::start_active_session(6);
+
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(5)));
+
+            let mut new2 = vec![
+                Event::ValidatorChosen(7, 1, 100),
+                Event::ValidatorChosen(7, 2, 90),
+                Event::ValidatorChosen(7, 3, 80),
+                Event::ValidatorChosen(7, 4, 70),
+                Event::ValidatorChosen(7, 5, 60),
+                Event::NewSession(30, 7, 5, 400),
+                Event::ValidatorScheduledExit(6, 5, 8),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(7);
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(4)));
+
+            let mut new3 = vec![
+                Event::ValidatorLeft(6, 50, 400),
+                Event::ValidatorChosen(8, 1, 100),
+                Event::ValidatorChosen(8, 2, 90),
+                Event::ValidatorChosen(8, 3, 80),
+                Event::ValidatorChosen(8, 4, 70),
+                Event::NewSession(35, 8, 4, 340),
+                Event::ValidatorScheduledExit(7, 4, 9),
+            ];
+
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(8);
+
+            assert_noop!(
+                NodleStaking::validator_exit_pool(Origin::signed(4)),
+                Error::<Test>::AlreadyLeaving,
+            );
+
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(3)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+
+            let mut new4 = vec![
+                Event::ValidatorLeft(5, 60, 340),
+                Event::ValidatorChosen(9, 1, 100),
+                Event::ValidatorChosen(9, 2, 90),
+                Event::ValidatorChosen(9, 3, 80),
+                Event::NewSession(40, 9, 3, 270),
+                Event::ValidatorScheduledExit(8, 3, 10),
+                Event::ValidatorScheduledExit(8, 2, 10),
+                Event::ValidatorScheduledExit(8, 1, 10),
+            ];
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(10);
+
+            let mut new5 = vec![
+                Event::ValidatorLeft(4, 70, 270),
+                Event::NewSession(45, 10, 0, 0),
+                Event::ValidatorLeft(1, 100, 170),
+                Event::ValidatorLeft(2, 90, 80),
+                Event::ValidatorLeft(3, 80, 0),
+                Event::NewSession(50, 11, 0, 0),
+            ];
+            expected.append(&mut new5);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (1000, 0));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&2), (1000, 0));
+            assert_eq!(Balances::total_balance(&2), 1000);
+
+            assert_eq!(mock::balances(&3), (1000, 0));
+            assert_eq!(Balances::total_balance(&3), 1000);
+
+            assert_eq!(mock::balances(&4), (1000, 0));
+            assert_eq!(Balances::total_balance(&4), 1000);
+
+            assert_eq!(mock::balances(&5), (1000, 0));
+            assert_eq!(Balances::total_balance(&5), 1000);
+
+            assert_eq!(mock::balances(&6), (1000, 0));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 0);
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
         });
 }
 
@@ -377,8 +685,8 @@ fn payout_distribution_to_solo_validators() {
         .with_validators(vec![(1, 100), (2, 90), (3, 80), (4, 70), (5, 60), (6, 50)])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(8);
-            // should choose top TotalCandidatesSelected (5), in order
+            mock::start_active_session(4);
+
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 100),
                 Event::ValidatorChosen(2, 2, 90),
@@ -386,42 +694,18 @@ fn payout_distribution_to_solo_validators() {
                 Event::ValidatorChosen(2, 4, 70),
                 Event::ValidatorChosen(2, 5, 60),
                 Event::NewSession(5, 2, 5, 400),
-            ];
-            assert_eq!(mock::events(), expected);
-
-            // Session-2 - set block author as 1 for all blocks
-            mock::run_to_block(11);
-            mock::set_author(2, 1, 100);
-            mock::mint_rewards(1_000_000);
-            mock::run_to_block(16);
-
-            let mut new1 = vec![
                 Event::ValidatorChosen(3, 1, 100),
                 Event::ValidatorChosen(3, 2, 90),
                 Event::ValidatorChosen(3, 3, 80),
                 Event::ValidatorChosen(3, 4, 70),
                 Event::ValidatorChosen(3, 5, 60),
                 Event::NewSession(10, 3, 5, 400),
-                Event::Rewarded(1, 1000000),
                 Event::ValidatorChosen(4, 1, 100),
                 Event::ValidatorChosen(4, 2, 90),
                 Event::ValidatorChosen(4, 3, 80),
                 Event::ValidatorChosen(4, 4, 70),
                 Event::ValidatorChosen(4, 5, 60),
                 Event::NewSession(15, 4, 5, 400),
-            ];
-            expected.append(&mut new1);
-            assert_eq!(events(), expected);
-
-            // Session-3 - set block author as 1 & 2 for all blocks
-            set_author(3, 1, 60);
-            set_author(3, 2, 40);
-            mock::mint_rewards(1_000_000);
-            mock::run_to_block(21);
-
-            let mut new2 = vec![
-                Event::Rewarded(1, 600000),
-                Event::Rewarded(2, 400000),
                 Event::ValidatorChosen(5, 1, 100),
                 Event::ValidatorChosen(5, 2, 90),
                 Event::ValidatorChosen(5, 3, 80),
@@ -429,17 +713,83 @@ fn payout_distribution_to_solo_validators() {
                 Event::ValidatorChosen(5, 5, 60),
                 Event::NewSession(20, 5, 5, 400),
             ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&1), (1000, 100));
+            assert_eq!(Balances::total_balance(&1), 1000);
+
+            assert_eq!(mock::balances(&2), (1000, 90));
+            assert_eq!(Balances::total_balance(&2), 1000);
+
+            assert_eq!(mock::balances(&3), (1000, 80));
+            assert_eq!(Balances::total_balance(&3), 1000);
+
+            assert_eq!(mock::balances(&4), (1000, 70));
+            assert_eq!(Balances::total_balance(&4), 1000);
+
+            assert_eq!(mock::balances(&5), (1000, 60));
+            assert_eq!(Balances::total_balance(&5), 1000);
+
+            assert_eq!(mock::balances(&6), (1000, 50));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 450);
+
+            // Session-5 - set block author as 1 for all blocks
+            mock::start_active_session(5);
+
+            mock::set_author(5, 1, 100);
+            mock::mint_rewards(1_000_000);
+
+            mock::start_active_session(6);
+
+            let mut new1 = vec![
+                Event::ValidatorChosen(6, 1, 100),
+                Event::ValidatorChosen(6, 2, 90),
+                Event::ValidatorChosen(6, 3, 80),
+                Event::ValidatorChosen(6, 4, 70),
+                Event::ValidatorChosen(6, 5, 60),
+                Event::NewSession(25, 6, 5, 400),
+                Event::Rewarded(1, 1000000),
+                Event::ValidatorChosen(7, 1, 100),
+                Event::ValidatorChosen(7, 2, 90),
+                Event::ValidatorChosen(7, 3, 80),
+                Event::ValidatorChosen(7, 4, 70),
+                Event::ValidatorChosen(7, 5, 60),
+                Event::NewSession(30, 7, 5, 400),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            // Session-7 - set block author as 1 & 2 for all blocks
+            set_author(6, 1, 60);
+            set_author(6, 2, 40);
+            mock::mint_rewards(1_000_000);
+
+            mock::start_active_session(7);
+
+            let mut new2 = vec![
+                Event::Rewarded(1, 600000),
+                Event::Rewarded(2, 400000),
+                Event::ValidatorChosen(8, 1, 100),
+                Event::ValidatorChosen(8, 2, 90),
+                Event::ValidatorChosen(8, 3, 80),
+                Event::ValidatorChosen(8, 4, 70),
+                Event::ValidatorChosen(8, 5, 60),
+                Event::NewSession(35, 8, 5, 400),
+            ];
             expected.append(&mut new2);
             assert_eq!(events(), expected);
 
-            // ~ each validator produces 1 block this round
-            set_author(4, 1, 20);
-            set_author(4, 2, 20);
-            set_author(4, 3, 20);
-            set_author(4, 4, 20);
-            set_author(4, 5, 20);
+            // Session-8 - each validator produces 1 block this round
+            set_author(7, 1, 20);
+            set_author(7, 2, 20);
+            set_author(7, 3, 20);
+            set_author(7, 4, 20);
+            set_author(7, 5, 20);
             mock::mint_rewards(1_000_000);
-            mock::run_to_block(26);
+
+            mock::start_active_session(8);
 
             let mut new3 = vec![
                 Event::Rewarded(5, 200000),
@@ -447,12 +797,12 @@ fn payout_distribution_to_solo_validators() {
                 Event::Rewarded(4, 200000),
                 Event::Rewarded(1, 200000),
                 Event::Rewarded(2, 200000),
-                Event::ValidatorChosen(6, 1, 100),
-                Event::ValidatorChosen(6, 2, 90),
-                Event::ValidatorChosen(6, 3, 80),
-                Event::ValidatorChosen(6, 4, 70),
-                Event::ValidatorChosen(6, 5, 60),
-                Event::NewSession(25, 6, 5, 400),
+                Event::ValidatorChosen(9, 1, 100),
+                Event::ValidatorChosen(9, 2, 90),
+                Event::ValidatorChosen(9, 3, 80),
+                Event::ValidatorChosen(9, 4, 70),
+                Event::ValidatorChosen(9, 5, 60),
+                Event::NewSession(40, 9, 5, 400),
             ];
             expected.append(&mut new3);
             assert_eq!(events(), expected);
@@ -466,7 +816,27 @@ fn payout_distribution_to_solo_validators() {
             assert!(NodleStaking::awarded_pts(4, 4).is_zero());
             assert!(NodleStaking::awarded_pts(4, 5).is_zero());
 
-            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events(),);
+            assert_eq!(mock::balances(&1), (1801000, 100));
+            assert_eq!(Balances::total_balance(&1), 1801000);
+
+            assert_eq!(mock::balances(&2), (601000, 90));
+            assert_eq!(Balances::total_balance(&2), 601000);
+
+            assert_eq!(mock::balances(&3), (201000, 80));
+            assert_eq!(Balances::total_balance(&3), 201000);
+
+            assert_eq!(mock::balances(&4), (201000, 70));
+            assert_eq!(Balances::total_balance(&4), 201000);
+
+            assert_eq!(mock::balances(&5), (201000, 60));
+            assert_eq!(Balances::total_balance(&5), 201000);
+
+            assert_eq!(mock::balances(&6), (1000, 50));
+            assert_eq!(Balances::total_balance(&6), 1000);
+
+            assert_eq!(NodleStaking::total(), 450);
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
         });
 }
 
@@ -485,53 +855,121 @@ fn validator_commission() {
         .with_nominators(vec![(2, 1, 10), (3, 1, 10)])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(8);
+            mock::start_active_session(4);
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 40),
                 Event::NewSession(5, 2, 1, 40),
+                Event::ValidatorChosen(3, 1, 40),
+                Event::NewSession(10, 3, 1, 40),
+                Event::ValidatorChosen(4, 1, 40),
+                Event::NewSession(15, 4, 1, 40),
+                Event::ValidatorChosen(5, 1, 40),
+                Event::NewSession(20, 5, 1, 40),
             ];
             assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 10));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 10));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 0));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 0));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 0));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(NodleStaking::total(), 40);
 
             assert_ok!(NodleStaking::validator_join_pool(Origin::signed(4), 20u128));
             assert_eq!(
                 last_event(),
                 MetaEvent::nodle_staking(Event::JoinedValidatorPool(4, 20u128, 60u128))
             );
-            mock::run_to_block(9);
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(5), 4, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
-            mock::run_to_block(11);
+
+            mock::start_active_session(5);
 
             let mut new1 = vec![
                 Event::JoinedValidatorPool(4, 20, 60),
-                Event::Nomination(5, 10, 4, 30),
-                Event::Nomination(6, 10, 4, 40),
-                Event::ValidatorChosen(3, 4, 40),
-                Event::ValidatorChosen(3, 1, 40),
-                Event::NewSession(10, 3, 2, 80),
+                Event::ValidatorChosen(6, 1, 40),
+                Event::ValidatorChosen(6, 4, 20),
+                Event::NewSession(25, 6, 2, 60),
             ];
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            mock::run_to_block(16);
-            set_author(3, 4, 100);
-            mock::mint_rewards(1_000_000);
-            mock::run_to_block(21);
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(5), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
 
             let mut new2 = vec![
-                Event::ValidatorChosen(4, 4, 40),
-                Event::ValidatorChosen(4, 1, 40),
-                Event::NewSession(15, 4, 2, 80),
-                Event::Rewarded(4, 600000),
-                Event::Rewarded(5, 200000),
-                Event::Rewarded(6, 200000),
-                Event::ValidatorChosen(5, 4, 40),
-                Event::ValidatorChosen(5, 1, 40),
-                Event::NewSession(20, 5, 2, 80),
+                Event::Nomination(5, 10, 4, 30),
+                Event::Nomination(6, 10, 4, 40),
             ];
             expected.append(&mut new2);
             assert_eq!(events(), expected);
+
+            mock::start_active_session(6);
+
+            let mut new3 = vec![
+                Event::ValidatorChosen(7, 4, 40),
+                Event::ValidatorChosen(7, 1, 40),
+                Event::NewSession(30, 7, 2, 80),
+            ];
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(7);
+
+            set_author(7, 1, 50);
+            set_author(7, 4, 50);
+            mock::mint_rewards(1_000_000);
+
+            mock::start_active_session(8);
+
+            let mut new4 = vec![
+                Event::ValidatorChosen(8, 4, 40),
+                Event::ValidatorChosen(8, 1, 40),
+                Event::NewSession(35, 8, 2, 80),
+                Event::Rewarded(4, 300000),
+                Event::Rewarded(5, 100000),
+                Event::Rewarded(6, 100000),
+                Event::Rewarded(1, 300000),
+                Event::Rewarded(2, 100000),
+                Event::Rewarded(3, 100000),
+                Event::ValidatorChosen(9, 4, 40),
+                Event::ValidatorChosen(9, 1, 40),
+                Event::NewSession(40, 9, 2, 80),
+            ];
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (300100, 20));
+            assert_eq!(Balances::total_balance(&1), 300100);
+
+            assert_eq!(mock::balances(&2), (100100, 10));
+            assert_eq!(Balances::total_balance(&2), 100100);
+
+            assert_eq!(mock::balances(&3), (100100, 10));
+            assert_eq!(Balances::total_balance(&3), 100100);
+
+            assert_eq!(mock::balances(&4), (300100, 20));
+            assert_eq!(Balances::total_balance(&4), 300100);
+
+            assert_eq!(mock::balances(&5), (100100, 10));
+            assert_eq!(Balances::total_balance(&5), 100100);
+
+            assert_eq!(mock::balances(&6), (100100, 10));
+            assert_eq!(Balances::total_balance(&6), 100100);
+
+            assert_eq!(NodleStaking::total(), 80);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events(),);
         });
@@ -562,7 +1000,8 @@ fn multiple_nominations() {
         ])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(8);
+            mock::start_active_session(4);
+
             // chooses top TotalSelectedCandidates (5), in order
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
@@ -571,106 +1010,149 @@ fn multiple_nominations() {
                 Event::ValidatorChosen(2, 3, 20),
                 Event::ValidatorChosen(2, 5, 10),
                 Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(3, 1, 50),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(4, 1, 50),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
             ];
             assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
 
             assert_noop!(
                 NodleStaking::nominator_nominate(Origin::signed(6), 1, 10),
                 Error::<Test>::AlreadyNominatedValidator,
             );
+
             assert_noop!(
                 NodleStaking::nominator_nominate(Origin::signed(6), 2, 2),
                 Error::<Test>::NominationBelowMin,
             );
+
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10));
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
+
             assert_noop!(
                 NodleStaking::nominator_nominate(Origin::signed(6), 5, 10),
                 Error::<Test>::ExceedMaxValidatorPerNom,
             );
-            mock::run_to_block(16);
 
             let mut new1 = vec![
                 Event::Nomination(6, 10, 2, 50),
                 Event::Nomination(6, 10, 3, 30),
                 Event::Nomination(6, 10, 4, 30),
-                Event::ValidatorChosen(3, 2, 50),
-                Event::ValidatorChosen(3, 1, 50),
-                Event::ValidatorChosen(3, 4, 30),
-                Event::ValidatorChosen(3, 3, 30),
-                Event::ValidatorChosen(3, 5, 10),
-                Event::NewSession(10, 3, 5, 170),
-                Event::ValidatorChosen(4, 2, 50),
-                Event::ValidatorChosen(4, 1, 50),
-                Event::ValidatorChosen(4, 4, 30),
-                Event::ValidatorChosen(4, 3, 30),
-                Event::ValidatorChosen(4, 5, 10),
-                Event::NewSession(15, 4, 5, 170),
             ];
 
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            mock::run_to_block(21);
-
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 2, 80));
-            assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11),
-                DispatchError::Module {
-                    index: 3,
-                    error: 3,
-                    message: Some("InsufficientBalance")
-                },
-            );
-            assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10),
-                Error::<Test>::TooManyNominators
-            );
-
-            mock::run_to_block(26);
+            mock::start_active_session(5);
 
             let mut new2 = vec![
-                Event::ValidatorChosen(5, 2, 50),
-                Event::ValidatorChosen(5, 1, 50),
-                Event::ValidatorChosen(5, 4, 30),
-                Event::ValidatorChosen(5, 3, 30),
-                Event::ValidatorChosen(5, 5, 10),
-                Event::NewSession(20, 5, 5, 170),
-                Event::Nomination(7, 80, 2, 130),
-                Event::ValidatorChosen(6, 2, 130),
+                Event::ValidatorChosen(6, 2, 50),
                 Event::ValidatorChosen(6, 1, 50),
                 Event::ValidatorChosen(6, 4, 30),
                 Event::ValidatorChosen(6, 3, 30),
                 Event::ValidatorChosen(6, 5, 10),
-                Event::NewSession(25, 6, 5, 250),
+                Event::NewSession(25, 6, 5, 170),
             ];
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(2)));
-
-            assert_eq!(
-                last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(5, 2, 7))
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 2, 80));
+            assert_noop!(
+                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11),
+                Error::<Test>::InsufficientBalance
             );
 
-            mock::run_to_block(31);
+            assert_noop!(
+                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10),
+                Error::<Test>::TooManyNominators
+            );
+
+            mock::start_active_session(6);
 
             let mut new3 = vec![
-                Event::ValidatorScheduledExit(5, 2, 7),
+                Event::Nomination(7, 80, 2, 130),
+                Event::ValidatorChosen(7, 2, 130),
                 Event::ValidatorChosen(7, 1, 50),
                 Event::ValidatorChosen(7, 4, 30),
                 Event::ValidatorChosen(7, 3, 30),
                 Event::ValidatorChosen(7, 5, 10),
-                Event::NewSession(30, 7, 4, 120),
+                Event::NewSession(30, 7, 5, 250),
             ];
 
             expected.append(&mut new3);
             assert_eq!(events(), expected);
 
-            // verify that nominations are removed after collator leaves, not before
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
+
+            assert_eq!(
+                last_event(),
+                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(6, 2, 8))
+            );
+
+            mock::start_active_session(7);
+
+            let mut new4 = vec![
+                Event::ValidatorScheduledExit(6, 2, 8),
+                Event::ValidatorChosen(8, 1, 50),
+                Event::ValidatorChosen(8, 4, 30),
+                Event::ValidatorChosen(8, 3, 30),
+                Event::ValidatorChosen(8, 5, 10),
+                Event::NewSession(35, 8, 4, 120),
+            ];
+
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            // verify that nominations are removed after validator leaves, not before
             assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 90);
             assert_eq!(
                 NodleStaking::nominator_state(7)
@@ -691,22 +1173,73 @@ fn multiple_nominations() {
                 4usize
             );
 
-            assert_eq!(mock::balances(&6), (60, 40));
-            assert_eq!(mock::balances(&7), (10, 90));
-
-            mock::run_to_block(40);
-
-            assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 10);
-            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 30);
-
             assert_eq!(
-                NodleStaking::nominator_state(7)
-                    .unwrap()
-                    .nominations
-                    .0
-                    .len(),
-                1usize
+                NodleStaking::validator_state(&2).unwrap().nominators.0,
+                vec![
+                    Bond {
+                        owner: 6,
+                        amount: 10,
+                    },
+                    Bond {
+                        owner: 7,
+                        amount: 80,
+                    },
+                    Bond {
+                        owner: 8,
+                        amount: 10,
+                    },
+                    Bond {
+                        owner: 9,
+                        amount: 10,
+                    },
+                ],
             );
+
+            assert_eq!(mock::balances(&6), (100, 40));
+            assert_eq!(mock::balances(&7), (100, 90));
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(mock::balances(&9), (100, 10));
+
+            assert_eq!(NodleStaking::total(), 250);
+
+            mock::start_active_session(8);
+
+            let mut new5 = vec![
+                Event::NominatorLeftValidator(6, 2, 10, 0),
+                Event::NominatorLeftValidator(7, 2, 80, 0),
+                Event::NominatorLeftValidator(8, 2, 10, 0),
+                Event::NominatorLeftValidator(9, 2, 10, 0),
+                Event::ValidatorLeft(2, 130, 120),
+                Event::ValidatorChosen(9, 1, 50),
+                Event::ValidatorChosen(9, 4, 30),
+                Event::ValidatorChosen(9, 3, 30),
+                Event::ValidatorChosen(9, 5, 10),
+                Event::NewSession(40, 9, 4, 120),
+            ];
+
+            expected.append(&mut new5);
+            assert_eq!(events(), expected);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(7)));
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(8)));
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(9)));
+
+            let mut new6 = vec![
+                Event::Withdrawn(6, 10),
+                Event::Withdrawn(7, 80),
+                Event::Withdrawn(8, 10),
+                Event::NominatorLeft(8, 10),
+                Event::Withdrawn(9, 10),
+                Event::NominatorLeft(9, 10),
+            ];
+
+            expected.append(&mut new6);
+            assert_eq!(events(), expected);
+
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 10);
+
             assert_eq!(
                 NodleStaking::nominator_state(6)
                     .unwrap()
@@ -715,9 +1248,48 @@ fn multiple_nominations() {
                     .len(),
                 3usize
             );
+            assert_eq!(
+                NodleStaking::nominator_state(7)
+                    .unwrap()
+                    .nominations
+                    .0
+                    .len(),
+                1usize
+            );
 
-            assert_eq!(mock::balances(&6), (70, 30));
-            assert_eq!(mock::balances(&7), (90, 10));
+            // Group-2
+            assert_eq!(mock::balances(&2), (100, 0));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&6), (100, 30));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 0));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 0));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            // Group-1
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 120);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
         });
@@ -748,33 +1320,139 @@ fn validators_bond() {
         ])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(4);
+            mock::start_active_session(4);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 50),
+                Event::ValidatorChosen(2, 2, 40),
+                Event::ValidatorChosen(2, 4, 20),
+                Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 5, 10),
+                Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(3, 1, 50),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(4, 1, 50),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
+            ];
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
+
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(6), 50),
                 Error::<Test>::ValidatorDNE
             );
+
             assert_ok!(NodleStaking::validator_bond_more(Origin::signed(1), 50));
+
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(1), 40),
-                DispatchError::Module {
-                    index: 3,
-                    error: 3,
-                    message: Some("InsufficientBalance")
-                }
+                Error::<Test>::InsufficientBalance
             );
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(1)));
+
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+
+            let mut new1 = vec![
+                Event::ValidatorBondedMore(1, 20, 70),
+                Event::ValidatorScheduledExit(4, 1, 6),
+            ];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(5);
+
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(1), 30),
                 Error::<Test>::CannotActivateIfLeaving,
             );
-            mock::run_to_block(30);
+
+            mock::start_active_session(6);
+
+            let mut new2 = vec![
+                Event::ValidatorChosen(6, 2, 40),
+                Event::ValidatorChosen(6, 4, 20),
+                Event::ValidatorChosen(6, 3, 20),
+                Event::ValidatorChosen(6, 5, 10),
+                Event::NewSession(25, 6, 4, 90),
+                Event::NominatorLeftValidator(6, 1, 10, 0),
+                Event::NominatorLeftValidator(7, 1, 10, 0),
+                Event::NominatorLeftValidator(10, 1, 10, 0),
+                Event::ValidatorLeft(1, 100, 90),
+                Event::ValidatorChosen(7, 2, 40),
+                Event::ValidatorChosen(7, 4, 20),
+                Event::ValidatorChosen(7, 3, 20),
+                Event::ValidatorChosen(7, 5, 10),
+                Event::NewSession(30, 7, 4, 90),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(1), 40),
                 Error::<Test>::ValidatorDNE,
             );
+
             assert_ok!(NodleStaking::validator_bond_more(Origin::signed(2), 80));
+
             assert_ok!(NodleStaking::validator_bond_less(Origin::signed(2), 90));
+
             assert_ok!(NodleStaking::validator_bond_less(Origin::signed(3), 10));
+
+            let mut new3 = vec![
+                Event::ValidatorBondedMore(2, 20, 100),
+                Event::ValidatorBondedLess(2, 100, 10),
+                Event::ValidatorBondedLess(3, 20, 10),
+            ];
+
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
             assert_noop!(
                 NodleStaking::validator_bond_less(Origin::signed(2), 11),
                 Error::<Test>::Underflow
@@ -791,7 +1469,36 @@ fn validators_bond() {
                 NodleStaking::validator_bond_less(Origin::signed(4), 11),
                 Error::<Test>::ValidatorBondBelowMin
             );
+
             assert_ok!(NodleStaking::validator_bond_less(Origin::signed(4), 10));
+
+            mock::start_active_session(9);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(2)));
+            assert_eq!(mock::balances(&2), (100, 10));
+
+            let mut new4 = vec![
+                Event::ValidatorBondedLess(4, 20, 10),
+                Event::ValidatorChosen(8, 2, 30),
+                Event::ValidatorChosen(8, 5, 10),
+                Event::ValidatorChosen(8, 4, 10),
+                Event::ValidatorChosen(8, 3, 10),
+                Event::NewSession(35, 8, 4, 60),
+                Event::ValidatorChosen(9, 2, 30),
+                Event::ValidatorChosen(9, 5, 10),
+                Event::ValidatorChosen(9, 4, 10),
+                Event::ValidatorChosen(9, 3, 10),
+                Event::NewSession(40, 9, 4, 60),
+                Event::ValidatorChosen(10, 2, 30),
+                Event::ValidatorChosen(10, 5, 10),
+                Event::ValidatorChosen(10, 4, 10),
+                Event::ValidatorChosen(10, 3, 10),
+                Event::NewSession(45, 10, 4, 60),
+                Event::Withdrawn(2, 90),
+            ];
+
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
         });
 }
 
@@ -820,7 +1527,68 @@ fn nominators_bond() {
         ])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(4);
+            mock::start_active_session(4);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 50),
+                Event::ValidatorChosen(2, 2, 40),
+                Event::ValidatorChosen(2, 4, 20),
+                Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 5, 10),
+                Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(3, 1, 50),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(4, 1, 50),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
+            ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
+
             assert_noop!(
                 NodleStaking::nominator_bond_more(Origin::signed(1), 2, 50),
                 Error::<Test>::NominatorDNE,
@@ -845,25 +1613,97 @@ fn nominators_bond() {
                 NodleStaking::nominator_bond_less(Origin::signed(6), 1, 6),
                 Error::<Test>::NominatorBondBelowMin,
             );
+
             assert_ok!(NodleStaking::nominator_bond_more(Origin::signed(6), 1, 10));
+
             assert_noop!(
                 NodleStaking::nominator_bond_less(Origin::signed(6), 2, 5),
                 Error::<Test>::NominationDNE,
             );
             assert_noop!(
                 NodleStaking::nominator_bond_more(Origin::signed(6), 1, 81),
-                DispatchError::Module {
-                    index: 3,
-                    error: 3,
-                    message: Some("InsufficientBalance")
-                }
+                Error::<Test>::InsufficientBalance,
             );
-            mock::run_to_block(9);
-            assert_eq!(mock::balances(&6), (80, 20));
-            assert_ok!(NodleStaking::exit_validators_pool(Origin::signed(1)));
-            mock::run_to_block(21);
+
+            mock::start_active_session(5);
+
+            assert_eq!(mock::balances(&6), (100, 20));
+            assert_eq!(NodleStaking::total(), 150);
+            assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
+
+            let mut new1 = vec![
+                Event::NominationIncreased(6, 1, 50, 60),
+                Event::ValidatorChosen(6, 1, 60),
+                Event::ValidatorChosen(6, 2, 40),
+                Event::ValidatorChosen(6, 4, 20),
+                Event::ValidatorChosen(6, 3, 20),
+                Event::ValidatorChosen(6, 5, 10),
+                Event::NewSession(25, 6, 5, 150),
+                Event::ValidatorScheduledExit(5, 1, 7),
+            ];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(7);
+
+            let mut new2 = vec![
+                Event::ValidatorChosen(7, 2, 40),
+                Event::ValidatorChosen(7, 4, 20),
+                Event::ValidatorChosen(7, 3, 20),
+                Event::ValidatorChosen(7, 5, 10),
+                Event::NewSession(30, 7, 4, 90),
+                Event::NominatorLeftValidator(6, 1, 20, 0),
+                Event::NominatorLeftValidator(7, 1, 10, 0),
+                Event::NominatorLeftValidator(10, 1, 10, 0),
+                Event::ValidatorLeft(1, 60, 90),
+                Event::ValidatorChosen(8, 2, 40),
+                Event::ValidatorChosen(8, 4, 20),
+                Event::ValidatorChosen(8, 3, 20),
+                Event::ValidatorChosen(8, 5, 10),
+                Event::NewSession(35, 8, 4, 90),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(8);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(7)));
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(10)));
+
+            let mut new3 = vec![
+                Event::ValidatorChosen(9, 2, 40),
+                Event::ValidatorChosen(9, 4, 20),
+                Event::ValidatorChosen(9, 3, 20),
+                Event::ValidatorChosen(9, 5, 10),
+                Event::NewSession(40, 9, 4, 90),
+                Event::Withdrawn(6, 20),
+                Event::NominatorLeft(6, 20),
+                Event::Withdrawn(7, 10),
+                Event::NominatorLeft(7, 10),
+                Event::Withdrawn(10, 10),
+                Event::NominatorLeft(10, 10),
+            ];
+
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
             assert!(!NodleStaking::is_nominator(&6));
+            assert!(!NodleStaking::is_nominator(&7));
+            assert!(!NodleStaking::is_nominator(&10));
+
+            assert_eq!(mock::balances(&1), (100, 0));
             assert_eq!(mock::balances(&6), (100, 0));
+            assert_eq!(mock::balances(&7), (100, 0));
+            assert_eq!(mock::balances(&10), (100, 0));
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(mock::balances(&9), (100, 10));
+
+            assert_eq!(NodleStaking::total(), 90);
         });
 }
 
@@ -892,7 +1732,68 @@ fn revoke_nomination_or_leave_nominators() {
         ])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(4);
+            mock::start_active_session(4);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 50),
+                Event::ValidatorChosen(2, 2, 40),
+                Event::ValidatorChosen(2, 4, 20),
+                Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 5, 10),
+                Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(3, 1, 50),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(4, 1, 50),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
+            ];
+            assert_eq!(mock::events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
+
             assert_noop!(
                 NodleStaking::nominator_denominate(Origin::signed(1), 2),
                 Error::<Test>::NominatorDNE,
@@ -908,6 +1809,39 @@ fn revoke_nomination_or_leave_nominators() {
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 3));
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 3));
             assert_ok!(NodleStaking::nominator_denominate(Origin::signed(6), 1));
+
+            let mut new1 = vec![
+                Event::Nomination(6, 3, 2, 43),
+                Event::Nomination(6, 3, 3, 23),
+                Event::NominatorLeftValidator(6, 1, 10, 40),
+            ];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(6);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+
+            let mut new2 = vec![
+                Event::ValidatorChosen(6, 2, 43),
+                Event::ValidatorChosen(6, 1, 40),
+                Event::ValidatorChosen(6, 3, 23),
+                Event::ValidatorChosen(6, 4, 20),
+                Event::ValidatorChosen(6, 5, 10),
+                Event::NewSession(25, 6, 5, 136),
+                Event::ValidatorChosen(7, 2, 43),
+                Event::ValidatorChosen(7, 1, 40),
+                Event::ValidatorChosen(7, 3, 23),
+                Event::ValidatorChosen(7, 4, 20),
+                Event::ValidatorChosen(7, 5, 10),
+                Event::NewSession(30, 7, 5, 136),
+                Event::Withdrawn(6, 10),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+
             assert_noop!(
                 NodleStaking::nominator_denominate(Origin::signed(6), 2),
                 Error::<Test>::NominatorBondBelowMin,
@@ -924,6 +1858,50 @@ fn revoke_nomination_or_leave_nominators() {
                 Error::<Test>::NominatorBondBelowMin,
             );
             assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(8)));
+
+            let mut new3 = vec![
+                Event::NominatorLeftValidator(6, 2, 3, 40),
+                Event::NominatorLeftValidator(6, 3, 3, 20),
+                Event::NominatorLeftValidator(8, 2, 10, 30),
+            ];
+
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            mock::start_active_session(8);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(8)));
+
+            let mut new4 = vec![
+                Event::ValidatorChosen(8, 1, 40),
+                Event::ValidatorChosen(8, 2, 30),
+                Event::ValidatorChosen(8, 4, 20),
+                Event::ValidatorChosen(8, 3, 20),
+                Event::ValidatorChosen(8, 5, 10),
+                Event::NewSession(35, 8, 5, 120),
+                Event::ValidatorChosen(9, 1, 40),
+                Event::ValidatorChosen(9, 2, 30),
+                Event::ValidatorChosen(9, 4, 20),
+                Event::ValidatorChosen(9, 3, 20),
+                Event::ValidatorChosen(9, 5, 10),
+                Event::NewSession(40, 9, 5, 120),
+                Event::Withdrawn(6, 6),
+                Event::NominatorLeft(6, 6),
+                Event::Withdrawn(8, 10),
+                Event::NominatorLeft(8, 10),
+            ];
+
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&6), (100, 0));
+            assert_eq!(mock::balances(&8), (100, 0));
+
+            assert_eq!(NodleStaking::total(), 120);
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
         });
 }
 
@@ -952,7 +1930,7 @@ fn payouts_follow_nomination_changes() {
         ])
         .tst_staking_build()
         .execute_with(|| {
-            mock::run_to_block(8);
+            mock::start_active_session(4);
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
@@ -961,112 +1939,200 @@ fn payouts_follow_nomination_changes() {
                 Event::ValidatorChosen(2, 3, 20),
                 Event::ValidatorChosen(2, 5, 10),
                 Event::NewSession(5, 2, 5, 140),
-            ];
-            assert_eq!(events(), expected);
-
-            set_author(1, 1, 100);
-            mock::mint_rewards(1_000_000);
-            mock::run_to_block(11);
-
-            let mut new1 = vec![
-                Event::Rewarded(1, 520000),
-                Event::Rewarded(6, 160000),
-                Event::Rewarded(7, 160000),
-                Event::Rewarded(10, 160000),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
                 Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 3, 20),
                 Event::ValidatorChosen(3, 5, 10),
                 Event::NewSession(10, 3, 5, 140),
-            ];
-
-            expected.append(&mut new1);
-            assert_eq!(events(), expected);
-
-            // ~ set block author as 1 for all blocks this round
-            set_author(2, 1, 100);
-            mock::mint_rewards(1_000_000);
-            // 1. ensure nominators are paid for 2 rounds after they leave
-            assert_noop!(
-                NodleStaking::nominator_denominate_all(Origin::signed(66)),
-                Error::<Test>::NominatorDNE
-            );
-            assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
-            mock::run_to_block(16);
-
-            let mut new2 = vec![
-                Event::NominatorLeftValidator(6, 1, 10, 40),
-                Event::NominatorLeft(6, 10),
-                Event::Rewarded(1, 520000),
-                Event::Rewarded(6, 160000),
-                Event::Rewarded(7, 160000),
-                Event::Rewarded(10, 160000),
+                Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
-                Event::ValidatorChosen(4, 1, 40),
                 Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 3, 20),
                 Event::ValidatorChosen(4, 5, 10),
-                Event::NewSession(15, 4, 5, 130),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
             ];
+            assert_eq!(mock::events(), expected);
 
-            expected.append(&mut new2);
-            assert_eq!(events(), expected);
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
 
-            set_author(3, 1, 100);
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
+
+            set_author(4, 1, 100);
             mock::mint_rewards(1_000_000);
-            mock::run_to_block(21);
+            mock::start_active_session(5);
 
-            let mut new3 = vec![
+            let mut new1 = vec![
                 Event::Rewarded(1, 520000),
                 Event::Rewarded(6, 160000),
                 Event::Rewarded(7, 160000),
                 Event::Rewarded(10, 160000),
-                Event::ValidatorChosen(5, 2, 40),
-                Event::ValidatorChosen(5, 1, 40),
-                Event::ValidatorChosen(5, 4, 20),
-                Event::ValidatorChosen(5, 3, 20),
-                Event::ValidatorChosen(5, 5, 10),
-                Event::NewSession(20, 5, 5, 130),
-            ];
-            expected.append(&mut new3);
-            assert_eq!(events(), expected);
-
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 1, 10));
-
-            mock::run_to_block(31);
-
-            set_author(6, 1, 100);
-            mock::mint_rewards(1_000_000);
-            mock::run_to_block(36);
-
-            let mut new4 = vec![
-                Event::Nomination(8, 10, 1, 50),
                 Event::ValidatorChosen(6, 1, 50),
                 Event::ValidatorChosen(6, 2, 40),
                 Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 3, 20),
                 Event::ValidatorChosen(6, 5, 10),
                 Event::NewSession(25, 6, 5, 140),
-                Event::ValidatorChosen(7, 1, 50),
+            ];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            // ~ set block author as 1 for all blocks this round
+            set_author(5, 1, 100);
+            mock::mint_rewards(1_000_000);
+
+            // 1. ensure nominators are paid for 2 rounds after they leave
+            assert_noop!(
+                NodleStaking::nominator_denominate_all(Origin::signed(66)),
+                Error::<Test>::NominatorDNE
+            );
+
+            assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
+
+            mock::start_active_session(6);
+
+            let mut new2 = vec![
+                Event::NominatorLeftValidator(6, 1, 10, 40),
+                Event::Rewarded(1, 520000),
+                Event::Rewarded(6, 160000),
+                Event::Rewarded(7, 160000),
+                Event::Rewarded(10, 160000),
                 Event::ValidatorChosen(7, 2, 40),
+                Event::ValidatorChosen(7, 1, 40),
                 Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 3, 20),
                 Event::ValidatorChosen(7, 5, 10),
-                Event::NewSession(30, 7, 5, 140),
+                Event::NewSession(30, 7, 5, 130),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+
+            set_author(6, 1, 100);
+            mock::mint_rewards(1_000_000);
+            mock::start_active_session(7);
+
+            let mut new3 = vec![
+                Event::Rewarded(1, 520000),
+                Event::Rewarded(6, 160000),
+                Event::Rewarded(7, 160000),
+                Event::Rewarded(10, 160000),
+                Event::ValidatorChosen(8, 2, 40),
+                Event::ValidatorChosen(8, 1, 40),
+                Event::ValidatorChosen(8, 4, 20),
+                Event::ValidatorChosen(8, 3, 20),
+                Event::ValidatorChosen(8, 5, 10),
+                Event::NewSession(35, 8, 5, 130),
+            ];
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 1, 10));
+
+            mock::start_active_session(8);
+
+            let mut new4 = vec![
+                Event::Nomination(8, 10, 1, 50),
+                Event::ValidatorChosen(9, 1, 50),
+                Event::ValidatorChosen(9, 2, 40),
+                Event::ValidatorChosen(9, 4, 20),
+                Event::ValidatorChosen(9, 3, 20),
+                Event::ValidatorChosen(9, 5, 10),
+                Event::NewSession(40, 9, 5, 140),
+            ];
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            set_author(8, 1, 100);
+            mock::mint_rewards(1_000_000);
+
+            mock::start_active_session(10);
+
+            let mut new5 = vec![
+                Event::Rewarded(1, 600000),
+                Event::Rewarded(7, 200000),
+                Event::Rewarded(10, 200000),
+                Event::ValidatorChosen(10, 1, 50),
+                Event::ValidatorChosen(10, 2, 40),
+                Event::ValidatorChosen(10, 4, 20),
+                Event::ValidatorChosen(10, 3, 20),
+                Event::ValidatorChosen(10, 5, 10),
+                Event::NewSession(45, 10, 5, 140),
+                Event::ValidatorChosen(11, 1, 50),
+                Event::ValidatorChosen(11, 2, 40),
+                Event::ValidatorChosen(11, 4, 20),
+                Event::ValidatorChosen(11, 3, 20),
+                Event::ValidatorChosen(11, 5, 10),
+                Event::NewSession(50, 11, 5, 140),
+            ];
+            expected.append(&mut new5);
+            assert_eq!(events(), expected);
+
+            set_author(10, 1, 100);
+            mock::mint_rewards(1_000_000);
+
+            mock::start_active_session(11);
+
+            let mut new6 = vec![
                 Event::Rewarded(1, 520000),
                 Event::Rewarded(7, 160000),
                 Event::Rewarded(8, 160000),
                 Event::Rewarded(10, 160000),
-                Event::ValidatorChosen(8, 1, 50),
-                Event::ValidatorChosen(8, 2, 40),
-                Event::ValidatorChosen(8, 4, 20),
-                Event::ValidatorChosen(8, 3, 20),
-                Event::ValidatorChosen(8, 5, 10),
-                Event::NewSession(35, 8, 5, 140),
+                Event::ValidatorChosen(12, 1, 50),
+                Event::ValidatorChosen(12, 2, 40),
+                Event::ValidatorChosen(12, 4, 20),
+                Event::ValidatorChosen(12, 3, 20),
+                Event::ValidatorChosen(12, 5, 10),
+                Event::NewSession(55, 12, 5, 140),
             ];
-            expected.append(&mut new4);
+            expected.append(&mut new6);
             assert_eq!(events(), expected);
+
+            assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
+
+            let mut new7 = vec![Event::Withdrawn(6, 10), Event::NominatorLeft(6, 10)];
+            expected.append(&mut new7);
+
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&6), (480100, 0));
+
+            assert_eq!(NodleStaking::total(), 140);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
         });
@@ -1309,10 +2375,10 @@ fn nominators_also_get_slashed_pro_rata() {
         let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
 
         // 101 is a nominator for 11
-        assert_eq!(initial_exposure.nominators.first().unwrap().owner, 101,);
+        assert_eq!(initial_exposure.nominators.first().unwrap().owner, 101);
 
-        assert_eq!(mock::balances(&11), (1000, 1000));
-        assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 500));
         assert_eq!(NodleStaking::total(), 3500);
 
         // staked values;
@@ -1361,75 +2427,15 @@ fn nominators_also_get_slashed_pro_rata() {
         );
         assert_eq!(
             mock::balances(&101),
-            (1500, nominator_stake - nominator_share),
+            (1975, nominator_stake - nominator_share)
         );
         assert_eq!(
             mock::balances(&11),
-            (1000, validator_stake - validator_share),
+            (1950, validator_stake - validator_share),
         );
 
         // Because slashing happened.
         assert!(is_disabled(11));
-    });
-}
-
-#[test]
-fn offence_deselects_validator_even_when_slash_is_zero() {
-    ExtBuilder::default().build_and_execute(|| {
-        mock::start_active_session(1);
-
-        let mut expected = vec![
-            Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
-            Event::ValidatorChosen(2, 21, 1000),
-            Event::NewSession(5, 2, 3, 3500),
-        ];
-        assert_eq!(events(), expected);
-
-        assert!(Session::validators().contains(&11));
-        assert!(<ValidatorState<Test>>::contains_key(11));
-        assert_eq!(NodleStaking::total(), 3500);
-
-        let slash_percent = Perbill::from_percent(0);
-        let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
-
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Active
-        );
-
-        mock::on_offence_now(
-            &[OffenceDetails {
-                offender: (11, initial_exposure.clone()),
-                reporters: vec![],
-            }],
-            &[slash_percent],
-        );
-
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Idle
-        );
-
-        mock::start_active_session(2);
-
-        assert_eq!(
-            NodleStaking::validator_state(11).unwrap().state,
-            ValidatorStatus::Idle
-        );
-
-        // Ensure Validator 11 is not part of session 3.
-        let mut new2 = vec![
-            Event::ValidatorChosen(3, 41, 1000),
-            Event::ValidatorChosen(3, 21, 1000),
-            Event::NewSession(10, 3, 2, 2000),
-        ];
-        expected.append(&mut new2);
-        assert_eq!(events(), expected);
-        assert_eq!(NodleStaking::total(), 3500);
-
-        // TODO :: Have to check this
-        // assert!(is_disabled(11));
     });
 }
 
@@ -1448,11 +2454,11 @@ fn slashing_performed_according_exposure() {
         ];
         assert_eq!(events(), expected);
 
-        assert_eq!(mock::balances(&11), (1000, 1000));
-        assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 500));
         assert_eq!(NodleStaking::total(), 3500);
 
-        let validator_balance = mock::balances(&11).0;
+        let validator_bond_value = mock::balances(&11).1;
 
         assert_eq!(
             NodleStaking::at_stake(NodleStaking::active_session(), 11).bond,
@@ -1480,8 +2486,8 @@ fn slashing_performed_according_exposure() {
         assert_eq!(events(), expected);
 
         // The validator controller account should be slashed for 250 (50% of 500).
-        assert_eq!(mock::balances(&11), (1000, validator_balance - 250));
-        assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(mock::balances(&11), (1750, validator_bond_value - 250));
+        assert_eq!(mock::balances(&101), (2000, 500));
         assert_eq!(NodleStaking::total(), 3250);
     });
 }
@@ -1842,8 +2848,9 @@ fn invulnerables_are_not_slashed() {
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            assert_eq!(mock::balances(&11), (1000, 1000));
-            assert_eq!(mock::balances(&21), (1000, 1000));
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(mock::balances(&21), (2000, 1000));
+            assert_eq!(mock::balances(&201), (1000, 500));
             assert_eq!(NodleStaking::total(), 4000);
 
             let valid21_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 21);
@@ -1882,13 +2889,13 @@ fn invulnerables_are_not_slashed() {
             assert_eq!(events(), expected);
 
             // The validator 11 hasn't been slashed, but 21 has been.
-            assert_eq!(mock::balances(&11), (1000, 1000));
+            assert_eq!(mock::balances(&11), (2000, 1000));
             assert_eq!(NodleStaking::total(), 3700);
             // 2000 - (0.2 * initial_balance)
             assert_eq!(
                 mock::balances(&21),
                 (
-                    1000,
+                    1800,
                     validator21_initial_bond - (2 * validator21_initial_bond / 10)
                 )
             );
@@ -1900,7 +2907,7 @@ fn invulnerables_are_not_slashed() {
             {
                 assert_eq!(
                     mock::balances(&nominator.owner),
-                    (500, initial_bond - (2 * initial_bond / 10)),
+                    (900, initial_bond - (2 * initial_bond / 10)),
                 );
             }
             assert_eq!(NodleStaking::total(), 3700);
@@ -1921,7 +2928,7 @@ fn dont_slash_if_fraction_is_zero() {
         ];
         assert_eq!(events(), expected);
 
-        assert_eq!(Balances::free_balance(11), 1000);
+        assert_eq!(mock::balances(&11), (2000, 1000));
         assert_eq!(NodleStaking::total(), 3500);
 
         on_offence_now(
@@ -1939,7 +2946,7 @@ fn dont_slash_if_fraction_is_zero() {
         assert_eq!(events(), expected);
 
         // The validator hasn't been slashed. The new era is not forced.
-        assert_eq!(Balances::free_balance(11), 1000);
+        assert_eq!(mock::balances(&11), (2000, 1000));
         assert_eq!(NodleStaking::total(), 3500);
     });
 }
@@ -1959,9 +2966,9 @@ fn only_slash_for_max_in_session() {
         ];
         assert_eq!(events(), expected);
 
-        assert_eq!(mock::balances(&11), (1000, 1000));
-        assert_eq!(mock::balances(&21), (1000, 1000));
-        assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&21), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 500));
         assert_eq!(NodleStaking::total(), 3500);
 
         on_offence_now(
@@ -1979,8 +2986,8 @@ fn only_slash_for_max_in_session() {
         expected.append(&mut new1);
         assert_eq!(events(), expected);
 
-        assert_eq!(mock::balances(&11), (1000, 500));
-        assert_eq!(mock::balances(&101), (1500, 250));
+        assert_eq!(mock::balances(&11), (1500, 500));
+        assert_eq!(mock::balances(&101), (1750, 250));
         assert_eq!(NodleStaking::total(), 2750);
 
         on_offence_now(
@@ -1999,8 +3006,8 @@ fn only_slash_for_max_in_session() {
         assert_eq!(events(), expected);
 
         // The validator has not been slashed additionally.
-        assert_eq!(mock::balances(&11), (1000, 500));
-        assert_eq!(mock::balances(&101), (1500, 250));
+        assert_eq!(mock::balances(&11), (1500, 500));
+        assert_eq!(mock::balances(&101), (1750, 250));
 
         on_offence_now(
             &[OffenceDetails {
@@ -2021,8 +3028,8 @@ fn only_slash_for_max_in_session() {
         assert_eq!(events(), expected);
 
         // The validator got slashed 10% more.
-        assert_eq!(mock::balances(&11), (1000, 400));
-        assert_eq!(mock::balances(&101), (1500, 200));
+        assert_eq!(mock::balances(&11), (1400, 400));
+        assert_eq!(mock::balances(&101), (1700, 200));
         assert_eq!(NodleStaking::total(), 2600);
     })
 }
@@ -2034,17 +3041,6 @@ fn garbage_collection_after_slashing() {
         .existential_deposit(2)
         .build_and_execute(|| {
             mock::start_active_session(1);
-            assert_eq!(Balances::free_balance(11), 256_000);
-
-            let slash_percent = Perbill::from_percent(10);
-            let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
-
-            // 101 is a nominator for 11
-            assert_eq!(initial_exposure.nominators.first().unwrap().owner, 101);
-
-            // staked values;
-            let nominator_stake = NodleStaking::nominator_state(101).unwrap().total;
-            let validator_stake = NodleStaking::validator_state(11).unwrap().bond;
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 384000),
@@ -2053,6 +3049,15 @@ fn garbage_collection_after_slashing() {
                 Event::NewSession(5, 2, 3, 641000),
             ];
             assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&11), (512000, 256000));
+            assert_eq!(mock::balances(&101), (512000, 128000));
+
+            let slash_percent = Perbill::from_percent(10);
+            let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
+
+            // 101 is a nominator for 11
+            assert_eq!(initial_exposure.nominators.first().unwrap().owner, 101);
 
             assert_eq!(NodleStaking::total(), 641000);
 
@@ -2072,19 +3077,20 @@ fn garbage_collection_after_slashing() {
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            assert_eq!(balances(&11).1, validator_stake - (validator_stake / 10));
-            assert_eq!(balances(&101).1, nominator_stake - (nominator_stake / 10));
+            assert_eq!(balances(&11), (512000 - 25600, 256000 - (256000 / 10)));
+            assert_eq!(balances(&101), (512000 - 12800, 128000 - (128000 / 10)));
+
             assert_eq!(NodleStaking::total(), 602600);
 
             assert!(<SlashingSpans<Test>>::get(&11).is_some());
 
             assert_eq!(
                 <SpanSlash<Test>>::get(&(11, 0)).amount_slashed(),
-                &(validator_stake / 10)
+                &(256000 / 10)
             );
             assert_eq!(
                 <SpanSlash<Test>>::get(&(101, 0)).amount_slashed(),
-                &(nominator_stake / 10)
+                &(128000 / 10)
             );
 
             on_offence_now(
@@ -2098,15 +3104,14 @@ fn garbage_collection_after_slashing() {
                 &[Perbill::from_percent(100)],
             );
 
-            let mut new2 = vec![Event::Slash(11, 230398), Event::Slash(101, 115200)];
+            let mut new2 = vec![Event::Slash(11, 230398), Event::Slash(101, 115198)];
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
-            assert_eq!(NodleStaking::total(), 257004);
 
-            assert_eq!(balances(&11).1, ExistentialDeposit::get());
-            // assert_eq!(balances(&11).1, ExistentialDeposit::get());
-            // assert_eq!(Balances::total_balance(&11), ExistentialDeposit::get());
+            assert_eq!(mock::balances(&11), (256002, 2));
+            assert_eq!(mock::balances(&101), (384002, 2));
+            assert_eq!(NodleStaking::total(), 257004);
 
             let slashing_spans = <SlashingSpans<Test>>::get(&11).unwrap();
             assert_eq!(slashing_spans.iter().count(), 2);
@@ -2123,10 +3128,87 @@ fn garbage_collection_after_slashing() {
 }
 
 #[test]
+fn garbage_collection_after_slashing_ed_1() {
+    // ensures that `SlashingSpans` and `SpanSlash` of an account is removed after reaping.
+    ExtBuilder::default().build_and_execute(|| {
+        mock::start_active_session(1);
+
+        let mut expected = vec![
+            Event::ValidatorChosen(2, 11, 1500),
+            Event::ValidatorChosen(2, 41, 1000),
+            Event::ValidatorChosen(2, 21, 1000),
+            Event::NewSession(5, 2, 3, 3500),
+        ];
+        assert_eq!(events(), expected);
+
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 500));
+        assert_eq!(NodleStaking::total(), 3500);
+
+        on_offence_now(
+            &[OffenceDetails {
+                offender: (
+                    11,
+                    NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                ),
+                reporters: vec![],
+            }],
+            &[Perbill::from_percent(10)],
+        );
+
+        let mut new1 = vec![Event::Slash(11, 100), Event::Slash(101, 50)];
+
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
+
+        assert_eq!(balances(&11), (1900, 900));
+        assert_eq!(balances(&101), (1950, 450));
+
+        assert_eq!(NodleStaking::total(), 3350);
+
+        assert!(<SlashingSpans<Test>>::get(&11).is_some());
+
+        assert_eq!(<SpanSlash<Test>>::get(&(11, 0)).amount_slashed(), &(100));
+        assert_eq!(<SpanSlash<Test>>::get(&(101, 0)).amount_slashed(), &(50));
+
+        on_offence_now(
+            &[OffenceDetails {
+                offender: (
+                    11,
+                    NodleStaking::at_stake(NodleStaking::active_session(), 11),
+                ),
+                reporters: vec![],
+            }],
+            &[Perbill::from_percent(100)],
+        );
+
+        let mut new2 = vec![Event::Slash(11, 899), Event::Slash(101, 449)];
+
+        expected.append(&mut new2);
+        assert_eq!(events(), expected);
+
+        assert_eq!(mock::balances(&11), (1001, 1));
+        assert_eq!(mock::balances(&101), (1501, 1));
+        assert_eq!(NodleStaking::total(), 2002);
+
+        let slashing_spans = <SlashingSpans<Test>>::get(&11).unwrap();
+        assert_eq!(slashing_spans.iter().count(), 2);
+
+        // TODO :: Validation of DB instance Clean-off pending
+        // // reap_stash respects num_slashing_spans so that weight is accurate
+        // assert_noop!(Staking::reap_stash(Origin::none(), 11, 0),
+        // Error::<Test>::IncorrectSlashingSpans); assert_ok!(Staking::reap_stash(Origin::none(),
+        // 11, 2));
+
+        // assert!(<Staking as crate::Store>::SlashingSpans::get(&11).is_none());
+        // assert_eq!(<Staking as crate::Store>::SpanSlash::get(&(11, 0)).amount_slashed(), &0);
+    })
+}
+
+#[test]
 fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool() {
     ExtBuilder::default().build_and_execute(|| {
         mock::start_active_session(1);
-        assert_eq!(Session::validators(), vec![11, 21, 41]);
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
@@ -2137,9 +3219,11 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         assert_eq!(events(), expected);
 
         // pre-slash balance
-        assert_eq!(mock::balances(&11), (1000, 1000));
-        assert_eq!(mock::balances(&101), (1500, 500));
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 500));
         assert_eq!(NodleStaking::total(), 3500);
+
+        assert_eq!(Session::validators(), vec![11, 21, 41]);
 
         let exposure_11 = NodleStaking::at_stake(NodleStaking::active_session(), &11);
         let exposure_21 = NodleStaking::at_stake(NodleStaking::active_session(), &21);
@@ -2161,8 +3245,8 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         assert_eq!(mock::events(), expected);
 
         // post-slash balance
-        assert_eq!(mock::balances(&11), (1000, 900));
-        assert_eq!(mock::balances(&101), (1500, 450));
+        assert_eq!(mock::balances(&11), (1900, 900));
+        assert_eq!(mock::balances(&101), (1950, 450));
         assert_eq!(NodleStaking::total(), 3350);
 
         // Validator-11 is deactivated
@@ -2238,9 +3322,9 @@ fn slashing_nominators_by_span_max() {
 
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&11), (1000, 1000));
-        assert_eq!(mock::balances(&21), (1000, 1000));
-        assert_eq!(mock::balances(&101), (1000, 1000));
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&21), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 1000));
         assert_eq!(NodleStaking::total(), 4000);
 
         let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
@@ -2279,10 +3363,12 @@ fn slashing_nominators_by_span_max() {
         assert_eq!(mock::events(), expected);
 
         let nominator101_prev_slashed_val = Perbill::from_percent(10) * nominated_value_11;
-        assert_eq!(mock::balances(&11), (1000, 900));
+
+        assert_eq!(mock::balances(&11), (1900, 900));
+
         assert_eq!(
             mock::balances(&101),
-            (1000, 1000 - nominator101_prev_slashed_val,)
+            (1950, 1000 - nominator101_prev_slashed_val,)
         );
         assert_eq!(NodleStaking::total(), 3850);
 
@@ -2321,8 +3407,8 @@ fn slashing_nominators_by_span_max() {
         expected.append(&mut new2);
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&21), (1000, 700));
-        assert_eq!(mock::balances(&101), (1000, 850));
+        assert_eq!(mock::balances(&21), (1700, 700));
+        assert_eq!(mock::balances(&101), (1850, 850));
         assert_eq!(NodleStaking::total(), 3450);
 
         let nominator101_prev_slashed_val =
@@ -2330,7 +3416,7 @@ fn slashing_nominators_by_span_max() {
 
         assert_eq!(
             mock::balances(&101),
-            (1000, 950 - nominator101_prev_slashed_val)
+            (1850, 950 - nominator101_prev_slashed_val)
         );
 
         let expected_spans = vec![
@@ -2367,6 +3453,8 @@ fn slashing_nominators_by_span_max() {
 
         expected.append(&mut new3);
         assert_eq!(mock::events(), expected);
+
+        assert_eq!(mock::balances(&11), (1800, 800));
         assert_eq!(NodleStaking::total(), 3350);
 
         // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
@@ -2403,9 +3491,9 @@ fn slashes_are_summed_across_spans() {
 
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&11), (1000, 1000));
-        assert_eq!(mock::balances(&21), (1000, 1000));
-        assert_eq!(mock::balances(&101), (1000, 1000));
+        assert_eq!(mock::balances(&11), (2000, 1000));
+        assert_eq!(mock::balances(&21), (2000, 1000));
+        assert_eq!(mock::balances(&101), (2000, 1000));
         assert_eq!(NodleStaking::total(), 4000);
 
         let get_span = |account| <SlashingSpans<Test>>::get(&account).unwrap();
@@ -2426,8 +3514,8 @@ fn slashes_are_summed_across_spans() {
         expected.append(&mut new1);
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&21), (1000, 900));
-        assert_eq!(mock::balances(&101), (1000, 950));
+        assert_eq!(mock::balances(&21), (1900, 900));
+        assert_eq!(mock::balances(&101), (1950, 950));
         assert_eq!(NodleStaking::total(), 3850);
 
         let expected_spans = vec![
@@ -2476,8 +3564,8 @@ fn slashes_are_summed_across_spans() {
         expected.append(&mut new2);
         assert_eq!(mock::events(), expected);
 
-        assert_eq!(mock::balances(&21), (990, 819));
-        assert_eq!(mock::balances(&101), (1000, 905));
+        assert_eq!(mock::balances(&21), (1809, 819));
+        assert_eq!(mock::balances(&101), (1905, 905));
         assert_eq!(NodleStaking::total(), 3724);
 
         let expected_spans = vec![
@@ -2525,8 +3613,8 @@ fn deferred_slashes_are_deferred() {
             ];
             assert_eq!(mock::events(), expected);
 
-            assert_eq!(mock::balances(&11), (1000, 1000));
-            assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(mock::balances(&101), (2000, 500));
             assert_eq!(NodleStaking::total(), 3500);
 
             on_offence_now(
@@ -2572,8 +3660,8 @@ fn deferred_slashes_are_deferred() {
             expected.append(&mut new3);
             assert_eq!(mock::events(), expected);
 
-            assert_eq!(mock::balances(&11), (1000, 900));
-            assert_eq!(mock::balances(&101), (1500, 450));
+            assert_eq!(mock::balances(&11), (1900, 900));
+            assert_eq!(mock::balances(&101), (1950, 450));
             assert_eq!(NodleStaking::total(), 3350);
         })
 }
@@ -2593,8 +3681,8 @@ fn remove_deferred() {
             ];
             assert_eq!(mock::events(), expected);
 
-            assert_eq!(mock::balances(&11), (1000, 1000));
-            assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(mock::balances(&101), (2000, 500));
             assert_eq!(NodleStaking::total(), 3500);
 
             on_offence_now(
@@ -2657,8 +3745,8 @@ fn remove_deferred() {
 
             mock::start_active_session(3);
 
-            assert_eq!(mock::balances(&11), (1000, 1000));
-            assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(mock::balances(&101), (2000, 500));
             assert_eq!(NodleStaking::total(), 3500);
 
             let mut new4 = vec![
@@ -2673,8 +3761,8 @@ fn remove_deferred() {
             mock::start_active_session(4);
 
             // Ensure deffered slash event have fired.
-            assert_eq!(mock::balances(&11), (1000, 950));
-            assert_eq!(mock::balances(&101), (1500, 475));
+            assert_eq!(mock::balances(&11), (1950, 950));
+            assert_eq!(mock::balances(&101), (1975, 475));
 
             let mut new5 = vec![
                 Event::Slash(11, 50),
@@ -2707,8 +3795,8 @@ fn remove_multi_deferred() {
             ];
             assert_eq!(mock::events(), expected);
 
-            assert_eq!(mock::balances(&11), (1000, 1000));
-            assert_eq!(mock::balances(&101), (1500, 500));
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(mock::balances(&101), (2000, 500));
             assert_eq!(NodleStaking::total(), 3500);
 
             // Add 11 to Unapplied Slash Q
