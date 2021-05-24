@@ -21,15 +21,12 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(test)]
-pub mod benchmarking;
-#[cfg(test)]
+#[cfg(any(feature = "runtime-benchmarks", test))]
+mod benchmarking;
+#[cfg(any(feature = "runtime-benchmarks", test))]
 mod mock;
 #[cfg(test)]
 mod tests;
-
-#[macro_use]
-pub mod helpers;
 
 mod set;
 pub mod weights;
@@ -41,12 +38,6 @@ pub mod slashing;
 use frame_support::traits::GenesisBuild;
 
 pub use pallet::*;
-
-pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
-
-#[allow(dead_code)]
-#[cfg(any(feature = "runtime-benchmarks", test))]
-pub(crate) const TST_LOG_TARGET: &'static str = "runtime::tststaking";
 
 #[pallet]
 pub mod pallet {
@@ -1501,10 +1492,8 @@ pub mod pallet {
         }
         // ensure validator is active before calling
         pub fn update_validators_pool(validator: T::AccountId, total: BalanceOf<T>) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] | Own[{:#?}] | Tot[{:#?}]",
-                function!(),
+            log::trace!(
+                "update_validators_pool:[{:#?}] | Own[{:#?}] | Tot[{:#?}]",
                 line!(),
                 validator,
                 total,
@@ -1519,10 +1508,8 @@ pub mod pallet {
         }
         // ensure validator is active before calling
         pub fn remove_from_validators_pool(validator: T::AccountId) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] | Own[{:#?}]",
-                function!(),
+            log::trace!(
+                "remove_from_validators_pool:[{:#?}] | Own[{:#?}]",
                 line!(),
                 validator
             );
@@ -1531,10 +1518,8 @@ pub mod pallet {
             });
         }
         pub(crate) fn validator_deactivate(controller: &T::AccountId) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Acc[{:#?}]",
-                function!(),
+            log::trace!(
+                "validator_deactivate:[{:#?}] - Acc[{:#?}]",
                 line!(),
                 controller
             );
@@ -1652,13 +1637,7 @@ pub mod pallet {
         }
 
         fn pay_stakers(next: SessionIndex) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Sess-idx[{:#?}]",
-                function!(),
-                line!(),
-                next
-            );
+            log::trace!("pay_stakers:[{:#?}] - Sess-idx[{:#?}]", line!(), next);
 
             let mint = |amt: BalanceOf<T>, to: T::AccountId| {
                 if amt > T::Currency::minimum_balance() {
@@ -1677,20 +1656,16 @@ pub mod pallet {
                 let pct_due = Perbill::from_rational_approximation(pts, total);
                 let mut amt_due = pct_due * issuance;
 
-                log!(
-                    trace,
-                    "[{:#?}]:[{:#?}] - L1 [{:#?}] | [{:#?}] | [{:#?}]",
-                    function!(),
+                log::trace!(
+                    "pay_stakers:[{:#?}] - L1 [{:#?}] | [{:#?}] | [{:#?}]",
                     line!(),
                     total,
                     issuance,
                     pct_due
                 );
 
-                log!(
-                    trace,
-                    "[{:#?}]:[{:#?}] - L2 [{:#?}] | [{:#?}] | [{:#?}]",
-                    function!(),
+                log::trace!(
+                    "pay_stakers:[{:#?}] - L2 [{:#?}] | [{:#?}] | [{:#?}]",
                     line!(),
                     val,
                     pts,
@@ -1707,12 +1682,7 @@ pub mod pallet {
                 if state.nominators.is_empty() {
                     // solo collator with no nominators
                     mint(amt_due, val.clone());
-                    log!(
-                        trace,
-                        "[{:#?}]:[{:#?}] - L3 Solo Mode",
-                        function!(),
-                        line!()
-                    );
+                    log::trace!("pay_stakers:[{:#?}] - L3 Solo Mode", line!());
                 } else {
                     // pay collator first; commission + due_portion
                     let val_pct = Perbill::from_rational_approximation(state.bond, state.total);
@@ -1725,10 +1695,8 @@ pub mod pallet {
                         val_pct * amt_due
                     };
 
-                    log!(
-                        trace,
-                        "[{:#?}]:[{:#?}] - L4 [{:#?}] | [{:#?}] | [{:#?}]",
-                        function!(),
+                    log::trace!(
+                        "pay_stakers:[{:#?}] - L4 [{:#?}] | [{:#?}] | [{:#?}]",
                         line!(),
                         validator_fee,
                         val_due,
@@ -1861,10 +1829,8 @@ pub mod pallet {
 
         /// Clear session information for given session index
         fn clear_session_information(session_idx: SessionIndex) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - AccuBal[{:#?}]",
-                function!(),
+            log::trace!(
+                "clear_session_information:[{:#?}] - AccuBal[{:#?}]",
                 line!(),
                 <SessionAccumulatedBalance<T>>::get(session_idx),
             );
@@ -1883,10 +1849,8 @@ pub mod pallet {
             ) {
                 Ok(imbalance) => T::RewardRemainder::on_unbalanced(imbalance),
                 Err(err) => {
-                    log!(
-                        error,
-                        "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
-                        function!(),
+                    log::error!(
+                        "clear_session_information:[{:#?}] - [{:#?}] | [{:#?}]",
                         line!(),
                         err,
                         "Warning: an error happened when trying to handle active session rewards \
@@ -1935,23 +1899,11 @@ pub mod pallet {
         T: Config + pallet_authorship::Config + pallet_session::Config,
     {
         fn note_author(author: T::AccountId) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Author[{:#?}]",
-                function!(),
-                line!(),
-                author
-            );
+            log::trace!("note_author:[{:#?}] - Author[{:#?}]", line!(), author);
             Self::reward_by_ids(vec![(author, 20)])
         }
         fn note_uncle(author: T::AccountId, _age: T::BlockNumber) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Author[{:#?}]",
-                function!(),
-                line!(),
-                author
-            );
+            log::trace!("note_uncle:[{:#?}] - Author[{:#?}]", line!(), author);
             Self::reward_by_ids(vec![
                 (<pallet_authorship::Module<T>>::author(), 2),
                 (author, 1),
@@ -1964,13 +1916,7 @@ pub mod pallet {
     /// Once the first new_session is planned, all session must start and then end in order.
     impl<T: Config> pallet_session::SessionManager<T::AccountId> for Pallet<T> {
         fn new_session(new_index: SessionIndex) -> Option<Vec<T::AccountId>> {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Sess-idx[{:#?}]",
-                function!(),
-                line!(),
-                new_index
-            );
+            log::trace!("new_session:[{:#?}] - Sess-idx[{:#?}]", line!(), new_index);
 
             let current_block_number = system::Pallet::<T>::block_number();
 
@@ -1987,10 +1933,8 @@ pub mod pallet {
                 total_staked,
             ));
 
-            log!(
-                debug,
-                "[{:#?}]:[{:#?}] - Event::NewSession(SI[{}],VC[{}],TS[{:#?}])",
-                function!(),
+            log::debug!(
+                "new_session:[{:#?}] - Event::NewSession(SI[{}],VC[{}],TS[{:#?}])",
                 line!(),
                 new_index,
                 validator_count,
@@ -2000,10 +1944,8 @@ pub mod pallet {
             Some(Self::selected_validators())
         }
         fn start_session(start_index: SessionIndex) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Sess-idx[{:#?}]",
-                function!(),
+            log::trace!(
+                "start_session:[{:#?}] - Sess-idx[{:#?}]",
                 line!(),
                 start_index
             );
@@ -2045,13 +1987,7 @@ pub mod pallet {
             Self::apply_unapplied_slashes(start_index);
         }
         fn end_session(end_index: SessionIndex) {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Sess-idx[{:#?}]",
-                function!(),
-                line!(),
-                end_index
-            );
+            log::trace!("end_session:[{:#?}] - Sess-idx[{:#?}]", line!(), end_index);
 
             if Self::active_session() == end_index {
                 let payout = Self::session_accumulated_balance(end_index);
@@ -2065,10 +2001,8 @@ pub mod pallet {
             // // Clear the DB cached state of last session
             // Self::clear_session_information(Self::active_session());
             } else {
-                log!(
-                    error,
-                    "[{:#?}]:[{:#?}] - Something wrong (CSI[{}], ESI[{}])",
-                    function!(),
+                log::error!(
+                    "end_session:[{:#?}] - Something wrong (CSI[{}], ESI[{}])",
                     line!(),
                     Self::active_session(),
                     end_index,
@@ -2200,10 +2134,8 @@ pub mod pallet {
             slash_fraction: &[Perbill],
             slash_session: SessionIndex,
         ) -> Result<Weight, ()> {
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Sess-idx [{:#?}] | Slash-Frac [{:#?}]",
-                function!(),
+            log::trace!(
+                "on_offence:[{:#?}] - Sess-idx [{:#?}] | Slash-Frac [{:#?}]",
                 line!(),
                 slash_session,
                 slash_fraction,
@@ -2225,10 +2157,8 @@ pub mod pallet {
             let invulnerables = Self::invulnerables();
             add_db_reads_writes(1, 0);
 
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Invulnerables[{:#?}]",
-                function!(),
+            log::trace!(
+                "on_offence:[{:#?}] - Invulnerables[{:#?}]",
                 line!(),
                 invulnerables,
             );
@@ -2288,7 +2218,7 @@ pub mod pallet {
                         add_db_reads_writes(1, 1);
                     }
                 } else {
-                    log!(trace, "[{:#?}]:[{:#?}] - NOP", function!(), line!(),);
+                    log::trace!("on_offence:[{:#?}] - NOP", line!(),);
                     add_db_reads_writes(4 /* fetch_spans */, 5 /* kick_out_if_recent */);
                 }
             }

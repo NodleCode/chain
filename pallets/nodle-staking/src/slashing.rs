@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::*;
 use super::{
     BalanceOf, Config, Error, Event, NegativeImbalanceOf, Pallet, SessionInterface, Store,
     UnappliedSlash, ValidatorSnapshot,
@@ -216,21 +215,13 @@ pub(crate) fn compute_slash<T: Config>(
     let mut reward_payout = Zero::zero();
     let mut val_slashed = Zero::zero();
 
-    log!(
-        trace,
-        "[{:#?}]:[{:#?}] - Slash-[{:#?}]",
-        function!(),
-        line!(),
-        slash
-    );
+    log::trace!("compute_slash:[{:#?}] - Slash-[{:#?}]", line!(), slash);
 
     // is the slash amount here a maximum for the era?
     let own_slash = slash * exposure.bond;
     if slash * exposure.total == Zero::zero() {
-        log!(
-            trace,
-            "[{:#?}]:[{:#?}] - ValidatorSS[ B-[{:#?}] | T-[{:#?}]] - Nop",
-            function!(),
+        log::trace!(
+            "compute_slash:[{:#?}] - ValidatorSS[ B-[{:#?}] | T-[{:#?}]] - Nop",
             line!(),
             exposure.bond,
             exposure.total,
@@ -283,10 +274,8 @@ pub(crate) fn compute_slash<T: Config>(
             // chill the validator - it misbehaved in the current span and should
             // not continue in the next election. also end the slashing span.
             spans.end_span(now);
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
-                function!(),
+            log::trace!(
+                "compute_slash:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
                 line!(),
                 spans.span_index(),
                 now
@@ -317,7 +306,7 @@ fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
     let mut reward_payout = Zero::zero();
     let mut val_slashed = Zero::zero();
 
-    log!(trace, "[{:#?}]:[{:#?}]", function!(), line!());
+    log::trace!("kick_out_if_recent:[{:#?}]", line!());
 
     let mut spans = fetch_spans::<T>(
         params.controller,
@@ -329,10 +318,8 @@ fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
 
     if spans.era_span(params.slash_session).map(|s| s.index) == Some(spans.span_index()) {
         spans.end_span(params.now);
-        log!(
-            trace,
-            "[{:#?}]:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
-            function!(),
+        log::trace!(
+            "kick_out_if_recent:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
             line!(),
             spans.span_index(),
             params.now,
@@ -407,10 +394,8 @@ fn slash_nominators<T: Config>(
                 // End the span, but don't chill the nominator. its nomination
                 // on this validator will be ignored in the future.
                 spans.end_span(now);
-                log!(
-                    trace,
-                    "[{:#?}]:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
-                    function!(),
+                log::trace!(
+                    "slash_nominators:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
                     line!(),
                     spans.span_index(),
                     now
@@ -611,10 +596,8 @@ fn do_slash_validator<T: Config>(
                 .saturating_sub(validator_state.nomi_bond_total);
             let slashed_value = validator_state.slash(value, T::Currency::minimum_balance());
 
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
-                function!(),
+            log::trace!(
+                "do_slash_validator:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
                 line!(),
                 value,
                 slashed_value,
@@ -642,10 +625,8 @@ fn do_slash_validator<T: Config>(
 
                 let cur_balance_stat = T::Currency::free_balance(controller);
 
-                log!(
-                    trace,
-                    "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
-                    function!(),
+                log::trace!(
+                    "do_slash_validator:[{:#?}] - [{:#?}] | [{:#?}]",
                     line!(),
                     pre_balance_stat,
                     cur_balance_stat,
@@ -684,10 +665,8 @@ fn do_slash_nominator<T: Config>(
                 T::Currency::minimum_balance(),
             );
 
-            log!(
-                trace,
-                "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
-                function!(),
+            log::trace!(
+                "do_slash_nominator:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]",
                 line!(),
                 value,
                 slashed_value,
@@ -728,10 +707,8 @@ fn do_slash_nominator<T: Config>(
 
                 let cur_balance_stat = T::Currency::free_balance(controller);
 
-                log!(
-                    trace,
-                    "[{:#?}]:[{:#?}] - [{:#?}] | [{:#?}]",
-                    function!(),
+                log::trace!(
+                    "do_slash_nominator:[{:#?}] - [{:#?}] | [{:#?}]",
                     line!(),
                     pre_balance_stat,
                     cur_balance_stat,

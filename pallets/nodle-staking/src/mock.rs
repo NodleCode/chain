@@ -16,10 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#![cfg(test)]
-
+use super::*;
 use crate as nodle_staking;
-use crate::*;
 use frame_support::{
     assert_ok, ord_parameter_types, parameter_types,
     traits::{
@@ -588,7 +586,11 @@ pub(crate) fn set_author(session: u32, acc: u64, pts: u32) {
 pub(crate) fn mint_rewards(amount: Balance) {
     let imbalance = <pallet_balances::Module<Test> as Currency<AccountId>>::issue(amount);
     NodleStaking::on_unbalanced(imbalance);
-    tst_log!(trace, "[{:#?}]=> - {:#?}", line!(), mock::last_event());
+    log::trace!(
+        "mint_rewards:[{:#?}]=> - {:#?}",
+        line!(),
+        mock::last_event()
+    );
 }
 
 /// Progress to the given block, triggering session and era changes as we progress.

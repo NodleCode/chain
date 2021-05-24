@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#![cfg(test)]
+
 use super::*;
-use super::{Error, ValidatorSnapshot};
 use crate::mock::{
     balances, bond_nominator, bond_validator, events, is_disabled, last_event,
     on_offence_in_session, on_offence_now, set_author, start_session, Balance, Balances,
@@ -24,7 +25,6 @@ use crate::mock::{
 };
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::{traits::BadOrigin, traits::Zero, Perbill};
-
 use sp_staking::offence::OffenceDetails;
 
 #[test]
@@ -2343,18 +2343,14 @@ fn reward_validator_slashing_validator_does_not_overflow() {
                 }
             );
 
-            tst_log!(
-                trace,
-                "[{:#?}]:[{:#?}] - Bonded Sess - {:#?}",
-                function!(),
+            log::trace!(
+                "reward_validator_slashing_validator_does_not_overflow:[{:#?}] - Bonded Sess - {:#?}",
                 line!(),
                 NodleStaking::bonded_sessions()
             );
 
-            tst_log!(
-                trace,
-                "[{:#?}]:[{:#?}] - AtStake - {:#?}",
-                function!(),
+			log::trace!(
+                "reward_validator_slashing_validator_does_not_overflow:[{:#?}] - AtStake - {:#?}",
                 line!(),
                 NodleStaking::at_stake(4, 81)
             );
@@ -2758,9 +2754,8 @@ fn subsequent_reports_in_same_span_pay_out_less() {
         );
         assert_eq!(NodleStaking::total(), 3500);
 
-        tst_log!(
-            debug,
-            "[{:#?}]=> Acc-1[{:#?}]",
+        log::trace!(
+            "subsequent_reports_in_same_span_pay_out_less:[{:#?}]=> Acc-1[{:#?}]",
             line!(),
             Balances::free_balance(1)
         );
