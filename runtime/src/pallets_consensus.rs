@@ -23,22 +23,19 @@ use crate::{
     Grandpa, Historical, ImOnline, Offences, Runtime,
 };
 
+#[cfg(feature = "with-staking")]
+use crate::pallets_governance::FinancialCollective;
+
 #[cfg(not(feature = "with-staking"))]
 use crate::Poa;
 
+#[cfg(not(feature = "with-staking"))]
+use sp_runtime::traits::ConvertInto;
+
 #[cfg(feature = "with-staking")]
-use crate::{Balances, Session, Staking, Timestamp};
+use crate::{Balances, Staking};
 
 use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
-
-#[cfg(feature = "with-staking")]
-use frame_support::{
-    traits::U128CurrencyToVote,
-    weights::{constants::BlockExecutionWeight, DispatchClass},
-};
-
-#[cfg(feature = "with-staking")]
-use frame_system::EnsureRoot;
 
 use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
 
@@ -52,18 +49,11 @@ use sp_core::{
     u32_trait::{_1, _2},
 };
 use sp_runtime::{
-    impl_opaque_keys,
-    traits::{ConvertInto, OpaqueKeys},
-    transaction_validity::TransactionPriority,
-    Perbill,
+    impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, Perbill,
 };
 
 #[cfg(feature = "with-staking")]
 use sp_runtime::ModuleId;
-
-#[cfg(feature = "with-staking")]
-#[cfg(any(feature = "std", test))]
-pub use pallet_curveless_staking::StakerStatus;
 
 use sp_std::prelude::*;
 
@@ -78,8 +68,8 @@ impl_opaque_keys! {
 
 // Normally used with the staking pallet
 parameter_types! {
-    pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-    pub const BondingDuration: pallet_staking::EraIndex = 24 * 28;
+    // 28 Days for unbonding
+    pub const BondingDuration: sp_staking::SessionIndex = 28 * 6;
     //pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
     //pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
     //pub const MaxNominatorRewardedPerValidator: u32 = 256;
@@ -89,7 +79,7 @@ parameter_types! {
     pub const EpochDuration: u64 = constants::EPOCH_DURATION_IN_SLOTS;
     pub const ExpectedBlockTime: Moment = constants::MILLISECS_PER_BLOCK;
     pub const ReportLongevity: u64 =
-        BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
+        BondingDuration::get() as u64 * EpochDuration::get();
 }
 
 impl pallet_babe::Config for Runtime {
@@ -210,7 +200,7 @@ impl pallet_session::Config for Runtime {
     type Event = Event;
     type Keys = SessionKeys;
     type ValidatorId = AccountId;
-    type ValidatorIdOf = ConvertInto;
+    type ValidatorIdOf = pallet_nodle_staking::StashOf<Runtime>;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = Babe;
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
@@ -218,55 +208,62 @@ impl pallet_session::Config for Runtime {
 
 #[cfg(feature = "with-staking")]
 impl pallet_session::historical::Config for Runtime {
-    type FullIdentification = pallet_curveless_staking::Exposure<AccountId, Balance>;
-    type FullIdentificationOf = pallet_curveless_staking::ExposureOf<Runtime>;
+    type FullIdentification = pallet_nodle_staking::ValidatorSnapshot<AccountId, Balance>;
+    type FullIdentificationOf = pallet_nodle_staking::ValidatorSnapshotOf<Runtime>;
 }
 
+// TODO::Have to fine tune parameters for practical use-case
 #[cfg(feature = "with-staking")]
 parameter_types! {
-    // pub const SessionsPerEra: sp_staking::SessionIndex = 6;
-    // pub const BondingDuration: pallet_curveless_staking::EraIndex = 24 * 28;
-    pub const SlashDeferDuration: pallet_curveless_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
-    pub const MaxNominatorRewardedPerValidator: u32 = 256;
-    pub const ElectionLookahead: BlockNumber = constants::EPOCH_DURATION_IN_BLOCKS / 4;
-    pub const MaxIterations: u32 = 10;
-    // 0.05%. The higher the value, the more strict solution acceptance becomes.
-    pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
-    pub OffchainSolutionWeightLimit: Weight = constants::RuntimeBlockWeights::get()
-        .get(DispatchClass::Normal)
-        .max_extrinsic.expect("Normal extrinsics have a weight limit configured; qed")
-        .saturating_sub(BlockExecutionWeight::get());
+    // 27 Days
+    pub const SlashDeferDuration: sp_staking::SessionIndex = 27 * 6;
+    pub const MinSelectedValidators: u32 = 5;
+    pub const MaxNominatorsPerValidator: u32 = 25;
+    pub const MaxValidatorPerNominator: u32 = 25;
+    pub const DefaultValidatorCommission: Perbill = Perbill::from_percent(20);
+    pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(10);
+    pub const MinValidatorStake: u128 = 10;
+    pub const MinNominatorStake: u128 = 5;
+    pub const MinNomination: u128 = 3;
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
-    /// We prioritize im-online heartbeats over election solution submission.
-    pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
+
+}
+#[cfg(feature = "with-staking")]
+impl pallet_nodle_staking::Config for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type BondedDuration = BondingDuration;
+    type MinSelectedValidators = MinSelectedValidators;
+    type MaxNominatorsPerValidator = MaxNominatorsPerValidator;
+    type MaxValidatorPerNominator = MaxValidatorPerNominator;
+    type DefaultValidatorCommission = DefaultValidatorCommission;
+    type DefaultSlashRewardFraction = DefaultSlashRewardFraction;
+    type MinValidatorStake = MinValidatorStake;
+    type MinValidatorPoolStake = MinValidatorStake;
+    type MinNominatorStake = MinNominatorStake;
+    type MinNomination = MinNomination;
+    type RewardRemainder = ();
+    type PalletId = StakingPalletId;
+    type Slash = ();
+    type Reward = ();
+    type SlashDeferDuration = SlashDeferDuration;
+    type SessionInterface = Self;
+    type CancelOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type WeightInfo = pallet_nodle_staking::weights::SubstrateWeight<Runtime>;
 }
 
-#[cfg(feature = "with-staking")]
-impl pallet_curveless_staking::Config for Runtime {
-    type Currency = Balances;
-    type UnixTime = Timestamp;
-    type CurrencyToVote = U128CurrencyToVote;
-    type RewardRemainder = ();
+parameter_types! {
+    pub OffencesWeightSoftLimit: Weight = Perbill::from_percent(60) *
+        constants::RuntimeBlockWeights::get().max_block;
+}
+
+impl pallet_offences::Config for Runtime {
     type Event = Event;
-    type Slash = (); // send the slashed funds to the treasury.
-    type SessionsPerEra = SessionsPerEra;
-    type BondingDuration = BondingDuration;
-    type SlashDeferDuration = SlashDeferDuration;
-    /// A super-majority of the council can cancel the slash.
-    type SlashCancelOrigin = EnsureRoot<AccountId>;
-    type SessionInterface = Self;
-    type NextNewSession = Session;
-    type ElectionLookahead = ElectionLookahead;
-    type Call = Call;
-    type MaxIterations = MaxIterations;
-    type MinSolutionScoreBump = MinSolutionScoreBump;
-    type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
-    type UnsignedPriority = StakingUnsignedPriority;
-    // The unsigned solution weight targeted by the OCW. We set it to the maximum possible value of
-    // a single extrinsic.
-    type OffchainSolutionWeightLimit = OffchainSolutionWeightLimit;
-    type WeightInfo = pallet_curveless_staking::weights::SubstrateWeight<Runtime>;
-    type PalletId = StakingPalletId;
+    type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
+    // type IdentificationTuple = ();
+    type OnOffenceHandler = ();
+    type WeightSoftLimit = OffencesWeightSoftLimit;
 }
 
 #[cfg(feature = "with-staking")]
@@ -287,16 +284,4 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     // type MembershipChanged = Staking;
     type MembershipInitialized = ();
     type MembershipChanged = ();
-}
-
-parameter_types! {
-    pub OffencesWeightSoftLimit: Weight = Perbill::from_percent(60) *
-        constants::RuntimeBlockWeights::get().max_block;
-}
-
-impl pallet_offences::Config for Runtime {
-    type Event = Event;
-    type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
-    type OnOffenceHandler = ();
-    type WeightSoftLimit = OffencesWeightSoftLimit;
 }

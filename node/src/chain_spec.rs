@@ -24,8 +24,11 @@ use nodle_chain_runtime::{
     TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
 };
 
+// #[cfg(feature = "with-staking")]
+// use nodle_chain_runtime::{StakerStatus, StakingConfig};
+
 #[cfg(feature = "with-staking")]
-use nodle_chain_runtime::{StakerStatus, StakingConfig};
+use nodle_chain_runtime::StakingConfig;
 
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -208,16 +211,25 @@ pub fn testnet_genesis(
         pallet_grandpa: Some(GrandpaConfig {
             authorities: vec![],
         }),
+        // #[cfg(feature = "with-staking")]
+        // pallet_curveless_staking: Some(StakingConfig {
+        //     validator_count: initial_authorities.len() as u32 * 2,
+        //     minimum_validator_count: initial_authorities.len() as u32,
+        //     stakers: initial_authorities
+        //         .iter()
+        //         .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+        //         .collect(),
+        //     invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+        //     slash_reward_fraction: Perbill::from_percent(10),
+        //     ..Default::default()
+        // }),
         #[cfg(feature = "with-staking")]
-        pallet_curveless_staking: Some(StakingConfig {
-            validator_count: initial_authorities.len() as u32 * 2,
-            minimum_validator_count: initial_authorities.len() as u32,
+        pallet_nodle_staking: Some(StakingConfig {
             stakers: initial_authorities
                 .iter()
-                .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+                .map(|x| (x.1.clone(), None, STASH))
                 .collect(),
-            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-            slash_reward_fraction: Perbill::from_percent(10),
+            invulnerables: initial_authorities.iter().map(|x| x.1.clone()).collect(),
             ..Default::default()
         }),
         pallet_membership_Instance2: Some(ValidatorsSetConfig {

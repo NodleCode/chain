@@ -240,9 +240,9 @@ impl Config for Test {
     type Slash = ();
     type Reward = ();
     type SlashDeferDuration = SlashDeferDuration;
-    type SlashCancelOrigin = frame_system::EnsureRoot<Self::AccountId>;
     type SessionInterface = Self;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
+    type WeightInfo = ();
 }
 
 thread_local! {

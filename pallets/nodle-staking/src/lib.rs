@@ -22,13 +22,17 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(test)]
+pub mod benchmarking;
+#[cfg(test)]
 mod mock;
 #[cfg(test)]
 mod tests;
+
 #[macro_use]
 pub mod helpers;
 
 mod set;
+pub mod weights;
 
 use frame_support::pallet;
 pub mod slashing;
@@ -40,7 +44,8 @@ pub use pallet::*;
 
 pub(crate) const LOG_TARGET: &'static str = "runtime::staking";
 
-#[cfg(test)]
+#[allow(dead_code)]
+#[cfg(any(feature = "runtime-benchmarks", test))]
 pub(crate) const TST_LOG_TARGET: &'static str = "runtime::tststaking";
 
 #[pallet]
@@ -67,6 +72,8 @@ pub mod pallet {
         SessionIndex,
     };
     use sp_std::{cmp::Ordering, convert::From, prelude::*};
+
+    pub use weights::WeightInfo;
 
     pub(crate) const STAKING_ID: LockIdentifier = *b"staking ";
 
@@ -301,11 +308,24 @@ pub mod pallet {
         }
     }
 
-    impl<AccountId: Ord, Balance> Eq for ValidatorSnapshot<AccountId, Balance> {}
+    impl<AccountId: Ord, Balance: Ord> Eq for ValidatorSnapshot<AccountId, Balance> {}
 
-    impl<AccountId: Ord, Balance> PartialEq for ValidatorSnapshot<AccountId, Balance> {
+    impl<AccountId: Ord, Balance: Ord> PartialEq for ValidatorSnapshot<AccountId, Balance> {
         fn eq(&self, other: &Self) -> bool {
             self.nominators == other.nominators
+        }
+    }
+
+    impl<AccountId: Ord, Balance: Ord> Ord for ValidatorSnapshot<AccountId, Balance> {
+        fn cmp(&self, other: &Self) -> Ordering {
+            self.total.cmp(&other.total)
+        }
+    }
+
+    impl<AccountId: Ord, Balance: Ord> PartialOrd for ValidatorSnapshot<AccountId, Balance> {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+            // Some(self.total.cmp(&other.total))
         }
     }
 
@@ -533,8 +553,6 @@ pub mod pallet {
         type BondedDuration: Get<SessionIndex>;
         /// Number of sessions that slashes are deferred by, after computation.
         type SlashDeferDuration: Get<SessionIndex>;
-        /// The origin which can cancel a deferred slash. Root can always do this.
-        type SlashCancelOrigin: EnsureOrigin<Self::Origin>;
         /// Minimum number of selected validators every round
         type MinSelectedValidators: Get<u32>;
         /// Maximum nominators per validator
@@ -561,7 +579,10 @@ pub mod pallet {
         /// This pallet's module id. Used to derivate a dedicated account id to store session
         /// rewards for validators and nominators in.
         type PalletId: Get<ModuleId>;
+        /// The origin which can cancel a deferred slash. Root can always do this.
         type CancelOrigin: EnsureOrigin<Self::Origin>;
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -1064,7 +1085,9 @@ pub mod pallet {
             session_idx: SessionIndex,
             controllers: Vec<T::AccountId>,
         ) -> DispatchResultWithPostInfo {
-            T::SlashCancelOrigin::ensure_origin(origin)?;
+            T::CancelOrigin::try_origin(origin)
+                .map(|_| ())
+                .or_else(ensure_root)?;
 
             let apply_at = session_idx.saturating_add(T::SlashDeferDuration::get());
 
@@ -1966,10 +1989,9 @@ pub mod pallet {
 
             log!(
                 debug,
-                "[{:#?}]:[{:#?}] - Event::NewSession(B[{}],SI[{}],VC[{}],TS[{:#?}])",
+                "[{:#?}]:[{:#?}] - Event::NewSession(SI[{}],VC[{}],TS[{:#?}])",
                 function!(),
                 line!(),
-                current_block_number,
                 new_index,
                 validator_count,
                 total_staked,

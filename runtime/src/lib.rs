@@ -57,10 +57,6 @@ use sp_runtime::{
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 
-#[cfg(feature = "with-staking")]
-#[cfg(any(feature = "std", test))]
-pub use pallets_consensus::StakerStatus;
-
 pub mod constants;
 mod implementations;
 mod migrations;
@@ -150,7 +146,7 @@ construct_nodle_runtime! {
 #[cfg(feature = "with-staking")]
 construct_nodle_runtime! {
     // Consensus & Staking
-    Staking: pallet_curveless_staking::{Module, Call, Config<T>, Storage, Event<T>, ValidateUnsigned},
+    Staking: pallet_nodle_staking::{Module, Call, Storage, Event<T>, Config<T>},
 }
 
 /// The address format for describing accounts.
@@ -439,7 +435,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_grandpa, Grandpa);
 
             #[cfg(feature = "with-staking")]
-            add_benchmark!(params, batches, pallet_curveless_staking, Staking);
+            add_benchmark!(params, batches, pallet_nodle_staking, Staking);
 
             add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_identity, Identity);

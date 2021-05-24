@@ -39,7 +39,7 @@ macro_rules! log {
 // 	};
 // }
 
-#[cfg(test)]
+#[cfg(any(feature = "runtime-benchmarks", test))]
 #[macro_export]
 macro_rules! tst_log {
 	($level:tt, $patter:expr $(, $values:expr)* $(,)?) => {
@@ -51,6 +51,7 @@ macro_rules! tst_log {
 }
 
 /// Extract current function name
+#[cfg(feature = "std")]
 #[macro_export]
 macro_rules! function {
     () => {{
@@ -60,5 +61,14 @@ macro_rules! function {
         }
         let name = type_name_of(f);
         &name[..name.len() - 3]
+    }};
+}
+
+/// Extract current function name
+#[cfg(not(feature = "std"))]
+#[macro_export]
+macro_rules! function {
+    () => {{
+        "XX"
     }};
 }
