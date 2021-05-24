@@ -59,7 +59,6 @@ use sp_version::RuntimeVersion;
 
 pub mod constants;
 mod implementations;
-mod migrations;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -182,7 +181,6 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllModules,
-    migrations::GrantsMigration,
 >;
 
 sp_api::impl_runtime_apis! {

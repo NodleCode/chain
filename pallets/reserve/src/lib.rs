@@ -131,7 +131,7 @@ pub mod pallet {
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
-            let res = call.dispatch(frame_system::RawOrigin::Root.into());
+            let res = call.dispatch(frame_system::RawOrigin::Signed(Self::account_id()).into());
 
             Self::deposit_event(Event::ReserveOp(res.map(|_| ()).map_err(|e| e.error)));
 
