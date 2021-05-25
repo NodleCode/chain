@@ -86,11 +86,11 @@ benchmarks! {
         let call = Call::<T>::set_invulnerables(inv_validators.clone());
     }: { call.dispatch_bypass_filter(caller)? }
     verify {
-        log::trace!(
-            "[set_invulnerables > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[set_invulnerables > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         assert_last_event::<T>(
             Event::NewInvulnerables(inv_validators).into()
         );
@@ -120,11 +120,11 @@ benchmarks! {
         let bond_additional = T::Currency::minimum_balance() * 10u32.into();
     }: _(RawOrigin::Signed(validator.clone()), bond_additional)
     verify {
-        log::trace!(
-            "[validator_bond_more > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[validator_bond_more > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         assert_last_event::<T>(
             Event::ValidatorBondedMore(
                 validator.clone(),
@@ -144,11 +144,11 @@ benchmarks! {
         let bond_less = T::Currency::minimum_balance() * 2u32.into();
     }: _(RawOrigin::Signed(validator.clone()), bond_less)
     verify {
-        log::trace!(
-            "[validator_bond_less > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[validator_bond_less > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         assert_last_event::<T>(
             Event::ValidatorBondedLess(
                 validator.clone(),
@@ -167,11 +167,11 @@ benchmarks! {
         ).unwrap();
     }: _(RawOrigin::Signed(validator.clone()))
     verify {
-        log::trace!(
-            "[validator_exit_pool > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[validator_exit_pool > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         assert_last_event::<T>(
             Event::ValidatorScheduledExit(
                 0,
@@ -193,11 +193,11 @@ benchmarks! {
         let nominator = create_funded_user::<T>("nom-nominator", n, 100);
         whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
-        log::trace!( "[nominator_nominate > {:#?}]=> - {:#?}", line!(), crate::mock::events());
+        // log::trace!( "[nominator_nominate > {:#?}]=> - {:#?}", line!(), crate::mock::events());
 
     }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_val)
     verify {
-        log::trace!( "[nominator_nominate > {:#?}]=> - Verif-{:#?}", line!(), crate::mock::events());
+        // log::trace!( "[nominator_nominate > {:#?}]=> - Verif-{:#?}", line!(), crate::mock::events());
         assert_last_event::<T>(
             Event::Nomination(
                 nominator,
@@ -225,18 +225,18 @@ benchmarks! {
             validator.clone(),
             nominator_bond_val
         ).unwrap();
-        log::trace!(
-            "[nominator_denominate > {:#?}]=> - Top-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_denominate > {:#?}]=> - Top-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
     }: _(RawOrigin::Signed(nominator.clone()), validator.clone())
     verify {
-        log::trace!(
-            "[nominator_denominate > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_denominate > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         assert_last_event::<T>(
             Event::NominatorLeftValidator(
                 nominator,
@@ -267,18 +267,18 @@ benchmarks! {
                 nominator_bond_val
             ).unwrap();
         }
-        log::trace!(
-            "[nominator_denominate > {:#?}]=> - Top-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_denominate > {:#?}]=> - Top-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
     }: _(RawOrigin::Signed(nominator.clone()))
     verify {
-        log::trace!(
-            "[nominator_denominate > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_denominate > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         let verif_idx: usize = T::MaxValidatorPerNominator::get() as usize - 1;
         assert_last_event::<T>(
             Event::NominatorLeftValidator(
@@ -307,19 +307,19 @@ benchmarks! {
             validator.clone(),
             nominator_bond_val
         ).unwrap();
-        log::trace!(
-            "[nominator_bond_more > {:#?}]=> - Top-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_bond_more > {:#?}]=> - Top-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         let nominator_bond_addition: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
     }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_addition)
     verify {
-        log::trace!(
-            "[nominator_bond_more > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_bond_more > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         assert_last_event::<T>(
             Event::NominationIncreased(
                 nominator,
@@ -347,20 +347,19 @@ benchmarks! {
             validator.clone(),
             nominator_bond_val
         ).unwrap();
-        log::trace!(
-            "[nominator_bond_less > {:#?}]=> - Top-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
+        // log::trace!(
+        //     "[nominator_bond_less > {:#?}]=> - Top-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         let nominator_bond_removal: BalanceOf<T> = T::MinNomination::get() * 1u32.into();
     }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_removal)
     verify {
-        log::trace!(
-            "[nominator_bond_less > {:#?}]=> - Verif-{:#?}",
-            line!(),
-            crate::mock::events()
-        );
-
+        // log::trace!(
+        //     "[nominator_bond_less > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
         let before = <NodleStaking<T>>::validator_state(&validator).unwrap().bond +
             <NodleStaking<T>>::validator_state(&validator).unwrap().nomi_bond_total +
             nominator_bond_removal;

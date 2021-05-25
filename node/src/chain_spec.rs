@@ -196,8 +196,8 @@ pub fn testnet_genesis(
                 .iter()
                 .map(|x| {
                     (
-                        x.0.clone(),
-                        x.0.clone(),
+                        x.1.clone(),
+                        x.1.clone(),
                         session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
                     )
                 })
@@ -229,6 +229,33 @@ pub fn testnet_genesis(
                 .iter()
                 .map(|x| (x.1.clone(), None, STASH))
                 .collect(),
+            // stakers: initial_authorities
+            //     .iter()
+            //     .map(|x| (x.1.clone(), None, STASH))
+            //     .chain(
+            //         endowed_accounts
+            //             .iter()
+            //             .map(|x| (x.clone(), None, ENDOWMENT)),
+            //     )
+            //     .fold(vec![], |mut acc, (account, nomi, endowment)| {
+            //         if acc
+            //             .iter()
+            //             .find(|(who, _nomi, _endowment)| who == &account)
+            //             .is_some()
+            //         {
+            //             // Increase endowment
+            //             acc = acc
+            //                 .iter()
+            //                 .cloned()
+            //                 .map(|(cur_account, curr_nomi, cur_endowment)| {
+            //                     (cur_account, curr_nomi, cur_endowment)
+            //                 })
+            //                 .collect::<Vec<(AccountId, Option<AccountId>, Balance)>>();
+            //         } else {
+            //             acc.push((account, nomi, endowment));
+            //         }
+            //         acc
+            //     }),
             invulnerables: initial_authorities.iter().map(|x| x.1.clone()).collect(),
             ..Default::default()
         }),
