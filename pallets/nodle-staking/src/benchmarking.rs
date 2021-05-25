@@ -23,7 +23,7 @@ use super::*;
 use frame_benchmarking::{
     account, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
 };
-use frame_support::traits::{Currency, Get};
+use frame_support::traits::{Currency, EnsureOrigin, Get, UnfilteredDispatchable};
 use frame_system::{EventRecord, RawOrigin};
 use sp_std::prelude::*;
 
@@ -77,6 +77,25 @@ fn create_funded_user<T: Config>(
 }
 
 benchmarks! {
+
+    set_invulnerables {
+        let c in 1 .. T::MinSelectedValidators::get();
+        log::trace!("[set_invulnerables > {:#?}]=> - Itern-{:#?}", line!(), c);
+        let inv_validators = register_validator::<T>("sinv-validator", c);
+        let caller = T::CancelOrigin::successful_origin();
+        let call = Call::<T>::set_invulnerables(inv_validators.clone());
+    }: { call.dispatch_bypass_filter(caller)? }
+    verify {
+        log::trace!(
+            "[set_invulnerables > {:#?}]=> - Verif-{:#?}",
+            line!(),
+            crate::mock::events()
+        );
+        assert_last_event::<T>(
+            Event::NewInvulnerables(inv_validators).into()
+        );
+    }
+
     validator_join_pool {
         let c in 1 .. T::MinSelectedValidators::get();
         log::trace!("[validator_join_pool > {:#?}]=> - Itern-{:#?}", line!(), c);
@@ -174,11 +193,11 @@ benchmarks! {
         let nominator = create_funded_user::<T>("nom-nominator", n, 100);
         whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
-        log::trace!( "[nominator_nominate > {:#?}]=> - {:#?}", line!(), mock::events());
+        log::trace!( "[nominator_nominate > {:#?}]=> - {:#?}", line!(), crate::mock::events());
 
     }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_val)
     verify {
-        log::trace!( "[nominator_nominate > {:#?}]=> - Verif-{:#?}", line!(), mock::events());
+        log::trace!( "[nominator_nominate > {:#?}]=> - Verif-{:#?}", line!(), crate::mock::events());
         assert_last_event::<T>(
             Event::Nomination(
                 nominator,
@@ -358,8 +377,6 @@ benchmarks! {
             ).into()
         );
     }
-
-
 }
 
 impl_benchmark_test_suite!(

@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 use super::*;
 use crate as nodle_staking;
 use frame_support::{
@@ -37,7 +36,10 @@ use sp_staking::{
     offence::{OffenceDetails, OnOffenceHandler},
     SessionIndex,
 };
-use std::{cell::RefCell, collections::HashSet};
+
+// use std::{cell::RefCell, collections::HashSet};
+use crate::set::OrderedSet;
+use sp_std::cell::RefCell;
 
 pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;
@@ -48,8 +50,12 @@ pub(crate) type AccountIndex = u64;
 pub(crate) type BlockNumber = u64;
 pub(crate) type Balance = u128;
 
+// thread_local! {
+//     static SESSION: RefCell<(Vec<AccountId>, HashSet<AccountId>)> = RefCell::new(Default::default());
+// }
+
 thread_local! {
-    static SESSION: RefCell<(Vec<AccountId>, HashSet<AccountId>)> = RefCell::new(Default::default());
+    static SESSION: RefCell<(Vec<AccountId>, OrderedSet<AccountId>)> = RefCell::new(Default::default());
 }
 
 /// Another session handler struct to test on_disabled.
@@ -70,7 +76,8 @@ impl OneSessionHandler<AccountId> for OtherSessionHandler {
         AccountId: 'a,
     {
         SESSION.with(|x| {
-            *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), HashSet::new())
+            // *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), HashSet::new())
+            *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), OrderedSet::new())
         });
     }
 
@@ -417,7 +424,8 @@ impl ExtBuilder {
         let mut ext = sp_io::TestExternalities::new(storage);
         ext.execute_with(|| {
             let validators = Session::validators();
-            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
+            // SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
+            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), OrderedSet::new()));
         });
         ext.execute_with(|| {
             System::set_block_number(1);
@@ -523,7 +531,8 @@ impl ExtBuilder {
         let mut ext = sp_io::TestExternalities::from(storage);
         ext.execute_with(|| {
             let validators = Session::validators();
-            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
+            // SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
+            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), OrderedSet::new()));
         });
 
         if self.initialize_first_session {
@@ -548,7 +557,6 @@ impl ExtBuilder {
 }
 
 pub(crate) fn balances(who: &AccountId) -> (Balance, Balance) {
-    // (Balances::free_balance(who), Balances::reserved_balance(who))
     (
         Balances::free_balance(who),
         Balances::free_balance(who) - Balances::usable_balance(who),
