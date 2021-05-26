@@ -1444,15 +1444,26 @@ pub mod pallet {
             <TotalSelected<T>>::put(T::MinSelectedValidators::get());
             // Set default slash reward fraction
             <SlashRewardFraction<T>>::put(T::DefaultSlashRewardFraction::get());
+            let genesis_session_idx = 0u32;
             // Choose top TotalSelected validators
-            let (v_count, total_staked) = <Pallet<T>>::select_session_validators(1u32);
+            let (v_count, total_staked) =
+                <Pallet<T>>::select_session_validators(genesis_session_idx);
             // Start Session 1
-            <ActiveSession<T>>::put(1u32);
+            <ActiveSession<T>>::put(genesis_session_idx);
             // Snapshot total stake
-            <Staked<T>>::insert(1u32, <Total<T>>::get());
+            <Staked<T>>::insert(genesis_session_idx, <Total<T>>::get());
+
+            log::trace!(
+                "GenesisBuild:[{:#?}] - (SI[{}],VC[{}],TS[{:#?}])",
+                line!(),
+                genesis_session_idx,
+                v_count,
+                total_staked,
+            );
+
             <Pallet<T>>::deposit_event(Event::NewSession(
                 T::BlockNumber::zero(),
-                1u32,
+                genesis_session_idx,
                 v_count,
                 total_staked,
             ));

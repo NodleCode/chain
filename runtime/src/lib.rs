@@ -96,6 +96,7 @@ macro_rules! construct_nodle_runtime {
 				ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
 				Offences: pallet_offences::{Module, Call, Storage, Event},
 				ValidatorsSet: pallet_membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>},
+				$($modules)*
 				Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
 				Historical: pallet_session_historical::{Module},
 				AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config},
@@ -130,7 +131,6 @@ macro_rules! construct_nodle_runtime {
 				Allocations: pallet_allocations::{Module, Call, Event<T>, Storage},
 				AllocationsOracles: pallet_membership::<Instance5>::{Module, Call, Storage, Event<T>, Config<T>},
 
-				$($modules)*
 			}
 		}
 	}
