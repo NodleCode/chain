@@ -588,7 +588,7 @@ pub mod pallet {
         /// Set the validators who cannot be slashed (if any).
         ///
         /// The dispatch origin must be Root.
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::set_invulnerables(invulnerables.len() as u32))]
         pub fn set_invulnerables(
             origin: OriginFor<T>,
             invulnerables: Vec<T::AccountId>,
@@ -600,9 +600,9 @@ pub mod pallet {
             Self::deposit_event(Event::NewInvulnerables(invulnerables));
             Ok(().into())
         }
-        #[pallet::weight(10_000)]
         /// Set the total number of validator selected per round
         /// - changes are not applied until the start of the next round
+        #[pallet::weight(T::WeightInfo::set_total_validator_per_round(*new))]
         pub fn set_total_validator_per_round(
             origin: OriginFor<T>,
             new: u32,
@@ -620,18 +620,24 @@ pub mod pallet {
             Ok(().into())
         }
         /// Join the set of validators pool
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_join_pool())]
         pub fn validator_join_pool(
             origin: OriginFor<T>,
             bond: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
+            log::debug!("validator_join_pool:[{:#?}] - Entry!!!", line!(),);
+
             let acc = ensure_signed(origin)?;
+
             ensure!(!Self::is_validator(&acc), Error::<T>::ValidatorExists);
+
             ensure!(!Self::is_nominator(&acc), Error::<T>::NominatorExists);
+            log::debug!("validator_join_pool:[{:#?}]", line!(),);
             ensure!(
                 bond >= T::MinValidatorPoolStake::get(),
                 Error::<T>::ValidatorBondBelowMin
             );
+            log::debug!("validator_join_pool:[{:#?}]", line!(),);
             let mut validators = <ValidatorPool<T>>::get();
             ensure!(
                 validators.insert(Bond {
@@ -640,6 +646,7 @@ pub mod pallet {
                 }),
                 Error::<T>::ValidatorExists
             );
+            log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
             let validator_free_balance = T::Currency::free_balance(&acc);
             ensure!(
@@ -647,7 +654,11 @@ pub mod pallet {
                 Error::<T>::InsufficientBalance
             );
 
+            log::debug!("validator_join_pool:[{:#?}]", line!(),);
+
             system::Pallet::<T>::inc_consumers(&acc).map_err(|_| Error::<T>::BadState)?;
+
+            log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
             // T::Currency::reserve(&acc, bond)?;
             T::Currency::set_lock(STAKING_ID, &acc, bond, WithdrawReasons::all());
@@ -658,13 +669,14 @@ pub mod pallet {
             <ValidatorState<T>>::insert(&acc, validator);
             <ValidatorPool<T>>::put(validators);
             Self::deposit_event(Event::JoinedValidatorPool(acc, bond, Self::total()));
+            log::debug!("validator_join_pool:[{:#?}] - Exit!!!", line!(),);
             Ok(().into())
         }
         /// Request to exit the validators pool. If successful,
         /// the account is immediately removed from the validator pool
         /// to prevent selection as a validator, but unbonding
         /// is executed with a delay of `BondedDuration` rounds.
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_exit_pool())]
         pub fn validator_exit_pool(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
 
@@ -699,7 +711,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond more for validator
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_bond_more())]
         pub fn validator_bond_more(
             origin: OriginFor<T>,
             more: BalanceOf<T>,
@@ -747,7 +759,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond less for validator
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::validator_bond_less())]
         pub fn validator_bond_less(
             origin: OriginFor<T>,
             less: BalanceOf<T>,
@@ -797,7 +809,7 @@ pub mod pallet {
         }
         /// If caller is not a nominator, then join the set of nominators
         /// If caller is a nominator, then makes nomination to change their nomination state
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_nominate())]
         pub fn nominator_nominate(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -896,7 +908,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Revoke an existing nomination
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_denominate())]
         pub fn nominator_denominate(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -904,7 +916,7 @@ pub mod pallet {
             Self::nominator_revokes_validator(ensure_signed(origin)?, validator, false)
         }
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
-        #[pallet::weight(0)]
+        #[pallet::weight(T::WeightInfo::nominator_denominate_all())]
         pub fn nominator_denominate_all(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
@@ -917,7 +929,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond more for nominators with respect to a specific validator
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_bond_more())]
         pub fn nominator_bond_more(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -961,7 +973,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond less for nominators with respect to a specific nominated validator
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_bond_less())]
         pub fn nominator_bond_less(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -1017,7 +1029,7 @@ pub mod pallet {
 
             Ok(().into())
         }
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::withdraw_unbonded())]
         pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
@@ -1404,6 +1416,8 @@ pub mod pallet {
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
+            log::trace!("GenesisBuild:[{:#?}] - Entry!!!", line!(),);
+
             let duplicate_invulnerables = self
                 .invulnerables
                 .iter()

@@ -76,6 +76,7 @@ pub fn run() -> Result<()> {
         None => {
             let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| async move {
+                log::info!("[run > {:#?}]=> - None!!!", line!(),);
                 match config.role {
                     Role::Light => service::new_light(config),
                     _ => service::new_full(config),
@@ -83,28 +84,17 @@ pub fn run() -> Result<()> {
                 .map_err(sc_cli::Error::Service)
             })
         }
-        Some(Subcommand::Benchmark(cmd)) => {
-            if cfg!(feature = "runtime-benchmarks") {
-                let runner = cli.create_runner(cmd)?;
-
-                runner.sync_run(|config| cmd.run::<Block, Executor>(config))
-            } else {
-                Err("Benchmarking wasn't enabled when building the node. \
-				You can enable it with `--features runtime-benchmarks`."
-                    .into())
-            }
-        }
-        Some(Subcommand::Key(cmd)) => cmd.run(&cli),
-        Some(Subcommand::Sign(cmd)) => cmd.run(),
-        Some(Subcommand::Verify(cmd)) => cmd.run(),
-        Some(Subcommand::Vanity(cmd)) => cmd.run(),
         Some(Subcommand::BuildSpec(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
+            Ok(runner.sync_run(|config| {
+                log::info!("[run > {:#?}]=> - BuildSpec!!!", line!(),);
+                cmd.run(config.chain_spec, config.network)
+            })?)
         }
         Some(Subcommand::CheckBlock(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
+            Ok(runner.async_run(|config| {
+                log::info!("[run > {:#?}]=> - CheckBlock!!!", line!(),);
                 let PartialComponents {
                     client,
                     task_manager,
@@ -112,33 +102,49 @@ pub fn run() -> Result<()> {
                     ..
                 } = new_partial(&config)?;
                 Ok((cmd.run(client, import_queue), task_manager))
-            })
+            })?)
         }
         Some(Subcommand::ExportBlocks(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
+            Ok(runner.async_run(|config| {
+                log::info!("[run > {:#?}]=> - ExportBlocks!!!", line!(),);
                 let PartialComponents {
                     client,
                     task_manager,
                     ..
                 } = new_partial(&config)?;
                 Ok((cmd.run(client, config.database), task_manager))
-            })
+            })?)
         }
         Some(Subcommand::ExportState(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
+            Ok(runner.async_run(|config| {
+                log::info!("[run > {:#?}]=> - ExportState!!!", line!(),);
                 let PartialComponents {
                     client,
                     task_manager,
                     ..
                 } = new_partial(&config)?;
                 Ok((cmd.run(client, config.chain_spec), task_manager))
-            })
+            })?)
+        }
+        Some(Subcommand::Benchmark(cmd)) => {
+            if cfg!(feature = "runtime-benchmarks") {
+                let runner = cli.create_runner(cmd)?;
+                Ok(runner.sync_run(|config| {
+                    log::info!("[run > {:#?}]=> - Benchmark!!!", line!(),);
+                    cmd.run::<Block, Executor>(config)
+                })?)
+            } else {
+                Err("Benchmarking wasn't enabled when building the node. \
+				You can enable it with `--features runtime-benchmarks`."
+                    .into())
+            }
         }
         Some(Subcommand::ImportBlocks(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
+            Ok(runner.async_run(|config| {
+                log::info!("[run > {:#?}]=> - ImportBlocks!!!", line!(),);
                 let PartialComponents {
                     client,
                     task_manager,
@@ -146,15 +152,19 @@ pub fn run() -> Result<()> {
                     ..
                 } = new_partial(&config)?;
                 Ok((cmd.run(client, import_queue), task_manager))
-            })
+            })?)
         }
         Some(Subcommand::PurgeChain(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.sync_run(|config| cmd.run(config.database))
+            Ok(runner.sync_run(|config| {
+                log::info!("[run > {:#?}]=> - PurgeChain!!!", line!(),);
+                cmd.run(config.database)
+            })?)
         }
         Some(Subcommand::Revert(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
+            Ok(runner.async_run(|config| {
+                log::info!("[run > {:#?}]=> - Revert!!!", line!(),);
                 let PartialComponents {
                     client,
                     task_manager,
@@ -162,7 +172,12 @@ pub fn run() -> Result<()> {
                     ..
                 } = new_partial(&config)?;
                 Ok((cmd.run(client, backend), task_manager))
-            })
+            })?)
         }
-    }
+        Some(Subcommand::Key(cmd)) => cmd.run(&cli),
+        Some(Subcommand::Sign(cmd)) => cmd.run(),
+        Some(Subcommand::Verify(cmd)) => cmd.run(),
+        Some(Subcommand::Vanity(cmd)) => cmd.run(),
+    }?;
+    Ok(())
 }

@@ -23,8 +23,12 @@ use super::*;
 use frame_benchmarking::{
     account, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
 };
-use frame_support::traits::{Currency, EnsureOrigin, Get, UnfilteredDispatchable};
+use frame_support::{
+    assert_ok,
+    traits::{Currency, EnsureOrigin, Get, UnfilteredDispatchable},
+};
 use frame_system::{EventRecord, RawOrigin};
+use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 
 use crate::Pallet as NodleStaking;
@@ -42,27 +46,6 @@ fn assert_last_event<T: Config>(generic_event: <T as Config>::Event) {
     assert_eq!(event, &system_event);
 }
 
-fn register_validator<T: Config>(perfix: &'static str, count: u32) -> Vec<T::AccountId> {
-    let validators: Vec<T::AccountId> = (0..count)
-        .map(|c| account(perfix, c, SEED))
-        .collect::<Vec<_>>();
-    log::trace!(
-        "[register_validator > {:#?}]=> - validators-len-{:#?}",
-        line!(),
-        validators.len()
-    );
-    assert!(
-        T::MinValidatorPoolStake::get() > 0u32.into(),
-        "Bond cannot be zero!"
-    );
-    for who in validators.clone() {
-        let bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        T::Currency::make_free_balance_be(&who, bond_val);
-        <NodleStaking<T>>::validator_join_pool(RawOrigin::Signed(who).into(), bond_val).unwrap();
-    }
-    validators
-}
-
 /// Grab a funded user.
 fn create_funded_user<T: Config>(
     string: &'static str,
@@ -74,6 +57,31 @@ fn create_funded_user<T: Config>(
     T::Currency::make_free_balance_be(&user, balance);
     T::Currency::issue(balance);
     user
+}
+
+fn register_validator<T: Config>(prefix: &'static str, count: u32) -> Vec<T::AccountId> {
+    let mut validators: Vec<T::AccountId> = vec![];
+    assert!(
+        T::MinValidatorPoolStake::get() > 0u32.into(),
+        "Bond cannot be zero!"
+    );
+    for valid_idx in 0..count {
+        let who = create_funded_user::<T>(prefix, valid_idx, 500);
+        validators.push(who.clone());
+        let bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
+        assert_ok!(<NodleStaking<T>>::validator_join_pool(
+            RawOrigin::Signed(who).into(),
+            bond_val
+        ));
+    }
+
+    log::trace!(
+        "[register_validator > {:#?}]=> - validators-len-{:#?}",
+        line!(),
+        validators.len()
+    );
+
+    validators
 }
 
 benchmarks! {
@@ -96,27 +104,50 @@ benchmarks! {
         );
     }
 
+    set_total_validator_per_round {
+        let c in 5 .. T::MinSelectedValidators::get() * 2;
+        let caller = T::CancelOrigin::successful_origin();
+        let call = Call::<T>::set_total_validator_per_round(c);
+        let old = <TotalSelected<T>>::get();
+        // log::trace!(
+        //     "[set_total_validator_per_round > {:#?}]=> - Pre-{:#?}",
+        //     line!(),
+        // 	c
+        // );
+    }: { call.dispatch_bypass_filter(caller)? }
+    verify {
+        // log::trace!(
+        //     "[set_total_validator_per_round > {:#?}]=> - Verif-{:#?}",
+        //     line!(),
+        // 	c
+        // );
+        assert_last_event::<T>(
+            Event::TotalSelectedSet(old, c).into()
+        );
+    }
+
     validator_join_pool {
-        let c in 1 .. T::MinSelectedValidators::get();
-        log::trace!("[validator_join_pool > {:#?}]=> - Itern-{:#?}", line!(), c);
-        register_validator::<T>("vjp-validator", c);
-        let caller: T::AccountId = whitelisted_caller();
-        let bond: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        T::Currency::make_free_balance_be(&caller, bond.clone());
-    }: _(RawOrigin::Signed(caller.clone()), bond)
+        let validator = create_funded_user::<T>("vjp-validator", SEED, 100);
+        let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
+    }: _(RawOrigin::Signed(validator.clone()), validator_bond_val)
     verify {
         assert_last_event::<T>(
-            Event::JoinedValidatorPool(caller, bond, <NodleStaking<T>>::total()).into()
+            Event::JoinedValidatorPool(
+                validator,
+                validator_bond_val,
+                <NodleStaking<T>>::total()
+            ).into()
         );
     }
 
     validator_bond_more {
         let validator = create_funded_user::<T>("vbm-validator", SEED, 100);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
             RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
+            validator_bond_val)
+        );
         let bond_additional = T::Currency::minimum_balance() * 10u32.into();
     }: _(RawOrigin::Signed(validator.clone()), bond_additional)
     verify {
@@ -135,13 +166,15 @@ benchmarks! {
     }
 
     validator_bond_less {
-        let validator = create_funded_user::<T>("vbl-validator", SEED, 100);
-        let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
-            RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
-        let bond_less = T::Currency::minimum_balance() * 2u32.into();
+        let validator = create_funded_user::<T>("vbl-validator", SEED, 500);
+        let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 5u32.into();
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
+        let bond_less = T::MinValidatorPoolStake::get() * 1u32.into();
     }: _(RawOrigin::Signed(validator.clone()), bond_less)
     verify {
         // log::trace!(
@@ -161,36 +194,35 @@ benchmarks! {
     validator_exit_pool {
         let validator = create_funded_user::<T>("vep-validator", SEED, 100);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
-            RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
     }: _(RawOrigin::Signed(validator.clone()))
     verify {
         // log::trace!(
-        //     "[validator_exit_pool > {:#?}]=> - Verif-{:#?}",
+        //     "[validator_exit_pool > {:#?}]=> - Verif-[{:#?}]",
         //     line!(),
-        //     crate::mock::events()
+        //     <NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving()
         // );
-        assert_last_event::<T>(
-            Event::ValidatorScheduledExit(
-                0,
-                validator.clone(),
-                2
-            ).into()
+        assert_eq!(
+            <NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving(),
+            true
         );
     }
 
     nominator_nominate {
-        let n in 1 .. T::MaxValidatorPerNominator::get();
-        log::trace!("[nominator_nominate > {:#?}]=> - Itern-{:#?}", line!(), n);
-        let validator = create_funded_user::<T>("nom-validator", n, 100);
+        let validator = create_funded_user::<T>("nom-validator", SEED, 100);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
-            RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
-        let nominator = create_funded_user::<T>("nom-nominator", n, 100);
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
+        let nominator = create_funded_user::<T>("nom-nominator", SEED, 100);
         whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
         // log::trace!( "[nominator_nominate > {:#?}]=> - {:#?}", line!(), crate::mock::events());
@@ -209,104 +241,67 @@ benchmarks! {
     }
 
     nominator_denominate {
-        let n in 1 .. T::MaxValidatorPerNominator::get();
-        log::trace!( "[nominator_denominate > {:#?}]=> - Itern-{:#?}", line!(), n);
-        let validator = create_funded_user::<T>("nden-validator", n, 100);
-        let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
-            RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
-        let nominator = create_funded_user::<T>("nden-nominator", n, 100);
-        whitelist_account!(nominator);
-        let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
-        <NodleStaking<T>>::nominator_nominate(
-            RawOrigin::Signed(nominator.clone()).into(),
-            validator.clone(),
-            nominator_bond_val
-        ).unwrap();
-        // log::trace!(
-        //     "[nominator_denominate > {:#?}]=> - Top-{:#?}",
-        //     line!(),
-        //     crate::mock::events()
-        // );
-    }: _(RawOrigin::Signed(nominator.clone()), validator.clone())
-    verify {
-        // log::trace!(
-        //     "[nominator_denominate > {:#?}]=> - Verif-{:#?}",
-        //     line!(),
-        //     crate::mock::events()
-        // );
-        assert_last_event::<T>(
-            Event::NominatorLeftValidator(
-                nominator,
-                validator.clone(),
-                nominator_bond_val,
-                <NodleStaking<T>>::validator_state(&validator).unwrap().total
-            ).into()
-        );
-    }
-
-    nominator_denominate_all {
-        let n in 1 .. T::MaxValidatorPerNominator::get();
-        log::trace!( "[nominator_denominate > {:#?}]=> - Itern-{:#?}", line!(), n);
 
         let validator_list = register_validator::<T>(
             "nda-validator",
             T::MaxValidatorPerNominator::get()
         );
 
-        let nominator = create_funded_user::<T>("nda-nominator", n, 100);
+        let nominator = create_funded_user::<T>("nden-nominator", SEED, 100);
         whitelist_account!(nominator);
-        let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 1u32.into();
+        let nominator_bond_val: BalanceOf<T> = T::MinNominatorStake::get() * 2u32.into();
 
-        for valid_itm in validator_list.clone() {
-            <NodleStaking<T>>::nominator_nominate(
-                RawOrigin::Signed(nominator.clone()).into(),
-                valid_itm.clone(),
-                nominator_bond_val
-            ).unwrap();
+        for validator in validator_list.clone() {
+            assert_ok!(
+                <NodleStaking<T>>::nominator_nominate(
+                    RawOrigin::Signed(nominator.clone()).into(),
+                    validator.clone(),
+                    nominator_bond_val
+                )
+            );
         }
+        let validator_to_exit = validator_list[0].clone();
         // log::trace!(
         //     "[nominator_denominate > {:#?}]=> - Top-{:#?}",
         //     line!(),
         //     crate::mock::events()
         // );
-    }: _(RawOrigin::Signed(nominator.clone()))
+    }: _(RawOrigin::Signed(nominator.clone()), validator_to_exit.clone())
     verify {
         // log::trace!(
         //     "[nominator_denominate > {:#?}]=> - Verif-{:#?}",
         //     line!(),
         //     crate::mock::events()
         // );
-        let verif_idx: usize = T::MaxValidatorPerNominator::get() as usize - 1;
         assert_last_event::<T>(
             Event::NominatorLeftValidator(
                 nominator,
-                validator_list[verif_idx].clone(),
+                validator_to_exit.clone(),
                 nominator_bond_val,
-                <NodleStaking<T>>::validator_state(validator_list[verif_idx].clone()).unwrap().total
+                <NodleStaking<T>>::validator_state(&validator_to_exit).unwrap().total
             ).into()
         );
     }
 
     nominator_bond_more {
-        let n in 1 .. T::MaxValidatorPerNominator::get();
-        log::trace!( "[nominator_bond_more > {:#?}]=> - Itern-{:#?}", line!(), n);
-        let validator = create_funded_user::<T>("nbndm-validator", n, 100);
+        let validator = create_funded_user::<T>("nbndm-validator", SEED, 100);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
-            RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
-        let nominator = create_funded_user::<T>("nbndm-nominator", n, 100);
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
+        let nominator = create_funded_user::<T>("nbndm-nominator", SEED, 100);
         whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
-        <NodleStaking<T>>::nominator_nominate(
-            RawOrigin::Signed(nominator.clone()).into(),
-            validator.clone(),
-            nominator_bond_val
-        ).unwrap();
+        assert_ok!(
+            <NodleStaking<T>>::nominator_nominate(
+                RawOrigin::Signed(nominator.clone()).into(),
+                validator.clone(),
+                nominator_bond_val
+            )
+        );
         // log::trace!(
         //     "[nominator_bond_more > {:#?}]=> - Top-{:#?}",
         //     line!(),
@@ -331,22 +326,24 @@ benchmarks! {
     }
 
     nominator_bond_less {
-        let n in 1 .. T::MaxValidatorPerNominator::get();
-        log::trace!("[nominator_bond_less > {:#?}]=> - Itern-{:#?}", line!(), n);
-        let validator = create_funded_user::<T>("nbndl-validator", n, 100);
+        let validator = create_funded_user::<T>("nbndl-validator", SEED, 100);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
-        <NodleStaking<T>>::validator_join_pool(
-            RawOrigin::Signed(validator.clone()).into(),
-            validator_bond_val
-        ).unwrap();
-        let nominator = create_funded_user::<T>("nbndl-nominator", n, 100);
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
+        let nominator = create_funded_user::<T>("nbndl-nominator", SEED, 100);
         whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 4u32.into();
-        <NodleStaking<T>>::nominator_nominate(
-            RawOrigin::Signed(nominator.clone()).into(),
-            validator.clone(),
-            nominator_bond_val
-        ).unwrap();
+        assert_ok!(
+            <NodleStaking<T>>::nominator_nominate(
+                RawOrigin::Signed(nominator.clone()).into(),
+                validator.clone(),
+                nominator_bond_val
+            )
+        );
         // log::trace!(
         //     "[nominator_bond_less > {:#?}]=> - Top-{:#?}",
         //     line!(),
@@ -373,6 +370,66 @@ benchmarks! {
                 validator.clone(),
                 before,
                 after,
+            ).into()
+        );
+    }
+
+    nominator_denominate_all {
+        let validator_list = register_validator::<T>(
+            "nda-validator",
+            T::MaxValidatorPerNominator::get()
+        );
+        let nominator = create_funded_user::<T>("nda-nominator", SEED, 100);
+        whitelist_account!(nominator);
+        let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 1u32.into();
+
+        for valid_itm in validator_list.clone() {
+            assert_ok!(
+                <NodleStaking<T>>::nominator_nominate(
+                    RawOrigin::Signed(nominator.clone()).into(),
+                    valid_itm.clone(),
+                    nominator_bond_val
+                )
+            );
+        }
+        // log::trace!(
+        //     "[nominator_denominate > {:#?}]=> - Top-{:#?}",
+        //     line!(),
+        //     crate::mock::events()
+        // );
+    }: _(RawOrigin::Signed(nominator.clone()))
+    verify {
+        // log::trace!(
+        //     "[nominator_denominate > {:#?}]=> - Verif-[{:#?}] | [{:#?}]",
+        //     line!(),
+        //     <NominatorState<T>>::get(nominator.clone()).unwrap().active_bond,
+        // 	<NominatorState<T>>::get(nominator.clone()).unwrap().unlocking.len(),
+        // );
+        assert_eq!(
+            <NominatorState<T>>::get(nominator.clone()).unwrap().active_bond,
+            Zero::zero()
+        );
+        assert_eq!(
+            <NominatorState<T>>::get(nominator.clone()).unwrap().unlocking.len(),
+            T::MaxValidatorPerNominator::get() as usize
+        );
+    }
+
+    withdraw_unbonded {
+        let validator = create_funded_user::<T>("wdu-validator", SEED, 100);
+        let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
+    }: _(RawOrigin::Signed(validator.clone()))
+    verify {
+        assert_last_event::<T>(
+            Event::Withdrawn(
+                validator,
+                Zero::zero()
             ).into()
         );
     }
