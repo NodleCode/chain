@@ -209,11 +209,11 @@ pub mod pallet {
         VestingScheduleOf<T> = "VestingSchedule",
     )]
     pub enum Event<T: Config> {
-        /// Added new vesting schedule (from, to, vesting_schedule)
+        /// Added new vesting schedule \[from, to, vesting_schedule\]
         VestingScheduleAdded(T::AccountId, T::AccountId, VestingScheduleOf<T>),
-        /// Claimed vesting (who, locked_amount)
+        /// Claimed vesting \[who, locked_amount\]
         Claimed(T::AccountId, BalanceOf<T>),
-        /// Canceled all vesting schedules (who)
+        /// Canceled all vesting schedules \[who\]
         VestingSchedulesCanceled(T::AccountId),
     }
 

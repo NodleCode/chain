@@ -139,7 +139,7 @@ pub mod pallet {
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T> = "Balance")]
     pub enum Event<T: Config> {
-        /// An allocation was triggered
+        /// An allocation was triggered \[who, value, fee, proof\]
         NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
     }
 
