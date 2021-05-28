@@ -213,7 +213,7 @@ pub mod pallet {
         VestingScheduleAdded(T::AccountId, T::AccountId, VestingScheduleOf<T>),
         /// Claimed vesting \[who, locked_amount\]
         Claimed(T::AccountId, BalanceOf<T>),
-        /// Canceled all vesting schedules [who]
+        /// Canceled all vesting schedules \[who\]
         VestingSchedulesCanceled(T::AccountId),
     }
 
