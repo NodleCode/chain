@@ -379,6 +379,7 @@ impl ExtBuilder {
     }
     pub(crate) fn tst_staking_build(self) -> sp_io::TestExternalities {
         sp_tracing::try_init_simple();
+        // frame_support::debug::RuntimeLogger::init();
 
         let mut storage = frame_system::GenesisConfig::default()
             .build_storage::<Test>()

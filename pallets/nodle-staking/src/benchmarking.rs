@@ -20,9 +20,7 @@
 
 use super::*;
 
-use frame_benchmarking::{
-    account, benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
-};
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, whitelist_account};
 use frame_support::{
     assert_ok,
     traits::{Currency, EnsureOrigin, Get, UnfilteredDispatchable},
@@ -37,6 +35,8 @@ pub type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 const SEED: u32 = 0;
+const MAX_VALIDATORS: u32 = 1000;
+const MAX_SLASHES: u32 = 1000;
 
 fn assert_last_event<T: Config>(generic_event: <T as Config>::Event) {
     let events = frame_system::Pallet::<T>::events();
@@ -431,6 +431,50 @@ benchmarks! {
                 validator,
                 Zero::zero()
             ).into()
+        );
+    }
+
+    slash_cancel_deferred {
+        let s in 1 .. MAX_SLASHES;
+        let c in 1 .. MAX_VALIDATORS;
+        let mut unapplied_slashes = Vec::new();
+        let session_idx = 1u32;
+
+        let reg_validators = register_validator::<T>("def-validator", MAX_VALIDATORS);
+        let mut deferred_validators = Vec::new();
+
+        for idx in 0 .. MAX_SLASHES {
+
+            let unapl_slainst = UnappliedSlash::<T::AccountId, BalanceOf<T>>{
+                validator: reg_validators[idx as usize].clone(),
+                ..Default::default()
+            };
+
+            if idx % 2 == 0 { deferred_validators.push(reg_validators[idx as usize].clone()) };
+
+            unapplied_slashes.push(unapl_slainst);
+        }
+
+        <UnappliedSlashes<T>>::insert(
+            session_idx.saturating_add(T::SlashDeferDuration::get()),
+            &unapplied_slashes
+        );
+
+        let slash_indices: Vec<u32> = (0 .. s).collect();
+    }: _(RawOrigin::Root, session_idx, deferred_validators)
+    verify {
+        // log::trace!(
+        //     "[slash_cancel_deferred > {:#?}]=> - Verif-[{:#?}]",
+        //     line!(),
+        // 	<UnappliedSlashes<T>>::get(
+        // 		session_idx.saturating_add(T::SlashDeferDuration::get()),
+        // 	).len()
+        // );
+        assert_eq!(
+            <UnappliedSlashes<T>>::get(
+                session_idx.saturating_add(T::SlashDeferDuration::get()),
+            ).len(),
+            (MAX_VALIDATORS / 2) as usize
         );
     }
 }

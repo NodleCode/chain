@@ -17,13 +17,10 @@
 */
 
 use super::{
-    BalanceOf, Config, Error, Event, NegativeImbalanceOf, Pallet, SessionInterface, Store,
-    UnappliedSlash, ValidatorSnapshot,
+    BalanceOf, Config, Event, NegativeImbalanceOf, Pallet, SessionInterface, Store, UnappliedSlash,
+    ValidatorSnapshot,
 };
-use frame_support::{
-    ensure,
-    traits::{Currency, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons},
-};
+use frame_support::traits::{Currency, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{Saturating, Zero},
@@ -551,19 +548,11 @@ pub(crate) fn clear_session_metadata<T: Config>(obsolete_session: SessionIndex) 
 
 /// Clear slashing metadata for a dead account.
 #[allow(dead_code)]
-pub(crate) fn clear_slash_metadata<T: Config>(
-    controller: &T::AccountId,
-    num_slashing_spans: u32,
-) -> DispatchResult {
+pub(crate) fn clear_slash_metadata<T: Config>(controller: &T::AccountId) -> DispatchResult {
     let spans = match <Pallet<T>>::slashing_spans(controller) {
         None => return Ok(()),
         Some(s) => s,
     };
-
-    ensure!(
-        num_slashing_spans as usize >= spans.iter().count(),
-        Error::<T>::IncorrectSlashingSpans
-    );
 
     <Pallet<T> as Store>::SlashingSpans::remove(controller);
 

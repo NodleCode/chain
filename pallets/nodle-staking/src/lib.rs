@@ -630,13 +630,23 @@ pub mod pallet {
             let acc = ensure_signed(origin)?;
 
             ensure!(!Self::is_validator(&acc), Error::<T>::ValidatorExists);
-
             ensure!(!Self::is_nominator(&acc), Error::<T>::NominatorExists);
-            log::debug!("validator_join_pool:[{:#?}]", line!(),);
-            ensure!(
-                bond >= T::MinValidatorPoolStake::get(),
-                Error::<T>::ValidatorBondBelowMin
+
+            let invuln_acc: bool = <Invulnerables<T>>::get().contains(&acc);
+
+            log::debug!(
+                "validator_join_pool:[{:#?}] | is_Invulnerables[{:#?}]",
+                line!(),
+                invuln_acc
             );
+
+            if !invuln_acc {
+                ensure!(
+                    bond >= T::MinValidatorPoolStake::get(),
+                    Error::<T>::ValidatorBondBelowMin
+                );
+            }
+
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
             let mut validators = <ValidatorPool<T>>::get();
             ensure!(
@@ -648,11 +658,13 @@ pub mod pallet {
             );
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
-            let validator_free_balance = T::Currency::free_balance(&acc);
-            ensure!(
-                validator_free_balance >= bond,
-                Error::<T>::InsufficientBalance
-            );
+            if !invuln_acc {
+                let validator_free_balance = T::Currency::free_balance(&acc);
+                ensure!(
+                    validator_free_balance >= bond,
+                    Error::<T>::InsufficientBalance
+                );
+            }
 
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
@@ -1067,7 +1079,8 @@ pub mod pallet {
 
                     if nominator_state.nominations.0.len().is_zero() {
                         T::Currency::remove_lock(STAKING_ID, &acc);
-                        <NominatorState<T>>::remove(acc.clone());
+                        let _ = Self::kill_state_info(&acc);
+                        // <NominatorState<T>>::remove(acc.clone());
                         Self::deposit_event(Event::NominatorLeft(acc.clone(), old_total));
                     } else {
                         <NominatorState<T>>::insert(acc.clone(), nominator_state);
@@ -1082,7 +1095,7 @@ pub mod pallet {
         /// Can be called by the `T::SlashCancelOrigin`.
         ///
         /// Parameters: session index and validator list of the slashes for that session to kill.
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::slash_cancel_deferred(*session_idx as u32, controllers.len() as u32))]
         pub fn slash_cancel_deferred(
             origin: OriginFor<T>,
             session_idx: SessionIndex,
@@ -1502,7 +1515,6 @@ pub mod pallet {
     }
 
     impl<T: Config> Pallet<T> {
-        #[allow(dead_code)]
         pub(crate) fn is_validator(acc: &T::AccountId) -> bool {
             <ValidatorState<T>>::get(acc).is_some()
         }
@@ -1766,7 +1778,9 @@ pub mod pallet {
 
                             T::Currency::remove_lock(STAKING_ID, &x.owner);
 
-                            <ValidatorState<T>>::remove(&x.owner);
+                            let _ = Self::kill_state_info(&x.owner);
+
+                            // <ValidatorState<T>>::remove(&x.owner);
 
                             Self::deposit_event(Event::ValidatorLeft(
                                 x.owner,
@@ -1795,6 +1809,18 @@ pub mod pallet {
                 .filter(|x| x.amount >= T::MinValidatorStake::get())
                 .map(|x| x.owner)
                 .collect::<Vec<T::AccountId>>();
+
+            if <Invulnerables<T>>::get().len() > 0 {
+                top_validators = Self::invulnerables()
+                    .iter()
+                    .chain(top_validators.iter())
+                    .map(|x| x.clone())
+                    .collect::<Vec<T::AccountId>>();
+            }
+
+            top_validators.sort();
+            top_validators.dedup();
+
             // snapshot exposure for round for weighting reward distribution
             for account in top_validators.iter() {
                 let state = <ValidatorState<T>>::get(&account)
@@ -1806,7 +1832,8 @@ pub mod pallet {
                 total += amount;
                 Self::deposit_event(Event::ValidatorChosen(next, account.clone(), amount));
             }
-            top_validators.sort();
+
+            // top_validators.sort();
             // insert canonical collator set
             <SelectedValidators<T>>::put(top_validators);
             (validators_count, total)
@@ -1840,15 +1867,16 @@ pub mod pallet {
         /// This is called:
         /// - after a `withdraw_unbonded()` call that frees all of a stash's bonded balance.
         /// - through `reap_stash()` if the balance has fallen to zero (through slashing).
-        #[allow(dead_code)]
-        fn kill_state_info(controller: &T::AccountId, num_slashing_spans: u32) -> DispatchResult {
-            slashing::clear_slash_metadata::<T>(controller, num_slashing_spans)?;
+        fn kill_state_info(controller: &T::AccountId) -> DispatchResult {
+            slashing::clear_slash_metadata::<T>(controller)?;
 
-            <ValidatorState<T>>::remove(controller);
-            <NominatorState<T>>::remove(controller);
+            if Self::is_validator(&controller) {
+                <ValidatorState<T>>::remove(controller);
+            } else if Self::is_nominator(&controller) {
+                <NominatorState<T>>::remove(controller);
+            }
 
             system::Pallet::<T>::dec_consumers(controller);
-
             Ok(())
         }
 
@@ -1861,9 +1889,12 @@ pub mod pallet {
             );
 
             <Staked<T>>::remove(session_idx);
-            <Points<T>>::remove(session_idx);
             <AtStake<T>>::remove_prefix(session_idx);
+            <Points<T>>::remove(session_idx);
             <AwardedPts<T>>::remove_prefix(session_idx);
+            <SessionValidatorReward<T>>::remove(session_idx);
+            <UnappliedSlashes<T>>::remove(session_idx);
+            slashing::clear_session_metadata::<T>(session_idx);
 
             // withdraw rewards
             match T::Currency::withdraw(

@@ -77,8 +77,8 @@ fn validator_activate_works() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -919,8 +919,8 @@ fn validator_commission() {
             mock::start_active_session(6);
 
             let mut new3 = vec![
-                Event::ValidatorChosen(7, 4, 40),
                 Event::ValidatorChosen(7, 1, 40),
+                Event::ValidatorChosen(7, 4, 40),
                 Event::NewSession(30, 7, 2, 80),
             ];
             expected.append(&mut new3);
@@ -935,8 +935,8 @@ fn validator_commission() {
             mock::start_active_session(8);
 
             let mut new4 = vec![
-                Event::ValidatorChosen(8, 4, 40),
                 Event::ValidatorChosen(8, 1, 40),
+                Event::ValidatorChosen(8, 4, 40),
                 Event::NewSession(35, 8, 2, 80),
                 Event::Rewarded(4, 300000),
                 Event::Rewarded(5, 100000),
@@ -944,8 +944,8 @@ fn validator_commission() {
                 Event::Rewarded(1, 300000),
                 Event::Rewarded(2, 100000),
                 Event::Rewarded(3, 100000),
-                Event::ValidatorChosen(9, 4, 40),
                 Event::ValidatorChosen(9, 1, 40),
+                Event::ValidatorChosen(9, 4, 40),
                 Event::NewSession(40, 9, 2, 80),
             ];
             expected.append(&mut new4);
@@ -1006,26 +1006,26 @@ fn multiple_nominations() {
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
                 Event::ValidatorChosen(2, 2, 40),
-                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 5, 10),
                 Event::NewSession(5, 2, 5, 140),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
-                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 5, 10),
                 Event::NewSession(10, 3, 5, 140),
                 Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
-                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 5, 10),
                 Event::NewSession(15, 4, 5, 140),
                 Event::ValidatorChosen(5, 1, 50),
                 Event::ValidatorChosen(5, 2, 40),
-                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 5, 10),
                 Event::NewSession(20, 5, 5, 140),
             ];
@@ -1094,10 +1094,10 @@ fn multiple_nominations() {
             mock::start_active_session(5);
 
             let mut new2 = vec![
-                Event::ValidatorChosen(6, 2, 50),
                 Event::ValidatorChosen(6, 1, 50),
-                Event::ValidatorChosen(6, 4, 30),
+                Event::ValidatorChosen(6, 2, 50),
                 Event::ValidatorChosen(6, 3, 30),
+                Event::ValidatorChosen(6, 4, 30),
                 Event::ValidatorChosen(6, 5, 10),
                 Event::NewSession(25, 6, 5, 170),
             ];
@@ -1120,10 +1120,10 @@ fn multiple_nominations() {
 
             let mut new3 = vec![
                 Event::Nomination(7, 80, 2, 130),
-                Event::ValidatorChosen(7, 2, 130),
                 Event::ValidatorChosen(7, 1, 50),
-                Event::ValidatorChosen(7, 4, 30),
+                Event::ValidatorChosen(7, 2, 130),
                 Event::ValidatorChosen(7, 3, 30),
+                Event::ValidatorChosen(7, 4, 30),
                 Event::ValidatorChosen(7, 5, 10),
                 Event::NewSession(30, 7, 5, 250),
             ];
@@ -1143,8 +1143,8 @@ fn multiple_nominations() {
             let mut new4 = vec![
                 Event::ValidatorScheduledExit(6, 2, 8),
                 Event::ValidatorChosen(8, 1, 50),
-                Event::ValidatorChosen(8, 4, 30),
                 Event::ValidatorChosen(8, 3, 30),
+                Event::ValidatorChosen(8, 4, 30),
                 Event::ValidatorChosen(8, 5, 10),
                 Event::NewSession(35, 8, 4, 120),
             ];
@@ -1211,8 +1211,8 @@ fn multiple_nominations() {
                 Event::NominatorLeftValidator(9, 2, 10, 0),
                 Event::ValidatorLeft(2, 130, 120),
                 Event::ValidatorChosen(9, 1, 50),
-                Event::ValidatorChosen(9, 4, 30),
                 Event::ValidatorChosen(9, 3, 30),
+                Event::ValidatorChosen(9, 4, 30),
                 Event::ValidatorChosen(9, 5, 10),
                 Event::NewSession(40, 9, 4, 120),
             ];
@@ -1309,8 +1309,19 @@ fn validators_bond() {
             (8, 100),
             (9, 100),
             (10, 100),
+            (20, 1),
+            (30, 1),
         ])
-        .with_validators(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
+        .invulnerables(vec![20, 30])
+        .with_validators(vec![
+            (1, 20),
+            (2, 20),
+            (3, 20),
+            (4, 20),
+            (5, 10),
+            (20, 1),
+            (30, 1),
+        ])
         .with_nominators(vec![
             (6, 1, 10),
             (7, 1, 10),
@@ -1325,28 +1336,36 @@ fn validators_bond() {
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
                 Event::ValidatorChosen(2, 2, 40),
-                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 5, 10),
-                Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(2, 20, 1),
+                Event::ValidatorChosen(2, 30, 1),
+                Event::NewSession(5, 2, 7, 142),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
-                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 5, 10),
-                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(3, 20, 1),
+                Event::ValidatorChosen(3, 30, 1),
+                Event::NewSession(10, 3, 7, 142),
                 Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
-                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 5, 10),
-                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(4, 20, 1),
+                Event::ValidatorChosen(4, 30, 1),
+                Event::NewSession(15, 4, 7, 142),
                 Event::ValidatorChosen(5, 1, 50),
                 Event::ValidatorChosen(5, 2, 40),
-                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 5, 10),
-                Event::NewSession(20, 5, 5, 140),
+                Event::ValidatorChosen(5, 20, 1),
+                Event::ValidatorChosen(5, 30, 1),
+                Event::NewSession(20, 5, 7, 142),
             ];
             assert_eq!(events(), expected);
 
@@ -1380,7 +1399,7 @@ fn validators_bond() {
             assert_eq!(mock::balances(&10), (100, 10));
             assert_eq!(Balances::total_balance(&10), 100);
 
-            assert_eq!(NodleStaking::total(), 140);
+            assert_eq!(NodleStaking::total(), 142);
 
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(6), 50),
@@ -1415,21 +1434,24 @@ fn validators_bond() {
 
             let mut new2 = vec![
                 Event::ValidatorChosen(6, 2, 40),
-                Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 3, 20),
+                Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 5, 10),
-                Event::NewSession(25, 6, 4, 90),
+                Event::ValidatorChosen(6, 20, 1),
+                Event::ValidatorChosen(6, 30, 1),
+                Event::NewSession(25, 6, 6, 92),
                 Event::NominatorLeftValidator(6, 1, 10, 0),
                 Event::NominatorLeftValidator(7, 1, 10, 0),
                 Event::NominatorLeftValidator(10, 1, 10, 0),
-                Event::ValidatorLeft(1, 100, 90),
+                Event::ValidatorLeft(1, 100, 92),
                 Event::ValidatorChosen(7, 2, 40),
-                Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 3, 20),
+                Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 5, 10),
-                Event::NewSession(30, 7, 4, 90),
+                Event::ValidatorChosen(7, 20, 1),
+                Event::ValidatorChosen(7, 30, 1),
+                Event::NewSession(30, 7, 6, 92),
             ];
-
             expected.append(&mut new2);
             assert_eq!(events(), expected);
 
@@ -1480,23 +1502,28 @@ fn validators_bond() {
             let mut new4 = vec![
                 Event::ValidatorBondedLess(4, 20, 10),
                 Event::ValidatorChosen(8, 2, 30),
-                Event::ValidatorChosen(8, 5, 10),
-                Event::ValidatorChosen(8, 4, 10),
                 Event::ValidatorChosen(8, 3, 10),
-                Event::NewSession(35, 8, 4, 60),
+                Event::ValidatorChosen(8, 4, 10),
+                Event::ValidatorChosen(8, 5, 10),
+                Event::ValidatorChosen(8, 20, 1),
+                Event::ValidatorChosen(8, 30, 1),
+                Event::NewSession(35, 8, 6, 62),
                 Event::ValidatorChosen(9, 2, 30),
-                Event::ValidatorChosen(9, 5, 10),
-                Event::ValidatorChosen(9, 4, 10),
                 Event::ValidatorChosen(9, 3, 10),
-                Event::NewSession(40, 9, 4, 60),
+                Event::ValidatorChosen(9, 4, 10),
+                Event::ValidatorChosen(9, 5, 10),
+                Event::ValidatorChosen(9, 20, 1),
+                Event::ValidatorChosen(9, 30, 1),
+                Event::NewSession(40, 9, 6, 62),
                 Event::ValidatorChosen(10, 2, 30),
-                Event::ValidatorChosen(10, 5, 10),
-                Event::ValidatorChosen(10, 4, 10),
                 Event::ValidatorChosen(10, 3, 10),
-                Event::NewSession(45, 10, 4, 60),
+                Event::ValidatorChosen(10, 4, 10),
+                Event::ValidatorChosen(10, 5, 10),
+                Event::ValidatorChosen(10, 20, 1),
+                Event::ValidatorChosen(10, 30, 1),
+                Event::NewSession(45, 10, 6, 62),
                 Event::Withdrawn(2, 90),
             ];
-
             expected.append(&mut new4);
             assert_eq!(events(), expected);
         });
@@ -1532,26 +1559,26 @@ fn nominators_bond() {
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
                 Event::ValidatorChosen(2, 2, 40),
-                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 5, 10),
                 Event::NewSession(5, 2, 5, 140),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
-                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 5, 10),
                 Event::NewSession(10, 3, 5, 140),
                 Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
-                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 5, 10),
                 Event::NewSession(15, 4, 5, 140),
                 Event::ValidatorChosen(5, 1, 50),
                 Event::ValidatorChosen(5, 2, 40),
-                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 5, 10),
                 Event::NewSession(20, 5, 5, 140),
             ];
@@ -1635,8 +1662,8 @@ fn nominators_bond() {
                 Event::NominationIncreased(6, 1, 50, 60),
                 Event::ValidatorChosen(6, 1, 60),
                 Event::ValidatorChosen(6, 2, 40),
-                Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 3, 20),
+                Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 5, 10),
                 Event::NewSession(25, 6, 5, 150),
                 Event::ValidatorScheduledExit(5, 1, 7),
@@ -1649,8 +1676,8 @@ fn nominators_bond() {
 
             let mut new2 = vec![
                 Event::ValidatorChosen(7, 2, 40),
-                Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 3, 20),
+                Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 5, 10),
                 Event::NewSession(30, 7, 4, 90),
                 Event::NominatorLeftValidator(6, 1, 20, 0),
@@ -1658,8 +1685,8 @@ fn nominators_bond() {
                 Event::NominatorLeftValidator(10, 1, 10, 0),
                 Event::ValidatorLeft(1, 60, 90),
                 Event::ValidatorChosen(8, 2, 40),
-                Event::ValidatorChosen(8, 4, 20),
                 Event::ValidatorChosen(8, 3, 20),
+                Event::ValidatorChosen(8, 4, 20),
                 Event::ValidatorChosen(8, 5, 10),
                 Event::NewSession(35, 8, 4, 90),
             ];
@@ -1675,8 +1702,8 @@ fn nominators_bond() {
 
             let mut new3 = vec![
                 Event::ValidatorChosen(9, 2, 40),
-                Event::ValidatorChosen(9, 4, 20),
                 Event::ValidatorChosen(9, 3, 20),
+                Event::ValidatorChosen(9, 4, 20),
                 Event::ValidatorChosen(9, 5, 10),
                 Event::NewSession(40, 9, 4, 90),
                 Event::Withdrawn(6, 20),
@@ -1737,26 +1764,26 @@ fn revoke_nomination_or_leave_nominators() {
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
                 Event::ValidatorChosen(2, 2, 40),
-                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 5, 10),
                 Event::NewSession(5, 2, 5, 140),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
-                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 5, 10),
                 Event::NewSession(10, 3, 5, 140),
                 Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
-                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 5, 10),
                 Event::NewSession(15, 4, 5, 140),
                 Event::ValidatorChosen(5, 1, 50),
                 Event::ValidatorChosen(5, 2, 40),
-                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 5, 10),
                 Event::NewSession(20, 5, 5, 140),
             ];
@@ -1824,14 +1851,14 @@ fn revoke_nomination_or_leave_nominators() {
             assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
 
             let mut new2 = vec![
-                Event::ValidatorChosen(6, 2, 43),
                 Event::ValidatorChosen(6, 1, 40),
+                Event::ValidatorChosen(6, 2, 43),
                 Event::ValidatorChosen(6, 3, 23),
                 Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 5, 10),
                 Event::NewSession(25, 6, 5, 136),
-                Event::ValidatorChosen(7, 2, 43),
                 Event::ValidatorChosen(7, 1, 40),
+                Event::ValidatorChosen(7, 2, 43),
                 Event::ValidatorChosen(7, 3, 23),
                 Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 5, 10),
@@ -1876,14 +1903,14 @@ fn revoke_nomination_or_leave_nominators() {
             let mut new4 = vec![
                 Event::ValidatorChosen(8, 1, 40),
                 Event::ValidatorChosen(8, 2, 30),
-                Event::ValidatorChosen(8, 4, 20),
                 Event::ValidatorChosen(8, 3, 20),
+                Event::ValidatorChosen(8, 4, 20),
                 Event::ValidatorChosen(8, 5, 10),
                 Event::NewSession(35, 8, 5, 120),
                 Event::ValidatorChosen(9, 1, 40),
                 Event::ValidatorChosen(9, 2, 30),
-                Event::ValidatorChosen(9, 4, 20),
                 Event::ValidatorChosen(9, 3, 20),
+                Event::ValidatorChosen(9, 4, 20),
                 Event::ValidatorChosen(9, 5, 10),
                 Event::NewSession(40, 9, 5, 120),
                 Event::Withdrawn(6, 6),
@@ -1935,26 +1962,26 @@ fn payouts_follow_nomination_changes() {
             let mut expected = vec![
                 Event::ValidatorChosen(2, 1, 50),
                 Event::ValidatorChosen(2, 2, 40),
-                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 5, 10),
                 Event::NewSession(5, 2, 5, 140),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
-                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 5, 10),
                 Event::NewSession(10, 3, 5, 140),
                 Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
-                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 5, 10),
                 Event::NewSession(15, 4, 5, 140),
                 Event::ValidatorChosen(5, 1, 50),
                 Event::ValidatorChosen(5, 2, 40),
-                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 5, 10),
                 Event::NewSession(20, 5, 5, 140),
             ];
@@ -2003,8 +2030,8 @@ fn payouts_follow_nomination_changes() {
                 Event::Rewarded(10, 160000),
                 Event::ValidatorChosen(6, 1, 50),
                 Event::ValidatorChosen(6, 2, 40),
-                Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 3, 20),
+                Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 5, 10),
                 Event::NewSession(25, 6, 5, 140),
             ];
@@ -2032,10 +2059,10 @@ fn payouts_follow_nomination_changes() {
                 Event::Rewarded(6, 160000),
                 Event::Rewarded(7, 160000),
                 Event::Rewarded(10, 160000),
-                Event::ValidatorChosen(7, 2, 40),
                 Event::ValidatorChosen(7, 1, 40),
-                Event::ValidatorChosen(7, 4, 20),
+                Event::ValidatorChosen(7, 2, 40),
                 Event::ValidatorChosen(7, 3, 20),
+                Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 5, 10),
                 Event::NewSession(30, 7, 5, 130),
             ];
@@ -2052,10 +2079,10 @@ fn payouts_follow_nomination_changes() {
                 Event::Rewarded(6, 160000),
                 Event::Rewarded(7, 160000),
                 Event::Rewarded(10, 160000),
-                Event::ValidatorChosen(8, 2, 40),
                 Event::ValidatorChosen(8, 1, 40),
-                Event::ValidatorChosen(8, 4, 20),
+                Event::ValidatorChosen(8, 2, 40),
                 Event::ValidatorChosen(8, 3, 20),
+                Event::ValidatorChosen(8, 4, 20),
                 Event::ValidatorChosen(8, 5, 10),
                 Event::NewSession(35, 8, 5, 130),
             ];
@@ -2070,8 +2097,8 @@ fn payouts_follow_nomination_changes() {
                 Event::Nomination(8, 10, 1, 50),
                 Event::ValidatorChosen(9, 1, 50),
                 Event::ValidatorChosen(9, 2, 40),
-                Event::ValidatorChosen(9, 4, 20),
                 Event::ValidatorChosen(9, 3, 20),
+                Event::ValidatorChosen(9, 4, 20),
                 Event::ValidatorChosen(9, 5, 10),
                 Event::NewSession(40, 9, 5, 140),
             ];
@@ -2089,14 +2116,14 @@ fn payouts_follow_nomination_changes() {
                 Event::Rewarded(10, 200000),
                 Event::ValidatorChosen(10, 1, 50),
                 Event::ValidatorChosen(10, 2, 40),
-                Event::ValidatorChosen(10, 4, 20),
                 Event::ValidatorChosen(10, 3, 20),
+                Event::ValidatorChosen(10, 4, 20),
                 Event::ValidatorChosen(10, 5, 10),
                 Event::NewSession(45, 10, 5, 140),
                 Event::ValidatorChosen(11, 1, 50),
                 Event::ValidatorChosen(11, 2, 40),
-                Event::ValidatorChosen(11, 4, 20),
                 Event::ValidatorChosen(11, 3, 20),
+                Event::ValidatorChosen(11, 4, 20),
                 Event::ValidatorChosen(11, 5, 10),
                 Event::NewSession(50, 11, 5, 140),
             ];
@@ -2115,8 +2142,8 @@ fn payouts_follow_nomination_changes() {
                 Event::Rewarded(10, 160000),
                 Event::ValidatorChosen(12, 1, 50),
                 Event::ValidatorChosen(12, 2, 40),
-                Event::ValidatorChosen(12, 4, 20),
                 Event::ValidatorChosen(12, 3, 20),
+                Event::ValidatorChosen(12, 4, 20),
                 Event::ValidatorChosen(12, 5, 10),
                 Event::NewSession(55, 12, 5, 140),
             ];
@@ -2377,8 +2404,8 @@ fn nominators_also_get_slashed_pro_rata() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -2460,8 +2487,8 @@ fn slashing_performed_according_exposure() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -2513,24 +2540,24 @@ fn slash_in_old_span_does_not_deselect() {
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 1500),
-                Event::ValidatorChosen(2, 41, 1000),
                 Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
                 Event::NewSession(5, 2, 3, 3500),
                 Event::ValidatorChosen(3, 11, 1500),
-                Event::ValidatorChosen(3, 41, 1000),
                 Event::ValidatorChosen(3, 21, 1000),
+                Event::ValidatorChosen(3, 41, 1000),
                 Event::NewSession(10, 3, 3, 3500),
                 Event::ValidatorChosen(4, 11, 1500),
-                Event::ValidatorChosen(4, 41, 1000),
                 Event::ValidatorChosen(4, 21, 1000),
+                Event::ValidatorChosen(4, 41, 1000),
                 Event::NewSession(15, 4, 3, 3500),
                 Event::ValidatorChosen(5, 11, 1500),
-                Event::ValidatorChosen(5, 41, 1000),
                 Event::ValidatorChosen(5, 21, 1000),
+                Event::ValidatorChosen(5, 41, 1000),
                 Event::NewSession(20, 5, 3, 3500),
                 Event::ValidatorChosen(6, 11, 1500),
-                Event::ValidatorChosen(6, 41, 1000),
                 Event::ValidatorChosen(6, 21, 1000),
+                Event::ValidatorChosen(6, 41, 1000),
                 Event::NewSession(25, 6, 3, 3500),
             ];
             assert_eq!(events(), expected);
@@ -2569,14 +2596,14 @@ fn slash_in_old_span_does_not_deselect() {
             mock::start_active_session(8);
 
             let mut new2 = vec![
-                Event::ValidatorChosen(7, 41, 1000),
                 Event::ValidatorChosen(7, 21, 1000),
+                Event::ValidatorChosen(7, 41, 1000),
                 Event::NewSession(30, 7, 2, 2000),
-                Event::ValidatorChosen(8, 41, 1000),
                 Event::ValidatorChosen(8, 21, 1000),
+                Event::ValidatorChosen(8, 41, 1000),
                 Event::NewSession(35, 8, 2, 2000),
-                Event::ValidatorChosen(9, 41, 1000),
                 Event::ValidatorChosen(9, 21, 1000),
+                Event::ValidatorChosen(9, 41, 1000),
                 Event::NewSession(40, 9, 2, 2000),
             ];
 
@@ -2599,16 +2626,16 @@ fn slash_in_old_span_does_not_deselect() {
             let mut new3 = vec![
                 Event::ValidatorBondedMore(11, 800, 810),
                 Event::ValidatorChosen(10, 11, 1210),
-                Event::ValidatorChosen(10, 41, 1000),
                 Event::ValidatorChosen(10, 21, 1000),
+                Event::ValidatorChosen(10, 41, 1000),
                 Event::NewSession(45, 10, 3, 3210),
                 Event::ValidatorChosen(11, 11, 1210),
-                Event::ValidatorChosen(11, 41, 1000),
                 Event::ValidatorChosen(11, 21, 1000),
+                Event::ValidatorChosen(11, 41, 1000),
                 Event::NewSession(50, 11, 3, 3210),
                 Event::ValidatorChosen(12, 11, 1210),
-                Event::ValidatorChosen(12, 41, 1000),
                 Event::ValidatorChosen(12, 21, 1000),
+                Event::ValidatorChosen(12, 41, 1000),
                 Event::NewSession(55, 12, 3, 3210),
             ];
             expected.append(&mut new3);
@@ -2622,16 +2649,16 @@ fn slash_in_old_span_does_not_deselect() {
 
             let mut new4 = vec![
                 Event::ValidatorChosen(13, 11, 1210),
-                Event::ValidatorChosen(13, 41, 1000),
                 Event::ValidatorChosen(13, 21, 1000),
+                Event::ValidatorChosen(13, 41, 1000),
                 Event::NewSession(60, 13, 3, 3210),
                 Event::ValidatorChosen(14, 11, 1210),
-                Event::ValidatorChosen(14, 41, 1000),
                 Event::ValidatorChosen(14, 21, 1000),
+                Event::ValidatorChosen(14, 41, 1000),
                 Event::NewSession(65, 14, 3, 3210),
                 Event::ValidatorChosen(15, 11, 1210),
-                Event::ValidatorChosen(15, 41, 1000),
                 Event::ValidatorChosen(15, 21, 1000),
+                Event::ValidatorChosen(15, 41, 1000),
                 Event::NewSession(70, 15, 3, 3210),
             ];
             expected.append(&mut new4);
@@ -2687,8 +2714,8 @@ fn reporters_receive_their_slice() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -2740,8 +2767,8 @@ fn subsequent_reports_in_same_span_pay_out_less() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -2828,8 +2855,8 @@ fn invulnerables_are_not_slashed() {
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 1500),
-                Event::ValidatorChosen(2, 41, 1000),
                 Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
                 Event::NewSession(5, 2, 3, 3500),
             ];
             assert_eq!(events(), expected);
@@ -2846,12 +2873,12 @@ fn invulnerables_are_not_slashed() {
 
             let mut new1 = vec![
                 Event::Nomination(201, 500, 21, 1500),
-                Event::ValidatorChosen(3, 21, 1500),
                 Event::ValidatorChosen(3, 11, 1500),
+                Event::ValidatorChosen(3, 21, 1500),
                 Event::ValidatorChosen(3, 41, 1000),
                 Event::NewSession(10, 3, 3, 4000),
-                Event::ValidatorChosen(4, 21, 1500),
                 Event::ValidatorChosen(4, 11, 1500),
+                Event::ValidatorChosen(4, 21, 1500),
                 Event::ValidatorChosen(4, 41, 1000),
                 Event::NewSession(15, 4, 3, 4000),
             ];
@@ -2933,8 +2960,8 @@ fn dont_slash_if_fraction_is_zero() {
 
         let expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -2971,8 +2998,8 @@ fn only_slash_for_max_in_session() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -3055,8 +3082,8 @@ fn garbage_collection_after_slashing() {
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 384000),
-                Event::ValidatorChosen(2, 41, 256000),
                 Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 256000),
                 Event::NewSession(5, 2, 3, 641000),
             ];
             assert_eq!(events(), expected);
@@ -3146,8 +3173,8 @@ fn garbage_collection_after_slashing_ed_1() {
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -3223,8 +3250,8 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
 
         let mut expected = vec![
             Event::ValidatorChosen(2, 11, 1500),
-            Event::ValidatorChosen(2, 41, 1000),
             Event::ValidatorChosen(2, 21, 1000),
+            Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 3500),
         ];
         assert_eq!(events(), expected);
@@ -3271,11 +3298,11 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         // ensure validator 11 is not selected for the session 3 & 4
 
         let mut new1 = vec![
-            Event::ValidatorChosen(3, 41, 1000),
             Event::ValidatorChosen(3, 21, 1000),
+            Event::ValidatorChosen(3, 41, 1000),
             Event::NewSession(10, 3, 2, 2000),
-            Event::ValidatorChosen(4, 41, 1000),
             Event::ValidatorChosen(4, 21, 1000),
+            Event::ValidatorChosen(4, 41, 1000),
             Event::NewSession(15, 4, 2, 2000),
         ];
         expected.append(&mut new1);
@@ -3291,8 +3318,8 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         let mut new2 = vec![
             Event::ValidatorBondedMore(11, 900, 910),
             Event::ValidatorChosen(5, 11, 1360),
-            Event::ValidatorChosen(5, 41, 1000),
             Event::ValidatorChosen(5, 21, 1000),
+            Event::ValidatorChosen(5, 41, 1000),
             Event::NewSession(20, 5, 3, 3360),
         ];
         expected.append(&mut new2);
@@ -3317,16 +3344,16 @@ fn slashing_nominators_by_span_max() {
 
         let mut expected = vec![
             Event::Nomination(101, 500, 21, 1500),
-            Event::ValidatorChosen(2, 21, 1500),
             Event::ValidatorChosen(2, 11, 1500),
+            Event::ValidatorChosen(2, 21, 1500),
             Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 4000),
-            Event::ValidatorChosen(3, 21, 1500),
             Event::ValidatorChosen(3, 11, 1500),
+            Event::ValidatorChosen(3, 21, 1500),
             Event::ValidatorChosen(3, 41, 1000),
             Event::NewSession(10, 3, 3, 4000),
-            Event::ValidatorChosen(4, 21, 1500),
             Event::ValidatorChosen(4, 11, 1500),
+            Event::ValidatorChosen(4, 21, 1500),
             Event::ValidatorChosen(4, 41, 1000),
             Event::NewSession(15, 4, 3, 4000),
         ];
@@ -3486,16 +3513,16 @@ fn slashes_are_summed_across_spans() {
 
         let mut expected = vec![
             Event::Nomination(101, 500, 21, 1500),
-            Event::ValidatorChosen(2, 21, 1500),
             Event::ValidatorChosen(2, 11, 1500),
+            Event::ValidatorChosen(2, 21, 1500),
             Event::ValidatorChosen(2, 41, 1000),
             Event::NewSession(5, 2, 3, 4000),
-            Event::ValidatorChosen(3, 21, 1500),
             Event::ValidatorChosen(3, 11, 1500),
+            Event::ValidatorChosen(3, 21, 1500),
             Event::ValidatorChosen(3, 41, 1000),
             Event::NewSession(10, 3, 3, 4000),
-            Event::ValidatorChosen(4, 21, 1500),
             Event::ValidatorChosen(4, 11, 1500),
+            Event::ValidatorChosen(4, 21, 1500),
             Event::ValidatorChosen(4, 41, 1000),
             Event::NewSession(15, 4, 3, 4000),
         ];
@@ -3618,8 +3645,8 @@ fn deferred_slashes_are_deferred() {
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 1500),
-                Event::ValidatorChosen(2, 41, 1000),
                 Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
                 Event::NewSession(5, 2, 3, 3500),
             ];
             assert_eq!(mock::events(), expected);
@@ -3649,8 +3676,8 @@ fn deferred_slashes_are_deferred() {
             mock::start_active_session(2);
 
             let mut new2 = vec![
-                Event::ValidatorChosen(3, 41, 1000),
                 Event::ValidatorChosen(3, 21, 1000),
+                Event::ValidatorChosen(3, 41, 1000),
                 Event::NewSession(10, 3, 2, 2000),
             ];
 
@@ -3664,8 +3691,8 @@ fn deferred_slashes_are_deferred() {
             let mut new3 = vec![
                 Event::Slash(11, 100),
                 Event::Slash(101, 50),
-                Event::ValidatorChosen(4, 41, 1000),
                 Event::ValidatorChosen(4, 21, 1000),
+                Event::ValidatorChosen(4, 41, 1000),
                 Event::NewSession(15, 4, 2, 2000),
             ];
             expected.append(&mut new3);
@@ -3686,8 +3713,8 @@ fn remove_deferred() {
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 1500),
-                Event::ValidatorChosen(2, 41, 1000),
                 Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
                 Event::NewSession(5, 2, 3, 3500),
             ];
             assert_eq!(mock::events(), expected);
@@ -3717,8 +3744,8 @@ fn remove_deferred() {
             mock::start_active_session(2);
 
             let mut new2 = vec![
-                Event::ValidatorChosen(3, 41, 1000),
                 Event::ValidatorChosen(3, 21, 1000),
+                Event::ValidatorChosen(3, 41, 1000),
                 Event::NewSession(10, 3, 2, 2000),
             ];
 
@@ -3761,8 +3788,8 @@ fn remove_deferred() {
             assert_eq!(NodleStaking::total(), 3500);
 
             let mut new4 = vec![
-                Event::ValidatorChosen(4, 41, 1000),
                 Event::ValidatorChosen(4, 21, 1000),
+                Event::ValidatorChosen(4, 41, 1000),
                 Event::NewSession(15, 4, 2, 2000),
             ];
 
@@ -3778,8 +3805,8 @@ fn remove_deferred() {
             let mut new5 = vec![
                 Event::Slash(11, 50),
                 Event::Slash(101, 25),
-                Event::ValidatorChosen(5, 41, 1000),
                 Event::ValidatorChosen(5, 21, 1000),
+                Event::ValidatorChosen(5, 41, 1000),
                 Event::NewSession(20, 5, 2, 2000),
             ];
 
@@ -3800,8 +3827,8 @@ fn remove_multi_deferred() {
 
             let mut expected = vec![
                 Event::ValidatorChosen(2, 11, 1500),
-                Event::ValidatorChosen(2, 41, 1000),
                 Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
                 Event::NewSession(5, 2, 3, 3500),
             ];
             assert_eq!(mock::events(), expected);
