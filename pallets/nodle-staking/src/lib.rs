@@ -32,6 +32,7 @@ mod set;
 pub mod weights;
 
 use frame_support::pallet;
+mod migrations;
 pub mod slashing;
 
 #[cfg(feature = "std")]
@@ -632,20 +633,10 @@ pub mod pallet {
             ensure!(!Self::is_validator(&acc), Error::<T>::ValidatorExists);
             ensure!(!Self::is_nominator(&acc), Error::<T>::NominatorExists);
 
-            let invuln_acc: bool = <Invulnerables<T>>::get().contains(&acc);
-
-            log::debug!(
-                "validator_join_pool:[{:#?}] | is_Invulnerables[{:#?}]",
-                line!(),
-                invuln_acc
+            ensure!(
+                bond >= T::MinValidatorPoolStake::get(),
+                Error::<T>::ValidatorBondBelowMin
             );
-
-            if !invuln_acc {
-                ensure!(
-                    bond >= T::MinValidatorPoolStake::get(),
-                    Error::<T>::ValidatorBondBelowMin
-                );
-            }
 
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
             let mut validators = <ValidatorPool<T>>::get();
@@ -658,13 +649,11 @@ pub mod pallet {
             );
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
-            if !invuln_acc {
-                let validator_free_balance = T::Currency::free_balance(&acc);
-                ensure!(
-                    validator_free_balance >= bond,
-                    Error::<T>::InsufficientBalance
-                );
-            }
+            let validator_free_balance = T::Currency::free_balance(&acc);
+            ensure!(
+                validator_free_balance >= bond,
+                Error::<T>::InsufficientBalance
+            );
 
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 

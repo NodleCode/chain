@@ -1312,16 +1312,7 @@ fn validators_bond() {
             (20, 1),
             (30, 1),
         ])
-        .invulnerables(vec![20, 30])
-        .with_validators(vec![
-            (1, 20),
-            (2, 20),
-            (3, 20),
-            (4, 20),
-            (5, 10),
-            (20, 1),
-            (30, 1),
-        ])
+        .with_validators(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
         .with_nominators(vec![
             (6, 1, 10),
             (7, 1, 10),
@@ -1339,33 +1330,25 @@ fn validators_bond() {
                 Event::ValidatorChosen(2, 3, 20),
                 Event::ValidatorChosen(2, 4, 20),
                 Event::ValidatorChosen(2, 5, 10),
-                Event::ValidatorChosen(2, 20, 1),
-                Event::ValidatorChosen(2, 30, 1),
-                Event::NewSession(5, 2, 7, 142),
+                Event::NewSession(5, 2, 5, 140),
                 Event::ValidatorChosen(3, 1, 50),
                 Event::ValidatorChosen(3, 2, 40),
                 Event::ValidatorChosen(3, 3, 20),
                 Event::ValidatorChosen(3, 4, 20),
                 Event::ValidatorChosen(3, 5, 10),
-                Event::ValidatorChosen(3, 20, 1),
-                Event::ValidatorChosen(3, 30, 1),
-                Event::NewSession(10, 3, 7, 142),
+                Event::NewSession(10, 3, 5, 140),
                 Event::ValidatorChosen(4, 1, 50),
                 Event::ValidatorChosen(4, 2, 40),
                 Event::ValidatorChosen(4, 3, 20),
                 Event::ValidatorChosen(4, 4, 20),
                 Event::ValidatorChosen(4, 5, 10),
-                Event::ValidatorChosen(4, 20, 1),
-                Event::ValidatorChosen(4, 30, 1),
-                Event::NewSession(15, 4, 7, 142),
+                Event::NewSession(15, 4, 5, 140),
                 Event::ValidatorChosen(5, 1, 50),
                 Event::ValidatorChosen(5, 2, 40),
                 Event::ValidatorChosen(5, 3, 20),
                 Event::ValidatorChosen(5, 4, 20),
                 Event::ValidatorChosen(5, 5, 10),
-                Event::ValidatorChosen(5, 20, 1),
-                Event::ValidatorChosen(5, 30, 1),
-                Event::NewSession(20, 5, 7, 142),
+                Event::NewSession(20, 5, 5, 140),
             ];
             assert_eq!(events(), expected);
 
@@ -1399,7 +1382,7 @@ fn validators_bond() {
             assert_eq!(mock::balances(&10), (100, 10));
             assert_eq!(Balances::total_balance(&10), 100);
 
-            assert_eq!(NodleStaking::total(), 142);
+            assert_eq!(NodleStaking::total(), 140);
 
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(6), 50),
@@ -1437,20 +1420,16 @@ fn validators_bond() {
                 Event::ValidatorChosen(6, 3, 20),
                 Event::ValidatorChosen(6, 4, 20),
                 Event::ValidatorChosen(6, 5, 10),
-                Event::ValidatorChosen(6, 20, 1),
-                Event::ValidatorChosen(6, 30, 1),
-                Event::NewSession(25, 6, 6, 92),
+                Event::NewSession(25, 6, 4, 90),
                 Event::NominatorLeftValidator(6, 1, 10, 0),
                 Event::NominatorLeftValidator(7, 1, 10, 0),
                 Event::NominatorLeftValidator(10, 1, 10, 0),
-                Event::ValidatorLeft(1, 100, 92),
+                Event::ValidatorLeft(1, 100, 90),
                 Event::ValidatorChosen(7, 2, 40),
                 Event::ValidatorChosen(7, 3, 20),
                 Event::ValidatorChosen(7, 4, 20),
                 Event::ValidatorChosen(7, 5, 10),
-                Event::ValidatorChosen(7, 20, 1),
-                Event::ValidatorChosen(7, 30, 1),
-                Event::NewSession(30, 7, 6, 92),
+                Event::NewSession(30, 7, 4, 90),
             ];
             expected.append(&mut new2);
             assert_eq!(events(), expected);
@@ -1499,29 +1478,23 @@ fn validators_bond() {
             assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(2)));
             assert_eq!(mock::balances(&2), (100, 10));
 
-            let mut new4 = vec![
+			let mut new4 = vec![
                 Event::ValidatorBondedLess(4, 20, 10),
                 Event::ValidatorChosen(8, 2, 30),
                 Event::ValidatorChosen(8, 3, 10),
                 Event::ValidatorChosen(8, 4, 10),
                 Event::ValidatorChosen(8, 5, 10),
-                Event::ValidatorChosen(8, 20, 1),
-                Event::ValidatorChosen(8, 30, 1),
-                Event::NewSession(35, 8, 6, 62),
+                Event::NewSession(35, 8, 4, 60),
                 Event::ValidatorChosen(9, 2, 30),
                 Event::ValidatorChosen(9, 3, 10),
                 Event::ValidatorChosen(9, 4, 10),
                 Event::ValidatorChosen(9, 5, 10),
-                Event::ValidatorChosen(9, 20, 1),
-                Event::ValidatorChosen(9, 30, 1),
-                Event::NewSession(40, 9, 6, 62),
+                Event::NewSession(40, 9, 4, 60),
                 Event::ValidatorChosen(10, 2, 30),
                 Event::ValidatorChosen(10, 3, 10),
                 Event::ValidatorChosen(10, 4, 10),
                 Event::ValidatorChosen(10, 5, 10),
-                Event::ValidatorChosen(10, 20, 1),
-                Event::ValidatorChosen(10, 30, 1),
-                Event::NewSession(45, 10, 6, 62),
+                Event::NewSession(45, 10, 4, 60),
                 Event::Withdrawn(2, 90),
             ];
             expected.append(&mut new4);
