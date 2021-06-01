@@ -108,7 +108,7 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         post_invulnerable_validators.dedup();
 
         <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
 
         for valid_acc in &poa_validators {
             if <StakingValidatorState<T>>::contains_key(&valid_acc) {
