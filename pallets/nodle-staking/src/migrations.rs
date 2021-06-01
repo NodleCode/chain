@@ -95,7 +95,7 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
 
         let pre_invulnerable_validators = <StakingInvulnerables<T>>::get().unwrap();
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
         let mut post_invulnerable_validators = pre_invulnerable_validators
             .clone()
