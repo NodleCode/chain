@@ -207,10 +207,7 @@ benchmarks! {
         //     line!(),
         //     <NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving()
         // );
-        assert_eq!(
-            <NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving(),
-            true
-        );
+        assert!(<NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving());
     }
 
     nominator_nominate {
