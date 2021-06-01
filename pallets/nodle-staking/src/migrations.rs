@@ -135,7 +135,7 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
                     <StakingValidatorState<T>>::contains_key(&valid_acc),
                 );
 
-                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
             }
         }
 
