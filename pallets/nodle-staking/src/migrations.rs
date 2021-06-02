@@ -92,7 +92,7 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         log::info!("🕊️ POA Validators doesn't exist Nothing to migrate!!!");
     } else {
         let poa_validators = <POAValidators<T>>::get().unwrap();
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
         let pre_invulnerable_validators = <StakingInvulnerables<T>>::get().unwrap();
         weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
