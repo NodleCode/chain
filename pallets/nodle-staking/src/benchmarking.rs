@@ -245,9 +245,9 @@ benchmarks! {
             T::MaxValidatorPerNominator::get()
         );
 
-        let nominator = create_funded_user::<T>("nden-nominator", SEED, 100);
-        whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNominatorStake::get() * 2u32.into();
+        let nominator = create_funded_user::<T>("nden-nominator", SEED, nominator_bond_val);
+        whitelist_account!(nominator);
 
         for validator in validator_list.clone() {
             assert_ok!(
