@@ -127,8 +127,8 @@ benchmarks! {
     }
 
     validator_join_pool {
-        let validator = create_funded_user::<T>("vjp-validator", SEED, 100);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 2u32.into();
+        let validator = create_funded_user::<T>("vjp-validator", SEED, validator_bond_val);
     }: _(RawOrigin::Signed(validator.clone()), validator_bond_val)
     verify {
         assert_last_event::<T>(
