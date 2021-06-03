@@ -219,9 +219,10 @@ benchmarks! {
                 validator_bond_val
             )
         );
-        let nominator = create_funded_user::<T>("nom-nominator", SEED, 100);
-        whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
+        let nominator = create_funded_user::<T>("nom-nominator", SEED, nominator_bond_val);
+        whitelist_account!(nominator);
+       
         // log::trace!( "[nominator_nominate > {:#?}]=> - {:#?}", line!(), crate::mock::events());
 
     }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_val)
