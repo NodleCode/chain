@@ -166,8 +166,8 @@ benchmarks! {
     }
 
     validator_bond_less {
-        let validator = create_funded_user::<T>("vbl-validator", SEED, 500);
         let validator_bond_val: BalanceOf<T> = T::MinValidatorPoolStake::get() * 5u32.into();
+        let validator = create_funded_user::<T>("vbl-validator", SEED, validator_bond_val);
         assert_ok!(
             <NodleStaking<T>>::validator_join_pool(
                 RawOrigin::Signed(validator.clone()).into(),
