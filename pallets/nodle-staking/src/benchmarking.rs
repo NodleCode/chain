@@ -290,9 +290,9 @@ benchmarks! {
                 validator_bond_val
             )
         );
-        let nominator = create_funded_user::<T>("nbndm-nominator", SEED, 100);
-        whitelist_account!(nominator);
         let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 2u32.into();
+        let nominator = create_funded_user::<T>("nbndm-nominator", SEED, nominator_bond_val);
+        whitelist_account!(nominator);
         assert_ok!(
             <NodleStaking<T>>::nominator_nominate(
                 RawOrigin::Signed(nominator.clone()).into(),
