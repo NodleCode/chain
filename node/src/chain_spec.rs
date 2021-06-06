@@ -17,19 +17,14 @@
  */
 
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
+#[cfg(feature = "with-staking")]
+use nodle_chain_runtime::StakingConfig;
 use nodle_chain_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
     IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
 };
-
-// #[cfg(feature = "with-staking")]
-// use nodle_chain_runtime::{StakerStatus, StakingConfig};
-
-#[cfg(feature = "with-staking")]
-use nodle_chain_runtime::StakingConfig;
-
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use serde_json::json;
@@ -211,51 +206,12 @@ pub fn testnet_genesis(
         pallet_grandpa: Some(GrandpaConfig {
             authorities: vec![],
         }),
-        // #[cfg(feature = "with-staking")]
-        // pallet_curveless_staking: Some(StakingConfig {
-        //     validator_count: initial_authorities.len() as u32 * 2,
-        //     minimum_validator_count: initial_authorities.len() as u32,
-        //     stakers: initial_authorities
-        //         .iter()
-        //         .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
-        //         .collect(),
-        //     invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-        //     slash_reward_fraction: Perbill::from_percent(10),
-        //     ..Default::default()
-        // }),
         #[cfg(feature = "with-staking")]
         pallet_nodle_staking: Some(StakingConfig {
             stakers: initial_authorities
                 .iter()
                 .map(|x| (x.1.clone(), None, STASH))
                 .collect(),
-            // stakers: initial_authorities
-            //     .iter()
-            //     .map(|x| (x.1.clone(), None, STASH))
-            //     .chain(
-            //         endowed_accounts
-            //             .iter()
-            //             .map(|x| (x.clone(), None, ENDOWMENT)),
-            //     )
-            //     .fold(vec![], |mut acc, (account, nomi, endowment)| {
-            //         if acc
-            //             .iter()
-            //             .find(|(who, _nomi, _endowment)| who == &account)
-            //             .is_some()
-            //         {
-            //             // Increase endowment
-            //             acc = acc
-            //                 .iter()
-            //                 .cloned()
-            //                 .map(|(cur_account, curr_nomi, cur_endowment)| {
-            //                     (cur_account, curr_nomi, cur_endowment)
-            //                 })
-            //                 .collect::<Vec<(AccountId, Option<AccountId>, Balance)>>();
-            //         } else {
-            //             acc.push((account, nomi, endowment));
-            //         }
-            //         acc
-            //     }),
             invulnerables: initial_authorities.iter().map(|x| x.1.clone()).collect(),
             ..Default::default()
         }),

@@ -17,10 +17,12 @@
 */
 use super::*;
 use crate as nodle_staking;
+use crate::hooks;
 use frame_support::{
     assert_ok, ord_parameter_types, parameter_types,
     traits::{
-        Currency, FindAuthor, Imbalance, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler,
+        Currency, FindAuthor, Imbalance, LockIdentifier, OnFinalize, OnInitialize, OnUnbalanced,
+        OneSessionHandler,
     },
     weights::constants::RocksDbWeight,
 };
@@ -37,9 +39,7 @@ use sp_staking::{
     SessionIndex,
 };
 
-// use std::{cell::RefCell, collections::HashSet};
-use crate::set::OrderedSet;
-use sp_std::cell::RefCell;
+use std::{cell::RefCell, collections::HashSet};
 
 pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;
@@ -50,12 +50,8 @@ pub(crate) type AccountIndex = u64;
 pub(crate) type BlockNumber = u64;
 pub(crate) type Balance = u128;
 
-// thread_local! {
-//     static SESSION: RefCell<(Vec<AccountId>, HashSet<AccountId>)> = RefCell::new(Default::default());
-// }
-
 thread_local! {
-    static SESSION: RefCell<(Vec<AccountId>, OrderedSet<AccountId>)> = RefCell::new(Default::default());
+    static SESSION: RefCell<(Vec<AccountId>, HashSet<AccountId>)> = RefCell::new(Default::default());
 }
 
 /// Another session handler struct to test on_disabled.
@@ -76,8 +72,7 @@ impl OneSessionHandler<AccountId> for OtherSessionHandler {
         AccountId: 'a,
     {
         SESSION.with(|x| {
-            // *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), HashSet::new())
-            *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), OrderedSet::new())
+            *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), HashSet::new())
         });
     }
 
@@ -205,14 +200,14 @@ impl pallet_session::Config for Test {
     type SessionHandler = (OtherSessionHandler,);
     type Event = Event;
     type ValidatorId = AccountId;
-    type ValidatorIdOf = nodle_staking::StashOf<Test>;
+    type ValidatorIdOf = hooks::StashOf<Test>;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
     type WeightInfo = ();
 }
 impl pallet_session::historical::Config for Test {
-    type FullIdentification = nodle_staking::ValidatorSnapshot<AccountId, Balance>;
-    type FullIdentificationOf = nodle_staking::ValidatorSnapshotOf<Test>;
+    type FullIdentification = crate::types::ValidatorSnapshot<AccountId, Balance>;
+    type FullIdentificationOf = crate::types::ValidatorSnapshotOf<Test>;
 }
 impl pallet_authorship::Config for Test {
     type FindAuthor = Author11;
@@ -240,12 +235,15 @@ parameter_types! {
     pub const MinSelectedValidators: u32 = 5;
     pub const MaxNominatorsPerValidator: u32 = 4;
     pub const MaxValidatorPerNominator: u32 = 4;
-    pub const DefaultValidatorCommission: Perbill = Perbill::from_percent(20);
-    pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(10);
-    pub const MinValidatorStake: u128 = 10;
-    pub const MinNominatorStake: u128 = 5;
-    pub const MinNomination: u128 = 3;
+    pub const DefaultValidatorFee: Perbill = Perbill::from_percent(20);
+    pub const DefaultSlashRewardProportion: Perbill = Perbill::from_percent(10);
+    pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(50);
+    pub const MinValidatorStake: Balance = 10;
+    pub const MinNominatorStake: Balance = 5;
+    pub const MinNomination: Balance = 3;
+    pub const MaxChunkUnlock: usize = 32;
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    pub const StakingLockId: LockIdentifier = *b"staking ";
 }
 impl Config for Test {
     type Event = Event;
@@ -254,14 +252,17 @@ impl Config for Test {
     type MinSelectedValidators = MinSelectedValidators;
     type MaxNominatorsPerValidator = MaxNominatorsPerValidator;
     type MaxValidatorPerNominator = MaxValidatorPerNominator;
-    type DefaultValidatorCommission = DefaultValidatorCommission;
+    type DefaultValidatorFee = DefaultValidatorFee;
+    type DefaultSlashRewardProportion = DefaultSlashRewardProportion;
     type DefaultSlashRewardFraction = DefaultSlashRewardFraction;
     type MinValidatorStake = MinValidatorStake;
     type MinValidatorPoolStake = MinValidatorStake;
     type MinNominatorStake = MinNominatorStake;
     type MinNomination = MinNomination;
     type RewardRemainder = RewardRemainderMock;
+    type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
+    type StakingLockId = StakingLockId;
     type Slash = ();
     type Reward = ();
     type SlashDeferDuration = SlashDeferDuration;
@@ -445,8 +446,7 @@ impl ExtBuilder {
         let mut ext = sp_io::TestExternalities::new(storage);
         ext.execute_with(|| {
             let validators = Session::validators();
-            // SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
-            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), OrderedSet::new()));
+            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
         });
         ext.execute_with(|| {
             System::set_block_number(1);
@@ -552,8 +552,7 @@ impl ExtBuilder {
         let mut ext = sp_io::TestExternalities::from(storage);
         ext.execute_with(|| {
             let validators = Session::validators();
-            // SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
-            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), OrderedSet::new()));
+            SESSION.with(|x| *x.borrow_mut() = (validators.clone(), HashSet::new()));
         });
 
         if self.initialize_first_session {

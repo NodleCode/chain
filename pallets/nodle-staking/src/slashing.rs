@@ -16,11 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use super::{
-    BalanceOf, Config, Event, NegativeImbalanceOf, Pallet, SessionInterface, Store, UnappliedSlash,
-    ValidatorSnapshot,
+use super::{BalanceOf, Config, Event, NegativeImbalanceOf, Pallet, Store};
+use crate::hooks::SessionInterface;
+use crate::types::{SpanIndex, UnappliedSlash, ValidatorSnapshot};
+use frame_support::traits::{
+    Currency, Get, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons,
 };
-use frame_support::traits::{Currency, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons};
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{Saturating, Zero},
@@ -28,13 +29,6 @@ use sp_runtime::{
 };
 use sp_staking::SessionIndex;
 use sp_std::vec::Vec;
-
-/// The proportion of the slashing reward to be paid out on the first slashing detection.
-/// This is f_1 in the paper.
-const REWARD_F1: Perbill = Perbill::from_percent(50);
-
-/// The index of a slashing span - unique to each controller.
-pub type SpanIndex = u32;
 
 // A range of start..end eras for a slashing span.
 #[derive(Encode, Decode)]
@@ -47,7 +41,10 @@ pub(crate) struct SlashingSpan {
 
 impl SlashingSpan {
     fn contains_era(&self, era: SessionIndex) -> bool {
-        self.start <= era && self.length.map_or(true, |l| self.start + l > era)
+        self.start <= era
+            && self
+                .length
+                .map_or(true, |l| self.start.saturating_add(l) > era)
     }
 }
 
@@ -85,15 +82,14 @@ impl SlashingSpans {
     // returns `true` if a new span was started, `false` otherwise. `false` indicates
     // that internal state is unchanged.
     pub(crate) fn end_span(&mut self, now: SessionIndex) -> bool {
-        let next_start = now + 1;
+        let next_start = now.saturating_add(1);
         if next_start <= self.last_start {
             return false;
         }
-
-        let last_length = next_start - self.last_start;
+        let last_length = next_start.saturating_sub(self.last_start);
         self.prior.insert(0, last_length);
         self.last_start = next_start;
-        self.span_index += 1;
+        self.span_index = self.span_index.saturating_add(1);
         true
     }
 
@@ -109,7 +105,7 @@ impl SlashingSpans {
         let prior = self.prior.iter().cloned().map(move |length| {
             let start = last_start - length;
             last_start = start;
-            index -= 1;
+            index = index.saturating_sub(1);
 
             SlashingSpan {
                 index,
@@ -209,8 +205,8 @@ pub(crate) fn compute_slash<T: Config>(
         reward_proportion,
     } = params.clone();
 
-    let mut reward_payout = Zero::zero();
-    let mut val_slashed = Zero::zero();
+    let mut reward_payout: BalanceOf<T> = Zero::zero();
+    let mut val_slashed: BalanceOf<T> = Zero::zero();
 
     log::trace!("compute_slash:[{:#?}] - Slash-[{:#?}]", line!(), slash);
 
@@ -285,7 +281,11 @@ pub(crate) fn compute_slash<T: Config>(
     }
 
     let mut nominators_slashed = Vec::new();
-    reward_payout += slash_nominators::<T>(params, prior_slash_p, &mut nominators_slashed);
+    reward_payout = reward_payout.saturating_add(slash_nominators::<T>(
+        params,
+        prior_slash_p,
+        &mut nominators_slashed,
+    ));
 
     Some(UnappliedSlash {
         validator: controller.clone(),
@@ -364,7 +364,7 @@ fn slash_nominators<T: Config>(
                 <Pallet<T> as Store>::NominatorSlashInSession::get(&slash_session, controller)
                     .unwrap_or_else(|| Zero::zero());
 
-            era_slash += own_slash_difference;
+            era_slash = era_slash.saturating_add(own_slash_difference);
 
             <Pallet<T> as Store>::NominatorSlashInSession::insert(
                 &slash_session,
@@ -463,7 +463,7 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
     // invariant: the staker is being slashed for non-zero value here
     // although `amount` may be zero, as it is only a difference.
     fn add_slash(&mut self, amount: BalanceOf<T>, slash_session: SessionIndex) {
-        *self.slash_of += amount;
+        *self.slash_of = self.slash_of.saturating_add(amount);
         self.spans.last_nonzero_slash =
             sp_std::cmp::max(self.spans.last_nonzero_slash, slash_session);
     }
@@ -493,8 +493,15 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
             span_record.slashed = slash;
 
             // compute reward.
-            let reward =
-                REWARD_F1 * (self.reward_proportion * slash).saturating_sub(span_record.paid_out);
+            let reward = T::DefaultSlashRewardFraction::get()
+                * (self.reward_proportion * slash).saturating_sub(span_record.paid_out);
+
+            log::trace!(
+                "compare_and_update_span_slash>[{:#?}] | Reward[{:#?}] | Perc[{:#?}]",
+                line!(),
+                reward,
+                T::DefaultSlashRewardFraction::get(),
+            );
 
             self.add_slash(difference, slash_session);
             changed = true;
@@ -502,15 +509,16 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
             reward
         } else if span_record.slashed == slash {
             // compute reward. no slash difference to apply.
-            REWARD_F1 * (self.reward_proportion * slash).saturating_sub(span_record.paid_out)
+            T::DefaultSlashRewardFraction::get()
+                * (self.reward_proportion * slash).saturating_sub(span_record.paid_out)
         } else {
             Zero::zero()
         };
 
         if !reward.is_zero() {
             changed = true;
-            span_record.paid_out += reward;
-            *self.paid_out += reward;
+            span_record.paid_out = span_record.paid_out.saturating_add(reward);
+            *self.paid_out = self.paid_out.saturating_add(reward);
         }
 
         if changed {
@@ -601,7 +609,7 @@ fn do_slash_validator<T: Config>(
                 slashed_imbalance.subsume(imbalance);
 
                 T::Currency::set_lock(
-                    crate::STAKING_ID,
+                    T::StakingLockId::get(),
                     &controller,
                     valid_pre_total.saturating_sub(slashed_value),
                     WithdrawReasons::all(),
@@ -609,7 +617,7 @@ fn do_slash_validator<T: Config>(
 
                 // Consider only the value slashed on active bond.
                 <Pallet<T> as Store>::Total::mutate(|x| {
-                    *x -= old_active_bond.saturating_sub(validator_state.bond)
+                    *x = x.saturating_sub(old_active_bond.saturating_sub(validator_state.bond))
                 });
 
                 let cur_balance_stat = T::Currency::free_balance(controller);
@@ -682,16 +690,16 @@ fn do_slash_nominator<T: Config>(
                 slashed_imbalance.subsume(imbalance);
 
                 T::Currency::set_lock(
-                    crate::STAKING_ID,
+                    T::StakingLockId::get(),
                     &controller,
                     nominator_state.total,
                     WithdrawReasons::all(),
                 );
 
-                // <Pallet<T> as Store>::Total::mutate(|x| *x -= slashed_value);
                 // Consider only the value slashed on active bond.
                 <Pallet<T> as Store>::Total::mutate(|x| {
-                    *x -= old_active_bond.saturating_sub(nominator_state.active_bond)
+                    *x = x
+                        .saturating_sub(old_active_bond.saturating_sub(nominator_state.active_bond))
                 });
 
                 let cur_balance_stat = T::Currency::free_balance(controller);

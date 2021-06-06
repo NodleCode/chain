@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-/* TODO: use orml_utilities::OrderedSet without leaking substrate v2.0 dependencies */
 use parity_scale_codec::{Decode, Encode};
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
@@ -73,8 +71,12 @@ impl<T: Ord> OrderedSet<T> {
     }
 
     /// Return if the set contains `value`
-    pub fn contains(&self, value: &T) -> bool {
-        self.0.binary_search(&value).is_ok()
+    pub fn contains(&self, value: &T) -> Option<usize> {
+        // self.0.binary_search(&value).is_ok()
+        match self.0.binary_search(&value) {
+            Ok(loc) => Some(loc),
+            Err(_) => None,
+        }
     }
 
     /// Clear the set

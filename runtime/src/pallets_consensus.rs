@@ -35,7 +35,11 @@ use sp_runtime::traits::ConvertInto;
 #[cfg(feature = "with-staking")]
 use crate::{Balances, Staking};
 
-use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
+use frame_support::{
+    parameter_types,
+    traits::{KeyOwnerProofSystem, LockIdentifier},
+    weights::Weight,
+};
 
 use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
 
@@ -220,13 +224,15 @@ parameter_types! {
     pub const MinSelectedValidators: u32 = 5;
     pub const MaxNominatorsPerValidator: u32 = 25;
     pub const MaxValidatorPerNominator: u32 = 25;
-    pub const DefaultValidatorCommission: Perbill = Perbill::from_percent(20);
-    pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(10);
-    pub const MinValidatorStake: u128 = 10;
-    pub const MinNominatorStake: u128 = 5;
-    pub const MinNomination: u128 = 3;
+    pub const DefaultValidatorFee: Perbill = Perbill::from_percent(20);
+    pub const DefaultSlashRewardProportion: Perbill = Perbill::from_percent(10);
+    pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(50);
+    pub const MinValidatorStake: Balance = 10 * constants::MILLICENTS;
+    pub const MinNominatorStake: Balance = 5 * constants::MILLICENTS;
+    pub const MinNomination: Balance = 3 * constants::MILLICENTS;
+    pub const MaxChunkUnlock: usize = 32;
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
-
+    pub const StakingLockId: LockIdentifier = *b"staking ";
 }
 #[cfg(feature = "with-staking")]
 impl pallet_nodle_staking::Config for Runtime {
@@ -236,14 +242,17 @@ impl pallet_nodle_staking::Config for Runtime {
     type MinSelectedValidators = MinSelectedValidators;
     type MaxNominatorsPerValidator = MaxNominatorsPerValidator;
     type MaxValidatorPerNominator = MaxValidatorPerNominator;
-    type DefaultValidatorCommission = DefaultValidatorCommission;
+    type DefaultValidatorFee = DefaultValidatorFee;
+    type DefaultSlashRewardProportion = DefaultSlashRewardProportion;
     type DefaultSlashRewardFraction = DefaultSlashRewardFraction;
     type MinValidatorStake = MinValidatorStake;
     type MinValidatorPoolStake = MinValidatorStake;
     type MinNominatorStake = MinNominatorStake;
     type MinNomination = MinNomination;
     type RewardRemainder = ();
+    type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
+    type StakingLockId = StakingLockId;
     type Slash = ();
     type Reward = ();
     type SlashDeferDuration = SlashDeferDuration;

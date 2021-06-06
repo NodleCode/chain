@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use super::{BalanceOf, Config, Validator};
-
+use super::{BalanceOf, Config};
+use crate::types::Validator;
 use frame_support::{
     pallet_prelude::*,
     traits::StorageInstance,
@@ -83,68 +83,81 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         "<POAValidators<T>>::exits()? {:?}",
         <POAValidators<T>>::exists()
     );
+    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+
     log::info!(
         "<StakingInvulnerables<T>>::exits()? {:?}",
         <StakingInvulnerables<T>>::exists()
     );
+    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
     if !<POAValidators<T>>::exists() {
+        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
         log::info!("🕊️ POA Validators doesn't exist Nothing to migrate!!!");
     } else {
-        let poa_validators = <POAValidators<T>>::get().unwrap();
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+        if let Some(poa_validators) = <POAValidators<T>>::get() {
+            weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
-        let pre_invulnerable_validators = <StakingInvulnerables<T>>::get().unwrap();
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+            let pre_invulnerable_validators = <StakingInvulnerables<T>>::get()
+                .expect("Error!!! Staking Invulnerable invalid DB instance state");
+            weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
-        let mut post_invulnerable_validators = pre_invulnerable_validators
-            .clone()
-            .iter()
-            .chain(poa_validators.iter())
-            .map(|x| x.clone())
-            .collect::<Vec<T::AccountId>>();
+            let mut post_invulnerable_validators = pre_invulnerable_validators
+                .clone()
+                .iter()
+                .chain(poa_validators.iter())
+                .map(|x| x.clone())
+                .collect::<Vec<T::AccountId>>();
 
-        post_invulnerable_validators.sort();
-        post_invulnerable_validators.dedup();
+            post_invulnerable_validators.sort();
+            post_invulnerable_validators.dedup();
 
-        <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+            <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
+            weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
 
-        for valid_acc in &poa_validators {
-            if <StakingValidatorState<T>>::contains_key(&valid_acc) {
-                log::trace!(
+            for valid_acc in &poa_validators {
+                if <StakingValidatorState<T>>::contains_key(&valid_acc) {
+                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+
+                    log::trace!(
                     "poa_validators_migration>[{:#?}]=> - Already staker Ignoring Address -[{:#?}]",
                     line!(),
                     valid_acc
                 );
-            } else {
-                log::trace!(
-                    "poa_validators_migration>[{:#?}]=> - Adding Address -[{:#?}]",
-                    line!(),
-                    valid_acc
-                );
+                } else {
+                    log::trace!(
+                        "poa_validators_migration>[{:#?}]=> - Adding Address -[{:#?}]",
+                        line!(),
+                        valid_acc
+                    );
 
-                <StakingValidatorState<T>>::insert(
-                    &valid_acc,
-                    Validator::<T::AccountId, BalanceOf<T>>::new(valid_acc.clone(), Zero::zero()),
-                );
+                    <StakingValidatorState<T>>::insert(
+                        &valid_acc,
+                        Validator::<T::AccountId, BalanceOf<T>>::new(
+                            valid_acc.clone(),
+                            Zero::zero(),
+                        ),
+                    );
 
-                log::trace!(
-                    "poa_validators_migration>[{:#?}]=> - Address Added-[{:#?}]",
-                    line!(),
-                    <StakingValidatorState<T>>::contains_key(&valid_acc),
-                );
+                    log::trace!(
+                        "poa_validators_migration>[{:#?}]=> - Address Added-[{:#?}]",
+                        line!(),
+                        <StakingValidatorState<T>>::contains_key(&valid_acc),
+                    );
 
-                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 1));
+                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
+                }
             }
+
+            <POAValidators<T>>::kill();
+
+            log::info!(
+                "🕊️ Sucess!!! POA Validators of len {:#?} moved to Staking pallet",
+                poa_validators.len()
+            );
+        } else {
+            log::warn!("🕊️ Warning!!! Unable to read POA Validators instance");
         }
-
-        <POAValidators<T>>::kill();
-
-        log::info!(
-            "🕊️ Sucess!!! POA Validators of len {:#?} moved to Staking pallet",
-            poa_validators.len()
-        );
     }
 
     weight
@@ -156,6 +169,7 @@ mod tests {
     use super::*;
     use crate::mock;
     use crate::mock::{events, AccountId, ExtBuilder, NodleStaking, Origin, Poa, Test};
+    use crate::types;
     use frame_support::assert_ok;
     use frame_support::traits::InitializeMembers;
 
@@ -219,32 +233,32 @@ mod tests {
 
             assert_eq!(
                 NodleStaking::validator_state(&11).unwrap().state,
-                nodle_staking::ValidatorStatus::Active
+                types::ValidatorStatus::Active
             );
 
             assert_eq!(
                 NodleStaking::validator_state(&21).unwrap().state,
-                nodle_staking::ValidatorStatus::Active
+                types::ValidatorStatus::Active
             );
 
             assert_eq!(
                 NodleStaking::validator_state(&31).unwrap().state,
-                nodle_staking::ValidatorStatus::Active
+                types::ValidatorStatus::Active
             );
 
             assert_eq!(
                 NodleStaking::validator_state(&61).unwrap().state,
-                nodle_staking::ValidatorStatus::Active
+                types::ValidatorStatus::Active
             );
 
             assert_eq!(
                 NodleStaking::validator_state(&71).unwrap().state,
-                nodle_staking::ValidatorStatus::Active
+                types::ValidatorStatus::Active
             );
 
             assert_eq!(
                 NodleStaking::validator_state(&81).unwrap().state,
-                nodle_staking::ValidatorStatus::Active
+                types::ValidatorStatus::Active
             );
 
             mock::start_active_session(2);

@@ -23,6 +23,7 @@ use crate::mock::{
     on_offence_in_session, on_offence_now, set_author, start_session, Balance, Balances,
     CancelOrigin, Event as MetaEvent, ExtBuilder, NodleStaking, Origin, Session, System, Test,
 };
+use crate::types::{Bond, ValidatorSnapshot, ValidatorStatus};
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::{traits::BadOrigin, traits::Zero, Perbill};
 use sp_staking::offence::OffenceDetails;
@@ -50,10 +51,6 @@ fn join_validator_pool_works() {
                 Error::<Test>::ValidatorExists,
             );
             assert_noop!(
-                NodleStaking::validator_join_pool(Origin::signed(3), 11u128,),
-                Error::<Test>::NominatorExists,
-            );
-            assert_noop!(
                 NodleStaking::validator_join_pool(Origin::signed(7), 9u128,),
                 Error::<Test>::ValidatorBondBelowMin,
             );
@@ -62,10 +59,11 @@ fn join_validator_pool_works() {
                 Error::<Test>::InsufficientBalance,
             );
             assert!(System::events().is_empty());
+            assert_ok!(NodleStaking::validator_join_pool(Origin::signed(3), 11u128,),);
             assert_ok!(NodleStaking::validator_join_pool(Origin::signed(7), 10u128,));
             assert_eq!(
                 last_event(),
-                MetaEvent::nodle_staking(Event::JoinedValidatorPool(7, 10u128, 1110u128))
+                MetaEvent::nodle_staking(Event::JoinedValidatorPool(7, 10u128, 1121u128))
             );
         });
 }
@@ -1478,7 +1476,7 @@ fn validators_bond() {
             assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(2)));
             assert_eq!(mock::balances(&2), (100, 10));
 
-			let mut new4 = vec![
+            let mut new4 = vec![
                 Event::ValidatorBondedLess(4, 20, 10),
                 Event::ValidatorChosen(8, 2, 30),
                 Event::ValidatorChosen(8, 3, 10),
@@ -3287,6 +3285,19 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
         mock::start_active_session(4);
 
         // ensure validator 11 is part of session 5
+
+        // log::trace!("[{:#?}]=> - {:#?}", line!(), mock::events());
+        // panic!("Stop-1");
+
+        // let mut new2 = vec![
+        //     Event::ValidatorBondedMore(11, 900, 910),
+        //     Event::ValidatorChosen(5, 11, 1410),
+        //     Event::ValidatorChosen(5, 21, 1000),
+        //     Event::ValidatorChosen(5, 41, 1000),
+        //     Event::NewSession(20, 5, 3, 3410),
+        // ];
+        // expected.append(&mut new2);
+        // assert_eq!(events(), expected);
 
         let mut new2 = vec![
             Event::ValidatorBondedMore(11, 900, 910),
