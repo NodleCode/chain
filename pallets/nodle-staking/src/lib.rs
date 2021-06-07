@@ -144,8 +144,7 @@ pub mod pallet {
         /// Set the validators who cannot be slashed (if any).
         ///
         /// The dispatch origin must be Root.
-        // #[pallet::weight(T::WeightInfo::set_invulnerables(invulnerables.len() as u32))]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::set_invulnerables(invulnerables.len() as u32))]
         pub fn set_invulnerables(
             origin: OriginFor<T>,
             invulnerables: Vec<T::AccountId>,
@@ -159,8 +158,7 @@ pub mod pallet {
         }
         /// Set the total number of validator selected per round
         /// - changes are not applied until the start of the next round
-        // #[pallet::weight(T::WeightInfo::set_total_validator_per_round(*new))]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::set_total_validator_per_round(*new))]
         pub fn set_total_validator_per_round(
             origin: OriginFor<T>,
             new: u32,
@@ -178,8 +176,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Join the set of validators pool
-        // #[pallet::weight(T::WeightInfo::validator_join_pool())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_join_pool())]
         pub fn validator_join_pool(
             origin: OriginFor<T>,
             bond: BalanceOf<T>,
@@ -239,8 +236,7 @@ pub mod pallet {
         /// the account is immediately removed from the validator pool
         /// to prevent selection as a validator, but unbonding
         /// is executed with a delay of `BondedDuration` rounds.
-        // #[pallet::weight(T::WeightInfo::validator_exit_pool())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_exit_pool())]
         pub fn validator_exit_pool(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let validator = ensure_signed(origin)?;
 
@@ -276,8 +272,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond more for validator
-        // #[pallet::weight(T::WeightInfo::validator_bond_more())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_bond_more())]
         pub fn validator_bond_more(
             origin: OriginFor<T>,
             more: BalanceOf<T>,
@@ -325,8 +320,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond less for validator
-        // #[pallet::weight(T::WeightInfo::validator_bond_less())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::validator_bond_less())]
         pub fn validator_bond_less(
             origin: OriginFor<T>,
             less: BalanceOf<T>,
@@ -376,8 +370,7 @@ pub mod pallet {
         }
         /// If caller is not a nominator, then join the set of nominators
         /// If caller is a nominator, then makes nomination to change their nomination state
-        // #[pallet::weight(T::WeightInfo::nominator_nominate())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_nominate())]
         pub fn nominator_nominate(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -482,8 +475,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Revoke an existing nomination
-        // #[pallet::weight(T::WeightInfo::nominator_denominate())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_denominate())]
         pub fn nominator_denominate(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -491,8 +483,7 @@ pub mod pallet {
             Self::nominator_revokes_validator(ensure_signed(origin)?, validator, false)
         }
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
-        // #[pallet::weight(T::WeightInfo::nominator_denominate_all())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_denominate_all())]
         pub fn nominator_denominate_all(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
@@ -505,8 +496,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond more for nominators with respect to a specific validator
-        // #[pallet::weight(T::WeightInfo::nominator_bond_more())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_bond_more())]
         pub fn nominator_bond_more(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -550,8 +540,7 @@ pub mod pallet {
             Ok(().into())
         }
         /// Bond less for nominators with respect to a specific nominated validator
-        // #[pallet::weight(T::WeightInfo::nominator_bond_less())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::nominator_bond_less())]
         pub fn nominator_bond_less(
             origin: OriginFor<T>,
             validator: T::AccountId,
@@ -608,8 +597,7 @@ pub mod pallet {
 
             Ok(().into())
         }
-        // #[pallet::weight(T::WeightInfo::withdraw_unbonded())]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::withdraw_unbonded())]
         pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
@@ -670,8 +658,7 @@ pub mod pallet {
         /// Can be called by the `T::SlashCancelOrigin`.
         ///
         /// Parameters: session index and validator list of the slashes for that session to kill.
-        // #[pallet::weight(T::WeightInfo::slash_cancel_deferred(*session_idx as u32, controllers.len() as u32))]
-        #[pallet::weight(10_000)]
+        #[pallet::weight(T::WeightInfo::slash_cancel_deferred(*session_idx as u32, controllers.len() as u32))]
         pub fn slash_cancel_deferred(
             origin: OriginFor<T>,
             session_idx: SessionIndex,

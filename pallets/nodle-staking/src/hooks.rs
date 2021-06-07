@@ -33,7 +33,7 @@ use sp_runtime::{
     Perbill,
 };
 use sp_staking::{
-    offence::{Offence, OffenceDetails, OffenceError, OnOffenceHandler, ReportOffence},
+    offence::{OffenceDetails, OnOffenceHandler},
     SessionIndex,
 };
 use sp_std::prelude::*;
@@ -377,38 +377,3 @@ where
         true
     }
 }
-
-// TODO :: Final cleanup | Is it needed for block explorer context ?
-// /// Filter historical offences out and only allow those from the bonding period.
-// pub struct FilterHistoricalOffences<T, R> {
-//     _inner: sp_std::marker::PhantomData<(T, R)>,
-// }
-
-// impl<T, Reporter, Offender, R, O> ReportOffence<Reporter, Offender, O>
-//     for FilterHistoricalOffences<Pallet<T>, R>
-// where
-//     T: Config,
-//     R: ReportOffence<Reporter, Offender, O>,
-//     O: Offence<Offender>,
-// {
-//     fn report_offence(reporters: Vec<Reporter>, offence: O) -> Result<(), OffenceError> {
-//         // disallow any slashing from before the current bonding period.
-//         let offence_session = offence.session_index();
-//         let bonded_sessions = <BondedSessions<T>>::get();
-
-//         if bonded_sessions
-//             .first()
-//             .filter(|start| offence_session >= **start)
-//             .is_some()
-//         {
-//             R::report_offence(reporters, offence)
-//         } else {
-//             <Pallet<T>>::deposit_event(Event::OldSlashingReportDiscarded(offence_session));
-//             Ok(())
-//         }
-//     }
-
-//     fn is_known_offence(offenders: &[Offender], time_slot: &O::TimeSlot) -> bool {
-//         R::is_known_offence(offenders, time_slot)
-//     }
-// }
