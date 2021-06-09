@@ -139,7 +139,8 @@ pub fn testnet_genesis(
         )]
     });
 
-    const ENDOWMENT: Balance = 100 * NODL;
+    // const ENDOWMENT: Balance = 100 * NODL;
+    const ENDOWMENT: Balance = 10_000 * NODL;
 
     #[cfg(feature = "with-staking")]
     const STASH: Balance = ENDOWMENT / 1_000;

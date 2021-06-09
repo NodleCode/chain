@@ -37,8 +37,13 @@ use crate::{Balances, Staking};
 
 use frame_support::{
     parameter_types,
-    traits::{KeyOwnerProofSystem, LockIdentifier},
+    traits::{KeyOwnerProofSystem},
     weights::Weight,
+};
+
+#[cfg(feature = "with-staking")]
+use frame_support::{
+    traits::{LockIdentifier},
 };
 
 use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
@@ -132,7 +137,12 @@ impl pallet_authorship::Config for Runtime {
     type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
     type UncleGenerations = UncleGenerations;
     type FilterUncle = ();
+
+    #[cfg(not(feature = "with-staking"))]
     type EventHandler = ImOnline;
+
+    #[cfg(feature = "with-staking")]
+    type EventHandler = (Staking, ImOnline);
 }
 
 parameter_types! {
