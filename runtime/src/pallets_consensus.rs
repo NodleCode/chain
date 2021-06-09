@@ -35,16 +35,10 @@ use sp_runtime::traits::ConvertInto;
 #[cfg(feature = "with-staking")]
 use crate::{Balances, Staking};
 
-use frame_support::{
-    parameter_types,
-    traits::{KeyOwnerProofSystem},
-    weights::Weight,
-};
+use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
 
 #[cfg(feature = "with-staking")]
-use frame_support::{
-    traits::{LockIdentifier},
-};
+use frame_support::traits::LockIdentifier;
 
 use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
 
