@@ -1159,8 +1159,6 @@ pub mod pallet {
                     let nominator_stake = exists.ok_or(<Error<T>>::ValidatorDNE)?;
                     let nominators = OrderedSet::from(noms);
 
-                    // T::Currency::unreserve(&nominator, nominator_stake);
-
                     state.nominators = nominators;
                     state.nomi_bond_total = state.nomi_bond_total.saturating_sub(nominator_stake);
                     state.total = state.total.saturating_sub(nominator_stake);
