@@ -567,7 +567,6 @@ pub mod pallet {
             let mut validator_state =
                 <ValidatorState<T>>::get(&validator).ok_or(<Error<T>>::ValidatorDNE)?;
 
-            // T::Currency::unreserve(&nominator, less);
             nominations.unlocking.push(UnlockChunk {
                 value: less,
                 session_idx: Self::active_session().saturating_add(T::BondedDuration::get()),
