@@ -406,13 +406,13 @@ fn slash_nominators<T: Config>(
     reward_payout
 }
 
-// helper struct for managing a set of spans we are currently inspecting.
-// writes alterations to disk on drop, but only if a slash has been carried out.
-//
-// NOTE: alterations to slashing metadata should not be done after this is dropped.
-// dropping this struct applies any necessary slashes, which can lead to free balance
-// being 0, and the account being garbage-collected -- a dead account should get no new
-// metadata.
+/// helper struct for managing a set of spans we are currently inspecting.
+/// writes alterations to disk on drop, but only if a slash has been carried out.
+///
+/// NOTE: alterations to slashing metadata should not be done after this is dropped.
+/// dropping this struct applies any necessary slashes, which can lead to free balance
+/// being 0, and the account being garbage-collected -- a dead account should get no new
+/// metadata.
 struct InspectingSpans<'a, T: Config + 'a> {
     dirty: bool,
     window_start: SessionIndex,
