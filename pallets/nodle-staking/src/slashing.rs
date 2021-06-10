@@ -424,7 +424,7 @@ struct InspectingSpans<'a, T: Config + 'a> {
     _marker: sp_std::marker::PhantomData<T>,
 }
 
-// fetches the slashing spans record for a controller account, initializing it if necessary.
+/// fetches the slashing spans record for a controller account, initializing it if necessary.
 fn fetch_spans<'a, T: Config + 'a>(
     controller: &'a T::AccountId,
     window_start: SessionIndex,
