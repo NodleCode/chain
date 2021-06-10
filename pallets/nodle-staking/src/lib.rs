@@ -444,7 +444,6 @@ pub mod pallet {
                 <Error<T>>::NominatorExists,
             );
 
-            // T::Currency::reserve(&nominator_acc, amount)?;
             T::Currency::set_lock(
                 T::StakingLockId::get(),
                 &nominator_acc,
