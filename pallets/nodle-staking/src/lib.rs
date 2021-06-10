@@ -515,7 +515,6 @@ pub mod pallet {
                 <Error<T>>::InsufficientBalance
             );
 
-            // T::Currency::reserve(&nominator, more)?;
             T::Currency::set_lock(
                 T::StakingLockId::get(),
                 &nominator,
