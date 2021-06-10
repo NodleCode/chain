@@ -220,7 +220,6 @@ pub mod pallet {
 
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
-            // T::Currency::reserve(&acc, bond)?;
             T::Currency::set_lock(T::StakingLockId::get(), &acc, bond, WithdrawReasons::all());
 
             let validator = Validator::new(acc.clone(), bond);
