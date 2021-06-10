@@ -296,8 +296,8 @@ pub(crate) fn compute_slash<T: Config>(
     })
 }
 
-// doesn't apply any slash, but kicks out the validator if the misbehavior is from
-// the most recent slashing span.
+/// doesn't apply any slash, but kicks out the validator if the misbehavior is from
+/// the most recent slashing span.
 fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
     // these are not updated by era-span or end-span.
     let mut reward_payout = Zero::zero();
