@@ -253,7 +253,7 @@ impl pallet_nodle_staking::Config for Runtime {
     type MinValidatorPoolStake = MinValidatorStake;
     type MinNominatorStake = MinNominatorStake;
     type MinNomination = MinNomination;
-    type RewardRemainder = ();
+    type RewardRemainder = CompanyReserve;
     type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
     type StakingLockId = StakingLockId;
