@@ -165,7 +165,6 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
     weight
 }
 
-#[cfg(feature = "test-migration")]
 #[cfg(test)]
 mod tests {
     use super::*;

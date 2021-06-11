@@ -92,36 +92,21 @@ impl sp_runtime::BoundToRuntimeAppPublic for OtherSessionHandler {
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
-macro_rules! construct_nodle_runtime {
-    ($( $modules:tt )*) => {
-        #[allow(clippy::large_enum_variant)]
-        frame_support::construct_runtime! {
-            pub enum Test where
-                Block = Block,
-                NodeBlock = Block,
-                UncheckedExtrinsic = UncheckedExtrinsic,
-            {
-                System: frame_system::{Module, Call, Config, Storage, Event<T>},
-                Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
-                Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-                Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-				$($modules)*
-                Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
-            }
-        }
+frame_support::construct_runtime!(
+    pub enum Test where
+        Block = Block,
+        NodeBlock = Block,
+        UncheckedExtrinsic = UncheckedExtrinsic,
+    {
+        System: frame_system::{Module, Call, Config, Storage, Event<T>},
+        Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
+        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
+        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
+        NodleStaking: nodle_staking::{Module, Call, Config<T>, Storage, Event<T>},
+        Poa: pallet_poa::{Module, Storage},
+        Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
     }
-}
-
-#[cfg(not(feature = "test-migration"))]
-construct_nodle_runtime! {
-    NodleStaking: nodle_staking::{Module, Call, Config<T>, Storage, Event<T>},
-}
-
-#[cfg(feature = "test-migration")]
-construct_nodle_runtime! {
-    NodleStaking: nodle_staking::{Module, Call, Config<T>, Storage, Event<T>},
-    Poa: pallet_poa::{Module, Storage},
-}
+);
 
 /// Author of block is always 11
 pub struct Author11;
@@ -216,7 +201,6 @@ impl pallet_authorship::Config for Test {
     type EventHandler = Module<Test>;
 }
 
-#[cfg(feature = "test-migration")]
 impl pallet_poa::Config for Test {}
 
 parameter_types! {
