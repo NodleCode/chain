@@ -468,7 +468,7 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
             sp_std::cmp::max(self.spans.last_nonzero_slash, slash_session);
     }
 
-    // find the span index of the given era, if covered.
+    /// find the span index of the given era, if covered.
     fn era_span(&self, era: SessionIndex) -> Option<SlashingSpan> {
         self.spans.iter().find(|span| span.contains_era(era))
     }
