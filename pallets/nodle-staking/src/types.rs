@@ -406,7 +406,7 @@ impl<
         &mut self,
         validator: AccountId,
         less: Balance,
-    ) -> Option<Option<Balance>> {
+    ) -> Result<Balance, String> {
         match self
             .nominations
             .0
@@ -417,12 +417,12 @@ impl<
                 if nom_bond.amount > less {
                     nom_bond.amount = nom_bond.amount.saturating_sub(less);
                     self.active_bond = self.active_bond.saturating_sub(less);
-                    Some(Some(nom_bond.amount.clone()))
+                    Ok(nom_bond.amount.clone())
                 } else {
-                    Some(None)
+                    Err("Underflow".into())
                 }
             }
-            Err(_) => None,
+            Err(_) => Err("NominationDNE".into()),
         }
     }
 }

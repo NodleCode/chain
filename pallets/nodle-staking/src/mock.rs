@@ -264,7 +264,6 @@ impl Config for Test {
     type PalletId = StakingPalletId;
     type StakingLockId = StakingLockId;
     type Slash = ();
-    type Reward = ();
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
@@ -296,7 +295,6 @@ pub struct ExtBuilder {
     nominators: Vec<(AccountId, AccountId, Balance)>,
     validator_pool: bool,
     validator_count: u32,
-    minimum_validator_count: u32,
     fair: bool,
     num_validators: Option<u32>,
     nominate: bool,
@@ -313,7 +311,6 @@ impl Default for ExtBuilder {
             validators: vec![],
             validator_pool: false,
             validator_count: 2,
-            minimum_validator_count: 0,
             fair: true,
             num_validators: None,
             nominate: true,
@@ -332,42 +329,19 @@ impl ExtBuilder {
         self.invulnerables = invulnerables;
         self
     }
-    #[allow(dead_code)]
     pub(crate) fn with_balances(mut self, balances: Vec<(AccountId, Balance)>) -> Self {
         self.balances = balances;
         self
     }
-    #[allow(dead_code)]
     pub(crate) fn with_validators(mut self, validators: Vec<(AccountId, Balance)>) -> Self {
         self.validators = validators;
         self
     }
-    #[allow(dead_code)]
     pub(crate) fn with_nominators(
         mut self,
         nominators: Vec<(AccountId, AccountId, Balance)>,
     ) -> Self {
         self.nominators = nominators;
-        self
-    }
-    #[allow(dead_code)]
-    pub fn validator_pool(mut self, validator_pool: bool) -> Self {
-        self.validator_pool = validator_pool;
-        self
-    }
-    #[allow(dead_code)]
-    pub fn validator_count(mut self, count: u32) -> Self {
-        self.validator_count = count;
-        self
-    }
-    #[allow(dead_code)]
-    pub fn minimum_validator_count(mut self, count: u32) -> Self {
-        self.minimum_validator_count = count;
-        self
-    }
-    #[allow(dead_code)]
-    pub fn fair(mut self, is_fair: bool) -> Self {
-        self.fair = is_fair;
         self
     }
     pub fn num_validators(mut self, num_validators: u32) -> Self {
@@ -378,22 +352,10 @@ impl ExtBuilder {
         self.has_stakers = has;
         self
     }
-    #[allow(dead_code)]
-    pub(crate) fn initialize_first_session(mut self, init: bool) -> Self {
-        self.initialize_first_session = init;
-        self
-    }
-    #[allow(dead_code)]
-    pub(crate) fn nominate(mut self, nominate: bool) -> Self {
-        self.nominate = nominate;
-        self
-    }
-    #[allow(dead_code)]
     pub fn slash_defer_duration(self, session_idx: SessionIndex) -> Self {
         SLASH_DEFER_DURATION.with(|v| *v.borrow_mut() = session_idx);
         self
     }
-    #[allow(dead_code)]
     pub fn bonded_duration(self, session_idx: SessionIndex) -> Self {
         BONDED_DURATION.with(|v| *v.borrow_mut() = session_idx);
         self

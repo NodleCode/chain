@@ -342,14 +342,13 @@ where
                 if slash_defer_duration == 0 {
                     // apply right away.
                     slashing::apply_slash::<T>(unapplied);
-                    {
-                        let slash_cost = (6, 5);
-                        let reward_cost = (2, 2);
-                        add_db_reads_writes(
-                            (1 + nominators_len) * slash_cost.0 + reward_cost.0 * reporters_len,
-                            (1 + nominators_len) * slash_cost.1 + reward_cost.1 * reporters_len,
-                        );
-                    }
+
+                    let slash_cost = (6, 5);
+                    let reward_cost = (2, 2);
+                    add_db_reads_writes(
+                        (1 + nominators_len) * slash_cost.0 + reward_cost.0 * reporters_len,
+                        (1 + nominators_len) * slash_cost.1 + reward_cost.1 * reporters_len,
+                    );
                 } else {
                     // defer to end of some `slash_defer_duration` from now.
                     let apply_at = active_session.saturating_add(slash_defer_duration);

@@ -33,7 +33,7 @@ pub mod weights;
 
 use frame_support::pallet;
 pub(crate) mod hooks;
-pub mod migrations;
+mod migrations;
 pub(crate) mod slashing;
 pub(crate) mod types;
 
@@ -73,10 +73,6 @@ pub mod pallet {
     pub(crate) type BalanceOf<T> =
         <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-    pub(crate) type PositiveImbalanceOf<T> = <<T as Config>::Currency as Currency<
-        <T as frame_system::Config>::AccountId,
-    >>::PositiveImbalance;
-
     pub(crate) type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
         <T as frame_system::Config>::AccountId,
     >>::NegativeImbalance;
@@ -88,8 +84,6 @@ pub mod pallet {
         type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
         /// Handler for the unbalanced reduction when slashing a staker.
         type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
-        /// Handler for the unbalanced increment when rewarding a staker.
-        type Reward: OnUnbalanced<PositiveImbalanceOf<Self>>;
         /// Number of sessions that staked fund remain bonded for
         type BondedDuration: Get<SessionIndex>;
         /// Number of sessions that slashes are deferred by, after computation.
@@ -137,7 +131,16 @@ pub mod pallet {
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        fn on_runtime_upgrade() -> frame_support::weights::Weight {
+            if Self::do_upgrade_pallet() {
+                DoUpgradePallet::<T>::put(false);
+                migrations::poa_validators_migration::<T>()
+            } else {
+                0
+            }
+        }
+    }
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
@@ -551,8 +554,15 @@ pub mod pallet {
                 <NominatorState<T>>::get(&nominator).ok_or(<Error<T>>::NominatorDNE)?;
             let remaining = nominations
                 .dec_nomination(validator.clone(), less)
-                .ok_or(<Error<T>>::NominationDNE)?
-                .ok_or(<Error<T>>::Underflow)?;
+                .map(|bal| bal)
+                .map_err(|err_str| {
+                    if err_str == "Underflow" {
+                        <Error<T>>::Underflow
+                    } else {
+                        <Error<T>>::NominationDNE
+                    }
+                })?;
+
             ensure!(
                 remaining >= T::MinNomination::get(),
                 <Error<T>>::NominationBelowMin
@@ -980,6 +990,11 @@ pub mod pallet {
     #[pallet::getter(fn bonded_sessions)]
     pub(crate) type BondedSessions<T: Config> = StorageValue<_, Vec<SessionIndex>, ValueQuery>;
 
+    /// Runtime migration control flag
+    #[pallet::storage]
+    #[pallet::getter(fn do_upgrade_pallet)]
+    pub(super) type DoUpgradePallet<T: Config> = StorageValue<_, bool, ValueQuery>;
+
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
         pub stakers: Vec<(T::AccountId, Option<T::AccountId>, BalanceOf<T>)>,
@@ -1050,6 +1065,9 @@ pub mod pallet {
             // Snapshot total stake
             <Staked<T>>::insert(genesis_session_idx, <Total<T>>::get());
 
+            // Runtime migration control flag, by default disabled.
+            <DoUpgradePallet<T>>::put(false);
+
             log::trace!(
                 "GenesisBuild:[{:#?}] - (SI[{}],VC[{}],TS[{:#?}])",
                 line!(),
@@ -1087,11 +1105,6 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         pub(crate) fn is_validator(acc: &T::AccountId) -> bool {
             <ValidatorState<T>>::get(acc).is_some()
-        }
-
-        #[allow(dead_code)]
-        pub(crate) fn is_selected_validator(acc: &T::AccountId) -> bool {
-            <SelectedValidators<T>>::get().binary_search(acc).is_ok()
         }
 
         pub(crate) fn is_nominator(acc: &T::AccountId) -> bool {

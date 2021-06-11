@@ -31,7 +31,6 @@ use sp_std::vec::Vec;
 /// We have to do two things:
 /// - read "Validators" storage instance from POA.
 /// - with read info update the "Invulnerables" & "ValidatorState" of staking pallet.
-#[allow(dead_code)]
 pub fn poa_validators_migration<T: Config>() -> Weight {
     // Buffer to account for misc checks
     let mut weight: Weight = 1_000;
@@ -98,22 +97,25 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         if let Some(poa_validators) = <POAValidators<T>>::get() {
             weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
-            let pre_invulnerable_validators = <StakingInvulnerables<T>>::get()
-                .expect("Error!!! Staking Invulnerable invalid DB instance state");
-            weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+            if let Some(pre_invulnerable_validators) = <StakingInvulnerables<T>>::get() {
+                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
-            let mut post_invulnerable_validators = pre_invulnerable_validators
-                .clone()
-                .iter()
-                .chain(poa_validators.iter())
-                .map(|x| x.clone())
-                .collect::<Vec<T::AccountId>>();
+                let mut post_invulnerable_validators = pre_invulnerable_validators
+                    .clone()
+                    .iter()
+                    .chain(poa_validators.iter())
+                    .map(|x| x.clone())
+                    .collect::<Vec<T::AccountId>>();
 
-            post_invulnerable_validators.sort();
-            post_invulnerable_validators.dedup();
+                post_invulnerable_validators.sort();
+                post_invulnerable_validators.dedup();
 
-            <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
-            weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
+                <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
+                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
+            } else {
+                log::error!("Error!!! Staking Invulnerable invalid DB instance state");
+                return weight;
+            }
 
             for valid_acc in &poa_validators {
                 if <StakingValidatorState<T>>::contains_key(&valid_acc) {
@@ -178,6 +180,8 @@ mod tests {
     #[test]
     fn test_empty_list_on_migration_works() {
         ExtBuilder::default().build_and_execute(|| {
+            nodle_staking::DoUpgradePallet::<Test>::put(true);
+
             mock::start_active_session(1);
 
             let expected = vec![
@@ -191,7 +195,7 @@ mod tests {
             assert_eq!(Poa::validators().len(), 0);
             assert_eq!(NodleStaking::invulnerables().len(), 0);
 
-            poa_validators_migration::<Test>();
+            NodleStaking::on_runtime_upgrade();
 
             assert_eq!(Poa::validators().len(), 0);
             assert_eq!(NodleStaking::invulnerables().len(), 0);
@@ -201,6 +205,8 @@ mod tests {
     #[test]
     fn test_valid_list_on_migration_works() {
         ExtBuilder::default().build_and_execute(|| {
+            nodle_staking::DoUpgradePallet::<Test>::put(true);
+
             mock::start_active_session(1);
 
             let mut expected = vec![
@@ -221,7 +227,7 @@ mod tests {
 
             assert_eq!(Poa::validators(), [11, 21, 31, 61, 71, 81].to_vec());
 
-            poa_validators_migration::<Test>();
+            NodleStaking::on_runtime_upgrade();
 
             assert_eq!(Poa::validators().len(), 0);
             assert_eq!(
@@ -303,9 +309,6 @@ mod tests {
             assert_eq!(events(), expected);
 
             assert_eq!(NodleStaking::total(), 5500);
-
-            // log::trace!("[{:#?}]=> - {:#?}", line!(), mock::events());
-            // panic!("Stop-1");
         });
     }
 }

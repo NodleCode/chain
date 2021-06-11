@@ -33,7 +33,7 @@ use crate::Poa;
 use sp_runtime::traits::ConvertInto;
 
 #[cfg(feature = "with-staking")]
-use crate::{Balances, Staking};
+use crate::{Balances, CompanyReserve, Staking};
 
 use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
 
@@ -73,9 +73,6 @@ impl_opaque_keys! {
 parameter_types! {
     // 28 Days for unbonding
     pub const BondingDuration: sp_staking::SessionIndex = 28 * 6;
-    //pub const SlashDeferDuration: pallet_staking::EraIndex = 24 * 7; // 1/4 the bonding duration.
-    //pub const RewardCurve: &'static PiecewiseLinear<'static> = &REWARD_CURVE;
-    //pub const MaxNominatorRewardedPerValidator: u32 = 256;
 }
 
 parameter_types! {
@@ -257,8 +254,7 @@ impl pallet_nodle_staking::Config for Runtime {
     type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
     type StakingLockId = StakingLockId;
-    type Slash = ();
-    type Reward = ();
+    type Slash = CompanyReserve;
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
     type CancelOrigin =

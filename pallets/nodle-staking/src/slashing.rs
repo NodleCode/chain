@@ -205,9 +205,6 @@ pub(crate) fn compute_slash<T: Config>(
         reward_proportion,
     } = params.clone();
 
-    let mut reward_payout: BalanceOf<T> = Zero::zero();
-    let mut val_slashed: BalanceOf<T> = Zero::zero();
-
     log::trace!("compute_slash:[{:#?}] - Slash-[{:#?}]", line!(), slash);
 
     // is the slash amount here a maximum for the era?
@@ -249,39 +246,32 @@ pub(crate) fn compute_slash<T: Config>(
     }
 
     // apply slash to validator.
-    {
-        let mut spans = fetch_spans::<T>(
-            controller,
-            window_start,
-            &mut reward_payout,
-            &mut val_slashed,
-            reward_proportion,
+    let mut spans = fetch_spans::<T>(controller, window_start, reward_proportion);
+
+    let target_span = spans.compare_and_update_span_slash(slash_session, own_slash);
+
+    if target_span == Some(spans.span_index()) {
+        // misbehavior occurred within the current slashing span - take appropriate
+        // actions.
+
+        // chill the validator - it misbehaved in the current span and should
+        // not continue in the next election. also end the slashing span.
+        spans.end_span(now);
+        log::trace!(
+            "compute_slash:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
+            line!(),
+            spans.span_index(),
+            now
         );
+        let _ = <Pallet<T>>::validator_deactivate(params.controller);
 
-        let target_span = spans.compare_and_update_span_slash(slash_session, own_slash);
-
-        if target_span == Some(spans.span_index()) {
-            // misbehavior occurred within the current slashing span - take appropriate
-            // actions.
-
-            // chill the validator - it misbehaved in the current span and should
-            // not continue in the next election. also end the slashing span.
-            spans.end_span(now);
-            log::trace!(
-                "compute_slash:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
-                line!(),
-                spans.span_index(),
-                now
-            );
-            let _ = <Pallet<T>>::validator_deactivate(params.controller);
-
-            // make sure to disable validator till the end of this session
-            let _ = T::SessionInterface::disable_validator(params.controller);
-        }
+        // make sure to disable validator till the end of this session
+        let _ = T::SessionInterface::disable_validator(params.controller);
     }
 
+    // apply slash to Nominator.
     let mut nominators_slashed = Vec::new();
-    reward_payout = reward_payout.saturating_add(slash_nominators::<T>(
+    spans.paid_out = spans.paid_out.saturating_add(slash_nominators::<T>(
         params,
         prior_slash_p,
         &mut nominators_slashed,
@@ -289,27 +279,21 @@ pub(crate) fn compute_slash<T: Config>(
 
     Some(UnappliedSlash {
         validator: controller.clone(),
-        own: val_slashed,
+        own: spans.slash_of,
         others: nominators_slashed,
         reporters: Vec::new(),
-        payout: reward_payout,
+        payout: spans.paid_out,
     })
 }
 
 // doesn't apply any slash, but kicks out the validator if the misbehavior is from
 // the most recent slashing span.
 fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
-    // these are not updated by era-span or end-span.
-    let mut reward_payout = Zero::zero();
-    let mut val_slashed = Zero::zero();
-
     log::trace!("kick_out_if_recent:[{:#?}]", line!());
 
     let mut spans = fetch_spans::<T>(
         params.controller,
         params.window_start,
-        &mut reward_payout,
-        &mut val_slashed,
         params.reward_proportion,
     );
 
@@ -346,12 +330,11 @@ fn slash_nominators<T: Config>(
         reward_proportion,
     } = params;
 
-    let mut reward_payout = Zero::zero();
-
+    let mut reward_payout: BalanceOf<T> = Zero::zero();
     nominators_slashed.reserve(exposure.nominators.len());
+
     for nominator in &exposure.nominators {
         let controller = &nominator.owner;
-        let mut nom_slashed = Zero::zero();
 
         // the era slash of a nominator always grows, if the validator
         // had a new max slash for the era.
@@ -376,31 +359,24 @@ fn slash_nominators<T: Config>(
         };
 
         // compare the era slash against other eras in the same span.
-        {
-            let mut spans = fetch_spans::<T>(
-                controller,
-                window_start,
-                &mut reward_payout,
-                &mut nom_slashed,
-                reward_proportion,
+        let mut spans = fetch_spans::<T>(controller, window_start, reward_proportion);
+
+        let target_span = spans.compare_and_update_span_slash(slash_session, era_slash);
+
+        if target_span == Some(spans.span_index()) {
+            // End the span, but don't chill the nominator. its nomination
+            // on this validator will be ignored in the future.
+            spans.end_span(now);
+            log::trace!(
+                "slash_nominators:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
+                line!(),
+                spans.span_index(),
+                now
             );
-
-            let target_span = spans.compare_and_update_span_slash(slash_session, era_slash);
-
-            if target_span == Some(spans.span_index()) {
-                // End the span, but don't chill the nominator. its nomination
-                // on this validator will be ignored in the future.
-                spans.end_span(now);
-                log::trace!(
-                    "slash_nominators:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]",
-                    line!(),
-                    spans.span_index(),
-                    now
-                );
-            }
         }
 
-        nominators_slashed.push((controller.clone(), nom_slashed));
+        reward_payout = reward_payout.saturating_add(spans.paid_out);
+        nominators_slashed.push((controller.clone(), spans.slash_of));
     }
 
     reward_payout
@@ -413,13 +389,24 @@ fn slash_nominators<T: Config>(
 // dropping this struct applies any necessary slashes, which can lead to free balance
 // being 0, and the account being garbage-collected -- a dead account should get no new
 // metadata.
+// struct InspectingSpans<'a, T: Config + 'a> {
+//     dirty: bool,
+//     window_start: SessionIndex,
+//     controller: &'a T::AccountId,
+//     spans: SlashingSpans,
+//     paid_out: &'a mut BalanceOf<T>,
+//     slash_of: &'a mut BalanceOf<T>,
+//     reward_proportion: Perbill,
+//     _marker: sp_std::marker::PhantomData<T>,
+// }
+
 struct InspectingSpans<'a, T: Config + 'a> {
     dirty: bool,
     window_start: SessionIndex,
     controller: &'a T::AccountId,
     spans: SlashingSpans,
-    paid_out: &'a mut BalanceOf<T>,
-    slash_of: &'a mut BalanceOf<T>,
+    paid_out: BalanceOf<T>,
+    slash_of: BalanceOf<T>,
     reward_proportion: Perbill,
     _marker: sp_std::marker::PhantomData<T>,
 }
@@ -428,8 +415,6 @@ struct InspectingSpans<'a, T: Config + 'a> {
 fn fetch_spans<'a, T: Config + 'a>(
     controller: &'a T::AccountId,
     window_start: SessionIndex,
-    paid_out: &'a mut BalanceOf<T>,
-    slash_of: &'a mut BalanceOf<T>,
     reward_proportion: Perbill,
 ) -> InspectingSpans<'a, T> {
     let spans = <Pallet<T> as Store>::SlashingSpans::get(controller).unwrap_or_else(|| {
@@ -443,8 +428,8 @@ fn fetch_spans<'a, T: Config + 'a>(
         window_start,
         controller,
         spans,
-        slash_of,
-        paid_out,
+        slash_of: Zero::zero(),
+        paid_out: Zero::zero(),
         reward_proportion,
         _marker: sp_std::marker::PhantomData,
     }
@@ -463,7 +448,7 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
     // invariant: the staker is being slashed for non-zero value here
     // although `amount` may be zero, as it is only a difference.
     fn add_slash(&mut self, amount: BalanceOf<T>, slash_session: SessionIndex) {
-        *self.slash_of = self.slash_of.saturating_add(amount);
+        self.slash_of = self.slash_of.saturating_add(amount);
         self.spans.last_nonzero_slash =
             sp_std::cmp::max(self.spans.last_nonzero_slash, slash_session);
     }
@@ -518,7 +503,7 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
         if !reward.is_zero() {
             changed = true;
             span_record.paid_out = span_record.paid_out.saturating_add(reward);
-            *self.paid_out = self.paid_out.saturating_add(reward);
+            self.paid_out = self.paid_out.saturating_add(reward);
         }
 
         if changed {
@@ -548,14 +533,12 @@ impl<'a, T: 'a + Config> Drop for InspectingSpans<'a, T> {
 }
 
 /// Clear slashing metadata for an obsolete session.
-#[allow(dead_code)]
 pub(crate) fn clear_session_metadata<T: Config>(obsolete_session: SessionIndex) {
     <Pallet<T> as Store>::ValidatorSlashInSession::remove_prefix(&obsolete_session);
     <Pallet<T> as Store>::NominatorSlashInSession::remove_prefix(&obsolete_session);
 }
 
 /// Clear slashing metadata for a dead account.
-#[allow(dead_code)]
 pub(crate) fn clear_slash_metadata<T: Config>(controller: &T::AccountId) -> DispatchResult {
     let spans = match <Pallet<T>>::slashing_spans(controller) {
         None => return Ok(()),
