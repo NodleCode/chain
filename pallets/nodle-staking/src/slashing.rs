@@ -459,9 +459,9 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
         self.dirty = self.spans.end_span(now) || self.dirty;
     }
 
-    // add some value to the slash of the staker.
-    // invariant: the staker is being slashed for non-zero value here
-    // although `amount` may be zero, as it is only a difference.
+    /// add some value to the slash of the staker.
+    /// invariant: the staker is being slashed for non-zero value here
+    /// although `amount` may be zero, as it is only a difference.
     fn add_slash(&mut self, amount: BalanceOf<T>, slash_session: SessionIndex) {
         *self.slash_of = self.slash_of.saturating_add(amount);
         self.spans.last_nonzero_slash =
