@@ -473,10 +473,10 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
         self.spans.iter().find(|span| span.contains_era(era))
     }
 
-    // compares the slash in an era to the overall current span slash.
-    // if it's higher, applies the difference of the slashes and then updates the span on disk.
-    //
-    // returns the span index of the era where the slash occurred, if any.
+    /// compares the slash in an era to the overall current span slash.
+    /// if it's higher, applies the difference of the slashes and then updates the span on disk.
+    ///
+    /// returns the span index of the era where the slash occurred, if any.
     fn compare_and_update_span_slash(
         &mut self,
         slash_session: SessionIndex,
