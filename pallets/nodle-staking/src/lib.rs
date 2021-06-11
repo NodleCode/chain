@@ -49,8 +49,8 @@ pub mod pallet {
     use frame_support::{
         pallet_prelude::*,
         traits::{
-            Currency, ExistenceRequirement, Get, Imbalance, LockIdentifier, LockableCurrency,
-            OnUnbalanced, WithdrawReasons,
+            Currency, ExistenceRequirement, Get, GetPalletVersion, Imbalance, LockIdentifier,
+            LockableCurrency, OnUnbalanced, PalletVersion, WithdrawReasons,
         },
     };
     use frame_system::pallet_prelude::*;
@@ -133,12 +133,23 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            if Self::do_upgrade_pallet() {
-                DoUpgradePallet::<T>::put(false);
-                migrations::poa_validators_migration::<T>()
-            } else {
-                0
+            let mut weight = Weight::from(0u64);
+
+            // migrates our storage to pallet version 2.0.6
+            let version: PalletVersion =
+                <Pallet<T>>::storage_version().unwrap_or(<Pallet<T>>::current_version());
+
+            log::info!(
+                "on_runtime_upgrade>[{:#?}]=> - Current Pallet Version-[{:#?}]",
+                line!(),
+                version,
+            );
+
+            if version.major == 2 && version.minor == 0 {
+                weight = migrations::poa_validators_migration::<T>();
             }
+
+            weight
         }
     }
 
@@ -986,11 +997,6 @@ pub mod pallet {
     #[pallet::getter(fn bonded_sessions)]
     pub(crate) type BondedSessions<T: Config> = StorageValue<_, Vec<SessionIndex>, ValueQuery>;
 
-    /// Runtime migration control flag
-    #[pallet::storage]
-    #[pallet::getter(fn do_upgrade_pallet)]
-    pub(super) type DoUpgradePallet<T: Config> = StorageValue<_, bool, ValueQuery>;
-
     #[pallet::genesis_config]
     pub struct GenesisConfig<T: Config> {
         pub stakers: Vec<(T::AccountId, Option<T::AccountId>, BalanceOf<T>)>,
@@ -1060,9 +1066,6 @@ pub mod pallet {
             <ActiveSession<T>>::put(genesis_session_idx);
             // Snapshot total stake
             <Staked<T>>::insert(genesis_session_idx, <Total<T>>::get());
-
-            // Runtime migration control flag, by default disabled.
-            <DoUpgradePallet<T>>::put(false);
 
             log::trace!(
                 "GenesisBuild:[{:#?}] - (SI[{}],VC[{}],TS[{:#?}])",

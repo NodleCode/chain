@@ -169,7 +169,7 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
 mod tests {
     use super::*;
     use crate::mock;
-    use crate::mock::{events, AccountId, ExtBuilder, NodleStaking, Origin, Poa, Test};
+    use crate::mock::{events, AccountId, ExtBuilder, NodleStaking, Origin, Poa};
     use crate::types;
     use frame_support::assert_ok;
     use frame_support::traits::InitializeMembers;
@@ -179,8 +179,6 @@ mod tests {
     #[test]
     fn test_empty_list_on_migration_works() {
         ExtBuilder::default().build_and_execute(|| {
-            nodle_staking::DoUpgradePallet::<Test>::put(true);
-
             mock::start_active_session(1);
 
             let expected = vec![
@@ -204,8 +202,6 @@ mod tests {
     #[test]
     fn test_valid_list_on_migration_works() {
         ExtBuilder::default().build_and_execute(|| {
-            nodle_staking::DoUpgradePallet::<Test>::put(true);
-
             mock::start_active_session(1);
 
             let mut expected = vec![
