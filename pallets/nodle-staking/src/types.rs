@@ -402,11 +402,7 @@ impl<
             Err(_) => None,
         }
     }
-    pub fn dec_nomination(
-        &mut self,
-        validator: AccountId,
-        less: Balance,
-    ) -> Result<Balance, String> {
+    pub fn dec_nomination(&mut self, validator: AccountId, less: Balance) -> Result<Balance, &str> {
         match self
             .nominations
             .0

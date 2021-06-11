@@ -223,7 +223,6 @@ pub mod pallet {
 
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
-            // T::Currency::reserve(&acc, bond)?;
             T::Currency::set_lock(T::StakingLockId::get(), &acc, bond, WithdrawReasons::all());
 
             let validator = Validator::new(acc.clone(), bond);
@@ -448,7 +447,6 @@ pub mod pallet {
                 <Error<T>>::NominatorExists,
             );
 
-            // T::Currency::reserve(&nominator_acc, amount)?;
             T::Currency::set_lock(
                 T::StakingLockId::get(),
                 &nominator_acc,
@@ -520,7 +518,6 @@ pub mod pallet {
                 <Error<T>>::InsufficientBalance
             );
 
-            // T::Currency::reserve(&nominator, more)?;
             T::Currency::set_lock(
                 T::StakingLockId::get(),
                 &nominator,
@@ -580,7 +577,6 @@ pub mod pallet {
             let mut validator_state =
                 <ValidatorState<T>>::get(&validator).ok_or(<Error<T>>::ValidatorDNE)?;
 
-            // T::Currency::unreserve(&nominator, less);
             nominations.unlocking.push(UnlockChunk {
                 value: less,
                 session_idx: Self::active_session().saturating_add(T::BondedDuration::get()),
@@ -1175,8 +1171,6 @@ pub mod pallet {
                         .collect();
                     let nominator_stake = exists.ok_or(<Error<T>>::ValidatorDNE)?;
                     let nominators = OrderedSet::from(noms);
-
-                    // T::Currency::unreserve(&nominator, nominator_stake);
 
                     state.nominators = nominators;
                     state.nomi_bond_total = state.nomi_bond_total.saturating_sub(nominator_stake);

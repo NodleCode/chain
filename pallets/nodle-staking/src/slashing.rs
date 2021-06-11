@@ -286,8 +286,8 @@ pub(crate) fn compute_slash<T: Config>(
     })
 }
 
-// doesn't apply any slash, but kicks out the validator if the misbehavior is from
-// the most recent slashing span.
+/// doesn't apply any slash, but kicks out the validator if the misbehavior is from
+/// the most recent slashing span.
 fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
     log::trace!("kick_out_if_recent:[{:#?}]", line!());
 
@@ -382,24 +382,13 @@ fn slash_nominators<T: Config>(
     reward_payout
 }
 
-// helper struct for managing a set of spans we are currently inspecting.
-// writes alterations to disk on drop, but only if a slash has been carried out.
-//
-// NOTE: alterations to slashing metadata should not be done after this is dropped.
-// dropping this struct applies any necessary slashes, which can lead to free balance
-// being 0, and the account being garbage-collected -- a dead account should get no new
-// metadata.
-// struct InspectingSpans<'a, T: Config + 'a> {
-//     dirty: bool,
-//     window_start: SessionIndex,
-//     controller: &'a T::AccountId,
-//     spans: SlashingSpans,
-//     paid_out: &'a mut BalanceOf<T>,
-//     slash_of: &'a mut BalanceOf<T>,
-//     reward_proportion: Perbill,
-//     _marker: sp_std::marker::PhantomData<T>,
-// }
-
+/// helper struct for managing a set of spans we are currently inspecting.
+/// writes alterations to disk on drop, but only if a slash has been carried out.
+///
+/// NOTE: alterations to slashing metadata should not be done after this is dropped.
+/// dropping this struct applies any necessary slashes, which can lead to free balance
+/// being 0, and the account being garbage-collected -- a dead account should get no new
+/// metadata.
 struct InspectingSpans<'a, T: Config + 'a> {
     dirty: bool,
     window_start: SessionIndex,
@@ -411,7 +400,7 @@ struct InspectingSpans<'a, T: Config + 'a> {
     _marker: sp_std::marker::PhantomData<T>,
 }
 
-// fetches the slashing spans record for a controller account, initializing it if necessary.
+/// fetches the slashing spans record for a controller account, initializing it if necessary.
 fn fetch_spans<'a, T: Config + 'a>(
     controller: &'a T::AccountId,
     window_start: SessionIndex,
@@ -444,24 +433,24 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
         self.dirty = self.spans.end_span(now) || self.dirty;
     }
 
-    // add some value to the slash of the staker.
-    // invariant: the staker is being slashed for non-zero value here
-    // although `amount` may be zero, as it is only a difference.
+    /// add some value to the slash of the staker.
+    /// invariant: the staker is being slashed for non-zero value here
+    /// although `amount` may be zero, as it is only a difference.
     fn add_slash(&mut self, amount: BalanceOf<T>, slash_session: SessionIndex) {
         self.slash_of = self.slash_of.saturating_add(amount);
         self.spans.last_nonzero_slash =
             sp_std::cmp::max(self.spans.last_nonzero_slash, slash_session);
     }
 
-    // find the span index of the given era, if covered.
+    /// find the span index of the given era, if covered.
     fn era_span(&self, era: SessionIndex) -> Option<SlashingSpan> {
         self.spans.iter().find(|span| span.contains_era(era))
     }
 
-    // compares the slash in an era to the overall current span slash.
-    // if it's higher, applies the difference of the slashes and then updates the span on disk.
-    //
-    // returns the span index of the era where the slash occurred, if any.
+    /// compares the slash in an era to the overall current span slash.
+    /// if it's higher, applies the difference of the slashes and then updates the span on disk.
+    ///
+    /// returns the span index of the era where the slash occurred, if any.
     fn compare_and_update_span_slash(
         &mut self,
         slash_session: SessionIndex,
@@ -559,9 +548,9 @@ pub(crate) fn clear_slash_metadata<T: Config>(controller: &T::AccountId) -> Disp
     Ok(())
 }
 
-// apply the slash to a validator controller account, deducting any missing funds from the reward
-// payout, saturating at 0. this is mildly unfair but also an edge-case that
-// can only occur when overlapping locked funds have been slashed.
+/// apply the slash to a validator controller account, deducting any missing funds from the reward
+/// payout, saturating at 0. this is mildly unfair but also an edge-case that
+/// can only occur when overlapping locked funds have been slashed.
 fn do_slash_validator<T: Config>(
     controller: &T::AccountId,
     value: BalanceOf<T>,
