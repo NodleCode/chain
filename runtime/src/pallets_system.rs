@@ -24,7 +24,7 @@ use crate::{
     System, UncheckedExtrinsic,
 };
 use frame_support::{
-    debug, parameter_types,
+    parameter_types,
     weights::{constants::RocksDbWeight, IdentityFee},
 };
 use frame_system::limits::BlockLength;
@@ -71,6 +71,7 @@ impl frame_system::Config for Runtime {
     type OnKilledAccount = ();
     type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
     type SS58Prefix = SS58Prefix;
+    type OnSetCode = ();
 }
 
 parameter_types! {
@@ -163,7 +164,7 @@ where
         );
         let raw_payload = SignedPayload::new(call, extra)
             .map_err(|e| {
-                debug::warn!("Unable to create signed payload: {:?}", e);
+                log::warn!("Unable to create signed payload: {:?}", e);
             })
             .ok()?;
         let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;

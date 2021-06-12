@@ -35,15 +35,16 @@ use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weigh
 use frame_support::{
     traits::U128CurrencyToVote,
     weights::{constants::BlockExecutionWeight, DispatchClass},
+    PalletId,
 };
 
 #[cfg(feature = "with-staking")]
 use frame_system::EnsureRoot;
 
-use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
+use nodle_chain_primitives::{AccountId, Moment};
 
 #[cfg(feature = "with-staking")]
-use nodle_chain_primitives::Balance;
+use nodle_chain_primitives::{Balance, BlockNumber};
 
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -57,9 +58,6 @@ use sp_runtime::{
     transaction_validity::TransactionPriority,
     Perbill,
 };
-
-#[cfg(feature = "with-staking")]
-use sp_runtime::ModuleId;
 
 #[cfg(feature = "with-staking")]
 #[cfg(any(feature = "std", test))]
@@ -142,7 +140,6 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_SLOTS as _;
     pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
 }
 
@@ -150,7 +147,7 @@ impl pallet_im_online::Config for Runtime {
     type AuthorityId = ImOnlineId;
     type Event = Event;
     type ValidatorSet = Historical;
-    type SessionDuration = SessionDuration;
+    type NextSessionRotation = Babe;
     type ReportUnresponsiveness = Offences;
     type UnsignedPriority = ImOnlineUnsignedPriority;
     type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
@@ -186,6 +183,11 @@ impl pallet_session::historical::Config for Runtime {
 impl pallet_poa::Config for Runtime {}
 
 #[cfg(not(feature = "with-staking"))]
+parameter_types! {
+    pub const PoaMaxMembers: u32 = 100;
+}
+
+#[cfg(not(feature = "with-staking"))]
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type Event = Event;
     type AddOrigin =
@@ -200,6 +202,8 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = Poa;
     type MembershipChanged = Poa;
+    type MaxMembers = PoaMaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 #[cfg(feature = "with-staking")]
@@ -231,12 +235,12 @@ parameter_types! {
     pub const ElectionLookahead: BlockNumber = constants::EPOCH_DURATION_IN_BLOCKS / 4;
     pub const MaxIterations: u32 = 10;
     // 0.05%. The higher the value, the more strict solution acceptance becomes.
-    pub MinSolutionScoreBump: Perbill = Perbill::from_rational_approximation(5u32, 10_000);
+    pub MinSolutionScoreBump: Perbill = Perbill::from_rational(5u32, 10_000);
     pub OffchainSolutionWeightLimit: Weight = constants::RuntimeBlockWeights::get()
         .get(DispatchClass::Normal)
         .max_extrinsic.expect("Normal extrinsics have a weight limit configured; qed")
         .saturating_sub(BlockExecutionWeight::get());
-    pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    pub const StakingPalletId: PalletId = PalletId(*b"mockstak");
     /// We prioritize im-online heartbeats over election solution submission.
     pub const StakingUnsignedPriority: TransactionPriority = TransactionPriority::max_value() / 2;
 }
@@ -270,6 +274,11 @@ impl pallet_curveless_staking::Config for Runtime {
 }
 
 #[cfg(feature = "with-staking")]
+parameter_types! {
+    pub const StakingMaxMembers: u32 = 1000;
+}
+
+#[cfg(feature = "with-staking")]
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type Event = Event;
     type AddOrigin =
@@ -287,6 +296,8 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     // type MembershipChanged = Staking;
     type MembershipInitialized = ();
     type MembershipChanged = ();
+    type MaxMembers = StakingMaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -298,5 +309,4 @@ impl pallet_offences::Config for Runtime {
     type Event = Event;
     type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
     type OnOffenceHandler = ();
-    type WeightSoftLimit = OffencesWeightSoftLimit;
 }

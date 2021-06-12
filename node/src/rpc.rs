@@ -20,6 +20,7 @@
 
 use nodle_chain_primitives::{AccountId, Balance, Block, BlockNumber, CertificateId, Hash, Index};
 use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi, RootOfTrustRuntimeApi};
+use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
 use sc_consensus_babe_rpc::BabeRpcHandler;
 use sc_consensus_epochs::SharedEpochChanges;
@@ -29,6 +30,7 @@ use sc_finality_grandpa::{
 use sc_finality_grandpa_rpc::GrandpaRpcHandler;
 use sc_rpc::SubscriptionTaskExecutor;
 pub use sc_rpc_api::DenyUnsafe;
+use sc_sync_state_rpc::{SyncStateRpcApi, SyncStateRpcHandler};
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
@@ -82,6 +84,8 @@ pub struct FullDeps<C, P, SC, B> {
     pub pool: Arc<P>,
     /// The SelectChain Strategy
     pub select_chain: SC,
+    /// A copy of the chain spec.
+    pub chain_spec: Box<dyn sc_chain_spec::ChainSpec>,
     /// Whether to deny unsafe calls
     pub deny_unsafe: DenyUnsafe,
     /// BABE specific dependencies.
@@ -99,10 +103,10 @@ pub fn create_full<C, P, SC, B>(
 ) -> jsonrpc_core::IoHandler<sc_rpc_api::Metadata>
 where
     C: ProvideRuntimeApi<Block>,
-    C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
+    C: HeaderBackend<Block> + AuxStore + HeaderMetadata<Block, Error = BlockChainError> + 'static,
     C: Send + Sync + 'static,
     C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
-    C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber>,
+    C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber, Hash>,
     C::Api: RootOfTrustRuntimeApi<Block, CertificateId>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BabeApi<Block>,
@@ -121,6 +125,7 @@ where
         client,
         pool,
         select_chain,
+        chain_spec,
         deny_unsafe,
         babe,
         grandpa,
@@ -156,7 +161,7 @@ where
     io.extend_with(sc_consensus_babe_rpc::BabeApi::to_delegate(
         BabeRpcHandler::new(
             client.clone(),
-            shared_epoch_changes,
+            shared_epoch_changes.clone(),
             keystore,
             babe_config,
             select_chain,
@@ -165,13 +170,21 @@ where
     ));
     io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(
         GrandpaRpcHandler::new(
-            shared_authority_set,
+            shared_authority_set.clone(),
             shared_voter_state,
             justification_stream,
             subscription_executor,
             finality_provider,
         ),
     ));
+    io.extend_with(SyncStateRpcApi::to_delegate(SyncStateRpcHandler::new(
+        chain_spec,
+        client.clone(),
+        shared_authority_set,
+        shared_epoch_changes,
+        deny_unsafe,
+    )));
+
     io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(client)));
 
     io

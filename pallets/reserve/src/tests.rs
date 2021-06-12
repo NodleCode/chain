@@ -41,9 +41,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        TestModule: pallet_reserve::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_reserve::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -73,6 +73,7 @@ impl frame_system::Config for Test {
     type DbWeight = ();
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
+    type OnSetCode = ();
 }
 parameter_types! {
     pub const MaxLocks: u32 = 50;
@@ -83,7 +84,7 @@ impl pallet_balances::Config for Test {
     type DustRemoval = ();
     type MaxLocks = MaxLocks;
     type ExistentialDeposit = ();
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
     type WeightInfo = ();
 }
 
@@ -91,14 +92,14 @@ ord_parameter_types! {
     pub const Admin: u64 = 1;
 }
 parameter_types! {
-    pub const ReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+    pub const ReserveModuleId: PalletId = PalletId(*b"py/resrv");
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = Call;
-    type ModuleId = ReserveModuleId;
+    type PalletId = ReserveModuleId;
     type WeightInfo = ();
 }
 type TestCurrency = <Test as Config>::Currency;

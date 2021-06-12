@@ -91,7 +91,7 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             Self::ensure_oracle(origin)?;
             ensure!(
-                !pallet_emergency_shutdown::Module::<T>::shutdown(),
+                !pallet_emergency_shutdown::Pallet::<T>::shutdown(),
                 Error::<T>::UnderShutdown
             );
 
