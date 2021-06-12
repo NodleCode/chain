@@ -38,10 +38,10 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event<T>},
-        Allocations: pallet_allocations::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
+        Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -71,6 +71,7 @@ impl frame_system::Config for Test {
     type DbWeight = ();
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
+    type OnSetCode = ();
 }
 parameter_types! {
     pub const ExistentialDeposit: u64 = 2;

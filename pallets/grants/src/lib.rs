@@ -314,7 +314,7 @@ impl<T: Config> Pallet<T> {
 
     /// Returns locked balance based on current block number.
     fn locked_balance(who: &T::AccountId) -> BalanceOf<T> {
-        let now = <frame_system::Module<T>>::block_number();
+        let now = <frame_system::Pallet<T>>::block_number();
         Self::vesting_schedules(who)
             .iter()
             .fold(Zero::zero(), |acc, s| {

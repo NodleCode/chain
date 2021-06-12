@@ -100,6 +100,10 @@ impl pallet_allocations::Config for Runtime {
     type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
+parameter_types! {
+    pub const AllocationMaxMembers: u32 = 100;
+}
+
 impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
     type Event = Event;
     type AddOrigin =
@@ -114,4 +118,6 @@ impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = Allocations;
     type MembershipChanged = Allocations;
+    type MaxMembers = AllocationMaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }

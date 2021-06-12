@@ -124,7 +124,7 @@ pub mod pallet {
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
-            let now = <system::Module<T>>::block_number();
+            let now = <system::Pallet<T>>::block_number();
             <Slots<T>>::insert(
                 &certificate_id,
                 RootCertificate {
@@ -164,7 +164,7 @@ pub mod pallet {
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
-            slot.renewed = <system::Module<T>>::block_number();
+            slot.renewed = <system::Pallet<T>>::block_number();
             <Slots<T>>::insert(&certificate_id, slot);
 
             Self::deposit_event(Event::SlotRenewed(certificate_id));
@@ -272,7 +272,7 @@ impl<T: Config> Pallet<T> {
             .renewed
             .checked_add(&slot.validity)
             .expect("we only sum block numbers that are not supposed to overflow; qed")
-            <= <system::Module<T>>::block_number();
+            <= <system::Pallet<T>>::block_number();
 
         owner_is_member && !revoked && !expired
     }
@@ -307,7 +307,7 @@ impl<T: Config> Pallet<T> {
     }
 }
 
-impl<T: Config> ChangeMembers<T::AccountId> for Module<T> {
+impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
     fn change_members_sorted(
         _incoming: &[T::AccountId],
         _outgoing: &[T::AccountId],

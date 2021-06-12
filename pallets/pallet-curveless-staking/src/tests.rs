@@ -559,9 +559,9 @@ fn nominators_also_get_slashed_pro_rata() {
 
         let slash_amount = slash_percent * exposed_stake;
         let validator_share =
-            Perbill::from_rational_approximation(exposed_validator, exposed_stake) * slash_amount;
+            Perbill::from_rational(exposed_validator, exposed_stake) * slash_amount;
         let nominator_share =
-            Perbill::from_rational_approximation(exposed_nominator, exposed_stake) * slash_amount;
+            Perbill::from_rational(exposed_nominator, exposed_stake) * slash_amount;
 
         // both slash amounts need to be positive for the test to make sense.
         assert!(validator_share > 0);
@@ -2271,7 +2271,7 @@ fn reward_from_authorship_event_handler_works() {
     ExtBuilder::default().build_and_execute(|| {
         use pallet_authorship::EventHandler;
 
-        assert_eq!(<pallet_authorship::Module<Test>>::author(), 11);
+        assert_eq!(<pallet_authorship::Pallet<Test>>::author(), 11);
 
         <Module<Test>>::note_author(11);
         <Module<Test>>::note_uncle(21, 1);
@@ -3256,7 +3256,7 @@ mod offchain_election {
     use parking_lot::RwLock;
     use sp_core::offchain::{
         testing::{PoolState, TestOffchainExt, TestTransactionPoolExt},
-        OffchainExt, TransactionPoolExt,
+        OffchainDbExt, TransactionPoolExt,
     };
     use sp_io::TestExternalities;
     use sp_npos_elections::StakedAssignment;
@@ -3299,7 +3299,7 @@ mod offchain_election {
         seed[0..4].copy_from_slice(&iterations.to_le_bytes());
         offchain_state.write().seed = seed;
 
-        ext.register_extension(OffchainExt::new(offchain));
+        ext.register_extension(OffchainDbExt::new(offchain));
         ext.register_extension(TransactionPoolExt::new(pool));
 
         pool_state
@@ -4514,8 +4514,8 @@ fn claim_reward_at_the_last_era_and_no_double_claim_and_invalid_claim() {
         let init_balance_10 = Balances::total_balance(&10);
         let init_balance_100 = Balances::total_balance(&100);
 
-        let part_for_10 = Perbill::from_rational_approximation::<u32>(1000, 1125);
-        let part_for_100 = Perbill::from_rational_approximation::<u32>(125, 1125);
+        let part_for_10 = Perbill::from_rational::<u32>(1000, 1125);
+        let part_for_100 = Perbill::from_rational::<u32>(125, 1125);
 
         // Check state
         Payee::<Test>::insert(11, RewardDestination::Controller);
@@ -4971,7 +4971,7 @@ fn offences_weight_calculated_correctly() {
     ExtBuilder::default().nominate(true).build_and_execute(|| {
 		// On offence with zero offenders: 4 Reads, 1 Write
 		let zero_offence_weight = <Test as frame_system::Config>::DbWeight::get().reads_writes(4, 1);
-		assert_eq!(Staking::on_offence(&[], &[Perbill::from_percent(50)], 0), Ok(zero_offence_weight));
+		assert_eq!(Staking::on_offence(&[], &[Perbill::from_percent(50)], 0), zero_offence_weight);
 
 		// On Offence with N offenders, Unapplied: 4 Reads, 1 Write + 4 Reads, 5 Writes
 		let n_offence_unapplied_weight = <Test as frame_system::Config>::DbWeight::get().reads_writes(4, 1)
@@ -4984,7 +4984,7 @@ fn offences_weight_calculated_correctly() {
 					reporters: vec![],
 				}
 			).collect();
-		assert_eq!(Staking::on_offence(&offenders, &[Perbill::from_percent(50)], 0), Ok(n_offence_unapplied_weight));
+		assert_eq!(Staking::on_offence(&offenders, &[Perbill::from_percent(50)], 0), n_offence_unapplied_weight);
 
 		// On Offence with one offenders, Applied
 		let one_offender = [
@@ -5005,7 +5005,7 @@ fn offences_weight_calculated_correctly() {
 			// `reward_cost` * reporters (1)
 			+ <Test as frame_system::Config>::DbWeight::get().reads_writes(2, 2);
 
-		assert_eq!(Staking::on_offence(&one_offender, &[Perbill::from_percent(50)], 0), Ok(one_offence_unapplied_weight));
+		assert_eq!(Staking::on_offence(&one_offender, &[Perbill::from_percent(50)], 0), one_offence_unapplied_weight);
 	});
 }
 

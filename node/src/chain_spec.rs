@@ -19,9 +19,9 @@
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use nodle_chain_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
-    ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
-    IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
-    TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
+    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig,
+    RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
+    ValidatorsSetConfig, VestingConfig, BABE_GENESIS_EPOCH_CONFIG,
 };
 
 #[cfg(feature = "with-staking")]
@@ -148,11 +148,11 @@ pub fn testnet_genesis(
 
     GenesisConfig {
         // Core
-        frame_system: Some(SystemConfig {
+        frame_system: SystemConfig {
             code: wasm_binary_unwrap().to_vec(),
             changes_trie_config: Default::default(),
-        }),
-        pallet_balances: Some(BalancesConfig {
+        },
+        pallet_balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
@@ -177,18 +177,13 @@ pub fn testnet_genesis(
 
                     acc
                 }),
-        }),
-        pallet_indices: Some(IndicesConfig { indices: vec![] }),
-        pallet_grants: Some(VestingConfig {
+        },
+        pallet_indices: IndicesConfig { indices: vec![] },
+        pallet_grants: VestingConfig {
             vesting: vested_grants,
-        }),
-        pallet_contracts: Some(ContractsConfig {
-            current_schedule: pallet_contracts::Schedule {
-                ..Default::default()
-            },
-        }),
+        },
         // Consensus
-        pallet_session: Some(SessionConfig {
+        pallet_session: SessionConfig {
             keys: initial_authorities
                 .iter()
                 .map(|x| {
@@ -199,17 +194,18 @@ pub fn testnet_genesis(
                     )
                 })
                 .collect::<Vec<_>>(),
-        }),
-        pallet_babe: Some(BabeConfig {
+        },
+        pallet_babe: BabeConfig {
             authorities: vec![],
-        }),
-        pallet_im_online: Some(ImOnlineConfig { keys: vec![] }),
-        pallet_authority_discovery: Some(AuthorityDiscoveryConfig { keys: vec![] }),
-        pallet_grandpa: Some(GrandpaConfig {
+            epoch_config: Some(BABE_GENESIS_EPOCH_CONFIG),
+        },
+        pallet_im_online: ImOnlineConfig { keys: vec![] },
+        pallet_authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
+        pallet_grandpa: GrandpaConfig {
             authorities: vec![],
-        }),
+        },
         #[cfg(feature = "with-staking")]
-        pallet_curveless_staking: Some(StakingConfig {
+        pallet_curveless_staking: StakingConfig {
             validator_count: initial_authorities.len() as u32 * 2,
             minimum_validator_count: initial_authorities.len() as u32,
             stakers: initial_authorities
@@ -219,40 +215,40 @@ pub fn testnet_genesis(
             invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
             slash_reward_fraction: Perbill::from_percent(10),
             ..Default::default()
-        }),
-        pallet_membership_Instance2: Some(ValidatorsSetConfig {
+        },
+        pallet_membership_Instance2: ValidatorsSetConfig {
             members: initial_authorities
                 .iter()
                 .map(|x| x.0.clone())
                 .collect::<Vec<_>>(),
             phantom: Default::default(),
-        }),
+        },
 
         // Governance
         // Technical Committee
-        pallet_collective_Instance2: Some(Default::default()),
-        pallet_membership_Instance1: Some(TechnicalMembershipConfig {
+        pallet_collective_Instance2: Default::default(),
+        pallet_membership_Instance1: TechnicalMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
+        },
         // Financial Committee
-        pallet_collective_Instance3: Some(Default::default()),
-        pallet_membership_Instance3: Some(FinancialMembershipConfig {
+        pallet_collective_Instance3: Default::default(),
+        pallet_membership_Instance3: FinancialMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
-        pallet_reserve_Instance1: Some(Default::default()),
-        pallet_reserve_Instance2: Some(Default::default()),
-        pallet_reserve_Instance3: Some(Default::default()),
+        },
+        pallet_reserve_Instance1: Default::default(),
+        pallet_reserve_Instance2: Default::default(),
+        pallet_reserve_Instance3: Default::default(),
         // Root Committee
-        pallet_collective_Instance4: Some(Default::default()),
-        pallet_membership_Instance4: Some(RootMembershipConfig {
+        pallet_collective_Instance4: Default::default(),
+        pallet_membership_Instance4: RootMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
+        },
 
         // Allocations
-        pallet_membership_Instance5: Some(Default::default()),
+        pallet_membership_Instance5: Default::default(),
     }
 }
 

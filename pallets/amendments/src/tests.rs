@@ -44,9 +44,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Storage, Config, Event<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
-        Amendments: amendments::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Config, Event<T>},
+        Amendments: amendments::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -79,6 +79,7 @@ impl frame_system::Config for Test {
     type DbWeight = ();
     type BaseCallFilter = ();
     type SystemWeightInfo = ();
+    type OnSetCode = ();
 }
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;

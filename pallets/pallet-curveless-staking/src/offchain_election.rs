@@ -383,9 +383,9 @@ pub fn prepare_submission<T: Config>(
 
     // compact encode the assignment.
     let compact = CompactAssignments::from_assignment(
-        low_accuracy_assignment,
-        nominator_index,
-        validator_index,
+        &low_accuracy_assignment,
+        &nominator_index,
+        &validator_index,
     )
     .map_err(|e| OffchainElectionError::from(e))?;
 
