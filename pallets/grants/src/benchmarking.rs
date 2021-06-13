@@ -70,17 +70,17 @@ benchmarks! {
 
         // Add some existing schedules according to b
         for x in 0 .. MAX_SCHEDULES {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }:  _(RawOrigin::Signed(config.granter), config.grantee_lookup, config.schedule)
 
     claim {
         let config = create_shared_config::<T>(1);
-        Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
         // Add some existing schedules according to b
         for x in 0 .. MAX_SCHEDULES {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }: _(RawOrigin::Signed(config.grantee))
 
@@ -89,7 +89,7 @@ benchmarks! {
 
         // Add some existing schedules according to b
         for x in 0 .. MAX_SCHEDULES {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
         let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup, true);

@@ -25,7 +25,7 @@ use nodle_chain_runtime::{
 };
 
 #[cfg(feature = "with-staking")]
-use nodle_chain_runtime::{StakerStatus, StakingConfig};
+use nodle_chain_runtime::{StakingConfig};
 
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -141,7 +141,7 @@ pub fn testnet_genesis(
         )]
     });
 
-    const ENDOWMENT: Balance = 100 * NODL;
+    const ENDOWMENT: Balance = 10_000 * NODL;
 
     #[cfg(feature = "with-staking")]
     const STASH: Balance = ENDOWMENT / 1_000;
@@ -205,15 +205,12 @@ pub fn testnet_genesis(
             authorities: vec![],
         },
         #[cfg(feature = "with-staking")]
-        pallet_curveless_staking: StakingConfig {
-            validator_count: initial_authorities.len() as u32 * 2,
-            minimum_validator_count: initial_authorities.len() as u32,
+        pallet_nodle_staking: StakingConfig {
             stakers: initial_authorities
                 .iter()
-                .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+                .map(|x| (x.1.clone(), None, STASH))
                 .collect(),
-            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-            slash_reward_fraction: Perbill::from_percent(10),
+            invulnerables: initial_authorities.iter().map(|x| x.1.clone()).collect(),
             ..Default::default()
         },
         pallet_membership_Instance2: ValidatorsSetConfig {

@@ -56,10 +56,6 @@ use sp_runtime::{
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 
-#[cfg(feature = "with-staking")]
-#[cfg(any(feature = "std", test))]
-pub use pallets_consensus::StakerStatus;
-
 pub mod constants;
 mod implementations;
 mod pallets_consensus;
@@ -106,6 +102,7 @@ macro_rules! construct_nodle_runtime {
 				ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
 				Offences: pallet_offences::{Pallet, Call, Storage, Event},
 				ValidatorsSet: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>},
+				$($modules)*
 				Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 				Historical: pallet_session_historical::{Pallet},
 				AuthorityDiscovery: pallet_authority_discovery::{Pallet, Call, Config},
@@ -140,7 +137,6 @@ macro_rules! construct_nodle_runtime {
 				Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage},
 				AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
-				$($modules)*
 			}
 		}
 	}
@@ -155,7 +151,7 @@ construct_nodle_runtime! {
 #[cfg(feature = "with-staking")]
 construct_nodle_runtime! {
     // Consensus & Staking
-    Staking: pallet_curveless_staking::{Pallet, Call, Config<T>, Storage, Event<T>, ValidateUnsigned},
+    Staking: pallet_nodle_staking::{Pallet, Call, Storage, Event<T>, Config<T>},
 }
 
 /// The address format for describing accounts.
@@ -428,7 +424,7 @@ sp_api::impl_runtime_apis! {
 
             use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey, add_benchmark};
 
-            use frame_system_benchmarking::Module as SystemBench;
+            use frame_system_benchmarking::Pallet as SystemBench;
             //use pallet_offences_benchmarking::Module as OffencesBench;
             //use pallet_session_benchmarking::Module as SessionBench;
 
@@ -451,7 +447,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_grandpa, Grandpa);
 
             #[cfg(feature = "with-staking")]
-            add_benchmark!(params, batches, pallet_curveless_staking, Staking);
+            add_benchmark!(params, batches, pallet_nodle_staking, Staking);
 
             add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_identity, Identity);

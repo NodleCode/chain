@@ -76,7 +76,7 @@ fn make_benchmark_config<T: Config<I>, I: 'static>(u: u32, b: u32) -> BenchmarkC
 fn do_apply<T: Config<I>, I: 'static>(
     config: &BenchmarkConfig<T, I>,
 ) -> DispatchResultWithPostInfo {
-    <Module<T, _>>::apply(
+    <Pallet<T, _>>::apply(
         RawOrigin::Signed(config.applicant.clone()).into(),
         config.metadata.clone(),
         config.deposit_applying,
@@ -103,7 +103,7 @@ benchmarks_instance_pallet! {
 
         do_apply::<T, I>(&config)?;
 
-        let _ = <Module<T, _>>::counter(
+        let _ = <Pallet<T, _>>::counter(
             RawOrigin::Signed(config.counterer.clone()).into(),
             config.applicant.clone(),
             config.deposit_countering
@@ -115,8 +115,8 @@ benchmarks_instance_pallet! {
 
         do_apply::<T, I>(&config)?;
 
-        let _ = <Module<T, _>>::commit_applications(
-            T::FinalizeApplicationPeriod::get() + <system::Module<T>>::block_number()
+        let _ = <Pallet<T, _>>::commit_applications(
+            T::FinalizeApplicationPeriod::get() + <system::Pallet<T>>::block_number()
         );
     }: _(RawOrigin::Signed(config.challenger), config.applicant, config.deposit_challenging)
 }

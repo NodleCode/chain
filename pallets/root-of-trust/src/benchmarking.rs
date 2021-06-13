@@ -34,7 +34,7 @@ const SEED_MANAGER: u32 = 0;
 fn register<T: Config>(index: u32) -> Result<T::AccountId, &'static str> {
     let manager = account("manager", index, SEED_MANAGER);
     T::Currency::make_free_balance_be(&manager, BalanceOf::<T>::max_value());
-    <Module<T>>::benchmark_set_members(&[manager.clone()]);
+    <Pallet<T>>::benchmark_set_members(&[manager.clone()]);
 
     Ok(manager)
 }
@@ -49,14 +49,14 @@ benchmarks! {
         let manager = register::<T>(0)?;
         let certificate: T::CertificateId = Default::default();
 
-        let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
+        let _ = <Pallet<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
     }: _(RawOrigin::Signed(manager), certificate)
 
     revoke_slot {
         let manager = register::<T>(0)?;
         let certificate: T::CertificateId = Default::default();
 
-        let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
+        let _ = <Pallet<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
     }: _(RawOrigin::Signed(manager), certificate)
 
     revoke_child {
@@ -64,7 +64,7 @@ benchmarks! {
         let certificate: T::CertificateId = Default::default();
         let child: T::CertificateId = Default::default();
 
-        let _ = <Module<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
+        let _ = <Pallet<T>>::book_slot(RawOrigin::Signed(manager.clone()).into(), certificate.clone());
     }: _(RawOrigin::Signed(manager), certificate, child)
 }
 
