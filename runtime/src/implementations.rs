@@ -20,6 +20,10 @@
 //! Auxillary struct/enums for polkadot runtime.
 
 use crate::{Authorship, Balances, Call, CompanyReserve};
+
+#[cfg(feature = "with-staking")]
+use crate::Staking;
+
 use frame_support::{
     traits::{Currency, Imbalance, InstanceFilter, OnUnbalanced},
     RuntimeDebug,
@@ -49,7 +53,13 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
                 tips.ration_merge_into(20, 80, &mut split);
             }
             CompanyReserve::on_unbalanced(split.0);
+
+            #[cfg(not(feature = "with-staking"))]
             Author::on_unbalanced(split.1);
+
+            // 80% is moved to staking pallet, when staking is enabled.
+            #[cfg(feature = "with-staking")]
+            Staking::on_unbalanced(split.1);
         }
     }
 }

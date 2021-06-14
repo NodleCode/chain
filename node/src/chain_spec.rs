@@ -17,16 +17,14 @@
  */
 
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
+#[cfg(feature = "with-staking")]
+use nodle_chain_runtime::StakingConfig;
 use nodle_chain_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
     IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
     TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
 };
-
-#[cfg(feature = "with-staking")]
-use nodle_chain_runtime::{StakerStatus, StakingConfig};
-
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use serde_json::json;
@@ -141,7 +139,7 @@ pub fn testnet_genesis(
         )]
     });
 
-    const ENDOWMENT: Balance = 100 * NODL;
+    const ENDOWMENT: Balance = 10_000 * NODL;
 
     #[cfg(feature = "with-staking")]
     const STASH: Balance = ENDOWMENT / 1_000;
@@ -193,8 +191,8 @@ pub fn testnet_genesis(
                 .iter()
                 .map(|x| {
                     (
-                        x.0.clone(),
-                        x.0.clone(),
+                        x.1.clone(),
+                        x.1.clone(),
                         session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
                     )
                 })
@@ -209,15 +207,12 @@ pub fn testnet_genesis(
             authorities: vec![],
         }),
         #[cfg(feature = "with-staking")]
-        pallet_curveless_staking: Some(StakingConfig {
-            validator_count: initial_authorities.len() as u32 * 2,
-            minimum_validator_count: initial_authorities.len() as u32,
+        pallet_nodle_staking: Some(StakingConfig {
             stakers: initial_authorities
                 .iter()
-                .map(|x| (x.0.clone(), x.1.clone(), STASH, StakerStatus::Validator))
+                .map(|x| (x.1.clone(), None, STASH))
                 .collect(),
-            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-            slash_reward_fraction: Perbill::from_percent(10),
+            invulnerables: initial_authorities.iter().map(|x| x.1.clone()).collect(),
             ..Default::default()
         }),
         pallet_membership_Instance2: Some(ValidatorsSetConfig {
