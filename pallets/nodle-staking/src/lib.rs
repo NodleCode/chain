@@ -477,6 +477,11 @@ pub mod pallet {
             <ValidatorState<T>>::insert(&validator, validator_state);
             <NominatorState<T>>::insert(&nominator_acc, nominator_state);
 
+            if !do_add_nomination {
+                system::Pallet::<T>::inc_consumers(&nominator_acc)
+                    .map_err(|_| <Error<T>>::BadState)?;
+            }
+
             Self::deposit_event(Event::Nomination(
                 nominator_acc,
                 amount,
