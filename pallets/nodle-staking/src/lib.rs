@@ -674,7 +674,7 @@ pub mod pallet {
             Ok(().into())
         }
 
-        #[pallet::weight(T::WeightInfo::withdraw_unbonded())]
+        #[pallet::weight(T::WeightInfo::withdraw_staking_rewards())]
         pub fn withdraw_staking_rewards(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
