@@ -270,8 +270,13 @@ parameter_types! {
 impl pallet_offences::Config for Runtime {
     type Event = Event;
     type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
-    // type IdentificationTuple = ();
+
+    #[cfg(not(feature = "with-staking"))]
     type OnOffenceHandler = ();
+
+    #[cfg(feature = "with-staking")]
+    type OnOffenceHandler = Staking;
+
     type WeightSoftLimit = OffencesWeightSoftLimit;
 }
 
