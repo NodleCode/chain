@@ -1314,7 +1314,7 @@ pub mod pallet {
             // let total_staked = <Staked<T>>::get(next);
             // let issuance = Self::compute_issuance(total_staked);
             let issuance = Self::session_validator_reward(next);
-            for (val, pts) in <AwardedPts<T>>::drain_prefix(next) {
+            for (val, pts) in <AwardedPts<T>>::iter_prefix(next) {
                 let pct_due = Perbill::from_rational_approximation(pts, total);
                 let mut amt_due = pct_due * issuance;
 
