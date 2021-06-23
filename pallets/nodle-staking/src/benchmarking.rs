@@ -29,7 +29,7 @@ use frame_system::{EventRecord, RawOrigin};
 use sp_runtime::traits::Zero;
 use sp_std::prelude::*;
 
-use crate::types::UnappliedSlash;
+use crate::types::{StakeReward, UnappliedSlash};
 use crate::Pallet as NodleStaking;
 
 pub type BalanceOf<T> =
@@ -38,6 +38,7 @@ pub type BalanceOf<T> =
 const SEED: u32 = 0;
 const MAX_VALIDATORS: u32 = 1000;
 const MAX_SLASHES: u32 = 1000;
+const MAX_SESSION: u32 = 1000;
 
 fn assert_last_event<T: Config>(generic_event: <T as Config>::Event) {
     let events = frame_system::Pallet::<T>::events();
@@ -442,6 +443,36 @@ benchmarks! {
                 session_idx.saturating_add(T::SlashDeferDuration::get()),
             ).len(),
             (MAX_VALIDATORS / 2) as usize
+        );
+    }
+
+    // Benchmark `withdraw_staking_rewards` extrinsic with the best possible conditions:
+    // * Origin of the Call may be any signed origin.
+    // * Call will create the validator accounts.
+    withdraw_staking_rewards {
+
+        let reg_validators = register_validator::<T>("def-validator", MAX_VALIDATORS);
+        for validator_idx in 0 .. MAX_VALIDATORS {
+            let mut stake_reward: Vec<StakeReward::<BalanceOf<T>>> = Default::default();
+            for session_idx in 0 .. MAX_SESSION {
+                stake_reward.push(StakeReward::<BalanceOf<T>>{
+                    value: Zero::zero(),
+                    session_idx: session_idx,
+                });
+            }
+            <StakeRewards<T>>::insert(
+                reg_validators[validator_idx as usize].clone(),
+                stake_reward,
+            );
+        }
+
+    }: _(RawOrigin::Signed(reg_validators[0 as usize].clone()))
+    verify {
+        assert_last_event::<T>(
+            Event::Rewarded(
+                reg_validators[0 as usize].clone(),
+                Zero::zero()
+            ).into()
         );
     }
 

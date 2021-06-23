@@ -64,7 +64,10 @@ pub mod pallet {
 
     pub use weights::WeightInfo;
 
-    use types::{Bond, Nominator, RewardPoint, SpanIndex, UnappliedSlash, UnlockChunk, Validator};
+    use types::{
+        Bond, Nominator, RewardPoint, SpanIndex, StakeReward, UnappliedSlash, UnlockChunk,
+        Validator,
+    };
 
     pub use types::{ValidatorSnapshot, ValidatorSnapshotOf};
 
@@ -670,6 +673,38 @@ pub mod pallet {
 
             Ok(().into())
         }
+
+        #[pallet::weight(T::WeightInfo::withdraw_staking_rewards())]
+        pub fn withdraw_staking_rewards(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+            let acc = ensure_signed(origin)?;
+
+            if <StakeRewards<T>>::contains_key(&acc) {
+                let mut total_rewards: BalanceOf<T> = Zero::zero();
+
+                let rewards = <StakeRewards<T>>::take(&acc);
+
+                // Iterate over the reward gains for the given account.
+                for reward in rewards.iter() {
+                    total_rewards = total_rewards.saturating_add(reward.value);
+                }
+
+                // deposit the reward gain to
+                if total_rewards > T::Currency::minimum_balance() {
+                    if let Ok(imb) = T::Currency::deposit_into_existing(&acc, total_rewards) {
+                        Self::deposit_event(Event::Rewarded(acc.clone(), imb.peek()));
+                    }
+                } else {
+                    // staking rewards are below ED
+                    Self::deposit_event(Event::Rewarded(acc.clone(), Zero::zero()));
+                }
+            } else {
+                // Not a validator or Nominator
+                Self::deposit_event(Event::Rewarded(acc.clone(), Zero::zero()));
+            }
+
+            Ok(().into())
+        }
+
         /// Cancel enactment of a deferred slash.
         ///
         /// Can be called by the `T::SlashCancelOrigin`.
@@ -796,6 +831,9 @@ pub mod pallet {
         /// Nominator withdraw all nominations
         /// \[account, nominator_total_stake_unlocked\]
         NominatorLeft(T::AccountId, BalanceOf<T>),
+        /// Reward gained by stakers.
+        /// \[account, reward_value\]
+        StakeReward(T::AccountId, BalanceOf<T>),
         /// Reward payout to stakers.
         /// \[account, reward_value\]
         Rewarded(T::AccountId, BalanceOf<T>),
@@ -928,6 +966,12 @@ pub mod pallet {
         RewardPoint,
         ValueQuery,
     >;
+
+    /// stakers nodle rewards per session
+    #[pallet::storage]
+    #[pallet::getter(fn stake_rewards)]
+    pub(crate) type StakeRewards<T: Config> =
+        StorageMap<_, Twox64Concat, T::AccountId, Vec<StakeReward<BalanceOf<T>>>, ValueQuery>;
 
     /// The percentage of the slash that is distributed to reporters.
     ///
@@ -1258,9 +1302,14 @@ pub mod pallet {
 
             let mint = |amt: BalanceOf<T>, to: T::AccountId| {
                 if amt > T::Currency::minimum_balance() {
-                    if let Ok(imb) = T::Currency::deposit_into_existing(&to, amt) {
-                        Self::deposit_event(Event::Rewarded(to.clone(), imb.peek()));
-                    }
+                    <StakeRewards<T>>::mutate(&to, |rewards| {
+                        rewards.push(StakeReward {
+                            session_idx: next,
+                            value: amt,
+                        });
+                        // *rewards = rewards;
+                        Self::deposit_event(Event::StakeReward(to.clone(), amt));
+                    });
                 }
             };
 
