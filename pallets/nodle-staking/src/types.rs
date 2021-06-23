@@ -76,6 +76,8 @@ pub struct UnlockChunk<Balance> {
     pub(crate) session_idx: SessionIndex,
 }
 
+pub(crate) type StakeReward<Balance> = UnlockChunk<Balance>;
+
 #[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug)]
 /// The activity status of the validator
 pub enum ValidatorStatus {

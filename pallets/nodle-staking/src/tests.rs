@@ -748,7 +748,7 @@ fn payout_distribution_to_solo_validators() {
                 Event::ValidatorChosen(6, 4, 70),
                 Event::ValidatorChosen(6, 5, 60),
                 Event::NewSession(25, 6, 5, 400),
-                Event::Rewarded(1, 1000000),
+                Event::StakeReward(1, 1000000),
                 Event::ValidatorChosen(7, 1, 100),
                 Event::ValidatorChosen(7, 2, 90),
                 Event::ValidatorChosen(7, 3, 80),
@@ -767,8 +767,8 @@ fn payout_distribution_to_solo_validators() {
             mock::start_active_session(7);
 
             let mut new2 = vec![
-                Event::Rewarded(1, 600000),
-                Event::Rewarded(2, 400000),
+                Event::StakeReward(1, 600000),
+                Event::StakeReward(2, 400000),
                 Event::ValidatorChosen(8, 1, 100),
                 Event::ValidatorChosen(8, 2, 90),
                 Event::ValidatorChosen(8, 3, 80),
@@ -790,11 +790,11 @@ fn payout_distribution_to_solo_validators() {
             mock::start_active_session(8);
 
             let mut new3 = vec![
-                Event::Rewarded(5, 200000),
-                Event::Rewarded(3, 200000),
-                Event::Rewarded(4, 200000),
-                Event::Rewarded(1, 200000),
-                Event::Rewarded(2, 200000),
+                Event::StakeReward(5, 200000),
+                Event::StakeReward(3, 200000),
+                Event::StakeReward(4, 200000),
+                Event::StakeReward(1, 200000),
+                Event::StakeReward(2, 200000),
                 Event::ValidatorChosen(9, 1, 100),
                 Event::ValidatorChosen(9, 2, 90),
                 Event::ValidatorChosen(9, 3, 80),
@@ -814,20 +814,56 @@ fn payout_distribution_to_solo_validators() {
             assert!(NodleStaking::awarded_pts(4, 4).is_zero());
             assert!(NodleStaking::awarded_pts(4, 5).is_zero());
 
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(1)));
+
+            let mut new4 = vec![Event::Rewarded(1, 1800000)];
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
             assert_eq!(mock::balances(&1), (1801000, 100));
             assert_eq!(Balances::total_balance(&1), 1801000);
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(2)));
+
+            let mut new5 = vec![Event::Rewarded(2, 600000)];
+            expected.append(&mut new5);
+            assert_eq!(events(), expected);
 
             assert_eq!(mock::balances(&2), (601000, 90));
             assert_eq!(Balances::total_balance(&2), 601000);
 
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(3)));
+
+            let mut new6 = vec![Event::Rewarded(3, 200000)];
+            expected.append(&mut new6);
+            assert_eq!(events(), expected);
+
             assert_eq!(mock::balances(&3), (201000, 80));
             assert_eq!(Balances::total_balance(&3), 201000);
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(4)));
+
+            let mut new7 = vec![Event::Rewarded(4, 200000)];
+            expected.append(&mut new7);
+            assert_eq!(events(), expected);
 
             assert_eq!(mock::balances(&4), (201000, 70));
             assert_eq!(Balances::total_balance(&4), 201000);
 
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(5)));
+
+            let mut new8 = vec![Event::Rewarded(5, 200000)];
+            expected.append(&mut new8);
+            assert_eq!(events(), expected);
+
             assert_eq!(mock::balances(&5), (201000, 60));
             assert_eq!(Balances::total_balance(&5), 201000);
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)));
+
+            let mut new9 = vec![Event::Rewarded(6, 0)];
+            expected.append(&mut new9);
+            assert_eq!(events(), expected);
 
             assert_eq!(mock::balances(&6), (1000, 50));
             assert_eq!(Balances::total_balance(&6), 1000);
@@ -936,12 +972,12 @@ fn validator_commission() {
                 Event::ValidatorChosen(8, 1, 40),
                 Event::ValidatorChosen(8, 4, 40),
                 Event::NewSession(35, 8, 2, 80),
-                Event::Rewarded(4, 300000),
-                Event::Rewarded(5, 100000),
-                Event::Rewarded(6, 100000),
-                Event::Rewarded(1, 300000),
-                Event::Rewarded(2, 100000),
-                Event::Rewarded(3, 100000),
+                Event::StakeReward(4, 300000),
+                Event::StakeReward(5, 100000),
+                Event::StakeReward(6, 100000),
+                Event::StakeReward(1, 300000),
+                Event::StakeReward(2, 100000),
+                Event::StakeReward(3, 100000),
                 Event::ValidatorChosen(9, 1, 40),
                 Event::ValidatorChosen(9, 4, 40),
                 Event::NewSession(40, 9, 2, 80),
@@ -949,20 +985,56 @@ fn validator_commission() {
             expected.append(&mut new4);
             assert_eq!(events(), expected);
 
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(1)));
+
+            let mut new5 = vec![Event::Rewarded(1, 300000)];
+            expected.append(&mut new5);
+            assert_eq!(events(), expected);
+
             assert_eq!(mock::balances(&1), (300100, 20));
             assert_eq!(Balances::total_balance(&1), 300100);
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(2)));
+
+            let mut new6 = vec![Event::Rewarded(2, 100000)];
+            expected.append(&mut new6);
+            assert_eq!(events(), expected);
 
             assert_eq!(mock::balances(&2), (100100, 10));
             assert_eq!(Balances::total_balance(&2), 100100);
 
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(3)));
+
+            let mut new7 = vec![Event::Rewarded(3, 100000)];
+            expected.append(&mut new7);
+            assert_eq!(events(), expected);
+
             assert_eq!(mock::balances(&3), (100100, 10));
             assert_eq!(Balances::total_balance(&3), 100100);
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(4)));
+
+            let mut new8 = vec![Event::Rewarded(4, 300000)];
+            expected.append(&mut new8);
+            assert_eq!(events(), expected);
 
             assert_eq!(mock::balances(&4), (300100, 20));
             assert_eq!(Balances::total_balance(&4), 300100);
 
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(5)));
+
+            let mut new9 = vec![Event::Rewarded(5, 100000)];
+            expected.append(&mut new9);
+            assert_eq!(events(), expected);
+
             assert_eq!(mock::balances(&5), (100100, 10));
             assert_eq!(Balances::total_balance(&5), 100100);
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)));
+
+            let mut new10 = vec![Event::Rewarded(6, 100000)];
+            expected.append(&mut new10);
+            assert_eq!(events(), expected);
 
             assert_eq!(mock::balances(&6), (100100, 10));
             assert_eq!(Balances::total_balance(&6), 100100);
@@ -1995,10 +2067,10 @@ fn payouts_follow_nomination_changes() {
             mock::start_active_session(5);
 
             let mut new1 = vec![
-                Event::Rewarded(1, 520000),
-                Event::Rewarded(6, 160000),
-                Event::Rewarded(7, 160000),
-                Event::Rewarded(10, 160000),
+                Event::StakeReward(1, 520000),
+                Event::StakeReward(6, 160000),
+                Event::StakeReward(7, 160000),
+                Event::StakeReward(10, 160000),
                 Event::ValidatorChosen(6, 1, 50),
                 Event::ValidatorChosen(6, 2, 40),
                 Event::ValidatorChosen(6, 3, 20),
@@ -2026,10 +2098,10 @@ fn payouts_follow_nomination_changes() {
 
             let mut new2 = vec![
                 Event::NominatorLeftValidator(6, 1, 10, 40),
-                Event::Rewarded(1, 520000),
-                Event::Rewarded(6, 160000),
-                Event::Rewarded(7, 160000),
-                Event::Rewarded(10, 160000),
+                Event::StakeReward(1, 520000),
+                Event::StakeReward(6, 160000),
+                Event::StakeReward(7, 160000),
+                Event::StakeReward(10, 160000),
                 Event::ValidatorChosen(7, 1, 40),
                 Event::ValidatorChosen(7, 2, 40),
                 Event::ValidatorChosen(7, 3, 20),
@@ -2046,10 +2118,10 @@ fn payouts_follow_nomination_changes() {
             mock::start_active_session(7);
 
             let mut new3 = vec![
-                Event::Rewarded(1, 520000),
-                Event::Rewarded(6, 160000),
-                Event::Rewarded(7, 160000),
-                Event::Rewarded(10, 160000),
+                Event::StakeReward(1, 520000),
+                Event::StakeReward(6, 160000),
+                Event::StakeReward(7, 160000),
+                Event::StakeReward(10, 160000),
                 Event::ValidatorChosen(8, 1, 40),
                 Event::ValidatorChosen(8, 2, 40),
                 Event::ValidatorChosen(8, 3, 20),
@@ -2082,9 +2154,9 @@ fn payouts_follow_nomination_changes() {
             mock::start_active_session(10);
 
             let mut new5 = vec![
-                Event::Rewarded(1, 600000),
-                Event::Rewarded(7, 200000),
-                Event::Rewarded(10, 200000),
+                Event::StakeReward(1, 600000),
+                Event::StakeReward(7, 200000),
+                Event::StakeReward(10, 200000),
                 Event::ValidatorChosen(10, 1, 50),
                 Event::ValidatorChosen(10, 2, 40),
                 Event::ValidatorChosen(10, 3, 20),
@@ -2107,10 +2179,10 @@ fn payouts_follow_nomination_changes() {
             mock::start_active_session(11);
 
             let mut new6 = vec![
-                Event::Rewarded(1, 520000),
-                Event::Rewarded(7, 160000),
-                Event::Rewarded(8, 160000),
-                Event::Rewarded(10, 160000),
+                Event::StakeReward(1, 520000),
+                Event::StakeReward(7, 160000),
+                Event::StakeReward(8, 160000),
+                Event::StakeReward(10, 160000),
                 Event::ValidatorChosen(12, 1, 50),
                 Event::ValidatorChosen(12, 2, 40),
                 Event::ValidatorChosen(12, 3, 20),
@@ -2128,8 +2200,13 @@ fn payouts_follow_nomination_changes() {
 
             assert_eq!(events(), expected);
 
-            assert_eq!(mock::balances(&6), (480100, 0));
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)));
 
+            let mut new8 = vec![Event::Rewarded(6, 480000)];
+            expected.append(&mut new8);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&6), (480100, 0));
             assert_eq!(NodleStaking::total(), 140);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
@@ -2303,6 +2380,124 @@ fn reward_validator_slashing_validator_does_not_overflow() {
             // Trigger payout for Session 3
             start_session(4);
 
+			let mut expected = vec![
+				Event::ValidatorChosen(
+					2,
+					11,
+					1500,
+				),
+				Event::ValidatorChosen(
+					2,
+					21,
+					1000,
+				),
+				Event::ValidatorChosen(
+					2,
+					41,
+					1000,
+				),
+				Event::NewSession(
+					5,
+					2,
+					3,
+					3500,
+				),
+				Event::ValidatorChosen(
+					3,
+					11,
+					1500,
+				),
+				Event::ValidatorChosen(
+					3,
+					21,
+					1000,
+				),
+				Event::ValidatorChosen(
+					3,
+					41,
+					1000,
+				),
+				Event::NewSession(
+					10,
+					3,
+					3,
+					3500,
+				),
+				Event::JoinedValidatorPool(
+					81,
+					36893488147419103230,
+					36893488147419106730,
+				),
+				Event::ValidatorChosen(
+					4,
+					11,
+					1500,
+				),
+				Event::ValidatorChosen(
+					4,
+					21,
+					1000,
+				),
+				Event::ValidatorChosen(
+					4,
+					41,
+					1000,
+				),
+				Event::ValidatorChosen(
+					4,
+					81,
+					36893488147419103230,
+				),
+				Event::NewSession(
+					15,
+					4,
+					4,
+					36893488147419106730,
+				),
+				Event::StakeReward(
+					81,
+					36893488147419103230,
+				),
+				Event::ValidatorChosen(
+					5,
+					11,
+					1500,
+				),
+				Event::ValidatorChosen(
+					5,
+					21,
+					1000,
+				),
+				Event::ValidatorChosen(
+					5,
+					41,
+					1000,
+				),
+				Event::ValidatorChosen(
+					5,
+					81,
+					36893488147419103230,
+				),
+				Event::NewSession(
+					20,
+					5,
+					4,
+					36893488147419106730,
+				),
+			];
+            assert_eq!(events(), expected);
+
+			assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(81)));
+
+			let mut new1 = vec![
+				Event::Rewarded(
+					81,
+					36893488147419103230,
+				),
+			];
+			expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
             // Payout made for Acc-81
             assert_eq!(Balances::total_balance(&81), (stake * 2));
 
@@ -2365,7 +2560,7 @@ fn reward_validator_slashing_validator_does_not_overflow() {
 
             // assert_eq!(Balances::total_balance(&11), stake - 1);
             // assert_eq!(Balances::total_balance(&2), 1);
-        })
+        });
 }
 
 #[test]
