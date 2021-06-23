@@ -1133,6 +1133,17 @@ fn multiple_nominations() {
 
             assert_eq!(NodleStaking::total(), 140);
 
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 2);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
+
             assert_noop!(
                 NodleStaking::nominator_nominate(Origin::signed(6), 1, 10),
                 Error::<Test>::AlreadyNominatedValidator,
@@ -1290,6 +1301,14 @@ fn multiple_nominations() {
             expected.append(&mut new5);
             assert_eq!(events(), expected);
 
+            assert_eq!(System::consumers(&2), 1);
+
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
+
             assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(6)));
             assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(7)));
             assert_ok!(NodleStaking::withdraw_unbonded(Origin::signed(8)));
@@ -1306,6 +1325,12 @@ fn multiple_nominations() {
 
             expected.append(&mut new6);
             assert_eq!(events(), expected);
+
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 0);
+            assert_eq!(System::consumers(&9), 0);
+            assert_eq!(System::consumers(&10), 1);
 
             assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 30);
             assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 10);
@@ -1360,6 +1385,17 @@ fn multiple_nominations() {
             assert_eq!(Balances::total_balance(&10), 100);
 
             assert_eq!(NodleStaking::total(), 120);
+
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 1);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 0);
+            assert_eq!(System::consumers(&9), 0);
+            assert_eq!(System::consumers(&10), 1);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
         });

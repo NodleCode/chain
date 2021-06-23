@@ -233,10 +233,6 @@ pub mod pallet {
 
             log::debug!("validator_join_pool:[{:#?}]", line!(),);
 
-            system::Pallet::<T>::inc_consumers(&acc).map_err(|_| <Error<T>>::BadState)?;
-
-            log::debug!("validator_join_pool:[{:#?}]", line!(),);
-
             T::Currency::set_lock(T::StakingLockId::get(), &acc, bond, WithdrawReasons::all());
 
             let validator = Validator::new(acc.clone(), bond);
@@ -1501,8 +1497,6 @@ pub mod pallet {
             } else if Self::is_nominator(&controller) {
                 <NominatorState<T>>::remove(controller);
             }
-
-            system::Pallet::<T>::dec_consumers(controller);
             Ok(())
         }
 
