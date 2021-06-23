@@ -2783,6 +2783,11 @@ fn slash_in_old_span_does_not_deselect() {
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
+
+            assert!(<AwardedPts<Test>>::contains_key(5, 11));
+            assert!(<AwardedPts<Test>>::contains_key(5, 21));
+            assert!(<AwardedPts<Test>>::contains_key(5, 41));
+
             assert_eq!(NodleStaking::total(), 3200);
 
             assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
