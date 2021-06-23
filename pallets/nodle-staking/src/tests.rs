@@ -2533,6 +2533,14 @@ fn slash_in_old_span_does_not_deselect() {
             ];
             assert_eq!(events(), expected);
 
+            mock::set_author(5, 11, 20);
+            mock::set_author(5, 21, 40);
+            mock::set_author(5, 41, 40);
+
+            assert!(<AwardedPts<Test>>::contains_key(5, 11));
+            assert!(<AwardedPts<Test>>::contains_key(5, 21));
+            assert!(<AwardedPts<Test>>::contains_key(5, 41));
+
             assert!(<ValidatorState<Test>>::contains_key(11));
             assert_eq!(
                 NodleStaking::validator_state(11).unwrap().state,
@@ -2670,6 +2678,12 @@ fn slash_in_old_span_does_not_deselect() {
                 NodleStaking::validator_state(11).unwrap().state,
                 ValidatorStatus::Active,
             );
+
+            mock::start_active_session(16);
+
+            assert!(!<AwardedPts<Test>>::contains_key(5, 11));
+            assert!(!<AwardedPts<Test>>::contains_key(5, 21));
+            assert!(!<AwardedPts<Test>>::contains_key(5, 41));
         });
 }
 
