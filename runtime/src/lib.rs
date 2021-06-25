@@ -85,7 +85,6 @@ macro_rules! construct_nodle_runtime {
 				// System
 				System: frame_system::{Module, Call, Storage, Config, Event<T>},
 				Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-				Indices: pallet_indices::{Module, Call, Storage, Config<T>, Event<T>},
 				Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
 				TransactionPayment: pallet_transaction_payment::{Module, Storage},
 				RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage},
@@ -118,10 +117,7 @@ macro_rules! construct_nodle_runtime {
 				Vesting: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>},
 
 				// Neat things
-				Identity: pallet_identity::{Module, Call, Storage, Event<T>},
-				Recovery: pallet_recovery::{Module, Call, Storage, Event<T>},
 				Utility: pallet_utility::{Module, Call, Event},
-				Proxy: pallet_proxy::{Module, Call, Storage, Event<T>},
 				Multisig: pallet_multisig::{Module, Call, Storage, Event<T>},
 				Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>},
 
