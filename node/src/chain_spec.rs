@@ -256,9 +256,6 @@ fn development_config_genesis() -> GenesisConfig {
         vec![get_authority_keys_from_seed("Alice")],
         vec![
             get_account_id_from_seed::<sr25519::Public>("Alice"),
-            get_account_id_from_seed::<sr25519::Public>("Bob"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-            get_account_id_from_seed::<sr25519::Public>("Dave"),
         ],
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
         None,
