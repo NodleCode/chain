@@ -22,8 +22,8 @@ use nodle_chain_runtime::StakingConfig;
 use nodle_chain_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
-    IndicesConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
-    TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
+    RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
+    ValidatorsSetConfig, VestingConfig,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
@@ -176,7 +176,6 @@ pub fn testnet_genesis(
                     acc
                 }),
         }),
-        pallet_indices: Some(IndicesConfig { indices: vec![] }),
         pallet_grants: Some(VestingConfig {
             vesting: vested_grants,
         }),
