@@ -146,7 +146,7 @@ construct_nodle_runtime! {
 }
 
 /// The address format for describing accounts.
-pub type Address = <Indices as StaticLookup>::Source;
+pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
@@ -434,12 +434,9 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_nodle_staking, Staking);
 
             add_benchmark!(params, batches, pallet_grants, Vesting);
-            add_benchmark!(params, batches, pallet_identity, Identity);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
-            add_benchmark!(params, batches, pallet_indices, Indices);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_proxy, Proxy);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
             add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);

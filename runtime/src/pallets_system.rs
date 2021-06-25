@@ -20,8 +20,8 @@
 
 use crate::{
     constants, implementations::DealWithFees, version::VERSION, Babe, Balances, Call,
-    CompanyReserve, Event, Indices, Origin, PalletInfo, Runtime, SignedExtra, SignedPayload,
-    System, UncheckedExtrinsic,
+    CompanyReserve, Event, Origin, PalletInfo, Runtime, SignedExtra, SignedPayload, System,
+    UncheckedExtrinsic,
 };
 use frame_support::{
     debug, parameter_types,
@@ -35,7 +35,7 @@ use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustm
 use parity_scale_codec::Encode;
 use sp_runtime::{
     generic,
-    traits::{BlakeTwo256, SaturatedConversion, StaticLookup},
+    traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
     FixedPointNumber, Perquintill,
 };
 use sp_version::RuntimeVersion;
@@ -60,7 +60,7 @@ impl frame_system::Config for Runtime {
     type Hash = Hash;
     type Hashing = BlakeTwo256;
     type AccountId = AccountId;
-    type Lookup = Indices;
+    type Lookup = AccountIdLookup<AccountId, ()>;
     type Header = generic::Header<BlockNumber, BlakeTwo256>;
     type Event = Event;
     type BlockHashCount = BlockHashCount;
@@ -82,18 +82,6 @@ impl pallet_timestamp::Config for Runtime {
     type OnTimestampSet = Babe;
     type MinimumPeriod = MinimumPeriod;
     type WeightInfo = pallet_timestamp::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    pub const IndexDeposit: Balance = 1 * constants::DOLLARS;
-}
-
-impl pallet_indices::Config for Runtime {
-    type AccountIndex = AccountIndex;
-    type Currency = Balances;
-    type Deposit = IndexDeposit;
-    type Event = Event;
-    type WeightInfo = pallet_indices::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -167,7 +155,7 @@ where
             })
             .ok()?;
         let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;
-        let address = Indices::unlookup(account);
+        let address = <Runtime as frame_system::Config>::Lookup::unlookup(account);
         let (call, extra, _) = raw_payload.deconstruct();
         Some((call, (address, signature.into(), extra)))
     }
