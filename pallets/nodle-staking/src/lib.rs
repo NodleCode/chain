@@ -54,7 +54,6 @@ pub mod pallet {
         },
     };
     use frame_system::pallet_prelude::*;
-    use frame_system::{self as system};
     use sp_runtime::{
         traits::{AccountIdConversion, Saturating, Zero},
         DispatchResult, ModuleId, Perbill,

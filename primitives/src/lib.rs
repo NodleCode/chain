@@ -39,9 +39,6 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 /// Some way of identifying a PKI certificate on the chain. We make it equivalent to AccountId.
 pub type CertificateId = AccountId;
 
-/// The type for looking up accounts. We don't expect more than 4 billion of them.
-pub type AccountIndex = u32;
-
 /// Balance of an account.
 pub type Balance = u128;
 
