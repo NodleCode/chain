@@ -19,17 +19,15 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants,
-    pallets_governance::{FinancialCollective, TechnicalCollective},
-    Balances, Call, CompanyReserve, Event, Origin, OriginCaller, RandomnessCollectiveFlip, Runtime,
-    Timestamp,
+    constants, pallets_governance::FinancialCollective, Balances, Call, Event, Origin,
+    OriginCaller, RandomnessCollectiveFlip, Runtime, Timestamp,
 };
 
 use frame_support::{parameter_types, weights::Weight};
 use nodle_chain_primitives::{AccountId, Balance};
 use pallet_contracts::weights::WeightInfo;
 use sp_core::u32_trait::{_1, _2};
-use sp_runtime::{traits::BlakeTwo256, Perbill};
+use sp_runtime::Perbill;
 
 impl pallet_grants::Config for Runtime {
     type Event = Event;

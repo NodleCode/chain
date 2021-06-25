@@ -28,9 +28,7 @@ use frame_support::{
     weights::{constants::RocksDbWeight, IdentityFee},
 };
 use frame_system::limits::BlockLength;
-use nodle_chain_primitives::{
-    AccountId, AccountIndex, Balance, BlockNumber, Hash, Index, Moment, Signature,
-};
+use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Hash, Index, Moment, Signature};
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use parity_scale_codec::Encode;
 use sp_runtime::{

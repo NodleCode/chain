@@ -19,17 +19,13 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Authorship, Balances, Call, CompanyReserve};
+use crate::{Authorship, Balances, CompanyReserve};
 
 #[cfg(feature = "with-staking")]
 use crate::Staking;
 
-use frame_support::{
-    traits::{Currency, Imbalance, InstanceFilter, OnUnbalanced},
-    RuntimeDebug,
-};
+use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 use nodle_chain_primitives::AccountId;
-use parity_scale_codec::{Decode, Encode};
 
 /// Logic for the author to get a portion of fees.
 pub struct Author;

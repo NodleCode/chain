@@ -50,7 +50,7 @@ use sp_core::OpaqueMetadata;
 pub use sp_runtime::BuildStorage;
 use sp_runtime::{
     generic,
-    traits::{BlakeTwo256, Block as BlockT, NumberFor, StaticLookup},
+    traits::{BlakeTwo256, Block as BlockT, NumberFor},
     transaction_validity::{TransactionSource, TransactionValidity},
     ApplyExtrinsicResult,
 };
