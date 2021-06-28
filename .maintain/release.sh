@@ -10,4 +10,4 @@ git push
 
 cargo build --release
 
-gh release create $1 --title $1 'target/release/wbuild/nodle-chain-runtime/nodle_chain_runtime.compact.wasm#Runtime Blob'
+gh release create $1 --title $1 --target master 'target/release/wbuild/nodle-chain-runtime/nodle_chain_runtime.compact.wasm#Runtime Blob'
