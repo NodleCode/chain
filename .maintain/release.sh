@@ -6,6 +6,7 @@ find . -name Cargo.toml -not -path "./target/*" -exec sed -i '' -e "s/^version =
 
 cargo build --release
 
+git pull
 git add .
 git commit -m "bump version for release"
 git push
