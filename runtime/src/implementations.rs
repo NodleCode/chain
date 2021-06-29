@@ -22,7 +22,7 @@
 use crate::{Authorship, Balances, CompanyReserve};
 
 #[cfg(feature = "with-staking")]
-use crate::Staking;
+use crate::NodleStaking;
 
 use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 use nodle_chain_primitives::AccountId;
@@ -55,7 +55,7 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 
             // 80% is moved to staking pallet, when staking is enabled.
             #[cfg(feature = "with-staking")]
-            Staking::on_unbalanced(split.1);
+            NodleStaking::on_unbalanced(split.1);
         }
     }
 }
