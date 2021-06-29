@@ -16,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#[cfg(feature = "with-staking")]
+use crate::NodleStaking;
+
 use frame_support::{
     debug,
     migration::{put_storage_value, StorageIterator},
@@ -79,6 +82,25 @@ impl OnRuntimeUpgrade for GrantsMigration {
         }
 
         debug::print!("🕊️ Corrected grants for {} accounts", grants_done);
+
+        weight
+    }
+}
+
+#[cfg(feature = "with-staking")]
+pub struct StakingMigration;
+
+#[cfg(feature = "with-staking")]
+impl OnRuntimeUpgrade for StakingMigration {
+    fn on_runtime_upgrade() -> Weight {
+        let mut weight = Weight::from(0u64);
+
+        debug::RuntimeLogger::init();
+        debug::print!("🕊️ Starting staking migration...");
+
+        weight = weight.saturating_add(NodleStaking::on_runtime_upgrade());
+
+        debug::print!("🕊️ Staking migration Done");
 
         weight
     }

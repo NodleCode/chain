@@ -33,7 +33,7 @@ use crate::Poa;
 use sp_runtime::traits::ConvertInto;
 
 #[cfg(feature = "with-staking")]
-use crate::{Balances, CompanyReserve, Staking};
+use crate::{Balances, CompanyReserve, NodleStaking};
 
 use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
 
@@ -133,7 +133,7 @@ impl pallet_authorship::Config for Runtime {
     type EventHandler = ImOnline;
 
     #[cfg(feature = "with-staking")]
-    type EventHandler = (Staking, ImOnline);
+    type EventHandler = (NodleStaking, ImOnline);
 }
 
 parameter_types! {
@@ -199,7 +199,7 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
 
 #[cfg(feature = "with-staking")]
 impl pallet_session::Config for Runtime {
-    type SessionManager = Staking;
+    type SessionManager = NodleStaking;
     type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
     type Event = Event;
@@ -275,7 +275,7 @@ impl pallet_offences::Config for Runtime {
     type OnOffenceHandler = ();
 
     #[cfg(feature = "with-staking")]
-    type OnOffenceHandler = Staking;
+    type OnOffenceHandler = NodleStaking;
 
     type WeightSoftLimit = OffencesWeightSoftLimit;
 }
@@ -294,8 +294,8 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type PrimeOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     // TODO :: Have to revisit this change.
-    // type MembershipInitialized = Staking;
-    // type MembershipChanged = Staking;
+    // type MembershipInitialized = NodleStaking;
+    // type MembershipChanged = NodleStaking;
     type MembershipInitialized = ();
     type MembershipChanged = ();
 }

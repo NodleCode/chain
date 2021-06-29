@@ -19,11 +19,15 @@ use super::{BalanceOf, Config};
 use crate::types::Validator;
 use frame_support::{
     pallet_prelude::*,
-    traits::StorageInstance,
+    traits::{Currency, Get, StorageInstance},
     weights::{constants::RocksDbWeight, Weight},
 };
 
-use sp_runtime::traits::Zero;
+use sp_runtime::{
+    traits::{AccountIdConversion, Zero},
+    Perbill,
+};
+
 use sp_std::vec::Vec;
 
 /// This migration is in charge of moving the validators from POA to Staking pallet to
@@ -61,9 +65,45 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         }
     }
 
+    struct StakingTotalSelectedStorageValuePrefix;
+    impl StorageInstance for StakingTotalSelectedStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "TotalSelected";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
+    struct StakingValidatorFeeStorageValuePrefix;
+    impl StorageInstance for StakingValidatorFeeStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "ValidatorFee";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
+    struct StakingSlashRewardProportionStorageValuePrefix;
+    impl StorageInstance for StakingSlashRewardProportionStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "SlashRewardProportion";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
     #[allow(type_alias_bounds)]
     type POAValidators<T: Config> =
         StorageValue<POAValidatorsStorageValuePrefix, Vec<T::AccountId>, OptionQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingTotalSelected =
+        StorageValue<StakingTotalSelectedStorageValuePrefix, u32, ValueQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingValidatorFee =
+        StorageValue<StakingValidatorFeeStorageValuePrefix, Perbill, ValueQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingSlashRewardProportion =
+        StorageValue<StakingSlashRewardProportionStorageValuePrefix, Perbill, ValueQuery>;
 
     #[allow(type_alias_bounds)]
     type StakingInvulnerables<T: Config> =
@@ -113,8 +153,22 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
                 <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
                 weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
             } else {
-                log::error!("Error!!! Staking Invulnerable invalid DB instance state");
-                return weight;
+                log::info!("Staking runtime upgrade Genesis config");
+
+                <StakingInvulnerables<T>>::put(poa_validators.clone());
+
+                // Ensure balance is >= ED
+                let imbalance = T::Currency::issue(T::Currency::minimum_balance());
+                T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
+
+                // Set collator commission to default config
+                StakingValidatorFee::put(T::DefaultValidatorFee::get());
+                // Set total selected validators to minimum config
+                StakingTotalSelected::put(T::MinSelectedValidators::get());
+                // Set default slash reward fraction
+                StakingSlashRewardProportion::put(T::DefaultSlashRewardProportion::get());
+
+                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 5));
             }
 
             for valid_acc in &poa_validators {

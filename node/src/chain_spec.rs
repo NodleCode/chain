@@ -18,7 +18,7 @@
 
 use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 #[cfg(feature = "with-staking")]
-use nodle_chain_runtime::StakingConfig;
+use nodle_chain_runtime::NodleStakingConfig;
 use nodle_chain_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
@@ -206,7 +206,7 @@ pub fn testnet_genesis(
             authorities: vec![],
         }),
         #[cfg(feature = "with-staking")]
-        pallet_nodle_staking: Some(StakingConfig {
+        pallet_nodle_staking: Some(NodleStakingConfig {
             stakers: initial_authorities
                 .iter()
                 .map(|x| (x.1.clone(), None, STASH))
