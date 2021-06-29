@@ -191,7 +191,6 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllModules,
-    migrations::StakingMigration,
 >;
 
 sp_api::impl_runtime_apis! {

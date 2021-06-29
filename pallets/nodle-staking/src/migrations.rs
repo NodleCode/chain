@@ -19,14 +19,11 @@ use super::{BalanceOf, Config};
 use crate::types::Validator;
 use frame_support::{
     pallet_prelude::*,
-    traits::{Currency, Get, StorageInstance},
+    traits::{Get, StorageInstance},
     weights::{constants::RocksDbWeight, Weight},
 };
 
-use sp_runtime::{
-    traits::{AccountIdConversion, Zero},
-    Perbill,
-};
+use sp_runtime::{traits::Zero, Perbill};
 
 use sp_std::vec::Vec;
 
@@ -156,10 +153,6 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
                 log::info!("Staking runtime upgrade Genesis config");
 
                 <StakingInvulnerables<T>>::put(poa_validators.clone());
-
-                // Ensure balance is >= ED
-                let imbalance = T::Currency::issue(T::Currency::minimum_balance());
-                T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
 
                 // Set collator commission to default config
                 StakingValidatorFee::put(T::DefaultValidatorFee::get());
