@@ -18,10 +18,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use crate::{
-    constants, pallets_governance::FinancialCollective, Balances, Call, Event, Origin,
-    OriginCaller, RandomnessCollectiveFlip, Runtime, Timestamp,
-};
+use crate::{Balances, Call, Event, Origin, OriginCaller, RandomnessCollectiveFlip, Runtime, Timestamp, constants, pallets_governance::FinancialCollective};
 
 use frame_support::{parameter_types, weights::Weight};
 use nodle_chain_primitives::{AccountId, Balance};
