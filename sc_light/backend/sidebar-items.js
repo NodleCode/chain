@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["GenesisOrUnavailableState","Either in-memory genesis state, or locally-unavailable state."]],"struct":[["Backend","Light client backend."],["ImportOperation","Light block (header and justification) import operation."]]});

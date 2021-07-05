@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["pallet",""]],"struct":[["FullIdentificationOf",""]],"type":[["FullIdentification","Compatibility code for the session historical code"]]});

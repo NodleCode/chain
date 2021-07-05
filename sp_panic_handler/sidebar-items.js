@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["set","Set the panic hook."]],"struct":[["AbortGuard","RAII guard for whether panics in the current thread should unwind or abort."]]});

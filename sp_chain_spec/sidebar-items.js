@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ChainType","The type of a chain."]],"type":[["Properties","Arbitrary properties defined in chain spec as a JSON object"]]});

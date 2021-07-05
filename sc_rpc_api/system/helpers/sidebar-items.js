@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["NodeRole","The role the node is running as"]],"struct":[["Health","Health struct returned by the RPC"],["PeerInfo","Network Peer information"],["SyncState","The state of the syncing of the node."],["SystemInfo","Running node’s static details."]]});

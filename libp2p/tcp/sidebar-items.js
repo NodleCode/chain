@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["async_io",""]],"struct":[["GenTcpConfig","The configuration for a TCP/IP transport capability for libp2p."],["TcpListenStream","A stream of incoming connections on one or more interfaces."]],"type":[["TcpConfig","The type of a [`GenTcpConfig`] using the `async-io` implementation."]]});

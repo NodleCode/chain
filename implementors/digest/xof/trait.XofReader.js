@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["blake3"] = [{"text":"impl <a class=\"trait\" href=\"digest/xof/trait.XofReader.html\" title=\"trait digest::xof::XofReader\">XofReader</a> for <a class=\"struct\" href=\"blake3/struct.OutputReader.html\" title=\"struct blake3::OutputReader\">OutputReader</a>","synthetic":false,"types":["blake3::OutputReader"]}];
+implementors["sha3"] = [{"text":"impl <a class=\"trait\" href=\"digest/xof/trait.XofReader.html\" title=\"trait digest::xof::XofReader\">XofReader</a> for <a class=\"struct\" href=\"sha3/struct.Sha3XofReader.html\" title=\"struct sha3::Sha3XofReader\">Sha3XofReader</a>","synthetic":false,"types":["sha3::reader::Sha3XofReader"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

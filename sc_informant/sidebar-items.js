@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["build","Builds the informant and returns a `Future` that drives the informant."]],"struct":[["OutputFormat","The format to print telemetry output in."]],"trait":[["TransactionPoolAndMaybeMallogSizeOf","Marker trait for a type that implements `TransactionPool` and `MallocSizeOf` on `not(target_os = \"unknown\")`."]]});

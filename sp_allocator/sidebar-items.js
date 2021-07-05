@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","The error type used by the allocators."]],"struct":[["FreeingBumpHeapAllocator","An implementation of freeing bump allocator."]]});

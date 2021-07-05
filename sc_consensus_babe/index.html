@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="BABE (Blind Assignment for Blockchain Extension)"><meta name="keywords" content="rust, rustlang, rust-lang, sc_consensus_babe"><title>sc_consensus_babe - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../sc_consensus_babe/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate sc_consensus_babe</p><div class="block version"><p>Version 0.9.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all sc_consensus_babe's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li><li><a href="#statics">Statics</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="sc_consensus_babe" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">sc_consensus_babe</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/sc_consensus_babe/lib.rs.html#19-1562" title="goto source code">[src]</a></span></h1><div class="docblock"><h1 id="babe-blind-assignment-for-blockchain-extension" class="section-header"><a href="#babe-blind-assignment-for-blockchain-extension">BABE (Blind Assignment for Blockchain Extension)</a></h1>
+<p>BABE is a slot-based block production mechanism which uses a VRF PRNG to
+randomly perform the slot allocation. On every slot, all the authorities
+generate a new random number with the VRF function and if it is lower than a
+given threshold (which is proportional to their weight/stake) they have a
+right to produce a block. The proof of the VRF function execution will be
+used by other peer to validate the legitimacy of the slot claim.</p>
+<p>The engine is also responsible for collecting entropy on-chain which will be
+used to seed the given VRF PRNG. An epoch is a contiguous number of slots
+under which we will be using the same authority set. During an epoch all VRF
+outputs produced as a result of block production will be collected on an
+on-chain randomness pool. Epoch changes are announced one epoch in advance,
+i.e. when ending epoch N, we announce the parameters (randomness,
+authorities, etc.) for epoch N+2.</p>
+<p>Since the slot assignment is randomized, it is possible that a slot is
+assigned to multiple validators in which case we will have a temporary fork,
+or that a slot is assigned to no validator in which case no block is
+produced. Which means that block times are not deterministic.</p>
+<p>The protocol has a parameter <code>c</code> [0, 1] for which <code>1 - c</code> is the probability
+of a slot being empty. The choice of this parameter affects the security of
+the protocol relating to maximum tolerable network delays.</p>
+<p>In addition to the VRF-based slot assignment described above, which we will
+call primary slots, the engine also supports a deterministic secondary slot
+assignment. Primary slots take precedence over secondary slots, when
+authoring the node starts by trying to claim a primary slot and falls back
+to a secondary slot claim attempt. The secondary slot assignment is done
+by picking the authority at index:</p>
+<p><code>blake2_256(epoch_randomness ++ slot_number) % authorities_len</code>.</p>
+<p>The secondary slots supports either a <code>SecondaryPlain</code> or <code>SecondaryVRF</code>
+variant. Comparing with <code>SecondaryPlain</code> variant, the <code>SecondaryVRF</code> variant
+generates an additional VRF output. The output is not included in beacon
+randomness, but can be consumed by parachains.</p>
+<p>The fork choice rule is weight-based, where weight equals the number of
+primary blocks in the chain. We will pick the heaviest chain (more primary
+blocks) and will go with the longest one in case of a tie.</p>
+<p>An in-depth description and analysis of the protocol can be found here:
+<a href="https://research.web3.foundation/en/latest/polkadot/block-production/Babe.html">https://research.web3.foundation/en/latest/polkadot/block-production/Babe.html</a></p>
+</div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="authorship/index.html" title="sc_consensus_babe::authorship mod">authorship</a></td><td class="docblock-short"><p>BABE authority selection and slot claiming.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="aux_schema/index.html" title="sc_consensus_babe::aux_schema mod">aux_schema</a></td><td class="docblock-short"><p>Schema for BABE epoch changes in the aux-db.</p>
+</td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.BabeBlockImport.html" title="sc_consensus_babe::BabeBlockImport struct">BabeBlockImport</a></td><td class="docblock-short"><p>A block-import handler for BABE.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeEpochConfiguration.html" title="sc_consensus_babe::BabeEpochConfiguration struct">BabeEpochConfiguration</a></td><td class="docblock-short"><p>Configuration data used by the BABE consensus engine.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeGenesisConfiguration.html" title="sc_consensus_babe::BabeGenesisConfiguration struct">BabeGenesisConfiguration</a></td><td class="docblock-short"><p>Configuration data used by the BABE consensus engine.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeIntermediate.html" title="sc_consensus_babe::BabeIntermediate struct">BabeIntermediate</a></td><td class="docblock-short"><p>Intermediate value passed to block importer.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeLink.html" title="sc_consensus_babe::BabeLink struct">BabeLink</a></td><td class="docblock-short"><p>State that must be shared between the import queue and the authoring logic.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeParams.html" title="sc_consensus_babe::BabeParams struct">BabeParams</a></td><td class="docblock-short"><p>Parameters for BABE.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeVerifier.html" title="sc_consensus_babe::BabeVerifier struct">BabeVerifier</a></td><td class="docblock-short"><p>A verifier for Babe blocks.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.BabeWorker.html" title="sc_consensus_babe::BabeWorker struct">BabeWorker</a></td><td class="docblock-short"><p>Worker for Babe which implements <code>Future&lt;Output=()&gt;</code>. This must be polled.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.Config.html" title="sc_consensus_babe::Config struct">Config</a></td><td class="docblock-short"><p>A slot duration. Create with <code>get_or_compute</code>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.Epoch.html" title="sc_consensus_babe::Epoch struct">Epoch</a></td><td class="docblock-short"><p>BABE epoch information</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.NextEpochDescriptor.html" title="sc_consensus_babe::NextEpochDescriptor struct">NextEpochDescriptor</a></td><td class="docblock-short"><p>Information about the next epoch. This is broadcast in the first block
+of the epoch.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.PrimaryPreDigest.html" title="sc_consensus_babe::PrimaryPreDigest struct">PrimaryPreDigest</a></td><td class="docblock-short"><p>Raw BABE primary slot assignment pre-digest.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.SecondaryPlainPreDigest.html" title="sc_consensus_babe::SecondaryPlainPreDigest struct">SecondaryPlainPreDigest</a></td><td class="docblock-short"><p>BABE secondary slot assignment pre-digest.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.ConsensusLog.html" title="sc_consensus_babe::ConsensusLog enum">ConsensusLog</a></td><td class="docblock-short"><p>An consensus log item for BABE.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.Error.html" title="sc_consensus_babe::Error enum">Error</a></td><td class="docblock-short"><p>Errors encountered by the babe authorship task.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.NextConfigDescriptor.html" title="sc_consensus_babe::NextConfigDescriptor enum">NextConfigDescriptor</a></td><td class="docblock-short"><p>Information about the next epoch config, if changed. This is broadcast in the first
+block of the epoch, and applies using the same rules as <code>NextEpochDescriptor</code>.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.PreDigest.html" title="sc_consensus_babe::PreDigest enum">PreDigest</a></td><td class="docblock-short"><p>A BABE pre-runtime digest. This contains all data required to validate a
+block and for the BABE runtime module. Slots can be assigned to a primary
+(VRF based) and to a secondary (slot number based).</p>
+</td></tr></table><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<table><tr class="module-item"><td><a class="constant" href="constant.BABE_ENGINE_ID.html" title="sc_consensus_babe::BABE_ENGINE_ID constant">BABE_ENGINE_ID</a></td><td class="docblock-short"><p>The <code>ConsensusEngineId</code> of BABE.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.VRF_OUTPUT_LENGTH.html" title="sc_consensus_babe::VRF_OUTPUT_LENGTH constant">VRF_OUTPUT_LENGTH</a></td><td class="docblock-short"><p>Length of VRF output.</p>
+</td></tr></table><h2 id="statics" class="section-header"><a href="#statics">Statics</a></h2>
+<table><tr class="module-item"><td><a class="static" href="static.INTERMEDIATE_KEY.html" title="sc_consensus_babe::INTERMEDIATE_KEY static">INTERMEDIATE_KEY</a></td><td class="docblock-short"><p>Intermediate key for Babe engine.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.BabeApi.html" title="sc_consensus_babe::BabeApi trait">BabeApi</a></td><td class="docblock-short"><p>API necessary for block authorship with BABE.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.CompatibleDigestItem.html" title="sc_consensus_babe::CompatibleDigestItem trait">CompatibleDigestItem</a></td><td class="docblock-short"><p>A digest item which is usable with BABE consensus.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.SyncOracle.html" title="sc_consensus_babe::SyncOracle trait">SyncOracle</a></td><td class="docblock-short"><p>An oracle for when major synchronization work is being undertaken.</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.block_import.html" title="sc_consensus_babe::block_import fn">block_import</a></td><td class="docblock-short"><p>Produce a BABE block-import object to be used later on in the construction of
+an import-queue.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.find_pre_digest.html" title="sc_consensus_babe::find_pre_digest fn">find_pre_digest</a></td><td class="docblock-short"><p>Extract the BABE pre digest from the given header. Pre-runtime digests are
+mandatory, the function will return <code>Err</code> if none is found.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.import_queue.html" title="sc_consensus_babe::import_queue fn">import_queue</a></td><td class="docblock-short"><p>Start an import queue for the BABE consensus algorithm.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.register_babe_inherent_data_provider.html" title="sc_consensus_babe::register_babe_inherent_data_provider fn">register_babe_inherent_data_provider</a></td><td class="docblock-short"><p>Register the babe inherent data provider, if not registered already.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.start_babe.html" title="sc_consensus_babe::start_babe fn">start_babe</a></td><td class="docblock-short"><p>Start the babe worker.</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.AuthorityId.html" title="sc_consensus_babe::AuthorityId type">AuthorityId</a></td><td class="docblock-short"><p>A Babe authority identifier. Necessarily equivalent to the schnorrkel public key used in
+the main Babe module. If that ever changes, then this must, too.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.AuthorityPair.html" title="sc_consensus_babe::AuthorityPair type">AuthorityPair</a></td><td class="docblock-short"><p>A Babe authority keypair. Necessarily equivalent to the schnorrkel public key used in
+the main Babe module. If that ever changes, then this must, too.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.AuthoritySignature.html" title="sc_consensus_babe::AuthoritySignature type">AuthoritySignature</a></td><td class="docblock-short"><p>A Babe authority signature.</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.BabeAuthorityWeight.html" title="sc_consensus_babe::BabeAuthorityWeight type">BabeAuthorityWeight</a></td><td class="docblock-short"><p>The weight of an authority.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="sc_consensus_babe" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

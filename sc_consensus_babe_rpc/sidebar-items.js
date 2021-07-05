@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Errors encountered by the RPC"]],"mod":[["gen_client","The generated client module."]],"struct":[["BabeRpcHandler","Implements the BabeRpc trait for interacting with Babe."],["EpochAuthorship","Holds information about the `slot`’s that can be claimed by a given key."]],"trait":[["BabeApi","Provides rpc methods for interacting with Babe."]]});

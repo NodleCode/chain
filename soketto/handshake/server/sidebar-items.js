@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Response","Handshake response the server sends back to the client."]],"struct":[["ClientRequest","Handshake request received from the client."],["Server","Websocket handshake client."]]});

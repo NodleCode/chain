@@ -1,0 +1,231 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Substrate-specific P2P networking."><meta name="keywords" content="rust, rustlang, rust-lang, sc_network"><title>sc_network - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../sc_network/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate sc_network</p><div class="block version"><p>Version 0.9.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all sc_network's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="sc_network" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">sc_network</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/sc_network/lib.rs.html#19-323" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Substrate-specific P2P networking.</p>
+<p><strong>Important</strong>: This crate is unstable and the API and usage may change.</p>
+<h1 id="node-identities-and-addresses" class="section-header"><a href="#node-identities-and-addresses">Node identities and addresses</a></h1>
+<p>In a decentralized network, each node possesses a network private key and a network public key.
+In Substrate, the keys are based on the ed25519 curve.</p>
+<p>From a node’s public key, we can derive its <em>identity</em>. In Substrate and libp2p, a node’s
+identity is represented with the <a href="struct.PeerId.html" title="PeerId"><code>PeerId</code></a> struct. All network communications between nodes on
+the network use encryption derived from both sides’s keys, which means that <strong>identities cannot
+be faked</strong>.</p>
+<p>A node’s identity uniquely identifies a machine on the network. If you start two or more
+clients using the same network key, large interferences will happen.</p>
+<h1 id="substrates-network-protocol" class="section-header"><a href="#substrates-network-protocol">Substrate’s network protocol</a></h1>
+<p>Substrate’s networking protocol is based upon libp2p. It is at the moment not possible and not
+planned to permit using something else than the libp2p network stack and the rust-libp2p
+library. However the libp2p framework is very flexible and the rust-libp2p library could be
+extended to support a wider range of protocols than what is offered by libp2p.</p>
+<h2 id="discovery-mechanisms" class="section-header"><a href="#discovery-mechanisms">Discovery mechanisms</a></h2>
+<p>In order for our node to join a peer-to-peer network, it has to know a list of nodes that are
+part of said network. This includes nodes identities and their address (how to reach them).
+Building such a list is called the <strong>discovery</strong> mechanism. There are three mechanisms that
+Substrate uses:</p>
+<ul>
+<li>Bootstrap nodes. These are hard-coded node identities and addresses passed alongside with
+the network configuration.</li>
+<li>mDNS. We perform a UDP broadcast on the local network. Nodes that listen may respond with
+their identity. More info <a href="https://github.com/libp2p/specs/blob/master/discovery/mdns.md">here</a>.
+mDNS can be disabled in the network configuration.</li>
+<li>Kademlia random walk. Once connected, we perform random Kademlia <code>FIND_NODE</code> requests on the
+configured Kademlia DHTs (one per configured chain protocol) in order for nodes to propagate to
+us their view of the network. More information about Kademlia can be found <a href="https://en.wikipedia.org/wiki/Kademlia">on
+Wikipedia</a>.</li>
+</ul>
+<h2 id="connection-establishment" class="section-header"><a href="#connection-establishment">Connection establishment</a></h2>
+<p>When node Alice knows node Bob’s identity and address, it can establish a connection with Bob.
+All connections must always use encryption and multiplexing. While some node addresses (eg.
+addresses using <code>/quic</code>) already imply which encryption and/or multiplexing to use, for others
+the <strong>multistream-select</strong> protocol is used in order to negotiate an encryption layer and/or a
+multiplexing layer.</p>
+<p>The connection establishment mechanism is called the <strong>transport</strong>.</p>
+<p>As of the writing of this documentation, the following base-layer protocols are supported by
+Substrate:</p>
+<ul>
+<li>TCP/IP for addresses of the form <code>/ip4/1.2.3.4/tcp/5</code>. Once the TCP connection is open, an
+encryption and a multiplexing layer are negotiated on top.</li>
+<li>WebSockets for addresses of the form <code>/ip4/1.2.3.4/tcp/5/ws</code>. A TCP/IP connection is open and
+the WebSockets protocol is negotiated on top. Communications then happen inside WebSockets data
+frames. Encryption and multiplexing are additionally negotiated again inside this channel.</li>
+<li>DNS for addresses of the form <code>/dns/example.com/tcp/5</code> or <code>/dns/example.com/tcp/5/ws</code>. A
+node’s address can contain a domain name.</li>
+<li>(All of the above using IPv6 instead of IPv4.)</li>
+</ul>
+<p>On top of the base-layer protocol, the <a href="https://noiseprotocol.org/">Noise</a> protocol is
+negotiated and applied. The exact handshake protocol is experimental and is subject to change.</p>
+<p>The following multiplexing protocols are supported:</p>
+<ul>
+<li><a href="https://github.com/libp2p/specs/tree/master/mplex">Mplex</a>. Support for mplex will likely
+be deprecated in the future.</li>
+<li><a href="https://github.com/hashicorp/yamux/blob/master/spec.md">Yamux</a>.</li>
+</ul>
+<h2 id="substreams" class="section-header"><a href="#substreams">Substreams</a></h2>
+<p>Once a connection has been established and uses multiplexing, substreams can be opened. When
+a substream is open, the <strong>multistream-select</strong> protocol is used to negotiate which protocol
+to use on that given substream.</p>
+<p>Protocols that are specific to a certain chain have a <code>&lt;protocol-id&gt;</code> in their name. This
+“protocol ID” is defined in the chain specifications. For example, the protocol ID of Polkadot
+is “dot”. In the protocol names below, <code>&lt;protocol-id&gt;</code> must be replaced with the corresponding
+protocol ID.</p>
+<blockquote>
+<p><strong>Note</strong>: It is possible for the same connection to be used for multiple chains. For example,
+one can use both the <code>/dot/sync/2</code> and <code>/sub/sync/2</code> protocols on the same
+connection, provided that the remote supports them.</p>
+</blockquote>
+<p>Substrate uses the following standard libp2p protocols:</p>
+<ul>
+<li><strong><code>/ipfs/ping/1.0.0</code></strong>. We periodically open an ephemeral substream in order to ping the
+remote and check whether the connection is still alive. Failure for the remote to reply leads
+to a disconnection.</li>
+<li><strong><a href="https://github.com/libp2p/specs/tree/master/identify"><code>/ipfs/id/1.0.0</code></a></strong>. We
+periodically open an ephemeral substream in order to ask information from the remote.</li>
+<li><strong><a href="https://github.com/libp2p/specs/pull/108"><code>/&lt;protocol_id&gt;/kad</code></a></strong>. We periodically open
+ephemeral substreams for Kademlia random walk queries. Each Kademlia query is done in a
+separate substream.</li>
+</ul>
+<p>Additionally, Substrate uses the following non-libp2p-standard protocols:</p>
+<ul>
+<li><strong><code>/substrate/&lt;protocol-id&gt;/&lt;version&gt;</code></strong> (where <code>&lt;protocol-id&gt;</code> must be replaced with the
+protocol ID of the targeted chain, and <code>&lt;version&gt;</code> is a number between 2 and 6). For each
+connection we optionally keep an additional substream for all Substrate-based communications alive.
+This protocol is considered legacy, and is progressively being replaced with alternatives.
+This is designated as “The legacy Substrate substream” in this documentation. See below for
+more details.</li>
+<li><strong><code>/&lt;protocol-id&gt;/sync/2</code></strong> is a request-response protocol (see below) that lets one perform
+requests for information about blocks. Each request is the encoding of a <code>BlockRequest</code> and
+each response is the encoding of a <code>BlockResponse</code>, as defined in the <code>api.v1.proto</code> file in
+this source tree.</li>
+<li><strong><code>/&lt;protocol-id&gt;/light/2</code></strong> is a request-response protocol (see below) that lets one perform
+light-client-related requests for information about the state. Each request is the encoding of
+a <code>light::Request</code> and each response is the encoding of a <code>light::Response</code>, as defined in the
+<code>light.v1.proto</code> file in this source tree.</li>
+<li><strong><code>/&lt;protocol-id&gt;/transactions/1</code></strong> is a notifications protocol (see below) where
+transactions are pushed to other nodes. The handshake is empty on both sides. The message
+format is a SCALE-encoded list of transactions, where each transaction is an opaque list of
+bytes.</li>
+<li><strong><code>/&lt;protocol-id&gt;/block-announces/1</code></strong> is a notifications protocol (see below) where
+block announces are pushed to other nodes. The handshake is empty on both sides. The message
+format is a SCALE-encoded tuple containing a block header followed with an opaque list of
+bytes containing some data associated with this block announcement, e.g. a candidate message.</li>
+<li>Notifications protocols that are registered using
+<code>NetworkConfiguration::notifications_protocols</code>. For example: <code>/paritytech/grandpa/1</code>. See
+below for more information.</li>
+</ul>
+<h2 id="the-legacy-substrate-substream" class="section-header"><a href="#the-legacy-substrate-substream">The legacy Substrate substream</a></h2>
+<p>Substrate uses a component named the <strong>peerset manager (PSM)</strong>. Through the discovery
+mechanism, the PSM is aware of the nodes that are part of the network and decides which nodes
+we should perform Substrate-based communications with. For these nodes, we open a connection
+if necessary and open a unique substream for Substrate-based communications. If the PSM decides
+that we should disconnect a node, then that substream is closed.</p>
+<p>For more information about the PSM, see the <em>sc-peerset</em> crate.</p>
+<p>Note that at the moment there is no mechanism in place to solve the issues that arise where the
+two sides of a connection open the unique substream simultaneously. In order to not run into
+issues, only the dialer of a connection is allowed to open the unique substream. When the
+substream is closed, the entire connection is closed as well. This is a bug that will be
+resolved by deprecating the protocol entirely.</p>
+<p>Within the unique Substrate substream, messages encoded using
+<a href="https://github.com/paritytech/parity-scale-codec"><em>parity-scale-codec</em></a> are exchanged.
+The detail of theses messages is not totally in place, but they can be found in the
+<code>message.rs</code> file.</p>
+<p>Once the substream is open, the first step is an exchange of a <em>status</em> message from both
+sides, containing information such as the chain root hash, head of chain, and so on.</p>
+<p>Communications within this substream include:</p>
+<ul>
+<li>Syncing. Blocks are announced and requested from other nodes.</li>
+<li>Light-client requests. When a light client requires information, a random node we have a
+substream open with is chosen, and the information is requested from it.</li>
+<li>Gossiping. Used for example by grandpa.</li>
+</ul>
+<h2 id="request-response-protocols" class="section-header"><a href="#request-response-protocols">Request-response protocols</a></h2>
+<p>A so-called request-response protocol is defined as follow:</p>
+<ul>
+<li>When a substream is opened, the opening side sends a message whose content is
+protocol-specific. The message must be prefixed with an
+<a href="https://en.wikipedia.org/wiki/LEB128">LEB128-encoded number</a> indicating its length. After the
+message has been sent, the writing side is closed.</li>
+<li>The remote sends back the response prefixed with a LEB128-encoded length, and closes its
+side as well.</li>
+</ul>
+<p>Each request is performed in a new separate substream.</p>
+<h2 id="notifications-protocols" class="section-header"><a href="#notifications-protocols">Notifications protocols</a></h2>
+<p>A so-called notifications protocol is defined as follow:</p>
+<ul>
+<li>When a substream is opened, the opening side sends a handshake message whose content is
+protocol-specific. The handshake message must be prefixed with an
+<a href="https://en.wikipedia.org/wiki/LEB128">LEB128-encoded number</a> indicating its length. The
+handshake message can be of length 0, in which case the sender has to send a single <code>0</code>.</li>
+<li>The receiver then either immediately closes the substream, or answers with its own
+LEB128-prefixed protocol-specific handshake response. The message can be of length 0, in which
+case a single <code>0</code> has to be sent back.</li>
+<li>Once the handshake has completed, the notifications protocol is unidirectional. Only the
+node which initiated the substream can push notifications. If the remote wants to send
+notifications as well, it has to open its own undirectional substream.</li>
+<li>Each notification must be prefixed with an LEB128-encoded length. The encoding of the
+messages is specific to each protocol.</li>
+<li>Either party can signal that it doesn’t want a notifications substream anymore by closing
+its writing side. The other party should respond by closing its own writing side soon after.</li>
+</ul>
+<p>The API of <code>sc-network</code> allows one to register user-defined notification protocols.
+<code>sc-network</code> automatically tries to open a substream towards each node for which the legacy
+Substream substream is open. The handshake is then performed automatically.</p>
+<p>For example, the <code>sc-finality-grandpa</code> crate registers the <code>/paritytech/grandpa/1</code>
+notifications protocol.</p>
+<p>At the moment, for backwards-compatibility, notification protocols are tied to the legacy
+Substrate substream. Additionally, the handshake message is hardcoded to be a single 8-bits
+integer representing the role of the node:</p>
+<ul>
+<li>1 for a full node.</li>
+<li>2 for a light node.</li>
+<li>4 for an authority.</li>
+</ul>
+<p>In the future, though, these restrictions will be removed.</p>
+<h1 id="usage" class="section-header"><a href="#usage">Usage</a></h1>
+<p>Using the <code>sc-network</code> crate is done through the <a href="struct.NetworkWorker.html" title="NetworkWorker"><code>NetworkWorker</code></a> struct. Create this
+struct by passing a <a href="config/struct.Params.html" title="config::Params"><code>config::Params</code></a>, then poll it as if it was a <code>Future</code>. You can extract an
+<code>Arc&lt;NetworkService&gt;</code> from the <code>NetworkWorker</code>, which can be shared amongst multiple places
+in order to give orders to the networking.</p>
+<p>See the <a href="config/index.html" title="config"><code>config</code></a> module for more information about how to configure the networking.</p>
+<p>After the <code>NetworkWorker</code> has been created, the important things to do are:</p>
+<ul>
+<li>Calling <code>NetworkWorker::poll</code> in order to advance the network. This can be done by
+dispatching a background task with the <a href="struct.NetworkWorker.html" title="NetworkWorker"><code>NetworkWorker</code></a>.</li>
+<li>Calling <code>on_block_import</code> whenever a block is added to the client.</li>
+<li>Calling <code>on_block_finalized</code> whenever a block is finalized.</li>
+<li>Calling <code>trigger_repropagate</code> when a transaction is added to the pool.</li>
+</ul>
+<p>More precise usage details are still being worked on and will likely change in the future.</p>
+</div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="bitswap/index.html" title="sc_network::bitswap mod">bitswap</a></td><td class="docblock-short"><p>Bitswap server for substrate.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="block_request_handler/index.html" title="sc_network::block_request_handler mod">block_request_handler</a></td><td class="docblock-short"><p>Helper for handling (i.e. answering) block requests from a remote peer via the
+[<code>crate::request_responses::RequestResponsesBehaviour</code>].</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="config/index.html" title="sc_network::config mod">config</a></td><td class="docblock-short"><p>Configuration of the networking layer.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="error/index.html" title="sc_network::error mod">error</a></td><td class="docblock-short"><p>Substrate network possible errors.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="gossip/index.html" title="sc_network::gossip mod">gossip</a></td><td class="docblock-short"><p>Helper for sending rate-limited gossip messages.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="light_client_requests/index.html" title="sc_network::light_client_requests mod">light_client_requests</a></td><td class="docblock-short"><p>Helpers for outgoing and incoming light client requests.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="multiaddr/index.html" title="sc_network::multiaddr mod">multiaddr</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="mod" href="network_state/index.html" title="sc_network::network_state mod">network_state</a></td><td class="docblock-short"><p>Information about the networking, for diagnostic purposes.</p>
+</td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Multiaddr.html" title="sc_network::Multiaddr struct">Multiaddr</a></td><td class="docblock-short"><p>Representation of a Multiaddr.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.NetworkService.html" title="sc_network::NetworkService struct">NetworkService</a></td><td class="docblock-short"><p>Substrate network service. Handles network IO and manages connectivity.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.NetworkStatus.html" title="sc_network::NetworkStatus struct">NetworkStatus</a></td><td class="docblock-short"><p>Overview status of the network.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.NetworkWorker.html" title="sc_network::NetworkWorker struct">NetworkWorker</a></td><td class="docblock-short"><p>Main network worker. Must be polled in order for the network to advance.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.NotificationSender.html" title="sc_network::NotificationSender struct">NotificationSender</a></td><td class="docblock-short"><p>A <code>NotificationSender</code> allows for sending notifications to a peer with a chosen protocol.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.NotificationSenderReady.html" title="sc_network::NotificationSenderReady struct">NotificationSenderReady</a></td><td class="docblock-short"><p>Reserved slot in the notifications buffer, ready to accept data.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.PeerId.html" title="sc_network::PeerId struct">PeerId</a></td><td class="docblock-short"><p>Identifier of a peer of the network.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.PeerInfo.html" title="sc_network::PeerInfo struct">PeerInfo</a></td><td class="docblock-short"><p>Info about a peer’s known state.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.ReputationChange.html" title="sc_network::ReputationChange struct">ReputationChange</a></td><td class="docblock-short"><p>Description of a reputation adjustment for a node.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.DhtEvent.html" title="sc_network::DhtEvent enum">DhtEvent</a></td><td class="docblock-short"><p>Events generated by DHT as a response to get_value and put_value requests.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.Event.html" title="sc_network::Event enum">Event</a></td><td class="docblock-short"><p>Type for events generated by networking layer.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.IfDisconnected.html" title="sc_network::IfDisconnected enum">IfDisconnected</a></td><td class="docblock-short"><p>When sending a request, what to do on a disconnected recipient.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.ObservedRole.html" title="sc_network::ObservedRole enum">ObservedRole</a></td><td class="docblock-short"><p>Role that the peer sent to us during the handshake, with the addition of what our local node
+knows about that peer.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.OutboundFailure.html" title="sc_network::OutboundFailure enum">OutboundFailure</a></td><td class="docblock-short"><p>Possible failures occurring in the context of sending
+an outbound request and receiving the response.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.RequestFailure.html" title="sc_network::RequestFailure enum">RequestFailure</a></td><td class="docblock-short"><p>Error in a request.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.SyncState.html" title="sc_network::SyncState enum">SyncState</a></td><td class="docblock-short"><p>Reported sync state.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.ExHashT.html" title="sc_network::ExHashT trait">ExHashT</a></td><td class="docblock-short"><p>Minimum Requirements for a Hash within Networking</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.NetworkStateInfo.html" title="sc_network::NetworkStateInfo trait">NetworkStateInfo</a></td><td class="docblock-short"><p>Trait for providing information about the local network state</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="sc_network" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

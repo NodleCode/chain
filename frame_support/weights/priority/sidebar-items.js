@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["LIMIT","The starting point of all Operational transactions. 3/4 of u64::max_value()."]],"enum":[["FrameTransactionPriority","Wrapper for priority of different dispatch classes."]]});

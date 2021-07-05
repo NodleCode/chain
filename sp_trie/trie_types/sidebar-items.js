@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["Layout",""],["Lookup","Querying interface, as in `trie_db` but less generic."],["TrieDB","Persistent trie database read-access interface for the a given hasher."],["TrieDBMut","Persistent trie database write-access interface for the a given hasher."],["TrieError","As in `trie_db`, but less generic, error type for the crate."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["error","System RPC module errors."],["gen_client","The generated client module."],["helpers","Substrate system API helpers."]],"struct":[["SystemClient","The Client."]],"trait":[["SystemApi","Substrate system RPC API"]]});

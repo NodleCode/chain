@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["QueueGuard","Locked queue of messages to the given peer."],["QueuedSender","Notifications sender for a specific combination of network service, peer, and protocol."]]});

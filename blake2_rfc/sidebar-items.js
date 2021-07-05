@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["selftest","Runs the self-test for both BLAKE2b and BLAKE2s."]],"mod":[["blake2b","The BLAKE2b hash function."],["blake2s","The BLAKE2s hash function."]]});

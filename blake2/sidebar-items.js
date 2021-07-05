@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Blake2b","Blake2b instance with a fixed output."],["Blake2s","Blake2s instance with a fixed output."],["VarBlake2b","Blake2b instance with a variable output."],["VarBlake2s","Blake2s instance with a variable output."]],"trait":[["Digest","The `Digest` trait specifies an interface common for digest functions."]]});

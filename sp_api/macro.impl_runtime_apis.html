@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Tags given trait implementations as runtime apis."><meta name="keywords" content="rust, rustlang, rust-lang, impl_runtime_apis"><title>impl_runtime_apis in sp_api - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../sp_api/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="index.html">sp_api</a></p><div id="sidebar-vars" data-name="impl_runtime_apis" data-ty="macro" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Macro <a href="index.html">sp_api</a>::<wbr><a class="macro" href="">impl_runtime_apis</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/sp_api_proc_macro/lib.rs.html#30" title="goto source code">[src]</a></span></h1><pre class="rust macro">impl_runtime_apis!() { /* proc-macro */ }</pre><div class="docblock"><p>Tags given trait implementations as runtime apis.</p>
+<p>All traits given to this macro, need to be declared with the
+<a href="macro.decl_runtime_apis.html"><code>decl_runtime_apis!</code></a> macro. The implementation of the trait
+should follow the declaration given to the <a href="macro.decl_runtime_apis.html"><code>decl_runtime_apis!</code></a>
+macro, besides the <code>Block</code> type that is required as first generic parameter for each runtime
+api trait. When implementing a runtime api trait, it is required that the trait is referenced
+by a path, e.g. <code>impl my_trait::MyTrait for Runtime</code>. The macro will use this path to access
+the declaration of the trait for the runtime side.</p>
+<p>The macro also generates the api implementations for the client side and provides it through
+the <code>RuntimeApi</code> type. The <code>RuntimeApi</code> is hidden behind a <code>feature</code> called <code>std</code>.</p>
+<p>To expose version information about all implemented api traits, the constant
+<code>RUNTIME_API_VERSIONS</code> is generated. This constant should be used to instantiate the <code>apis</code>
+field of <code>RuntimeVersion</code>.</p>
+<h1 id="example" class="section-header"><a href="#example">Example</a></h1>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">sp_version::create_runtime_str</span>;
+
+<span class="doccomment">/// All runtime api implementations need to be done in one call of the macro!</span>
+<span class="macro">sp_api::impl_runtime_apis!</span> {
+
+    <span class="kw">impl</span> <span class="self">self</span><span class="ident">::Balance</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
+        <span class="kw">fn</span> <span class="ident">get_balance</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+            <span class="number">1</span>
+        }
+        <span class="kw">fn</span> <span class="ident">set_balance</span>(<span class="ident">_bal</span>: <span class="ident">u64</span>) {
+            <span class="comment">// Store the balance</span>
+        }
+    }
+
+    <span class="kw">impl</span> <span class="self">self</span><span class="ident">::BlockBuilder</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
+        <span class="kw">fn</span> <span class="ident">build_block</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Block</span> {
+             <span class="macro">unimplemented!</span>(<span class="string">&quot;Please implement me!&quot;</span>)
+        }
+    }
+}
+
+<span class="doccomment">/// Runtime version. This needs to be declared for each runtime.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VERSION</span>: <span class="ident">sp_version::RuntimeVersion</span> <span class="op">=</span> <span class="ident">sp_version::RuntimeVersion</span> {
+    <span class="ident">spec_name</span>: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;node&quot;</span>),
+    <span class="ident">impl_name</span>: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;test-node&quot;</span>),
+    <span class="ident">authoring_version</span>: <span class="number">1</span>,
+    <span class="ident">spec_version</span>: <span class="number">1</span>,
+    <span class="ident">impl_version</span>: <span class="number">0</span>,
+    <span class="comment">// Here we are exposing the runtime api versions.</span>
+    <span class="ident">apis</span>: <span class="ident">RUNTIME_API_VERSIONS</span>,
+    <span class="ident">transaction_version</span>: <span class="number">1</span>,
+};
+</pre></div>
+</div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="sp_api" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

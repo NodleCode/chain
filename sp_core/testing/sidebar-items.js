@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ECDSA","Key type for generic Sr 25519 key."],["ED25519","Key type for generic Ed25519 key."],["SR25519","Key type for generic Sr 25519 key."]],"struct":[["TaskExecutor","A task executor that can be used in tests."]]});

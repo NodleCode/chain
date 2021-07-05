@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A mechanism for runtime authors to augment the functionality of contracts."><meta name="keywords" content="rust, rustlang, rust-lang, chain_extension"><title>pallet_contracts::chain_extension - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pallet_contracts/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module chain_extension</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"><a href="../index.html">pallet_contracts</a></p><div id="sidebar-vars" data-name="chain_extension" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">pallet_contracts</a>::<wbr><a class="mod" href="">chain_extension</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/pallet_contracts/chain_extension.rs.html#18-395" title="goto source code">[src]</a></span></h1><div class="docblock"><p>A mechanism for runtime authors to augment the functionality of contracts.</p>
+<p>The runtime is able to call into any contract and retrieve the result using
+<a href="../pallet/struct.Pallet.html#method.bare_call"><code>bare_call</code></a>. This already allows customization of runtime
+behaviour by user generated code (contracts). However, often it is more straightforward
+to allow the reverse behaviour: The contract calls into the runtime. We call the latter
+one a “chain extension” because it allows the chain to extend the set of functions that are
+callable by a contract.</p>
+<p>In order to create a chain extension the runtime author implements the <a href="trait.ChainExtension.html" title="ChainExtension"><code>ChainExtension</code></a>
+trait and declares it in this pallet’s <a href="../pallet/trait.Config.html">configuration Trait</a>. All types
+required for this endeavour are defined or re-exported in this module. There is an
+implementation on <code>()</code> which can be used to signal that no chain extension is available.</p>
+<h1 id="security" class="section-header"><a href="#security">Security</a></h1>
+<p>The chain author alone is responsible for the security of the chain extension.
+This includes avoiding the exposure of exploitable functions and charging the
+appropriate amount of weight. In order to do so benchmarks must be written and the
+<a href="struct.Environment.html#method.charge_weight"><code>charge_weight</code></a> function must be called <strong>before</strong>
+carrying out any action that causes the consumption of the chargeable weight.
+It cannot be overstated how delicate of a process the creation of a chain extension
+is. Check whether using <a href="../pallet/struct.Pallet.html#method.bare_call"><code>bare_call</code></a> suffices for the
+use case at hand.</p>
+<h1 id="benchmarking" class="section-header"><a href="#benchmarking">Benchmarking</a></h1>
+<p>The builtin contract callable functions that pallet-contracts provides all have
+benchmarks that determine the correct weight that an invocation of these functions
+induces. In order to be able to charge the correct weight for the functions defined
+by a chain extension benchmarks must be written, too. In the near future this crate
+will provide the means for easier creation of those specialized benchmarks.</p>
+</div><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<table><tr class="import-item"><td><code>pub use crate::<a class="trait" href="../pallet/trait.Config.html" title="trait pallet_contracts::pallet::Config">Config</a>;</code></td><td class="docblock-short"></td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Environment.html" title="pallet_contracts::chain_extension::Environment struct">Environment</a></td><td class="docblock-short"><p>Grants the chain extension access to its parameters and execution environment.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.ReturnFlags.html" title="pallet_contracts::chain_extension::ReturnFlags struct">ReturnFlags</a></td><td class="docblock-short"><p>Flags used by a contract to customize exit behaviour.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.InitState.html" title="pallet_contracts::chain_extension::InitState enum">InitState</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="enum" href="enum.RetVal.html" title="pallet_contracts::chain_extension::RetVal enum">RetVal</a></td><td class="docblock-short"><p>Determines the exit behaviour and return value of a chain extension.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.ChainExtension.html" title="pallet_contracts::chain_extension::ChainExtension trait">ChainExtension</a></td><td class="docblock-short"><p>A trait used to extend the set of contract callable functions.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Ext.html" title="pallet_contracts::chain_extension::Ext trait">Ext</a></td><td class="docblock-short"><p>An interface that provides access to the external environment in which the
+smart-contract is executed.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.SysConfig.html" title="pallet_contracts::chain_extension::SysConfig trait">SysConfig</a></td><td class="docblock-short"><p>System configuration trait. Implemented by runtime.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.UncheckedFrom.html" title="pallet_contracts::chain_extension::UncheckedFrom trait">UncheckedFrom</a></td><td class="docblock-short"><p>Similar to <code>From</code>, except that the onus is on the part of the caller to ensure
+that data passed in makes sense. Basically, you’re not guaranteed to get anything
+sensible out.</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.Result.html" title="pallet_contracts::chain_extension::Result type">Result</a></td><td class="docblock-short"><p>Result that returns a <a href="../../sp_runtime/enum.DispatchError.html" title="DispatchError"><code>DispatchError</code></a> on error.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_contracts" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script></body></html>

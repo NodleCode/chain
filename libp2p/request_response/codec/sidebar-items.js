@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["ProtocolName","Types serving as protocol names."],["RequestResponseCodec","A `RequestResponseCodec` defines the request and response types for a `RequestResponse` protocol or protocol family and how they are encoded / decoded on an I/O stream."]]});

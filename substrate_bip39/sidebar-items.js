@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error",""]],"fn":[["mini_secret_from_entropy","`entropy` should be a byte array from a correctly recovered and checksumed BIP39."],["seed_from_entropy","Similar to `mini_secret_from_entropy`, except that it provides the 64-byte seed directly."]]});

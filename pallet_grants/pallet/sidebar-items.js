@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Call",""],["Error",""],["Event",""]],"struct":[["GenesisConfig",""],["Pallet",""],["_GeneratedPrefixForStorageVestingSchedules",""]],"trait":[["Config",""]],"type":[["Module","Type alias to `Pallet`, to be used by `construct_runtime`."],["VestingSchedules",""]]});

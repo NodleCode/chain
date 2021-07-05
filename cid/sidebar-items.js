@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Error types"],["Version","The version of the CID."]],"struct":[["CidGeneric","Representation of a CID."]],"type":[["Cid","A Cid that contains a multihash with an allocated size of 512 bits."],["Result","Type alias to use this library’s [`Error`] type in a `Result`."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Checkpoint","Database’s checkpoint object. Used to create checkpoints of the specified DB from time to time."]]});

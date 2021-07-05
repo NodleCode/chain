@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SendWrapper","A wrapper which allows you to move around non-[`Send`]-types between threads, as long as you access the contained value only from within the original thread and make sure that it is dropped from within the original thread."]]});

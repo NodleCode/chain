@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="[`Secret`] wrapper type for more carefully handling secret values (e.g. passwords, cryptographic keys, access tokens or other credentials)"><meta name="keywords" content="rust, rustlang, rust-lang, secrecy"><title>secrecy - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../secrecy/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate secrecy</p><div class="block version"><p>Version 0.7.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all secrecy's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="secrecy" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">secrecy</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/secrecy/lib.rs.html#1-278" title="goto source code">[src]</a></span></h1><div class="docblock"><p><a href="struct.Secret.html" title="Secret"><code>Secret</code></a> wrapper type for more carefully handling secret values
+(e.g. passwords, cryptographic keys, access tokens or other credentials)</p>
+<h1 id="goals" class="section-header"><a href="#goals">Goals</a></h1>
+<p>The goals of this crate are as follows:</p>
+<ul>
+<li>Make secret access explicit and easy-to-audit via the
+<a href="trait.ExposeSecret.html" title="ExposeSecret"><code>ExposeSecret</code></a> trait. This also makes secret values immutable which
+helps avoid making accidental copies (e.g. reallocating the backing
+buffer for a <code>Vec</code>)</li>
+<li>Prevent accidental leakage of secrets via channels like debug logging</li>
+<li>Ensure secrets are wiped from memory on drop securely
+(using the <a href="../zeroize/index.html" title="zeroize"><code>zeroize</code></a> crate)</li>
+</ul>
+<p>Presently this crate favors a simple, <code>no_std</code>-friendly, safe i.e.
+<code>forbid(unsafe_code)</code>-based implementation and does not provide more advanced
+memory protection mechanisms e.g. ones based on <code>mlock(2)</code>/<code>mprotect(2)</code>.
+We may explore more advanced protection mechanisms in the future.</p>
+<h1 id="box-string-and-vec-wrappers" class="section-header"><a href="#box-string-and-vec-wrappers"><code>Box</code>, <code>String</code>, and <code>Vec</code> wrappers</a></h1>
+<p>Most users of this crate will simply want <a href="struct.Secret.html" title="Secret"><code>Secret</code></a> wrappers around Rust’s
+core collection types: i.e. <code>Box</code>, <code>String</code>, and <code>Vec</code>.</p>
+<p>When the <code>alloc</code> feature of this crate is enabled (which it is by default),
+<a href="type.SecretBox.html" title="SecretBox"><code>SecretBox</code></a>, <a href="type.SecretString.html" title="SecretString"><code>SecretString</code></a>, and <a href="type.SecretVec.html" title="SecretVec"><code>SecretVec</code></a> type aliases are
+available.</p>
+<p>There’s nothing particularly fancy about these: they’re just the simple
+composition of <code>Secret&lt;Box&lt;_&gt;&gt;</code>, <code>Secret&lt;String&gt;</code>, and <code>Secret&lt;Vec&lt;_&gt;&gt;</code>!
+However, in many cases they’re all you will need.</p>
+<h1 id="advanced-usage" class="section-header"><a href="#advanced-usage">Advanced usage</a></h1>
+<p>If you are hitting limitations on what’s possible with the collection type
+wrappers, you’ll want to define your own newtype which lets you customize
+the implementation:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">secrecy</span>::{<span class="ident">CloneableSecret</span>, <span class="ident">DebugSecret</span>, <span class="ident">Secret</span>, <span class="ident">Zeroize</span>};
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AccountNumber</span>(<span class="ident">String</span>);
+
+<span class="kw">impl</span> <span class="ident">Zeroize</span> <span class="kw">for</span> <span class="ident">AccountNumber</span> {
+    <span class="kw">fn</span> <span class="ident">zeroize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">zeroize</span>();
+    }
+}
+
+<span class="doccomment">/// Permits cloning</span>
+<span class="kw">impl</span> <span class="ident">CloneableSecret</span> <span class="kw">for</span> <span class="ident">AccountNumber</span> {}
+
+<span class="doccomment">/// Provides a `Debug` impl (by default `[[REDACTED]]`)</span>
+<span class="kw">impl</span> <span class="ident">DebugSecret</span> <span class="kw">for</span> <span class="ident">AccountNumber</span> {}
+
+<span class="doccomment">/// Use this alias when storing secret values</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SecretAccountNumber</span> <span class="op">=</span> <span class="ident">Secret</span><span class="op">&lt;</span><span class="ident">AccountNumber</span><span class="op">&gt;</span>;</pre></div>
+<h1 id="serde-support" class="section-header"><a href="#serde-support"><code>serde</code> support</a></h1>
+<p>When the <code>serde</code> feature of this crate is enabled, the <a href="struct.Secret.html" title="Secret"><code>Secret</code></a> type will
+receive a [<code>Deserialize</code>] impl for all <code>Secret&lt;T&gt;</code> types where
+<code>T: DeserializeOwned</code>. This allows <em>loading</em> secret values from data
+deserialized from <code>serde</code> (be careful to clean up any intermediate secrets
+when doing this, e.g. the unparsed input!)</p>
+<p>To prevent exfiltration of secret values via <code>serde</code>, by default <code>Secret&lt;T&gt;</code>
+does <em>not</em> receive a corresponding [<code>Serialize</code>] impl. If you would like
+types of <code>Secret&lt;T&gt;</code> to be serializable with <code>serde</code>, you will need to impl
+the [<code>SerializableSecret</code>] marker trait on <code>T</code>.</p>
+</div><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<table><tr class="import-item"><td><code>pub use <a class="mod" href="../zeroize/index.html" title="mod zeroize">zeroize</a>;</code></td><td class="docblock-short"></td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Secret.html" title="secrecy::Secret struct">Secret</a></td><td class="docblock-short"><p>Wrapper type for values that contains secrets, which attempts to limit
+accidental exposure and ensure secrets are wiped from memory when dropped.
+(e.g. passwords, cryptographic keys, access tokens or other credentials)</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.CloneableSecret.html" title="secrecy::CloneableSecret trait">CloneableSecret</a></td><td class="docblock-short"><p>Marker trait for secrets which are allowed to be cloned</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.DebugSecret.html" title="secrecy::DebugSecret trait">DebugSecret</a></td><td class="docblock-short"><p>Debugging trait which is specialized for handling secret values</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.ExposeSecret.html" title="secrecy::ExposeSecret trait">ExposeSecret</a></td><td class="docblock-short"><p>Expose a reference to an inner secret</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.Zeroize.html" title="secrecy::Zeroize trait">Zeroize</a></td><td class="docblock-short"><p>Trait for securely erasing types from memory</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.SecretBox.html" title="secrecy::SecretBox type">SecretBox</a></td><td class="docblock-short"><p><code>Box</code> types containing a secret value</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.SecretString.html" title="secrecy::SecretString type">SecretString</a></td><td class="docblock-short"><p>Secret strings</p>
+</td></tr><tr class="module-item"><td><a class="type" href="type.SecretVec.html" title="secrecy::SecretVec type">SecretVec</a></td><td class="docblock-short"><p><code>Vec</code> types containing secret value</p>
+</td></tr></table><h2 id="derives" class="section-header"><a href="#derives">Derive Macros</a></h2>
+<table><tr class="module-item"><td><a class="derive" href="derive.Zeroize.html" title="secrecy::Zeroize derive">Zeroize</a></td><td class="docblock-short"><p>Derive the <code>Zeroize</code> trait.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="secrecy" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

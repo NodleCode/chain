@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Record","A record of a visited node."],["Recorder","Records trie nodes as they pass it."]]});

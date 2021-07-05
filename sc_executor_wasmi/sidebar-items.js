@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["create_runtime","Create a new `WasmiRuntime` given the code. This function loads the module and stores it in the instance."]],"struct":[["WasmiInstance","Wasmi instance wrapper along with the state snapshot."],["WasmiRuntime","A runtime along with initial copy of data segments."]]});

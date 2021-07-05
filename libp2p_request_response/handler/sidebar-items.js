@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ProtocolSupport","The level of support for a particular protocol."]],"struct":[["RequestProtocol","Request substream upgrade protocol."],["ResponseProtocol","Response substream upgrade protocol."]]});

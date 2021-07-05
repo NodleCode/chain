@@ -1,0 +1,1 @@
+initSidebarItems({"attr":[["prefix_logs_with","Add a log prefix to the function."]]});

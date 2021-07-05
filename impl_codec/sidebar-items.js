@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["impl_fixed_hash_codec","Add Parity Codec serialization support to a fixed-sized hash type created by `construct_fixed_hash!`."],["impl_uint_codec","Add Parity Codec serialization support to an integer created by `construct_uint!`."]]});

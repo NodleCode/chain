@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["keep_newest","Keep the newest `n` items, and prune all items older than that."],["prove_session_membership","Create a proof based on the data available in the off-chain database."],["prune_older_than","Attempt to prune anything that is older than `first_to_keep` session index."]]});

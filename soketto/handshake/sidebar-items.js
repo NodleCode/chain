@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Enumeration of possible handshake errors."]],"mod":[["client","Websocket client handshake."],["server","Websocket server handshake."]]});

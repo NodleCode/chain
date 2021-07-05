@@ -1,0 +1,1 @@
+initSidebarItems({"derive":[["Decode","Derive the `minicbor::Decode` trait for a struct or enum."],["Encode","Derive the `minicbor::Encode` trait for a struct or enum."]]});

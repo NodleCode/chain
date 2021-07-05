@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["LoweredBlock","The origin of a block in the lowered block-order: either an original CLIF block, or an inserted edge-block, or a combination of the two if an edge is non-critical."]],"struct":[["BlockLoweringOrder","Mapping from CLIF BBs to VCode BBs."]]});

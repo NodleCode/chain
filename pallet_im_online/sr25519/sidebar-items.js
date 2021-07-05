@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["AuthorityId","An i’m online identifier using sr25519 as its crypto."],["AuthorityPair","An i’m online keypair using sr25519 as its crypto."],["AuthoritySignature","An i’m online signature using sr25519 as its crypto."]]});

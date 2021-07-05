@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Phase","The (voting) phases of a round, each corresponding to the type of votes cast in that phase."]],"struct":[["Round","Stores data for a round."],["RoundParams","Parameters for starting a round."],["State","State of the round."]]});

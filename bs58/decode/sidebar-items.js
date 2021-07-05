@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Errors that could occur when decoding a Base58 encoded string."]],"struct":[["DecodeBuilder","A builder for setting up the alphabet and output of a base58 decode."]],"type":[["Result","A specialized `Result` type for `bs58::decode`"]]});

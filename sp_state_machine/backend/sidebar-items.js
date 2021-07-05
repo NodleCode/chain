@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BackendRuntimeCode","Wrapper to create a [`RuntimeCode`] from a type that implements [`Backend`]."]],"trait":[["Backend","A state backend is used to read state data and can have changes committed to it."],["Consolidate","Trait that allows consolidate two transactions together."]]});

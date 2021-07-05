@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["new_malloc_size_ops","Get a new instance of a MallocSizeOfOps"]],"trait":[["MallocSizeOfExt","Extension methods for `MallocSizeOf` trait, do not implement directly. It allows getting heapsize without exposing `MallocSizeOfOps` (a single default `MallocSizeOfOps` is used for each call)."]]});

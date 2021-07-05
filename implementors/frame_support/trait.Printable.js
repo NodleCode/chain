@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["frame_support"] = [{"text":"impl <a class=\"trait\" href=\"frame_support/trait.Printable.html\" title=\"trait frame_support::Printable\">Printable</a> for <a class=\"struct\" href=\"frame_support/weights/struct.PostDispatchInfo.html\" title=\"struct frame_support::weights::PostDispatchInfo\">PostDispatchInfo</a>","synthetic":false,"types":["frame_support::weights::PostDispatchInfo"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

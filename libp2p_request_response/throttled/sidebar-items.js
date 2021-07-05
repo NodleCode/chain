@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Event","A Wrapper around [`RequestResponseEvent`]."]],"struct":[["Throttled","A wrapper around [`RequestResponse`] which adds request limits per peer."]],"type":[["ResponseChannel",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Call",""]],"struct":[["Pallet",""],["_GeneratedPrefixForStorageValidators",""]],"trait":[["Config",""]],"type":[["Module","Type alias to `Pallet`, to be used by `construct_runtime`."],["Validators",""]]});

@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Declares strongly-typed wrappers around codec-compatible types in storage."><meta name="keywords" content="rust, rustlang, rust-lang, decl_storage"><title>decl_storage in frame_support_procedural - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../frame_support_procedural/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="index.html">frame_support_procedural</a></p><div id="sidebar-vars" data-name="decl_storage" data-ty="macro" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Macro <a href="index.html">frame_support_procedural</a>::<wbr><a class="macro" href="">decl_storage</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/frame_support_procedural/lib.rs.html#241-243" title="goto source code">[src]</a></span></h1><pre class="rust macro">decl_storage!() { /* proc-macro */ }</pre><div class="docblock"><p>Declares strongly-typed wrappers around codec-compatible types in storage.</p>
+<h2 id="example" class="section-header"><a href="#example">Example</a></h2>
+<pre><code class="language-nocompile">decl_storage! {
+	trait Store for Module&lt;T: Config&gt; as Example {
+		Foo get(fn foo) config(): u32=12;
+		Bar: map hasher(identity) u32 =&gt; u32;
+		pub Zed build(|config| vec![(0, 0)]): map hasher(identity) u32 =&gt; u32;
+	}
+}
+</code></pre>
+<p>Declaration is set with the header <code>(pub) trait Store for Module&lt;T: Config&gt; as Example</code>,
+with <code>Store</code> a (pub) trait generated associating each storage item to the <code>Module</code> and
+<code>as Example</code> setting the prefix used for storage items of this module. <code>Example</code> must be unique:
+another module with the same name and the same inner storage item name will conflict.
+<code>Example</code> is called the module prefix.</p>
+<p>note: For instantiable modules the module prefix is prepended with instance
+prefix. Instance prefix is “” for default instance and “Instance$n” for instance number $n.
+Thus, instance 3 of module Example has a module prefix of <code>Instance3Example</code></p>
+<p>Basic storage consists of a name and a type; supported types are:</p>
+<ul>
+<li>
+<p>Value: <code>Foo: type</code>: Implements the
+<a href="../frame_support/storage/trait.StorageValue.html"><code>StorageValue</code></a> trait using the
+<a href="../frame_support/storage/generator/trait.StorageValue.html"><code>StorageValue generator</code></a>.</p>
+<p>The generator is implemented with:</p>
+<ul>
+<li><code>module_prefix</code>: module_prefix</li>
+<li><code>storage_prefix</code>: storage_name</li>
+</ul>
+<p>Thus the storage value is finally stored at:</p>
+<pre><code class="language-nocompile">Twox128(module_prefix) ++ Twox128(storage_prefix)
+</code></pre>
+</li>
+<li>
+<p>Map: <code>Foo: map hasher($hash) type =&gt; type</code>: Implements the
+<a href="../frame_support/storage/trait.StorageMap.html"><code>StorageMap</code></a> trait using the
+<a href="../frame_support/storage/generator/trait.StorageMap.html"><code>StorageMap generator</code></a>.
+And <a href="../frame_support/storage/trait.StoragePrefixedMap.html"><code>StoragePrefixedMap</code></a>.</p>
+<p><code>$hash</code> representing a choice of hashing algorithms available in the
+<a href="../frame_support/trait.Hashable.html"><code>Hashable</code></a> trait. You will generally want to use one
+of three hashers:</p>
+<ul>
+<li><code>blake2_128_concat</code>: The default, safe choice. Use if you are unsure or don’t care. It is
+secure against user-tainted keys, fairly fast and memory-efficient and supports
+iteration over its keys and values. This must be used if the keys of your map can be
+selected <em>en masse</em> by untrusted users.</li>
+<li><code>twox_64_concat</code>: This is an insecure hasher and can only be used safely if you know that
+the preimages cannot be chosen at will by untrusted users. It is memory-efficient, extremely
+performant and supports iteration over its keys and values. You can safely use this is the
+key is:
+<ul>
+<li>A (slowly) incrementing index.</li>
+<li>Known to be the result of a cryptographic hash (though <code>identity</code> is a better choice here).</li>
+<li>Known to be the public key of a cryptographic key pair in existence.</li>
+</ul>
+</li>
+<li><code>identity</code>: This is not a hasher at all, and just uses the key material directly. Since it
+does no hashing or appending, it’s the fastest possible hasher, however, it’s also the least
+secure. It can be used only if you know that the key will be cryptographically/securely
+randomly distributed over the binary encoding space. In most cases this will not be true.
+One case where it is true, however, if where the key is itself the result of a cryptographic
+hash of some existent data.</li>
+</ul>
+<p>Other hashers will tend to be “opaque” and not support iteration over the keys in the
+map. It is not recommended to use these.</p>
+<p>The generator is implemented with:</p>
+<ul>
+<li><code>module_prefix</code>: $module_prefix</li>
+<li><code>storage_prefix</code>: storage_name</li>
+<li><code>Hasher</code>: $hash</li>
+</ul>
+<p>Thus the keys are stored at:</p>
+<pre><code class="language-nocompile">twox128(module_prefix) ++ twox128(storage_prefix) ++ hasher(encode(key))
+</code></pre>
+</li>
+<li>
+<p>Double map: <code>Foo: double_map hasher($hash1) u32, hasher($hash2) u32 =&gt; u32</code>: Implements the
+<a href="../frame_support/storage/trait.StorageDoubleMap.html"><code>StorageDoubleMap</code></a> trait using the
+<a href="../frame_support/storage/generator/trait.StorageDoubleMap.html"><code>StorageDoubleMap generator</code></a>.
+And <a href="../frame_support/storage/trait.StoragePrefixedMap.html"><code>StoragePrefixedMap</code></a>.</p>
+<p><code>$hash1</code> and <code>$hash2</code> representing choices of hashing algorithms available in the
+<a href="../frame_support/trait.Hashable.html"><code>Hashable</code></a> trait. They must be chosen with care, see
+generator documentation.</p>
+<p>The generator is implemented with:</p>
+<ul>
+<li><code>module_prefix</code>: $module_prefix</li>
+<li><code>storage_prefix</code>: storage_name</li>
+<li><code>Hasher1</code>: $hash1</li>
+<li><code>Hasher2</code>: $hash2</li>
+</ul>
+<p>Thus keys are stored at:</p>
+<pre><code class="language-nocompile">Twox128(module_prefix) ++ Twox128(storage_prefix) ++ Hasher1(encode(key1)) ++ Hasher2(encode(key2))
+</code></pre>
+</li>
+</ul>
+<p>Supported hashers (ordered from least to best security):</p>
+<ul>
+<li><code>identity</code> - Just the unrefined key material. Use only when it is known to be a secure hash
+already. The most efficient and iterable over keys.</li>
+<li><code>twox_64_concat</code> - TwoX with 64bit + key concatenated. Use only when an untrusted source
+cannot select and insert key values. Very efficient and iterable over keys.</li>
+<li><code>blake2_128_concat</code> - Blake2 with 128bit + key concatenated. Slower but safe to use in all
+circumstances. Iterable over keys.</li>
+</ul>
+<p>Deprecated hashers, which do not support iteration over keys include:</p>
+<ul>
+<li><code>twox_128</code> - TwoX with 128bit.</li>
+<li><code>twox_256</code> - TwoX with with 256bit.</li>
+<li><code>blake2_128</code> - Blake2 with 128bit.</li>
+<li><code>blake2_256</code> - Blake2 with 256bit.</li>
+</ul>
+<p>Basic storage can be extended as such:</p>
+<p><code>#vis #name get(fn #getter) config(#field_name) build(#closure): #type = #default;</code></p>
+<ul>
+<li><code>#vis</code>: Set the visibility of the structure. <code>pub</code> or nothing.</li>
+<li><code>#name</code>: Name of the storage item, used as a prefix in storage.</li>
+<li>[optional] <code>get(fn #getter)</code>: Implements the function #getter to <code>Module</code>.</li>
+<li>[optional] <code>config(#field_name)</code>: <code>field_name</code> is optional if get is set.
+Will include the item in <code>GenesisConfig</code>.</li>
+<li>[optional] <code>build(#closure)</code>: Closure called with storage overlays.</li>
+<li><code>#type</code>: Storage type.</li>
+<li>[optional] <code>#default</code>: Value returned when none.</li>
+</ul>
+<p>Storage items are accessible in multiple ways:</p>
+<ul>
+<li>The structure: <code>Foo</code> or <code>Foo::&lt;T&gt;</code> depending if the value type is generic or not.</li>
+<li>The <code>Store</code> trait structure: <code>&lt;Module&lt;T&gt; as Store&gt;::Foo</code></li>
+<li>The getter on the module that calls get on the structure: <code>Module::&lt;T&gt;::foo()</code></li>
+</ul>
+<h2 id="genesisconfig" class="section-header"><a href="#genesisconfig">GenesisConfig</a></h2>
+<p>An optional <code>GenesisConfig</code> struct for storage initialization can be defined, either
+when at least one storage field requires default initialization
+(both <code>get</code> and <code>config</code> or <code>build</code>), or specifically as in:</p>
+<pre><code class="language-nocompile">decl_storage! {
+	trait Store for Module&lt;T: Config&gt; as Example {
+
+		// Your storage items
+	}
+	add_extra_genesis {
+		config(genesis_field): GenesisFieldType;
+		config(genesis_field2): GenesisFieldType;
+		...
+		build(|_: &amp;Self| {
+			// Modification of storage
+		})
+	}
+}
+</code></pre>
+<p>This struct can be exposed as <code>ExampleConfig</code> by the <code>construct_runtime!</code> macro like follows:</p>
+<pre><code class="language-nocompile">construct_runtime!(
+	pub enum Runtime with ... {
+        ...,
+        Example: example::{Module, Storage, ..., Config&lt;T&gt;},
+        ...,
+}
+);
+</code></pre>
+<h3 id="module-with-instances" class="section-header"><a href="#module-with-instances">Module with Instances</a></h3>
+<p>The <code>decl_storage!</code> macro supports building modules with instances with the following syntax
+(<code>DefaultInstance</code> type is optional):</p>
+<pre><code class="language-nocompile">trait Store for Module&lt;T: Config&lt;I&gt;, I: Instance=DefaultInstance&gt; as Example {}
+</code></pre>
+<p>Accessing the structure no requires the instance as generic parameter:</p>
+<ul>
+<li><code>Foo::&lt;I&gt;</code> if the value type is not generic</li>
+<li><code>Foo::&lt;T, I&gt;</code> if the value type is generic</li>
+</ul>
+<h2 id="where-clause" class="section-header"><a href="#where-clause">Where clause</a></h2>
+<p>This macro supports a where clause which will be replicated to all generated types.</p>
+<pre><code class="language-nocompile">trait Store for Module&lt;T: Config&gt; as Example where T::AccountId: std::fmt::Display {}
+</code></pre>
+<h2 id="limitations" class="section-header"><a href="#limitations">Limitations</a></h2><h1 id="instancing-and-generic-genesisconfig" class="section-header"><a href="#instancing-and-generic-genesisconfig">Instancing and generic <code>GenesisConfig</code></a></h1>
+<p>If your module supports instancing and you see an error like <code>parameter </code>I<code> is never used</code> for
+your <code>decl_storage!</code>, you are hitting a limitation of the current implementation. You probably
+try to use an associated type of a non-instantiable trait. To solve this, add the following to
+your macro call:</p>
+<pre><code class="language-nocompile">add_extra_genesis {
+	config(phantom): std::marker::PhantomData&lt;I&gt;,
+}
+...
+
+This adds a field to your `GenesisConfig` with the name `phantom` that you can initialize with
+`Default::default()`.
+</code></pre>
+</div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="frame_support_procedural" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

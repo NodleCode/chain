@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["OutEvent","Events returned by [`LightClientRequestSender`]."],["Request","The possible light client requests we support."],["Response","Incoming response from remote."],["SendRequestError","Error returned by [`LightClientRequestSender::request`]."]],"struct":[["LightClientRequestSender","State machine helping to send out light client requests."]]});

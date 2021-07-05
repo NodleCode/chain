@@ -1,0 +1,948 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Declares a `Module` struct and a `Call` enum, which implements the dispatch logic."><meta name="keywords" content="rust, rustlang, rust-lang, decl_module"><title>decl_module in frame_support - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../frame_support/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="index.html">frame_support</a></p><div id="sidebar-vars" data-name="decl_module" data-ty="macro" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Macro <a href="index.html">frame_support</a>::<wbr><a class="macro" href="">decl_module</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/frame_support/dispatch.rs.html#310-1957" title="goto source code">[src]</a></span></h1><div class="docblock type-decl"><div class="example-wrap"><pre class="rust macro">
+<span class="macro">macro_rules!</span> <span class="ident">decl_module</span> {
+    (
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>
+			$( <span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $( <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span> )<span class="question-mark">?</span> )<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">where_ty</span>:<span class="ident">ty</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">where_bound</span>:<span class="ident">path</span> )<span class="op">*</span> $(,)<span class="question-mark">?</span> {
+			$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">tt</span> )<span class="op">*</span>
+		}
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>
+			$( <span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $( <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span> )<span class="question-mark">?</span> )<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span>
+			<span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>,
+			<span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+			$(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">where_ty</span>:<span class="ident">ty</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">where_bound</span>:<span class="ident">path</span> )<span class="op">*</span>
+			$(,)<span class="question-mark">?</span>
+		{
+			$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">tt</span>)<span class="op">*</span>
+		}
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="ident">deposit_event</span>() <span class="op">=</span> <span class="ident">default</span>;
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="ident">deposit_event</span>
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">+</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="ident">deposit_event</span>() <span class="op">=</span> <span class="ident">default</span>;
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_finalize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>
+		<span class="kw">fn</span> <span class="ident">on_finalize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">+</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>
+		<span class="kw">fn</span> <span class="ident">on_finalize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">+</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">integrity_test</span>() { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">+</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">integrity_test</span>() { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">+</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>
+			$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">offchain_worker</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">+</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">offchain_worker</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>
+			$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$( <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span> )<span class="op">*</span>
+		<span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">value</span>:<span class="ident">expr</span>;
+		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span> )<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>:
+				<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+			<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">ty</span>;
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>:
+				<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+			<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">tt</span>)<span class="op">*</span> ]
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>
+			$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+			<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">ty</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>(
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin</span>:<span class="ident">ident</span> $( , $(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">codec_attr</span>:<span class="ident">ident</span>]</span>)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> )<span class="op">*</span> $(,)<span class="question-mark">?</span>
+		) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> )<span class="op">*</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>:
+				<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+			<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>(
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">from</span>:<span class="ident">ident</span> $( , $( <span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">codec_attr</span>:<span class="ident">ident</span>]</span> )<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> )<span class="op">*</span> $(,)<span class="question-mark">?</span>
+		) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> )<span class="op">*</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		$(<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>)<span class="question-mark">?</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>(
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin</span>:<span class="ident">ident</span> : <span class="ident">T::Origin</span> $( , $( <span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">codec_attr</span>:<span class="ident">ident</span>]</span> )<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> )<span class="op">*</span> $(,)<span class="question-mark">?</span>
+		) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> )<span class="op">*</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		$(<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>)<span class="question-mark">?</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>(
+			<span class="ident">origin</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin</span>:<span class="ident">ty</span> $( , $( <span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">codec_attr</span>:<span class="ident">ident</span>]</span> )<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> )<span class="op">*</span> $(,)<span class="question-mark">?</span>
+		) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> )<span class="op">*</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		$(<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>)<span class="question-mark">?</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>(
+			$( $(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">codec_attr</span>:<span class="ident">ident</span>]</span>)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span> ),<span class="op">*</span> $(,)<span class="question-mark">?</span>
+		) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> )<span class="op">*</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+		$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">normalize</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		[ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dispatchables</span>:<span class="ident">tt</span> )<span class="op">*</span> ]
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">call</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ignore</span>:<span class="ident">ident</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>)<span class="question-mark">?</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin</span>:<span class="ident">ident</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> [ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span>),<span class="op">*</span> ]
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_deposit_event</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_deposit_event</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="ident">deposit_event</span>$(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">event_trait_instance</span>:<span class="ident">ident</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">event_instance</span>:<span class="ident">ident</span>)<span class="question-mark">?</span><span class="op">&gt;</span>)<span class="question-mark">?</span>() <span class="op">=</span> <span class="ident">default</span>;
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_initialize</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_initialize</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_initialize</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_runtime_upgrade</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">return</span>:<span class="macro-nonterminal">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_runtime_upgrade</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_integrity_test</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="kw">fn</span> <span class="ident">integrity_test</span>() { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_integrity_test</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_finalize</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">on_finalize</span>() { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_finalize</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">on_finalize</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span>) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_on_finalize</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_offchain</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">offchain_worker</span>() { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_offchain</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="kw">fn</span> <span class="ident">offchain_worker</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span>) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_offchain</span>
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> }
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_function</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_ty</span>:<span class="ident">ty</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">ty</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ignore</span>:<span class="ident">ident</span>;
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span> (
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin</span>:<span class="ident">ident</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> )<span class="op">*</span>
+		) { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">impl_function</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">module</span>:<span class="ident">ident</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span><span class="op">&gt;</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_ty</span>:<span class="ident">ty</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">ty</span>;
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ignore</span>:<span class="ident">ident</span>;
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span> (
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin</span>:<span class="ident">ident</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> )<span class="op">*</span>
+		) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">create_call_enum</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span>;
+		<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">generated_variants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">current_params</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="ident">variant</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>;
+		$( <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span> )<span class="op">*</span>
+		<span class="attribute">#[<span class="ident">compact</span>]</span>
+		<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>;
+		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span> )<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">create_call_enum</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span>;
+		<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">generated_variants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">current_params</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="ident">variant</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>;
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>;
+		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span> )<span class="op">*</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">create_call_enum</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span>;
+		<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">generated_variants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">current_params</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		<span class="ident">variant</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>;
+		$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+		$(
+			<span class="ident">variant</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">next_fn_name</span>:<span class="ident">ident</span>;
+			$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span> )<span class="op">*</span>
+		)<span class="question-mark">?</span>
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">create_call_enum</span>
+		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span>;
+		<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span><span class="op">&gt;</span>
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">generated_variants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{}
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+    (@<span class="ident">imp</span>
+		$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+		<span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mod_type</span>:<span class="ident">ident</span><span class="op">&lt;</span>
+			<span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">trait_name</span>:<span class="ident">ident</span>
+			$(<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">instantiable</span>:<span class="ident">path</span> $(<span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">module_default_instance</span>:<span class="ident">path</span>)<span class="question-mark">?</span>)<span class="question-mark">?</span>
+		<span class="op">&gt;</span>
+		<span class="kw">for</span> <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">call_type</span>:<span class="ident">ident</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">origin_type</span>:<span class="ident">ty</span>, <span class="ident">system</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">system</span>:<span class="ident">ident</span> {
+			$(
+				$(<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_attr</span>:<span class="ident">tt</span>]</span>)<span class="op">*</span>
+				<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">weight</span>:<span class="ident">expr</span>]</span>
+				$(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_attr</span>:<span class="ident">meta</span>]</span>)<span class="op">*</span>
+				<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_vis</span>:<span class="ident">vis</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_name</span>:<span class="ident">ident</span>(
+					<span class="macro-nonterminal">$</span><span class="macro-nonterminal">from</span>:<span class="ident">ident</span> $( , $(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">codec_attr</span>:<span class="ident">ident</span>]</span>)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ty</span>)<span class="op">*</span>
+				) $( <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ty</span> )<span class="op">*</span> { $( <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">tt</span> )<span class="op">*</span> }
+				{ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_instance</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">fn_instantiable</span>:<span class="ident">path</span>)<span class="question-mark">?</span> }
+			)<span class="op">*</span>
+		}
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">other_where_bounds</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">deposit_event</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_initialize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_runtime_upgrade</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">on_finalize</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">offchain</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">constants</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+		{ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">error_type</span>:<span class="ident">ty</span> }
+		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">integrity_test</span>:<span class="ident">tt</span> )<span class="op">*</span> }
+	) <span class="op">=</span><span class="op">&gt;</span> { ... };
+}</pre></div>
+</div><div class="docblock"><p>Declares a <code>Module</code> struct and a <code>Call</code> enum, which implements the dispatch logic.</p>
+<h2 id="declaration" class="section-header"><a href="#declaration">Declaration</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
+
+		<span class="comment">// Private functions are dispatchable, but not available to other</span>
+		<span class="comment">// FRAME pallets.</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
+		<span class="kw">fn</span> <span class="ident">my_function</span>(<span class="ident">origin</span>, <span class="ident">var</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">dispatch::DispatchResult</span> {
+			<span class="comment">// Your implementation</span>
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="comment">// Public functions are both dispatchable and available to other</span>
+		<span class="comment">// FRAME pallets.</span>
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">my_public_function</span>(<span class="ident">origin</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">dispatch::DispatchResult</span> {
+			<span class="comment">// Your implementation</span>
+			<span class="prelude-val">Ok</span>(())
+		}
+	}
+}</pre></div>
+<p>The declaration is set with the header where:</p>
+<ul>
+<li><code>Module</code>: The struct generated by the macro, with type <code>Config</code>.</li>
+<li><code>Call</code>: The enum generated for every pallet, which implements <a href="./dispatch/trait.Callable.html"><code>Callable</code></a>.</li>
+<li><code>origin</code>: Alias of <code>T::Origin</code>, declared by the <a href="./macro.impl_outer_origin.html"><code>impl_outer_origin!</code></a> macro.</li>
+<li><code>Result</code>: The expected return type from pallet functions.</li>
+</ul>
+<p>The first parameter of dispatchable functions must always be <code>origin</code>.</p>
+<h3 id="shorthand-example" class="section-header"><a href="#shorthand-example">Shorthand Example</a></h3>
+<p>The macro automatically expands a shorthand function declaration to return the
+<a href="dispatch/type.DispatchResult.html" title="DispatchResult"><code>DispatchResult</code></a> type. These functions are the same:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
+		<span class="kw">fn</span> <span class="ident">my_long_function</span>(<span class="ident">origin</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">dispatch::DispatchResult</span> {
+			<span class="comment">// Your implementation</span>
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
+		<span class="kw">fn</span> <span class="ident">my_short_function</span>(<span class="ident">origin</span>) {
+			<span class="comment">// Your implementation</span>
+		}
+	}
+}</pre></div>
+<h3 id="consuming-only-portions-of-the-annotated-static-weight" class="section-header"><a href="#consuming-only-portions-of-the-annotated-static-weight">Consuming only portions of the annotated static weight</a></h3>
+<p>Per default a callable function consumes all of its static weight as declared via
+the #[weight] attribute. However, there are use cases where only a portion of this
+weight should be consumed. In that case the static weight is charged pre dispatch and
+the difference is refunded post dispatch.</p>
+<p>In order to make use of this feature the function must return <code>DispatchResultWithPostInfo</code>
+in place of the default <code>DispatchResult</code>. Then the actually consumed weight can be returned.
+To consume a non default weight while returning an error
+<a href="./weight/trait.WithPostDispatchInfo.html"><code>WithPostDispatchInfo::with_weight</code></a> can be used
+to augment any error with custom weight information.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">1_000_000</span>]</span>
+		<span class="kw">fn</span> <span class="ident">my_long_function</span>(<span class="ident">origin</span>, <span class="ident">do_expensive_calc</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+			<span class="ident">ensure_signed</span>(<span class="ident">origin</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_weight</span>(<span class="number">100_000</span>))<span class="question-mark">?</span>;
+			<span class="kw">if</span> <span class="ident">do_expensive_calc</span> {
+				<span class="comment">// do the expensive calculation</span>
+				<span class="comment">// ...</span>
+				<span class="comment">// return None to indicate that we are using all weight (the default)</span>
+				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>.<span class="ident">into</span>());
+			}
+			<span class="comment">// expensive calculation not executed: use only a portion of the weight</span>
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="number">100_000</span>).<span class="ident">into</span>())
+		}
+	}
+}</pre></div>
+<h3 id="transactional-function-example" class="section-header"><a href="#transactional-function-example">Transactional Function Example</a></h3>
+<p>Transactional function discards all changes to storage if it returns <code>Err</code>, or commits if
+<code>Ok</code>, via the #[transactional] attribute. Note the attribute must be after #[weight].</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
+		<span class="attribute">#[<span class="ident">transactional</span>]</span>
+		<span class="kw">fn</span> <span class="ident">my_short_function</span>(<span class="ident">origin</span>) {
+			<span class="comment">// Your implementation</span>
+		}
+	}
+}</pre></div>
+<h3 id="privileged-function-example" class="section-header"><a href="#privileged-function-example">Privileged Function Example</a></h3>
+<p>A privileged function checks that the origin of the call is <code>ROOT</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
+		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
+		<span class="kw">fn</span> <span class="ident">my_privileged_function</span>(<span class="ident">origin</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">dispatch::DispatchResult</span> {
+			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Your implementation</span>
+			<span class="prelude-val">Ok</span>(())
+		}
+	}
+}</pre></div>
+<h3 id="attributes-on-functions" class="section-header"><a href="#attributes-on-functions">Attributes on Functions</a></h3>
+<p>Attributes on functions are supported, but must be in the order of:</p>
+<ol>
+<li>Optional #[doc] attribute.</li>
+<li>#[weight] attribute.</li>
+<li>Optional function attributes, for instance #[transactional]. Those function attributes will be written
+only on the dispatchable functions implemented on <code>Module</code>, not on the <code>Call</code> enum variant.</li>
+</ol>
+<h2 id="multiple-module-instances-example" class="section-header"><a href="#multiple-module-instances-example">Multiple Module Instances Example</a></h2>
+<p>A Substrate module can be built such that multiple instances of the same module can be used within a single
+runtime. For example, the <a href="../pallet_balances/index.html">Balances module</a> can be added multiple times to your
+runtime in order to support multiple, independent currencies for your blockchain. Here is an example of how
+you would declare such a module using the <code>decl_module!</code> macro:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">Instance</span><span class="op">=</span><span class="ident">DefaultInstance</span><span class="op">&gt;</span>: <span class="ident">frame_system::Config</span> {}
+
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="ident">Instance</span> <span class="op">=</span> <span class="ident">DefaultInstance</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
+		<span class="comment">// Your implementation</span>
+	}
+}</pre></div>
+<p>Note: <code>decl_storage</code> must be called to generate <code>Instance</code> trait and optionally
+<code>DefaultInstance</code> type.</p>
+<h2 id="where-clause" class="section-header"><a href="#where-clause">Where clause</a></h2>
+<p>Besides the default <code>origin: T::Origin</code>, you can also pass other bounds to the module declaration.
+This where bound will be replicated to all types generated by this macro. The chaining of multiple
+trait bounds with <code>+</code> is not supported. If multiple bounds for one type are required, it needs to
+be split up into multiple bounds.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">system::Config</span> <span class="kw">where</span> <span class="self">Self</span><span class="ident">::AccountId</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {}
+
+<span class="macro">decl_module!</span> {
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span>, <span class="ident">T::AccountId</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+		<span class="comment">// Your implementation</span>
+	}
+}</pre></div>
+<h2 id="reserved-functions" class="section-header"><a href="#reserved-functions">Reserved Functions</a></h2>
+<p>The following are reserved function signatures:</p>
+<ul>
+<li><code>deposit_event</code>: Helper function for depositing an <a href="https://docs.substrate.dev/docs/event-enum">event</a>.
+The default behavior is to call <code>deposit_event</code> from the <a href="../frame_system/index.html">System module</a>.
+However, you can write your own implementation for events in your runtime. To use the default behavior,
+add <code>fn deposit_event() = default;</code> to your <code>Module</code>.</li>
+</ul>
+<p>The following reserved functions also take the block number (with type <code>T::BlockNumber</code>) as an optional input:</p>
+<ul>
+<li>
+<p><code>on_runtime_upgrade</code>: Executes at the beginning of a block prior to on_initialize when there
+is a runtime upgrade. This allows each module to upgrade its storage before the storage items are used.
+As such, <strong>calling other modules must be avoided</strong>!! Using this function will implement the
+<a href="../sp_runtime/traits/trait.OnRuntimeUpgrade.html"><code>OnRuntimeUpgrade</code></a> trait.
+Function signature must be <code>fn on_runtime_upgrade() -&gt; frame_support::weights::Weight</code>.</p>
+</li>
+<li>
+<p><code>on_initialize</code>: Executes at the beginning of a block. Using this function will
+implement the <a href="./trait.OnInitialize.html"><code>OnInitialize</code></a> trait.
+Function signature can be either:</p>
+<ul>
+<li><code>fn on_initialize(n: BlockNumber) -&gt; frame_support::weights::Weight</code> or</li>
+<li><code>fn on_initialize() -&gt; frame_support::weights::Weight</code></li>
+</ul>
+</li>
+<li>
+<p><code>on_finalize</code>: Executes at the end of a block. Using this function will
+implement the <a href="./traits/trait.OnFinalize.html"><code>OnFinalize</code></a> trait.
+Function signature can be either:</p>
+<ul>
+<li><code>fn on_finalize(n: BlockNumber) -&gt; frame_support::weights::Weight</code> or</li>
+<li><code>fn on_finalize() -&gt; frame_support::weights::Weight</code></li>
+</ul>
+</li>
+<li>
+<p><code>offchain_worker</code>: Executes at the beginning of a block and produces extrinsics for a future block
+upon completion. Using this function will implement the
+<a href="./traits/trait.OffchainWorker.html"><code>OffchainWorker</code></a> trait.</p>
+</li>
+<li>
+<p><code>integrity_test</code>: Executes in a test generated by <code>construct_runtime</code>, note it doesn’t
+execute in an externalities-provided environment. Implement
+<a href="./trait.IntegrityTest.html"><code>IntegrityTest</code></a> trait.</p>
+</li>
+</ul>
+</div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="frame_support" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

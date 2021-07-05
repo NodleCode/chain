@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["nodle_chain_runtime"] = [{"text":"impl <a class=\"trait\" href=\"nodle_chain_runtime/trait.BuildStorage.html\" title=\"trait nodle_chain_runtime::BuildStorage\">BuildStorage</a> for <a class=\"struct\" href=\"nodle_chain_runtime/struct.GenesisConfig.html\" title=\"struct nodle_chain_runtime::GenesisConfig\">GenesisConfig</a>","synthetic":false,"types":["nodle_chain_runtime::GenesisConfig"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

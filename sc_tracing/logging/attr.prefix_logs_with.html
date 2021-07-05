@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Add a log prefix to the function."><meta name="keywords" content="rust, rustlang, rust-lang, prefix_logs_with"><title>prefix_logs_with in sc_tracing::logging - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc attr"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sc_tracing/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class="location"><a href="../index.html">sc_tracing</a>::<wbr><a href="index.html">logging</a></p><div id="sidebar-vars" data-name="prefix_logs_with" data-ty="attr" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Attribute Macro <a href="../index.html">sc_tracing</a>::<wbr><a href="index.html">logging</a>::<wbr><a class="attr" href="">prefix_logs_with</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/sc_tracing_proc_macro/lib.rs.html#107" title="goto source code">[src]</a></span></h1><pre class="rust attr">#[prefix_logs_with]</pre><div class="docblock"><p>Add a log prefix to the function.</p>
+<p>This prefixes all the log lines with <code>[&lt;name&gt;]</code> (after the timestamp). It works by making a
+tracing’s span that is propagated to all the child calls and child tasks (futures) if they are
+spawned properly with the <code>SpawnHandle</code> (see <code>TaskManager</code> in sc-cli) or if the futures use
+<code>.in_current_span()</code> (see tracing-futures).</p>
+<p>See Tokio’s <a href="https://docs.rs/tracing-core/">tracing documentation</a> and
+<a href="https://docs.rs/tracing-futures/">tracing-futures documentation</a> for more details.</p>
+<h1 id="implementation-notes" class="section-header"><a href="#implementation-notes">Implementation notes</a></h1>
+<p>If there are multiple spans with a log prefix, only the latest will be shown.</p>
+<h1 id="example-with-a-literal" class="section-header"><a href="#example-with-a-literal">Example with a literal</a></h1>
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">Builds</span> <span class="ident">a</span> <span class="ident">new</span> <span class="ident">service</span> <span class="kw">for</span> <span class="ident">a</span> <span class="ident">light</span> <span class="ident">client</span>.
+<span class="attribute">#[<span class="ident">sc_cli::prefix_logs_with</span>(<span class="string">&quot;light&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_light</span>(<span class="ident">config</span>: <span class="ident">Configuration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskManager</span>, <span class="ident">ServiceError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> (<span class="ident">client</span>, <span class="ident">backend</span>, <span class="ident">keystore</span>, <span class="kw-2">mut</span> <span class="ident">task_manager</span>, <span class="ident">on_demand</span>) <span class="op">=</span>
+        <span class="ident">sc_service::new_light_parts</span>::<span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">RuntimeApi</span>, <span class="ident">Executor</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)<span class="question-mark">?</span>;
+
+       ...
+}</pre></div>
+<p>Will produce logs that look like this:</p>
+<pre><code class="language-text">2020-10-16 08:03:14  Substrate Node
+2020-10-16 08:03:14  ✌️  version 2.0.0-47f7d3f2e-x86_64-linux-gnu
+2020-10-16 08:03:14  ❤️  by Anonymous, 2017-2020
+2020-10-16 08:03:14  📋 Chain specification: Local Testnet
+2020-10-16 08:03:14  🏷 Node name: nice-glove-1401
+2020-10-16 08:03:14  👤 Role: LIGHT
+2020-10-16 08:03:14  💾 Database: RocksDb at /tmp/substrate95w2Dk/chains/local_testnet/db
+2020-10-16 08:03:14  ⛓  Native runtime: node-template-1 (node-template-1.tx1.au1)
+2020-10-16 08:03:14  [light] 🔨 Initializing Genesis block/state (state: 0x121d…8e36, header-hash: 0x24ef…8ff6)
+2020-10-16 08:03:14  [light] Loading GRANDPA authorities from genesis on what appears to be first startup.
+2020-10-16 08:03:15  [light] ⏱  Loaded block-time = 6000 milliseconds from genesis on first-launch
+2020-10-16 08:03:15  [light] Using default protocol ID &quot;sup&quot; because none is configured in the chain specs
+2020-10-16 08:03:15  [light] 🏷 Local node identity is: 12D3KooWHX4rkWT6a6N55Km7ZnvenGdShSKPkzJ3yj9DU5nqDtWR
+2020-10-16 08:03:15  [light] 📦 Highest known block at #0
+2020-10-16 08:03:15  [light] 〽️ Prometheus server started at 127.0.0.1:9615
+2020-10-16 08:03:15  [light] Listening for new connections on 127.0.0.1:9944.
+</code></pre>
+<h1 id="example-using-the-actual-node-name" class="section-header"><a href="#example-using-the-actual-node-name">Example using the actual node name</a></h1>
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">Builds</span> <span class="ident">a</span> <span class="ident">new</span> <span class="ident">service</span> <span class="kw">for</span> <span class="ident">a</span> <span class="ident">light</span> <span class="ident">client</span>.
+<span class="attribute">#[<span class="ident">sc_cli::prefix_logs_with</span>(<span class="ident">config</span>.<span class="ident">network</span>.<span class="ident">node_name</span>.<span class="ident">as_str</span>())]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_light</span>(<span class="ident">config</span>: <span class="ident">Configuration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskManager</span>, <span class="ident">ServiceError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> (<span class="ident">client</span>, <span class="ident">backend</span>, <span class="ident">keystore</span>, <span class="kw-2">mut</span> <span class="ident">task_manager</span>, <span class="ident">on_demand</span>) <span class="op">=</span>
+        <span class="ident">sc_service::new_light_parts</span>::<span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">RuntimeApi</span>, <span class="ident">Executor</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)<span class="question-mark">?</span>;
+
+       ...
+}</pre></div>
+<p>Will produce logs that look like this:</p>
+<pre><code class="language-text">2020-10-16 08:12:57  Substrate Node
+2020-10-16 08:12:57  ✌️  version 2.0.0-efb9b822a-x86_64-linux-gnu
+2020-10-16 08:12:57  ❤️  by Anonymous, 2017-2020
+2020-10-16 08:12:57  📋 Chain specification: Local Testnet
+2020-10-16 08:12:57  🏷 Node name: open-harbor-1619
+2020-10-16 08:12:57  👤 Role: LIGHT
+2020-10-16 08:12:57  💾 Database: RocksDb at /tmp/substrate9T9Mtb/chains/local_testnet/db
+2020-10-16 08:12:57  ⛓  Native runtime: node-template-1 (node-template-1.tx1.au1)
+2020-10-16 08:12:58  [open-harbor-1619] 🔨 Initializing Genesis block/state (state: 0x121d…8e36, header-hash: 0x24ef…8ff6)
+2020-10-16 08:12:58  [open-harbor-1619] Loading GRANDPA authorities from genesis on what appears to be first startup.
+2020-10-16 08:12:58  [open-harbor-1619] ⏱  Loaded block-time = 6000 milliseconds from genesis on first-launch
+2020-10-16 08:12:58  [open-harbor-1619] Using default protocol ID &quot;sup&quot; because none is configured in the chain specs
+2020-10-16 08:12:58  [open-harbor-1619] 🏷 Local node identity is: 12D3KooWRzmYC8QTK1Pm8Cfvid3skTS4Hn54jc4AUtje8Rqbfgtp
+2020-10-16 08:12:58  [open-harbor-1619] 📦 Highest known block at #0
+2020-10-16 08:12:58  [open-harbor-1619] 〽️ Prometheus server started at 127.0.0.1:9615
+2020-10-16 08:12:58  [open-harbor-1619] Listening for new connections on 127.0.0.1:9944.
+</code></pre>
+</div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_tracing" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script></body></html>

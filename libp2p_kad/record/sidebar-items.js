@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["store",""]],"struct":[["Key","The (opaque) key of a record."],["ProviderRecord","A record stored in the DHT whose value is the ID of a peer who can provide the value on-demand."],["Record","A record stored in the DHT."]]});

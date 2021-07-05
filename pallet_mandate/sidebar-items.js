@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Call","Dispatchable calls."],["Event","Events for this module."]],"struct":[["Module","The module declaration."]],"trait":[["Config","The module’s configuration trait."]]});

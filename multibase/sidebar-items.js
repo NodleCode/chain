@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Base","List of types currently supported in the multibase spec."],["Error","Error types"]],"fn":[["decode","Decode the base string."],["encode","Encode with the given byte slice to base string."]],"type":[["Result","Type alias to use this library’s [`Error`] type in a `Result`."]]});

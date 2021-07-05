@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["register_globals","Register the statics to report to registry"]],"struct":[["TOKIO_THREADS_ALIVE",""],["TOKIO_THREADS_TOTAL",""],["UNBOUNDED_CHANNELS_COUNTER",""]]});

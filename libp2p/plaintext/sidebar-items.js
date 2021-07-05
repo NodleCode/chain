@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PlainText1Config","`PlainText1Config` is an insecure connection handshake for testing purposes only."],["PlainText2Config","`PlainText2Config` is an insecure connection handshake for testing purposes only, implementing the libp2p plaintext connection handshake specification."],["PlainTextOutput","Output of the plaintext protocol."]]});

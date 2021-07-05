@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["debug","Logs a message at the debug level."],["error","Logs a message at the error level."],["info","Logs a message at the info level."],["trace","Logs a message at the trace level."],["warn","Logs a message at the warn level."]]});

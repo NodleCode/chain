@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["DataSegmentsSnapshot","This is a snapshot of data segments specialzied for a particular instantiation."],["WasmModuleInfo","A bunch of information collected from a WebAssembly module."]]});

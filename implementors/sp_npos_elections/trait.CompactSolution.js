@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["pallet_staking"] = [{"text":"impl <a class=\"trait\" href=\"sp_npos_elections/trait.CompactSolution.html\" title=\"trait sp_npos_elections::CompactSolution\">CompactSolution</a> for <a class=\"struct\" href=\"pallet_staking/struct.CompactAssignments.html\" title=\"struct pallet_staking::CompactAssignments\">CompactAssignments</a>","synthetic":false,"types":["pallet_staking::CompactAssignments"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

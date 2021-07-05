@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sp_std"] = [{"text":"impl <a class=\"trait\" href=\"sp_std/marker/trait.Sync.html\" title=\"trait sp_std::marker::Sync\">Sync</a> for <a class=\"struct\" href=\"sp_std/struct.Writer.html\" title=\"struct sp_std::Writer\">Writer</a>","synthetic":true,"types":["sp_std::Writer"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

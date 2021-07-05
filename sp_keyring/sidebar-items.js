@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["ed25519","Test account crypto for ed25519. Support code for the runtime. A set of test accounts."],["sr25519","Test account crypto for sr25519. Support code for the runtime. A set of test accounts."],["test",""]]});

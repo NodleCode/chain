@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PiecewiseLinear","Piecewise Linear function in [0, 1] -> [0, 1]."]]});

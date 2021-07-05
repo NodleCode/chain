@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["print_hex","Print any `u8` slice as hex."],["print_num","Print a number."],["print_utf8","Print any valid `utf8` buffer."],["runtime_version","Extract the runtime version of the given wasm blob by calling `Core_version`."]],"struct":[["HostFunctions","Provides implementations for the extern host functions."]]});

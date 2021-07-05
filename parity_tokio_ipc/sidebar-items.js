@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["dummy_endpoint","For testing/examples"]],"struct":[["Endpoint","Endpoint for IPC transport"],["Incoming","Stream of incoming connections"],["IpcConnection","IPC Connection"],["RemoteId","Remote connection data, if any available"],["SecurityAttributes","Socket permissions and ownership on UNIX"]]});

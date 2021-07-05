@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["create","Create an in-memory database with the given number of columns. Columns will be indexable by 0..`num_cols`"]],"struct":[["InMemory","A key-value database fulfilling the `KeyValueDB` trait, living in memory. This is generally intended for tests and is not particularly optimized."]]});

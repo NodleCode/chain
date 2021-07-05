@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Error type of this RPC api."]],"mod":[["gen_client","The generated client module."]],"struct":[["TransactionPayment","A struct that implements the [`TransactionPaymentApi`]."],["TransactionPaymentClient","The Client."]],"trait":[["TransactionPaymentApi",""],["TransactionPaymentRuntimeApi",""]]});

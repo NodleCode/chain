@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["AuthorityDiscoveryApi","The authority discovery api."]],"type":[["AuthorityId","An authority discovery authority identifier."],["AuthorityPair","An authority discovery authority keypair."],["AuthoritySignature","An authority discovery authority signature."]]});

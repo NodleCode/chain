@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RandomNumberGenerator","Pseudo-random number streamer. This retains the state of the random number stream. It’s as secure as the combination of the seed with which it is constructed and the hash function it uses to cycle elements."]]});

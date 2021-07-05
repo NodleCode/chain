@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","TLS related errors."]],"struct":[["Builder","TLS configuration builder."],["Certificate","Certificate, DER-encoded X.509 format."],["Config","TLS configuration."],["PrivateKey","Private key, DER-encoded ASN.1 in either PKCS#8 or PKCS#1 format."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["BlockBuilder","The `BlockBuilder` api trait that provides the required functionality for building a block."]]});

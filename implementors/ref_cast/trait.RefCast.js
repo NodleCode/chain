@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sp_storage"] = [{"text":"impl <a class=\"trait\" href=\"ref_cast/trait.RefCast.html\" title=\"trait ref_cast::RefCast\">RefCast</a> for <a class=\"struct\" href=\"sp_storage/struct.PrefixedStorageKey.html\" title=\"struct sp_storage::PrefixedStorageKey\">PrefixedStorageKey</a>","synthetic":false,"types":["sp_storage::PrefixedStorageKey"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

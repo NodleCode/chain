@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["IdentifyEvent","Event emitted  by the `Identify` behaviour."]],"struct":[["Identify","Network behaviour that automatically identifies nodes periodically, returns information about them, and answers identify queries from other nodes."],["IdentifyInfo","Information of a peer sent in `Identify` protocol responses."]]});

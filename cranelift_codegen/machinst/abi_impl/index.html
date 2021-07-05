@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Implementation of a vanilla ABI, shared between several machines. The implementation here assumes that arguments will be passed in registers first, then additional args on the stack; that the stack grows downward, contains a standard frame (return address and frame pointer), and the compiler is otherwise free to allocate space below that with its choice of layout; and that the machine has some notion of caller- and callee-save registers. Most modern machines, e.g. x86-64 and AArch64, should fit this mold and thus both of these backends use this shared implementation."><meta name="keywords" content="rust, rustlang, rust-lang, abi_impl"><title>cranelift_codegen::machinst::abi_impl - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a><p class="location">Module abi_impl</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"><a href="../../index.html">cranelift_codegen</a>::<wbr><a href="../index.html">machinst</a></p><div id="sidebar-vars" data-name="abi_impl" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../../index.html">cranelift_codegen</a>::<wbr><a href="../index.html">machinst</a>::<wbr><a class="mod" href="">abi_impl</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../../src/cranelift_codegen/machinst/abi_impl.rs.html#1-1511" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Implementation of a vanilla ABI, shared between several machines. The
+implementation here assumes that arguments will be passed in registers
+first, then additional args on the stack; that the stack grows downward,
+contains a standard frame (return address and frame pointer), and the
+compiler is otherwise free to allocate space below that with its choice of
+layout; and that the machine has some notion of caller- and callee-save
+registers. Most modern machines, e.g. x86-64 and AArch64, should fit this
+mold and thus both of these backends use this shared implementation.</p>
+<p>See the documentation in specific machine backends for the “instantiation”
+of this generic ABI, i.e., which registers are caller/callee-save, arguments
+and return values, and any other special requirements.</p>
+<p>For now the implementation here assumes a 64-bit machine, but we intend to
+make this 32/64-bit-generic shortly.</p>
+<h1 id="vanilla-abi" class="section-header"><a href="#vanilla-abi">Vanilla ABI</a></h1>
+<p>First, arguments and return values are passed in registers up to a certain
+fixed count, after which they overflow onto the stack. Multiple return
+values either fit in registers, or are returned in a separate return-value
+area on the stack, given by a hidden extra parameter.</p>
+<p>Note that the exact stack layout is up to us. We settled on the
+below design based on several requirements. In particular, we need to be
+able to generate instructions (or instruction sequences) to access
+arguments, stack slots, and spill slots before we know how many spill slots
+or clobber-saves there will be, because of our pass structure. We also
+prefer positive offsets to negative offsets because of an asymmetry in
+some machines’ addressing modes (e.g., on AArch64, positive offsets have a
+larger possible range without a long-form sequence to synthesize an
+arbitrary offset). Finally, it is not allowed to access memory below the
+current SP value.</p>
+<p>We assume that a prologue first pushes the frame pointer (and return address
+above that, if the machine does not do that in hardware). We set FP to point
+to this two-word frame record. We store all other frame slots below this
+two-word frame record, with the stack pointer remaining at or below this
+fixed frame storage for the rest of the function. We can then access frame
+storage slots using positive offsets from SP. In order to allow codegen for
+the latter before knowing how many clobber-saves we have, and also allow it
+while SP is being adjusted to set up a call, we implement a “nominal SP”
+tracking feature by which a fixup (distance between actual SP and a
+“nominal” SP) is known at each instruction.</p>
+<h1 id="stack-layout" class="section-header"><a href="#stack-layout">Stack Layout</a></h1>
+<p>The stack looks like:</p>
+<pre><code class="language-plain">  (high address)
+
+                             +---------------------------+
+                             |          ...              |
+                             | stack args                |
+                             | (accessed via FP)         |
+                             +---------------------------+
+SP at function entry -----&gt;  | return address            |
+                             +---------------------------+
+FP after prologue --------&gt;  | FP (pushed by prologue)   |
+                             +---------------------------+
+                             |          ...              |
+                             | spill slots               |
+                             | (accessed via nominal SP) |
+                             |          ...              |
+                             | stack slots               |
+                             | (accessed via nominal SP) |
+nominal SP ---------------&gt;  | (alloc'd by prologue)     |
+                             +---------------------------+
+                             |          ...              |
+                             | clobbered callee-saves    |
+SP at end of prologue ----&gt;  | (pushed by prologue)      |
+                             +---------------------------+
+                             | [alignment as needed]     |
+                             |          ...              |
+                             | args for call             |
+SP before making a call --&gt;  | (pushed at callsite)      |
+                             +---------------------------+
+
+  (low address)
+</code></pre>
+<h1 id="multi-value-returns" class="section-header"><a href="#multi-value-returns">Multi-value Returns</a></h1>
+<p>Note that we support multi-value returns in two ways. First, we allow for
+multiple return-value registers. Second, if teh appropriate flag is set, we
+support the SpiderMonkey Wasm ABI.  For details of the multi-value return
+ABI, see:</p>
+<p>https://searchfox.org/mozilla-central/rev/bc3600def806859c31b2c7ac06e3d69271052a89/js/src/wasm/WasmStubs.h#134</p>
+<p>In brief:</p>
+<ul>
+<li>Return values are processed in <em>reverse</em> order.</li>
+<li>The first return value in this order (so the last return) goes into the
+ordinary return register.</li>
+<li>Any further returns go in a struct-return area, allocated upwards (in
+address order) during the reverse traversal.</li>
+<li>This struct-return area is provided by the caller, and a pointer to its
+start is passed as an invisible last (extra) argument. Normally the caller
+will allocate this area on the stack. When we generate calls, we place it
+just above the on-stack argument area.</li>
+<li>So, for example, a function returning 4 i64’s (v0, v1, v2, v3), with no
+formal arguments, would:
+<ul>
+<li>Accept a pointer <code>P</code> to the struct return area as a hidden argument in the
+first argument register on entry.</li>
+<li>Return v3 in the one and only return-value register.</li>
+<li>Return v2 in memory at <code>[P]</code>.</li>
+<li>Return v1 in memory at <code>[P+8]</code>.</li>
+<li>Return v0 in memory at <code>[P+16]</code>.</li>
+</ul>
+</li>
+</ul>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.ABICalleeImpl.html" title="cranelift_codegen::machinst::abi_impl::ABICalleeImpl struct">ABICalleeImpl</a></td><td class="docblock-short"><p>ABI object for a function body.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.ABICallerImpl.html" title="cranelift_codegen::machinst::abi_impl::ABICallerImpl struct">ABICallerImpl</a></td><td class="docblock-short"><p>ABI object for a callsite.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.ABIArg.html" title="cranelift_codegen::machinst::abi_impl::ABIArg enum">ABIArg</a></td><td class="docblock-short"><p>A location for an argument or return value.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.ArgsOrRets.html" title="cranelift_codegen::machinst::abi_impl::ArgsOrRets enum">ArgsOrRets</a></td><td class="docblock-short"><p>Are we computing information about arguments or return values? Much of the
+handling is factored out into common routines; this enum allows us to
+distinguish which case we’re handling.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.CallDest.html" title="cranelift_codegen::machinst::abi_impl::CallDest enum">CallDest</a></td><td class="docblock-short"><p>Destination for a call.</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.InstIsSafepoint.html" title="cranelift_codegen::machinst::abi_impl::InstIsSafepoint enum">InstIsSafepoint</a></td><td class="docblock-short"><p>Is an instruction returned by an ABI machine-specific backend a safepoint,
+or not?</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.StackAMode.html" title="cranelift_codegen::machinst::abi_impl::StackAMode enum">StackAMode</a></td><td class="docblock-short"><p>Abstract location for a machine-specific ABI impl to translate into the
+appropriate addressing mode.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.ABIMachineSpec.html" title="cranelift_codegen::machinst::abi_impl::ABIMachineSpec trait">ABIMachineSpec</a></td><td class="docblock-short"><p>Trait implemented by machine-specific backend to provide information about
+register assignments and to allow generating the specific instructions for
+stack loads/saves, prologues/epilogues, etc.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="cranelift_codegen" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script></body></html>

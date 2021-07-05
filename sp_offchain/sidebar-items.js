@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["STORAGE_PREFIX","Re-export of parent module scope storage prefix."]],"trait":[["OffchainWorkerApi","The offchain worker api."]]});

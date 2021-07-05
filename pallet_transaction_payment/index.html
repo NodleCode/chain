@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Transaction Payment Module"><meta name="keywords" content="rust, rustlang, rust-lang, pallet_transaction_payment"><title>pallet_transaction_payment - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../pallet_transaction_payment/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate pallet_transaction_payment</p><div class="block version"><p>Version 3.0.0</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all pallet_transaction_payment's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="pallet_transaction_payment" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">pallet_transaction_payment</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/pallet_transaction_payment/lib.rs.html#18-1290" title="goto source code">[src]</a></span></h1><div class="docblock"><h1 id="transaction-payment-module" class="section-header"><a href="#transaction-payment-module">Transaction Payment Module</a></h1>
+<p>This module provides the basic logic needed to pay the absolute minimum amount needed for a
+transaction to be included. This includes:</p>
+<ul>
+<li><em>base fee</em>: This is the minimum amount a user pays for a transaction. It is declared
+as a base <em>weight</em> in the runtime and converted to a fee using <code>WeightToFee</code>.</li>
+<li><em>weight fee</em>: A fee proportional to amount of weight a transaction consumes.</li>
+<li><em>length fee</em>: A fee proportional to the encoded length of the transaction.</li>
+<li><em>tip</em>: An optional tip. Tip increases the priority of the transaction, giving it a higher
+chance to be included by the transaction queue.</li>
+</ul>
+<p>The base fee and adjusted weight and length fees constitute the <em>inclusion fee</em>, which is
+the minimum fee for a transaction to be included in a block.</p>
+<p>The formula of final fee:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore">
+<span class="ident">inclusion_fee</span> <span class="op">=</span> <span class="ident">base_fee</span> <span class="op">+</span> <span class="ident">length_fee</span> <span class="op">+</span> [<span class="ident">targeted_fee_adjustment</span> <span class="op">*</span> <span class="ident">weight_fee</span>];
+<span class="ident">final_fee</span> <span class="op">=</span> <span class="ident">inclusion_fee</span> <span class="op">+</span> <span class="ident">tip</span>;</pre></div>
+<ul>
+<li><code>targeted_fee_adjustment</code>: This is a multiplier that can tune the final fee based on
+the congestion of the network.</li>
+</ul>
+<p>Additionally, this module allows one to configure:</p>
+<ul>
+<li>The mapping between one unit of weight to one unit of fee via <a href="trait.Config.html#associatedtype.WeightToFee" title="Config::WeightToFee"><code>Config::WeightToFee</code></a>.</li>
+<li>A means of updating the fee for the next block, via defining a multiplier, based on the
+final state of the chain at the end of the previous block. This can be configured via
+<a href="trait.Config.html#associatedtype.FeeMultiplierUpdate" title="Config::FeeMultiplierUpdate"><code>Config::FeeMultiplierUpdate</code></a></li>
+<li>How the fees are paid via <a href="trait.Config.html#associatedtype.OnChargeTransaction" title="Config::OnChargeTransaction"><code>Config::OnChargeTransaction</code></a>.</li>
+</ul>
+</div><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<table><tr class="import-item"><td><code>pub use $crate::traits::<a class="trait" href="../frame_support/traits/trait.GetPalletVersion.html" title="trait frame_support::traits::GetPalletVersion">GetPalletVersion</a> as _;</code></td><td class="docblock-short"></td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.ChargeTransactionPayment.html" title="pallet_transaction_payment::ChargeTransactionPayment struct">ChargeTransactionPayment</a></td><td class="docblock-short"><p>Require the transactor pay for themselves and maybe include a tip to gain additional priority
+in the queue.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.CurrencyAdapter.html" title="pallet_transaction_payment::CurrencyAdapter struct">CurrencyAdapter</a></td><td class="docblock-short"><p>Implements the transaction payment for a module implementing the <code>Currency</code>
+trait (eg. the pallet_balances) using an unbalance handler (implementing
+<code>OnUnbalanced</code>).</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.FeeDetails.html" title="pallet_transaction_payment::FeeDetails struct">FeeDetails</a></td><td class="docblock-short"><p>The <code>FeeDetails</code> is composed of:</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.GenesisConfig.html" title="pallet_transaction_payment::GenesisConfig struct">GenesisConfig</a></td><td class="docblock-short"><p>Genesis config for the module, allow to build genesis storage.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.InclusionFee.html" title="pallet_transaction_payment::InclusionFee struct">InclusionFee</a></td><td class="docblock-short"><p>The base fee and adjusted weight and length fees constitute the <em>inclusion fee</em>.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.Module.html" title="pallet_transaction_payment::Module struct">Module</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="struct" href="struct.NextFeeMultiplier.html" title="pallet_transaction_payment::NextFeeMultiplier struct">NextFeeMultiplier</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="struct" href="struct.RuntimeDispatchInfo.html" title="pallet_transaction_payment::RuntimeDispatchInfo struct">RuntimeDispatchInfo</a></td><td class="docblock-short"><p>Information related to a dispatchable’s class, weight, and fee that can be queried from the runtime.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.TargetedFeeAdjustment.html" title="pallet_transaction_payment::TargetedFeeAdjustment struct">TargetedFeeAdjustment</a></td><td class="docblock-short"><p>A struct to update the weight multiplier per block. It implements <code>Convert&lt;Multiplier, Multiplier&gt;</code>, meaning that it can convert the previous multiplier to the next one. This should
+be called on <code>on_finalize</code> of a block, prior to potentially cleaning the weight data from the
+system module.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.Call.html" title="pallet_transaction_payment::Call enum">Call</a></td><td class="docblock-short"><p>Dispatchable calls.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.Config.html" title="pallet_transaction_payment::Config trait">Config</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="trait" href="trait.MultiplierUpdate.html" title="pallet_transaction_payment::MultiplierUpdate trait">MultiplierUpdate</a></td><td class="docblock-short"><p>Something that can convert the current multiplier to the next one.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.OnChargeTransaction.html" title="pallet_transaction_payment::OnChargeTransaction trait">OnChargeTransaction</a></td><td class="docblock-short"><p>Handle withdrawing, refunding and depositing of transaction fees.</p>
+</td></tr></table><h2 id="types" class="section-header"><a href="#types">Type Definitions</a></h2>
+<table><tr class="module-item"><td><a class="type" href="type.Multiplier.html" title="pallet_transaction_payment::Multiplier type">Multiplier</a></td><td class="docblock-short"><p>Fee multiplier.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="pallet_transaction_payment" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

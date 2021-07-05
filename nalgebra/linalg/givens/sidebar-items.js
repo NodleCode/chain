@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GivensRotation","A Givens rotation."]]});

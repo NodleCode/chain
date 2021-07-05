@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["frame_support"] = [{"text":"impl <a class=\"trait\" href=\"frame_support/dispatch/fmt/trait.Binary.html\" title=\"trait frame_support::dispatch::fmt::Binary\">Binary</a> for <a class=\"struct\" href=\"frame_support/traits/struct.WithdrawReasons.html\" title=\"struct frame_support::traits::WithdrawReasons\">WithdrawReasons</a>","synthetic":false,"types":["frame_support::traits::WithdrawReasons"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

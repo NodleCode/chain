@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["jsonrpc_core"] = [];
+implementors["sc_rpc_server"] = [{"text":"impl&lt;M:&nbsp;<a class=\"trait\" href=\"jsonrpc_core/calls/trait.Metadata.html\" title=\"trait jsonrpc_core::calls::Metadata\">Metadata</a>&gt; <a class=\"trait\" href=\"jsonrpc_core/middleware/trait.Middleware.html\" title=\"trait jsonrpc_core::middleware::Middleware\">Middleware</a>&lt;M&gt; for <a class=\"struct\" href=\"sc_rpc_server/struct.RpcMiddleware.html\" title=\"struct sc_rpc_server::RpcMiddleware\">RpcMiddleware</a>","synthetic":false,"types":["sc_rpc_server::middleware::RpcMiddleware"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

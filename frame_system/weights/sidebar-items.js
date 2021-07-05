@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SubstrateWeight","Weights for frame_system using the Substrate node and recommended hardware."]],"trait":[["WeightInfo","Weight functions needed for frame_system."]]});

@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Implementation of a Verifiable Random Function (VRF) using Ristretto points and Schnorr DLEQ proofs."><meta name="keywords" content="rust, rustlang, rust-lang, vrf"><title>schnorrkel::vrf - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../schnorrkel/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module vrf</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#constants">Constants</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li></ul></div><p class="location"><a href="../index.html">schnorrkel</a></p><div id="sidebar-vars" data-name="vrf" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">schnorrkel</a>::<wbr><a class="mod" href="">vrf</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/schnorrkel/vrf.rs.html#10-1214" title="goto source code">[src]</a></span></h1><div class="docblock"><h3 id="implementation-of-a-verifiable-random-function-vrf-using-ristretto-points-and-schnorr-dleq-proofs" class="section-header"><a href="#implementation-of-a-verifiable-random-function-vrf-using-ristretto-points-and-schnorr-dleq-proofs">Implementation of a Verifiable Random Function (VRF) using Ristretto points and Schnorr DLEQ proofs.</a></h3>
+<p><em>Warning</em>  We warn that our VRF construction supports malleable
+outputs via the <code>*malleable*</code> methods.  These are insecure when
+used in  conjunction with our HDKD provided in dervie.rs.
+Attackers could translate malleable VRF outputs from one soft subkey 
+to another soft subkey, gaining early knowledge of the VRF output.
+We suggest using either non-malleable VRFs or using implicit
+certificates instead of HDKD when using VRFs.</p>
+<p>We model the VRF on “Making NSEC5 Practical for DNSSEC” by
+Dimitrios Papadopoulos, Duane Wessels, Shumon Huque, Moni Naor,
+Jan Včelák, Leonid Rezyin, andd Sharon Goldberg.
+https://eprint.iacr.org/2017/099.pdf
+We note the V(X)EdDSA signature scheme by Trevor Perrin at
+https://www.signal.org/docs/specifications/xeddsa/#vxeddsa
+is almost identical to the NSEC5 construction, except that
+V(X)Ed25519 fails to be a VRF by giving signers multiple
+outputs per input.  There is another even later variant at
+https://datatracker.ietf.org/doc/draft-irtf-cfrg-vrf/</p>
+<p>We support individual signers merging numerous VRF outputs created
+with the same keypair, which follows the “DLEQ Proofs” and “Batching
+the Proofs” sections of “Privacy Pass - The Math” by Alex Davidson,
+https://new.blog.cloudflare.com/privacy-pass-the-math/#dleqproofs
+and “Privacy Pass: Bypassing Internet Challenges Anonymously”
+by Alex Davidson, Ian Goldberg, Nick Sullivan, George Tankersley,
+and Filippo Valsorda.
+https://www.petsymposium.org/2018/files/papers/issue3/popets-2018-0026.pdf</p>
+<p>As noted there, our merging technique’s soundness appeals to
+Theorem 3.17 on page 74 of Ryan Henry’s PhD thesis
+“Efficient Zero-Knowledge Proofs and Applications”
+https://uwspace.uwaterloo.ca/bitstream/handle/10012/8621/Henry_Ryan.pdf
+See also the attack on Peng and Bao’s batch proof protocol in
+“Batch Proofs of Partial Knowledge” by Ryan Henry and Ian Goldberg
+https://www.cypherpunks.ca/~iang/pubs/batchzkp-acns.pdf</p>
+<p>We might reasonably ask if the VRF signer’s public key should
+really be hashed when creating the scalars in <code>vrfs_merge*</code>.
+After all, there is no similar requirement when the values being
+hashed are BLS public keys in say
+https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html
+In fact, we expect the public key could be dropped both in
+Privacy Pass’ case, due to using randomness in the messages,
+and in the VRF case, provided the message depends upon shared
+randomness created after the public key.  Yet, there are VRF
+applications outside these two cases, and DLEQ proof applications
+where the points are not even hashes.  At minimum, we expect
+hashing the public key prevents malicious signers from choosing
+their key to cancel out the blinding of a particular point,
+which might become important in a some anonymity applications.
+In any case, there is no cost to hashing the public key for VRF
+applications, but important such an approach cannot yield a
+verifiable shuffle.
+TODO: Explain better!</p>
+<p>We also implement verifier side batching analogous to batched
+verification of Schnorr signatures, but note this requires an
+extra curve point, which enlarges the VRF proofs from 64 bytes
+to 96 bytes.  We provide <code>shorten_*</code> methods to produce the
+non-batchable proof from the batchable proof because doing so
+is an inherent part of the batch verification anyways.
+TODO: Security arguments!</p>
+<p>We do not provide DLEQ proofs optimized for the same signer using
+multiple public keys because such constructions sound more the
+domain of zero-knowledge proof libraries.</p>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Malleable.html" title="schnorrkel::vrf::Malleable struct">Malleable</a></td><td class="docblock-short"><p>VRF SigningTranscript for malleable VRF ouputs.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.VRFInOut.html" title="schnorrkel::vrf::VRFInOut struct">VRFInOut</a></td><td class="docblock-short"><p>VRF input and output paired together, possibly unverified.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.VRFOutput.html" title="schnorrkel::vrf::VRFOutput struct">VRFOutput</a></td><td class="docblock-short"><p>VRF output, possibly unverified.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.VRFProof.html" title="schnorrkel::vrf::VRFProof struct">VRFProof</a></td><td class="docblock-short"><p>Short proof of correctness for associated VRF output,
+for which no batched verification works.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.VRFProofBatchable.html" title="schnorrkel::vrf::VRFProofBatchable struct">VRFProofBatchable</a></td><td class="docblock-short"><p>Longer proof of correctness for associated VRF output,
+which supports batching.</p>
+</td></tr></table><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<table><tr class="module-item"><td><a class="constant" href="constant.KUSAMA_VRF.html" title="schnorrkel::vrf::KUSAMA_VRF constant">KUSAMA_VRF</a></td><td class="docblock-short"><p>Value for <code>kusama</code> paramater to <code>*dleq*</code> methods that yields the VRF for kusama.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.VRF_OUTPUT_LENGTH.html" title="schnorrkel::vrf::VRF_OUTPUT_LENGTH constant">VRF_OUTPUT_LENGTH</a></td><td class="docblock-short"><p>Length of VRF output.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.VRF_PROOF_BATCHABLE_LENGTH.html" title="schnorrkel::vrf::VRF_PROOF_BATCHABLE_LENGTH constant">VRF_PROOF_BATCHABLE_LENGTH</a></td><td class="docblock-short"><p>Length of the longer VRF proof which supports batch verification.</p>
+</td></tr><tr class="module-item"><td><a class="constant" href="constant.VRF_PROOF_LENGTH.html" title="schnorrkel::vrf::VRF_PROOF_LENGTH constant">VRF_PROOF_LENGTH</a></td><td class="docblock-short"><p>Length of the short VRF proof which lacks support for batch verification.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.VRFSigningTranscript.html" title="schnorrkel::vrf::VRFSigningTranscript trait">VRFSigningTranscript</a></td><td class="docblock-short"><p><code>SigningTranscript</code> helper trait that manages VRF output malleability.</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.dleq_verify_batch.html" title="schnorrkel::vrf::dleq_verify_batch fn">dleq_verify_batch</a></td><td class="docblock-short"><p>Batch verify DLEQ proofs where the public keys were held by
+different parties.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.vrf_malleable_hash.html" title="schnorrkel::vrf::vrf_malleable_hash fn">vrf_malleable_hash</a></td><td class="docblock-short"><p>Create a malleable VRF input point by hashing a transcript to a point.</p>
+</td></tr><tr class="module-item"><td><a class="fn" href="fn.vrf_verify_batch.html" title="schnorrkel::vrf::vrf_verify_batch fn">vrf_verify_batch</a></td><td class="docblock-short"><p>Batch verify VRFs by different signers</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="schnorrkel" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script></body></html>

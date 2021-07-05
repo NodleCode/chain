@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["INHERENT_IDENTIFIER","The identifier for the `uncles` inherent."]],"enum":[["InherentError","Errors that can occur while checking the authorship inherent."]],"struct":[["InherentDataProvider","Provider for inherent data."]],"trait":[["UnclesInherentData","Auxiliary trait to extract uncles inherent data."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["ty_bits","Returns the size (in bits) of a given type."]]});

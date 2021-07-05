@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sc_executor_wasmi"] = [{"text":"impl <a class=\"trait\" href=\"sc_executor_common/wasm_runtime/trait.WasmInstance.html\" title=\"trait sc_executor_common::wasm_runtime::WasmInstance\">WasmInstance</a> for <a class=\"struct\" href=\"sc_executor_wasmi/struct.WasmiInstance.html\" title=\"struct sc_executor_wasmi::WasmiInstance\">WasmiInstance</a>","synthetic":false,"types":["sc_executor_wasmi::WasmiInstance"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

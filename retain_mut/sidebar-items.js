@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["RetainMut","Trait that provides `retain_mut` method."]]});

@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This module exposes the machine-specific backend definition pieces."><meta name="keywords" content="rust, rustlang, rust-lang, machinst"><title>cranelift_codegen::machinst - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module machinst</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"><a href="../index.html">cranelift_codegen</a></p><div id="sidebar-vars" data-name="machinst" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">cranelift_codegen</a>::<wbr><a class="mod" href="">machinst</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/cranelift_codegen/machinst/mod.rs.html#1-433" title="goto source code">[src]</a></span></h1><div class="docblock"><p>This module exposes the machine-specific backend definition pieces.</p>
+<p>The MachInst infrastructure is the compiler backend, from CLIF
+(ir::Function) to machine code. The purpose of this infrastructure is, at a
+high level, to do instruction selection/lowering (to machine instructions),
+register allocation, and then perform all the fixups to branches, constant
+data references, etc., needed to actually generate machine code.</p>
+<p>The container for machine instructions, at various stages of construction,
+is the <code>VCode</code> struct. We refer to a sequence of machine instructions organized
+into basic blocks as “vcode”. This is short for “virtual-register code”, though
+it’s a bit of a misnomer because near the end of the pipeline, vcode has all
+real registers. Nevertheless, the name is catchy and we like it.</p>
+<p>The compilation pipeline, from an <code>ir::Function</code> (already optimized as much as
+you like by machine-independent optimization passes) onward, is as follows.
+(N.B.: though we show the VCode separately at each stage, the passes
+mutate the VCode in place; these are not separate copies of the code.)</p>
+<pre><code class="language-plain">
+    ir::Function                (SSA IR, machine-independent opcodes)
+        |
+        |  [lower]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - mostly virtual registers.
+        |                        - cond branches in two-target form.
+        |                        - branch targets are block indices.
+        |                        - in-memory constants held by insns,
+        |                          with unknown offsets.
+        |                        - critical edges (actually all edges)
+        |                          are split.)
+        | [regalloc]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - all real registers.
+        |                        - new instruction sequence returned
+        |                          out-of-band in RegAllocResult.
+        |                        - instruction sequence has spills,
+        |                          reloads, and moves inserted.
+        |                        - other invariants same as above.)
+        |
+        | [preamble/postamble]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - stack-frame size known.
+        |                        - out-of-band instruction sequence
+        |                          has preamble prepended to entry
+        |                          block, and postamble injected before
+        |                          every return instruction.
+        |                        - all symbolic stack references to
+        |                          stackslots and spillslots are resolved
+        |                          to concrete FP-offset mem addresses.)
+        | [block/insn ordering]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - vcode.final_block_order is filled in.
+        |                        - new insn sequence from regalloc is
+        |                          placed back into vcode and block
+        |                          boundaries are updated.)
+        | [redundant branch/block
+        |  removal]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - all blocks that were just an
+        |                          unconditional branch are removed.)
+        |
+        | [branch finalization
+        |  (fallthroughs)]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - all branches are in lowered one-
+        |                          target form, but targets are still
+        |                          block indices.)
+        |
+        | [branch finalization
+        |  (offsets)]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - all branch offsets from start of
+        |                          function are known, and all branches
+        |                          have resolved-offset targets.)
+        |
+        | [MemArg finalization]
+        |
+    VCode&lt;arch_backend::Inst&gt;   (machine instructions:
+        |                        - all MemArg references to the constant
+        |                          pool are replaced with offsets.
+        |                        - all constant-pool data is collected
+        |                          in the VCode.)
+        |
+        | [binary emission]
+        |
+    Vec&lt;u8&gt;                     (machine code!)
+
+</code></pre>
+</div><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<table><tr class="import-item"><td><code>pub use <a class="mod" href="lower/index.html" title="mod cranelift_codegen::machinst::lower">lower</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="vcode/index.html" title="mod cranelift_codegen::machinst::vcode">vcode</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="compile/index.html" title="mod cranelift_codegen::machinst::compile">compile</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="blockorder/index.html" title="mod cranelift_codegen::machinst::blockorder">blockorder</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="abi/index.html" title="mod cranelift_codegen::machinst::abi">abi</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="abi_impl/index.html" title="mod cranelift_codegen::machinst::abi_impl">abi_impl</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="buffer/index.html" title="mod cranelift_codegen::machinst::buffer">buffer</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="adapter/index.html" title="mod cranelift_codegen::machinst::adapter">adapter</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="helpers/index.html" title="mod cranelift_codegen::machinst::helpers">helpers</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="inst_common/index.html" title="mod cranelift_codegen::machinst::inst_common">inst_common</a>::*;</code></td><td class="docblock-short"></td></tr><tr class="import-item"><td><code>pub use <a class="mod" href="valueregs/index.html" title="mod cranelift_codegen::machinst::valueregs">valueregs</a>::*;</code></td><td class="docblock-short"></td></tr></table><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="abi/index.html" title="cranelift_codegen::machinst::abi mod">abi</a></td><td class="docblock-short"><p>ABI definitions.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="abi_impl/index.html" title="cranelift_codegen::machinst::abi_impl mod">abi_impl</a></td><td class="docblock-short"><p>Implementation of a vanilla ABI, shared between several machines. The
+implementation here assumes that arguments will be passed in registers
+first, then additional args on the stack; that the stack grows downward,
+contains a standard frame (return address and frame pointer), and the
+compiler is otherwise free to allocate space below that with its choice of
+layout; and that the machine has some notion of caller- and callee-save
+registers. Most modern machines, e.g. x86-64 and AArch64, should fit this
+mold and thus both of these backends use this shared implementation.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="adapter/index.html" title="cranelift_codegen::machinst::adapter mod">adapter</a></td><td class="docblock-short"><p>Adapter for a <code>MachBackend</code> to implement the <code>TargetIsa</code> trait.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="blockorder/index.html" title="cranelift_codegen::machinst::blockorder mod">blockorder</a></td><td class="docblock-short"><p>Computation of basic block order in emitted code.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="buffer/index.html" title="cranelift_codegen::machinst::buffer mod">buffer</a></td><td class="docblock-short"><p>In-memory representation of compiled machine code, with labels and fixups to
+refer to those labels. Handles constant-pool island insertion and also
+veneer insertion for out-of-range jumps.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="compile/index.html" title="cranelift_codegen::machinst::compile mod">compile</a></td><td class="docblock-short"><p>Compilation backend pipeline: optimized IR to VCode / binemit.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="helpers/index.html" title="cranelift_codegen::machinst::helpers mod">helpers</a></td><td class="docblock-short"><p>Miscellaneous helpers for machine backends.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="inst_common/index.html" title="cranelift_codegen::machinst::inst_common mod">inst_common</a></td><td class="docblock-short"><p>A place to park MachInst::Inst fragments which are common across multiple architectures.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="lower/index.html" title="cranelift_codegen::machinst::lower mod">lower</a></td><td class="docblock-short"><p>This module implements lowering (instruction selection) from Cranelift IR
+to machine instructions with virtual registers. This is <em>almost</em> the final
+machine code, except for register allocation.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="valueregs/index.html" title="cranelift_codegen::machinst::valueregs mod">valueregs</a></td><td class="docblock-short"><p>Data structure for tracking the (possibly multiple) registers that hold one
+SSA <code>Value</code>.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="vcode/index.html" title="cranelift_codegen::machinst::vcode mod">vcode</a></td><td class="docblock-short"><p>This implements the VCode container: a CFG of Insts that have been lowered.</p>
+</td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.MachCompileResult.html" title="cranelift_codegen::machinst::MachCompileResult struct">MachCompileResult</a></td><td class="docblock-short"><p>The result of a <code>MachBackend::compile_function()</code> call. Contains machine
+code (as bytes) and a disassembly, if requested.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.UnwindInfoContext.html" title="cranelift_codegen::machinst::UnwindInfoContext struct">UnwindInfoContext</a></td><td class="docblock-short"><p>Input data for UnwindInfoGenerator.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.MachTerminator.html" title="cranelift_codegen::machinst::MachTerminator enum">MachTerminator</a></td><td class="docblock-short"><p>Describes a block terminator (not call) in the vcode, when its branches
+have not yet been finalized (so a branch may have two targets).</p>
+</td></tr><tr class="module-item"><td><a class="enum" href="enum.UnwindInfoKind.html" title="cranelift_codegen::machinst::UnwindInfoKind enum">UnwindInfoKind</a></td><td class="docblock-short"><p>Expected unwind info type.</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.MachBackend.html" title="cranelift_codegen::machinst::MachBackend trait">MachBackend</a></td><td class="docblock-short"><p>Top-level machine backend trait, which wraps all monomorphized code and
+allows a virtual call from the machine-independent <code>Function::compile()</code>.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.MachInst.html" title="cranelift_codegen::machinst::MachInst trait">MachInst</a></td><td class="docblock-short"><p>A machine instruction.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.MachInstEmit.html" title="cranelift_codegen::machinst::MachInstEmit trait">MachInstEmit</a></td><td class="docblock-short"><p>A trait describing the ability to encode a MachInst into binary machine code.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.MachInstEmitInfo.html" title="cranelift_codegen::machinst::MachInstEmitInfo trait">MachInstEmitInfo</a></td><td class="docblock-short"><p>Constant information used to emit an instruction.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.MachInstEmitState.html" title="cranelift_codegen::machinst::MachInstEmitState trait">MachInstEmitState</a></td><td class="docblock-short"><p>A trait describing the emission state carried between MachInsts when
+emitting a function body.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.MachInstLabelUse.html" title="cranelift_codegen::machinst::MachInstLabelUse trait">MachInstLabelUse</a></td><td class="docblock-short"><p>A descriptor of a label reference (use) in an instruction set.</p>
+</td></tr><tr class="module-item"><td><a class="trait" href="trait.UnwindInfoGenerator.html" title="cranelift_codegen::machinst::UnwindInfoGenerator trait">UnwindInfoGenerator</a></td><td class="docblock-short"><p>UnwindInfo generator/helper.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cranelift_codegen" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script></body></html>

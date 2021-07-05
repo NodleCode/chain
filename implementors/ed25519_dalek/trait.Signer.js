@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["ed25519_dalek"] = [{"text":"impl <a class=\"trait\" href=\"ed25519_dalek/trait.Signer.html\" title=\"trait ed25519_dalek::Signer\">Signer</a>&lt;<a class=\"struct\" href=\"ed25519_dalek/struct.Signature.html\" title=\"struct ed25519_dalek::Signature\">Signature</a>&gt; for <a class=\"struct\" href=\"ed25519_dalek/struct.Keypair.html\" title=\"struct ed25519_dalek::Keypair\">Keypair</a>","synthetic":false,"types":["ed25519_dalek::keypair::Keypair"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

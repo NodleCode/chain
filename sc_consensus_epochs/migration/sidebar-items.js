@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EpochChangesV0","Legacy definition of epoch changes."]],"type":[["EpochChangesForV0","Type alias for legacy definition of epoch changes."]]});

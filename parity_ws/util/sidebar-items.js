@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Timeout","A handle to a specific timeout."],["Token","Used to identify some timed-out event."]]});

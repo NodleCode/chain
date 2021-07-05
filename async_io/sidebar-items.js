@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["block_on","Blocks the current thread on a future, processing I/O events when idle."]],"struct":[["Async","Async adapter for I/O types."],["Timer","A future or stream that emits timed events."]]});

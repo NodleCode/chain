@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sc_executor"] = [{"text":"impl&lt;D:&nbsp;<a class=\"trait\" href=\"sc_executor/trait.NativeExecutionDispatch.html\" title=\"trait sc_executor::NativeExecutionDispatch\">NativeExecutionDispatch</a> + 'static&gt; <a class=\"trait\" href=\"sp_core/traits/trait.CodeExecutor.html\" title=\"trait sp_core::traits::CodeExecutor\">CodeExecutor</a> for <a class=\"struct\" href=\"sc_executor/struct.NativeExecutor.html\" title=\"struct sc_executor::NativeExecutor\">NativeExecutor</a>&lt;D&gt;","synthetic":false,"types":["sc_executor::native_executor::NativeExecutor"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

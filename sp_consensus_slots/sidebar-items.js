@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EquivocationProof","Represents an equivocation proof. An equivocation happens when a validator produces more than one block on the same slot. The proof of equivocation are the given distinct headers that were signed by the validator and which include the slot number."],["Slot","Unit type wrapper that represents a slot."]]});

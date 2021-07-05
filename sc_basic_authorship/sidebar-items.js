@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DEFAULT_MAX_BLOCK_SIZE","Default maximum block size in bytes used by [`Proposer`]."]],"struct":[["Proposer","The proposer logic."],["ProposerFactory","Proposer factory."]]});

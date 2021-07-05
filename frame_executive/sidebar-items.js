@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Executive","Main entry point for certain runtime actions as e.g. `execute_block`."]],"trait":[["ExecuteBlock","Trait that can be used to execute a block."]],"type":[["CallOf",""],["CheckedOf",""],["OriginOf",""]]});

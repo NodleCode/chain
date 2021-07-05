@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Metrics","Authorship metrics."],["MetricsLink","Optional shareable link to basic authorship metrics."]]});

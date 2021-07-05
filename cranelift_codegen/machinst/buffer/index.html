@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="In-memory representation of compiled machine code, with labels and fixups to refer to those labels. Handles constant-pool island insertion and also veneer insertion for out-of-range jumps."><meta name="keywords" content="rust, rustlang, rust-lang, buffer"><title>cranelift_codegen::machinst::buffer - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a><p class="location">Module buffer</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li></ul></div><p class="location"><a href="../../index.html">cranelift_codegen</a>::<wbr><a href="../index.html">machinst</a></p><div id="sidebar-vars" data-name="buffer" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../../index.html">cranelift_codegen</a>::<wbr><a href="../index.html">machinst</a>::<wbr><a class="mod" href="">buffer</a><button id="copy-path" onclick="copy_path(this)">⎘</button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../../src/cranelift_codegen/machinst/buffer.rs.html#1-1822" title="goto source code">[src]</a></span></h1><div class="docblock"><p>In-memory representation of compiled machine code, with labels and fixups to
+refer to those labels. Handles constant-pool island insertion and also
+veneer insertion for out-of-range jumps.</p>
+<p>This code exists to solve three problems:</p>
+<ul>
+<li>
+<p>Branch targets for forward branches are not known until later, when we
+emit code in a single pass through the instruction structs.</p>
+</li>
+<li>
+<p>On many architectures, address references or offsets have limited range.
+For example, on AArch64, conditional branches can only target code +/- 1MB
+from the branch itself.</p>
+</li>
+<li>
+<p>The lowering of control flow from the CFG-with-edges produced by
+<a href="../blockorder/struct.BlockLoweringOrder.html">BlockLoweringOrder</a>, combined with many empty
+edge blocks when the register allocator does not need to insert any
+spills/reloads/moves in edge blocks, results in many suboptimal branch
+patterns. The lowering also pays no attention to block order, and so
+two-target conditional forms (cond-br followed by uncond-br) can often by
+avoided because one of the targets is the fallthrough. There are several
+cases here where we can simplify to use fewer branches.</p>
+</li>
+</ul>
+<p>This “buffer” implements a single-pass code emission strategy (with a later
+“fixup” pass, but only through recorded fixups, not all instructions). The
+basic idea is:</p>
+<ul>
+<li>
+<p>Emit branches as they are, including two-target (cond/uncond) compound
+forms, but with zero offsets and optimistically assuming the target will be
+in range. Record the “fixup” for later. Targets are denoted instead by
+symbolic “labels” that are then bound to certain offsets in the buffer as
+we emit code. (Nominally, there is a label at the start of every basic
+block.)</p>
+</li>
+<li>
+<p>As we do this, track the offset in the buffer at which the first label
+reference “goes out of range”. We call this the “deadline”. If we reach the
+deadline and we still have not bound the label to which an unresolved branch
+refers, we have a problem!</p>
+</li>
+<li>
+<p>To solve this problem, we emit “islands” full of “veneers”. An island is
+simply a chunk of code inserted in the middle of the code actually produced
+by the emitter (e.g., vcode iterating over instruction structs). The emitter
+has some awareness of this: it either asks for an island between blocks, so
+it is not accidentally executed, or else it emits a branch around the island
+when all other options fail (see <code>Inst::EmitIsland</code> meta-instruction).</p>
+</li>
+<li>
+<p>A “veneer” is an instruction (or sequence of instructions) in an “island”
+that implements a longer-range reference to a label. The idea is that, for
+example, a branch with a limited range can branch to a “veneer” instead,
+which is simply a branch in a form that can use a longer-range reference. On
+AArch64, for example, conditionals have a +/- 1 MB range, but a conditional
+can branch to an unconditional branch which has a +/- 128 MB range. Hence, a
+conditional branch’s label reference can be fixed up with a “veneer” to
+achieve a longer range.</p>
+</li>
+<li>
+<p>To implement all of this, we require the backend to provide a <code>LabelUse</code>
+type that implements a trait. This is nominally an enum that records one of
+several kinds of references to an offset in code – basically, a relocation
+type – and will usually correspond to different instruction formats. The
+<code>LabelUse</code> implementation specifies the maximum range, how to patch in the
+actual label location when known, and how to generate a veneer to extend the
+range.</p>
+</li>
+</ul>
+<p>That satisfies label references, but we still may have suboptimal branch
+patterns. To clean up the branches, we do a simple “peephole”-style
+optimization on the fly. To do so, the emitter (e.g., <code>Inst::emit()</code>)
+informs the buffer of branches in the code and, in the case of conditionals,
+the code that would have been emitted to invert this branch’s condition. We
+track the “latest branches”: these are branches that are contiguous up to
+the current offset. (If any code is emitted after a branch, that branch or
+run of contiguous branches is no longer “latest”.) The latest branches are
+those that we can edit by simply truncating the buffer and doing something
+else instead.</p>
+<p>To optimize branches, we implement several simple rules, and try to apply
+them to the “latest branches” when possible:</p>
+<ul>
+<li>
+<p>A branch with a label target, when that label is bound to the ending
+offset of the branch (the fallthrough location), can be removed altogether,
+because the branch would have no effect).</p>
+</li>
+<li>
+<p>An unconditional branch that starts at a label location, and branches to
+another label, results in a “label alias”: all references to the label bound
+<em>to</em> this branch instruction are instead resolved to the <em>target</em> of the
+branch instruction. This effectively removes empty blocks that just
+unconditionally branch to the next block. We call this “branch threading”.</p>
+</li>
+<li>
+<p>A conditional followed by an unconditional, when the conditional branches
+to the unconditional’s fallthrough, results in (i) the truncation of the
+unconditional, (ii) the inversion of the condition’s condition, and (iii)
+replacement of the conditional’s target (using the original target of the
+unconditional). This is a fancy way of saying “we can flip a two-target
+conditional branch’s taken/not-taken targets if it works better with our
+fallthrough”. To make this work, the emitter actually gives the buffer
+<em>both</em> forms of every conditional branch: the true form is emitted into the
+buffer, and the “inverted” machine-code bytes are provided as part of the
+branch-fixup metadata.</p>
+</li>
+<li>
+<p>An unconditional B preceded by another unconditional P, when B’s label(s) have
+been redirected to target(B), can be removed entirely. This is an extension
+of the branch-threading optimization, and is valid because if we know there
+will be no fallthrough into this branch instruction (the prior instruction
+is an unconditional jump), and if we know we have successfully redirected
+all labels, then this branch instruction is unreachable. Note that this
+works because the redirection happens before the label is ever resolved
+(fixups happen at island emission time, at which point latest-branches are
+cleared, or at the end of emission), so we are sure to catch and redirect
+all possible paths to this instruction.</p>
+</li>
+</ul>
+<h1 id="branch-optimization-correctness" class="section-header"><a href="#branch-optimization-correctness">Branch-optimization Correctness</a></h1>
+<p>The branch-optimization mechanism depends on a few data structures with
+invariants, which are always held outside the scope of top-level public
+methods:</p>
+<ul>
+<li>
+<p>The latest-branches list. Each entry describes a span of the buffer
+(start/end offsets), the label target, the corresponding fixup-list entry
+index, and the bytes (must be the same length) for the inverted form, if
+conditional. The list of labels that are bound to the start-offset of this
+branch is <em>complete</em> (if any label has a resolved offset equal to <code>start</code>
+and is not an alias, it must appear in this list) and <em>precise</em> (no label
+in this list can be bound to another offset). No label in this list should
+be an alias.  No two branch ranges can overlap, and branches are in
+ascending-offset order.</p>
+</li>
+<li>
+<p>The labels-at-tail list. This contains all MachLabels that have been bound
+to (whose resolved offsets are equal to) the tail offset of the buffer.
+No label in this list should be an alias.</p>
+</li>
+<li>
+<p>The label_offsets array, containing the bound offset of a label or
+UNKNOWN. No label can be bound at an offset greater than the current
+buffer tail.</p>
+</li>
+<li>
+<p>The label_aliases array, containing another label to which a label is
+bound or UNKNOWN. A label’s resolved offset is the resolved offset
+of the label it is aliased to, if this is set.</p>
+</li>
+</ul>
+<p>We argue below, at each method, how the invariants in these data structures
+are maintained (grep for “Post-invariant”).</p>
+<p>Given these invariants, we argue why each optimization preserves execution
+semantics below (grep for “Preserves execution semantics”).</p>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.MachBuffer.html" title="cranelift_codegen::machinst::buffer::MachBuffer struct">MachBuffer</a></td><td class="docblock-short"><p>A buffer of output to be produced, fixed up, and then emitted to a CodeSink
+in bulk.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.MachBufferFinalized.html" title="cranelift_codegen::machinst::buffer::MachBufferFinalized struct">MachBufferFinalized</a></td><td class="docblock-short"><p>A <code>MachBuffer</code> once emission is completed: holds generated code and records,
+without fixups. This allows the type to be independent of the backend.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.MachLabel.html" title="cranelift_codegen::machinst::buffer::MachLabel struct">MachLabel</a></td><td class="docblock-short"><p>A label refers to some offset in a <code>MachBuffer</code>. It may not be resolved at
+the point at which it is used by emitted code; the buffer records “fixups”
+for references to the label, and will come back and patch the code
+appropriately when the label’s location is eventually known.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.MachSrcLoc.html" title="cranelift_codegen::machinst::buffer::MachSrcLoc struct">MachSrcLoc</a></td><td class="docblock-short"><p>A source-location mapping resulting from a compilation.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.MachStackMap.html" title="cranelift_codegen::machinst::buffer::MachStackMap struct">MachStackMap</a></td><td class="docblock-short"><p>Record of stack map metadata: stack offsets containing references.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.StackMapExtent.html" title="cranelift_codegen::machinst::buffer::StackMapExtent enum">StackMapExtent</a></td><td class="docblock-short"><p>A stack map extent, when creating a stack map.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="cranelift_codegen" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script></body></html>
