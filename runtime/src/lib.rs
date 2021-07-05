@@ -141,8 +141,8 @@ construct_nodle_runtime! {
 
 #[cfg(feature = "with-staking")]
 construct_nodle_runtime! {
-    // Consensus & Staking
-    Staking: pallet_nodle_staking::{Module, Call, Storage, Event<T>, Config<T>},
+    // Consensus & NodleStaking
+    NodleStaking: pallet_nodle_staking::{Module, Call, Storage, Event<T>, Config<T>},
 }
 
 /// The address format for describing accounts.
@@ -171,7 +171,9 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
+
 /// Executive: handles dispatch to the various modules.
+#[cfg(not(feature = "with-staking"))]
 pub type Executive = frame_executive::Executive<
     Runtime,
     Block,
@@ -179,6 +181,16 @@ pub type Executive = frame_executive::Executive<
     Runtime,
     AllModules,
     migrations::GrantsMigration,
+>;
+
+/// Executive: handles dispatch to the various modules.
+#[cfg(feature = "with-staking")]
+pub type Executive = frame_executive::Executive<
+    Runtime,
+    Block,
+    frame_system::ChainContext<Runtime>,
+    Runtime,
+    AllModules,
 >;
 
 sp_api::impl_runtime_apis! {
@@ -431,7 +443,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_grandpa, Grandpa);
 
             #[cfg(feature = "with-staking")]
-            add_benchmark!(params, batches, pallet_nodle_staking, Staking);
+            add_benchmark!(params, batches, pallet_nodle_staking, NodleStaking);
 
             add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
