@@ -27,7 +27,7 @@ use frame_support::{
     traits::{Currency, Get, Imbalance, OnUnbalanced},
 };
 use frame_system::{self as system};
-use pallet_session::historical;
+use pallet_session::{historical, Store};
 use sp_runtime::{
     traits::{AccountIdConversion, Convert, Saturating},
     Perbill,
@@ -197,6 +197,8 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
     fn validators() -> Vec<AccountId>;
     /// Prune historical session tries up to but not including the given index.
     fn prune_historical_up_to(up_to: SessionIndex);
+    /// Get the status of session key for the validator.
+	fn have_valid_session_key(validator: &AccountId) -> bool;
 }
 
 impl<T: Config> SessionInterface<<T as frame_system::Config>::AccountId> for T
@@ -226,6 +228,11 @@ where
 
     fn prune_historical_up_to(up_to: SessionIndex) {
         <pallet_session::historical::Module<T>>::prune_up_to(up_to);
+    }
+
+    fn have_valid_session_key(validator: &<T as frame_system::Config>::AccountId) -> bool {
+		// <pallet_session::Module<T>>::load_keys(validator).is_some()
+		<pallet_session::Module<T> as Store>::NextKeys::get(validator).is_some()
     }
 }
 
