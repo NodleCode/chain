@@ -1,0 +1,40 @@
+name: Srtool
+
+on:
+  push:
+    branches:
+      - master
+      - eliott/gitops
+
+jobs:
+  srtool:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain: ["arcadia", "main"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Srtool build
+        id: srtool_build
+        uses: chevdor/srtool-actions@v0.2.0
+        with:
+          chain: ${{ matrix.chain }}
+          tag: 1.53.0-0.9.15
+          runtime_dir: runtime/${{ matrix.chain }}
+
+      - name: Summary
+        run: |
+          echo '${{ steps.srtool_build.outputs.json }}' | jq > ${{ matrix.chain }}-srtool-digest.json
+          cat ${{ matrix.chain }}-srtool-digest.json
+          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+
+      - name: Archive Runtime
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.chain }}-runtime-${{ github.sha }}
+          path: |
+            ${{ steps.srtool_build.outputs.wasm }}
+            ${{ steps.srtool_build.outputs.wasm_compressed }}
+            ${{ matrix.chain }}-srtool-digest.json
