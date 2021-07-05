@@ -20,7 +20,7 @@
 
 use crate::{
     constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Call, Event,
-    Grandpa, Historical, ImOnline, Offences, Runtime,
+    Grandpa, Historical, ImOnline, Offences, Runtime, Session,
 };
 
 #[cfg(feature = "with-staking")]
@@ -257,6 +257,7 @@ impl pallet_nodle_staking::Config for Runtime {
     type Slash = CompanyReserve;
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
+    type ValidatorRegistration = Session;
     type CancelOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type WeightInfo = pallet_nodle_staking::weights::SubstrateWeight<Runtime>;

@@ -173,11 +173,19 @@ parameter_types! {
     pub const UncleGenerations: u64 = 0;
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(25);
 }
+
 sp_runtime::impl_opaque_keys! {
     pub struct SessionKeys {
         pub other: OtherSessionHandler,
     }
 }
+
+impl From<UintAuthorityId> for SessionKeys {
+    fn from(other: UintAuthorityId) -> Self {
+        Self { other }
+    }
+}
+
 impl pallet_session::Config for Test {
     type SessionManager = pallet_session::historical::NoteHistoricalRoot<Test, NodleStaking>;
     type Keys = SessionKeys;
@@ -250,6 +258,7 @@ impl Config for Test {
     type Slash = ();
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
+    type ValidatorRegistration = Session;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
     type WeightInfo = ();
 }
