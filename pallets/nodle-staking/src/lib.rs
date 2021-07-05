@@ -50,7 +50,7 @@ pub mod pallet {
         pallet_prelude::*,
         traits::{
             Currency, ExistenceRequirement, Get, GetPalletVersion, Imbalance, LockIdentifier,
-            LockableCurrency, OnUnbalanced, PalletVersion, WithdrawReasons,
+            LockableCurrency, OnUnbalanced, PalletVersion, ValidatorRegistration, WithdrawReasons,
         },
     };
     use frame_system::pallet_prelude::*;
@@ -115,6 +115,8 @@ pub mod pallet {
         type RewardRemainder: OnUnbalanced<NegativeImbalanceOf<Self>>;
         /// Interface for interacting with a session module.
         type SessionInterface: SessionInterface<Self::AccountId>;
+        /// Validate a user is registered
+        type ValidatorRegistration: ValidatorRegistration<Self::AccountId>;
         /// This pallet's module id. Used to derivate a dedicated account id to store session
         /// rewards for validators and nominators in.
         type PalletId: Get<ModuleId>;
@@ -1428,6 +1430,7 @@ pub mod pallet {
                 .rev()
                 .take(top_n)
                 .filter(|x| x.amount >= T::MinValidatorStake::get())
+                .filter(|x| T::ValidatorRegistration::is_registered(&x.owner))
                 .map(|x| x.owner)
                 .collect::<Vec<T::AccountId>>();
 

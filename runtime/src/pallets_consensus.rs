@@ -24,7 +24,7 @@ use crate::{
 };
 
 #[cfg(feature = "with-staking")]
-use crate::pallets_governance::FinancialCollective;
+use crate::{pallets_governance::FinancialCollective, Session};
 
 #[cfg(not(feature = "with-staking"))]
 use crate::Poa;
@@ -257,6 +257,7 @@ impl pallet_nodle_staking::Config for Runtime {
     type Slash = CompanyReserve;
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
+    type ValidatorRegistration = Session;
     type CancelOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type WeightInfo = pallet_nodle_staking::weights::SubstrateWeight<Runtime>;

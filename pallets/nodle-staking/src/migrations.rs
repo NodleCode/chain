@@ -225,132 +225,136 @@ mod tests {
 
     #[test]
     fn test_empty_list_on_migration_works() {
-        ExtBuilder::default().build_and_execute(|| {
-            mock::start_active_session(1);
+        ExtBuilder::default()
+            .num_validators(4)
+            .build_and_execute(|| {
+                mock::start_active_session(1);
 
-            let expected = vec![
-                nodle_staking::Event::ValidatorChosen(2, 11, 1500),
-                nodle_staking::Event::ValidatorChosen(2, 21, 1000),
-                nodle_staking::Event::ValidatorChosen(2, 41, 1000),
-                nodle_staking::Event::NewSession(5, 2, 3, 3500),
-            ];
-            assert_eq!(events(), expected);
+                let expected = vec![
+                    nodle_staking::Event::ValidatorChosen(2, 11, 1500),
+                    nodle_staking::Event::ValidatorChosen(2, 21, 1000),
+                    nodle_staking::Event::ValidatorChosen(2, 41, 1000),
+                    nodle_staking::Event::NewSession(5, 2, 3, 3500),
+                ];
+                assert_eq!(events(), expected);
 
-            assert_eq!(Poa::validators().len(), 0);
-            assert_eq!(NodleStaking::invulnerables().len(), 0);
+                assert_eq!(Poa::validators().len(), 0);
+                assert_eq!(NodleStaking::invulnerables().len(), 0);
 
-            NodleStaking::on_runtime_upgrade();
+                NodleStaking::on_runtime_upgrade();
 
-            assert_eq!(Poa::validators().len(), 0);
-            assert_eq!(NodleStaking::invulnerables().len(), 0);
-        });
+                assert_eq!(Poa::validators().len(), 0);
+                assert_eq!(NodleStaking::invulnerables().len(), 0);
+            });
     }
 
     #[test]
     fn test_valid_list_on_migration_works() {
-        ExtBuilder::default().build_and_execute(|| {
-            mock::start_active_session(1);
+        ExtBuilder::default()
+            .num_validators(4)
+            .build_and_execute(|| {
+                mock::start_active_session(1);
 
-            let mut expected = vec![
-                nodle_staking::Event::ValidatorChosen(2, 11, 1500),
-                nodle_staking::Event::ValidatorChosen(2, 21, 1000),
-                nodle_staking::Event::ValidatorChosen(2, 41, 1000),
-                nodle_staking::Event::NewSession(5, 2, 3, 3500),
-            ];
-            assert_eq!(events(), expected);
+                let mut expected = vec![
+                    nodle_staking::Event::ValidatorChosen(2, 11, 1500),
+                    nodle_staking::Event::ValidatorChosen(2, 21, 1000),
+                    nodle_staking::Event::ValidatorChosen(2, 41, 1000),
+                    nodle_staking::Event::NewSession(5, 2, 3, 3500),
+                ];
+                assert_eq!(events(), expected);
 
-            assert_eq!(NodleStaking::total(), 3500);
+                assert_eq!(NodleStaking::total(), 3500);
 
-            assert_eq!(Poa::validators().len(), 0);
-            assert_eq!(NodleStaking::invulnerables().len(), 0);
+                assert_eq!(Poa::validators().len(), 0);
+                assert_eq!(NodleStaking::invulnerables().len(), 0);
 
-            let poa_validators: Vec<AccountId> = vec![11, 21, 31, 61, 71, 81];
-            Poa::initialize_members(&poa_validators);
+                let poa_validators: Vec<AccountId> = vec![11, 21, 31, 61, 71, 81];
+                Poa::initialize_members(&poa_validators);
 
-            assert_eq!(Poa::validators(), [11, 21, 31, 61, 71, 81].to_vec());
+                assert_eq!(Poa::validators(), [11, 21, 31, 61, 71, 81].to_vec());
 
-            NodleStaking::on_runtime_upgrade();
+                NodleStaking::on_runtime_upgrade();
 
-            assert_eq!(Poa::validators().len(), 0);
-            assert_eq!(
-                NodleStaking::invulnerables(),
-                [11, 21, 31, 61, 71, 81].to_vec()
-            );
+                assert_eq!(Poa::validators().len(), 0);
+                assert_eq!(
+                    NodleStaking::invulnerables(),
+                    [11, 21, 31, 61, 71, 81].to_vec()
+                );
 
-            assert_eq!(NodleStaking::total(), 3500);
+                assert_eq!(NodleStaking::total(), 3500);
 
-            assert_eq!(
-                NodleStaking::validator_state(&11).unwrap().state,
-                types::ValidatorStatus::Active
-            );
+                assert_eq!(
+                    NodleStaking::validator_state(&11).unwrap().state,
+                    types::ValidatorStatus::Active
+                );
 
-            assert_eq!(
-                NodleStaking::validator_state(&21).unwrap().state,
-                types::ValidatorStatus::Active
-            );
+                assert_eq!(
+                    NodleStaking::validator_state(&21).unwrap().state,
+                    types::ValidatorStatus::Active
+                );
 
-            assert_eq!(
-                NodleStaking::validator_state(&31).unwrap().state,
-                types::ValidatorStatus::Active
-            );
+                assert_eq!(
+                    NodleStaking::validator_state(&31).unwrap().state,
+                    types::ValidatorStatus::Active
+                );
 
-            assert_eq!(
-                NodleStaking::validator_state(&61).unwrap().state,
-                types::ValidatorStatus::Active
-            );
+                assert_eq!(
+                    NodleStaking::validator_state(&61).unwrap().state,
+                    types::ValidatorStatus::Active
+                );
 
-            assert_eq!(
-                NodleStaking::validator_state(&71).unwrap().state,
-                types::ValidatorStatus::Active
-            );
+                assert_eq!(
+                    NodleStaking::validator_state(&71).unwrap().state,
+                    types::ValidatorStatus::Active
+                );
 
-            assert_eq!(
-                NodleStaking::validator_state(&81).unwrap().state,
-                types::ValidatorStatus::Active
-            );
+                assert_eq!(
+                    NodleStaking::validator_state(&81).unwrap().state,
+                    types::ValidatorStatus::Active
+                );
 
-            mock::start_active_session(2);
+                mock::start_active_session(2);
 
-            let mut new1 = vec![
-                nodle_staking::Event::ValidatorChosen(3, 11, 1500),
-                nodle_staking::Event::ValidatorChosen(3, 21, 1000),
-                nodle_staking::Event::ValidatorChosen(3, 31, 0),
-                nodle_staking::Event::ValidatorChosen(3, 41, 1000),
-                nodle_staking::Event::ValidatorChosen(3, 61, 0),
-                nodle_staking::Event::ValidatorChosen(3, 71, 0),
-                nodle_staking::Event::ValidatorChosen(3, 81, 0),
-                nodle_staking::Event::NewSession(10, 3, 7, 3500),
-            ];
+                let mut new1 = vec![
+                    nodle_staking::Event::ValidatorChosen(3, 11, 1500),
+                    nodle_staking::Event::ValidatorChosen(3, 21, 1000),
+                    nodle_staking::Event::ValidatorChosen(3, 31, 0),
+                    nodle_staking::Event::ValidatorChosen(3, 41, 1000),
+                    nodle_staking::Event::ValidatorChosen(3, 61, 0),
+                    nodle_staking::Event::ValidatorChosen(3, 71, 0),
+                    nodle_staking::Event::ValidatorChosen(3, 81, 0),
+                    nodle_staking::Event::NewSession(10, 3, 7, 3500),
+                ];
 
-            expected.append(&mut new1);
-            assert_eq!(events(), expected);
+                expected.append(&mut new1);
+                assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(31), 500));
-            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(61), 500));
-            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(71), 500));
-            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(81), 500));
+                assert_ok!(NodleStaking::validator_bond_more(Origin::signed(31), 500));
+                assert_ok!(NodleStaking::validator_bond_more(Origin::signed(61), 500));
+                assert_ok!(NodleStaking::validator_bond_more(Origin::signed(71), 500));
+                assert_ok!(NodleStaking::validator_bond_more(Origin::signed(81), 500));
 
-            mock::start_active_session(3);
+                mock::start_active_session(3);
 
-            let mut new2 = vec![
-                nodle_staking::Event::ValidatorBondedMore(31, 0, 500),
-                nodle_staking::Event::ValidatorBondedMore(61, 0, 500),
-                nodle_staking::Event::ValidatorBondedMore(71, 0, 500),
-                nodle_staking::Event::ValidatorBondedMore(81, 0, 500),
-                nodle_staking::Event::ValidatorChosen(4, 11, 1500),
-                nodle_staking::Event::ValidatorChosen(4, 21, 1000),
-                nodle_staking::Event::ValidatorChosen(4, 31, 500),
-                nodle_staking::Event::ValidatorChosen(4, 41, 1000),
-                nodle_staking::Event::ValidatorChosen(4, 61, 500),
-                nodle_staking::Event::ValidatorChosen(4, 71, 500),
-                nodle_staking::Event::ValidatorChosen(4, 81, 500),
-                nodle_staking::Event::NewSession(15, 4, 7, 5500),
-            ];
+                let mut new2 = vec![
+                    nodle_staking::Event::ValidatorBondedMore(31, 0, 500),
+                    nodle_staking::Event::ValidatorBondedMore(61, 0, 500),
+                    nodle_staking::Event::ValidatorBondedMore(71, 0, 500),
+                    nodle_staking::Event::ValidatorBondedMore(81, 0, 500),
+                    nodle_staking::Event::ValidatorChosen(4, 11, 1500),
+                    nodle_staking::Event::ValidatorChosen(4, 21, 1000),
+                    nodle_staking::Event::ValidatorChosen(4, 31, 500),
+                    nodle_staking::Event::ValidatorChosen(4, 41, 1000),
+                    nodle_staking::Event::ValidatorChosen(4, 61, 500),
+                    nodle_staking::Event::ValidatorChosen(4, 71, 500),
+                    nodle_staking::Event::ValidatorChosen(4, 81, 500),
+                    nodle_staking::Event::NewSession(15, 4, 7, 5500),
+                ];
 
-            expected.append(&mut new2);
-            assert_eq!(events(), expected);
+                expected.append(&mut new2);
+                assert_eq!(events(), expected);
 
-            assert_eq!(NodleStaking::total(), 5500);
-        });
+                assert_eq!(NodleStaking::total(), 5500);
+            });
     }
 }
