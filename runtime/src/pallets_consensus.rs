@@ -20,11 +20,11 @@
 
 use crate::{
     constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Call, Event,
-    Grandpa, Historical, ImOnline, Offences, Runtime, Session,
+    Grandpa, Historical, ImOnline, Offences, Runtime,
 };
 
 #[cfg(feature = "with-staking")]
-use crate::pallets_governance::FinancialCollective;
+use crate::{pallets_governance::FinancialCollective, Session};
 
 #[cfg(not(feature = "with-staking"))]
 use crate::Poa;
