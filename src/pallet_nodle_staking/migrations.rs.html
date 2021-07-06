@@ -310,6 +310,57 @@
 <span id="307">307</span>
 <span id="308">308</span>
 <span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
@@ -332,11 +383,12 @@
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::types::Validator</span>;
 <span class="kw">use</span> <span class="ident">frame_support</span>::{
     <span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>,
-    <span class="ident">traits::StorageInstance</span>,
+    <span class="ident">traits</span>::{<span class="ident">Get</span>, <span class="ident">StorageInstance</span>},
     <span class="ident">weights</span>::{<span class="ident">constants::RocksDbWeight</span>, <span class="ident">Weight</span>},
 };
 
-<span class="kw">use</span> <span class="ident">sp_runtime::traits::Zero</span>;
+<span class="kw">use</span> <span class="ident">sp_runtime</span>::{<span class="ident">traits::Zero</span>, <span class="ident">Perbill</span>};
+
 <span class="kw">use</span> <span class="ident">sp_std::vec::Vec</span>;
 
 <span class="doccomment">/// This migration is in charge of moving the validators from POA to Staking pallet to</span>
@@ -374,9 +426,45 @@
         }
     }
 
+    <span class="kw">struct</span> <span class="ident">StakingTotalSelectedStorageValuePrefix</span>;
+    <span class="kw">impl</span> <span class="ident">StorageInstance</span> <span class="kw">for</span> <span class="ident">StakingTotalSelectedStorageValuePrefix</span> {
+        <span class="kw">const</span> <span class="ident">STORAGE_PREFIX</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;TotalSelected&quot;</span>;
+        <span class="kw">fn</span> <span class="ident">pallet_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+            <span class="string">&quot;NodleStaking&quot;</span>
+        }
+    }
+
+    <span class="kw">struct</span> <span class="ident">StakingValidatorFeeStorageValuePrefix</span>;
+    <span class="kw">impl</span> <span class="ident">StorageInstance</span> <span class="kw">for</span> <span class="ident">StakingValidatorFeeStorageValuePrefix</span> {
+        <span class="kw">const</span> <span class="ident">STORAGE_PREFIX</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;ValidatorFee&quot;</span>;
+        <span class="kw">fn</span> <span class="ident">pallet_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+            <span class="string">&quot;NodleStaking&quot;</span>
+        }
+    }
+
+    <span class="kw">struct</span> <span class="ident">StakingSlashRewardProportionStorageValuePrefix</span>;
+    <span class="kw">impl</span> <span class="ident">StorageInstance</span> <span class="kw">for</span> <span class="ident">StakingSlashRewardProportionStorageValuePrefix</span> {
+        <span class="kw">const</span> <span class="ident">STORAGE_PREFIX</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;SlashRewardProportion&quot;</span>;
+        <span class="kw">fn</span> <span class="ident">pallet_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+            <span class="string">&quot;NodleStaking&quot;</span>
+        }
+    }
+
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">type_alias_bounds</span>)]</span>
     <span class="kw">type</span> <span class="ident">POAValidators</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="ident">POAValidatorsStorageValuePrefix</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>, <span class="ident">OptionQuery</span><span class="op">&gt;</span>;
+
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">type_alias_bounds</span>)]</span>
+    <span class="kw">type</span> <span class="ident">StakingTotalSelected</span> <span class="op">=</span>
+        <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="ident">StakingTotalSelectedStorageValuePrefix</span>, <span class="ident">u32</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">type_alias_bounds</span>)]</span>
+    <span class="kw">type</span> <span class="ident">StakingValidatorFee</span> <span class="op">=</span>
+        <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="ident">StakingValidatorFeeStorageValuePrefix</span>, <span class="ident">Perbill</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">type_alias_bounds</span>)]</span>
+    <span class="kw">type</span> <span class="ident">StakingSlashRewardProportion</span> <span class="op">=</span>
+        <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="ident">StakingSlashRewardProportionStorageValuePrefix</span>, <span class="ident">Perbill</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">type_alias_bounds</span>)]</span>
     <span class="kw">type</span> <span class="ident">StakingInvulnerables</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
@@ -426,8 +514,18 @@
                 <span class="op">&lt;</span><span class="ident">StakingInvulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">post_invulnerable_validators</span>.<span class="ident">clone</span>());
                 <span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">RocksDbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">0</span>, <span class="number">1</span>));
             } <span class="kw">else</span> {
-                <span class="macro">log::error!</span>(<span class="string">&quot;Error!!! Staking Invulnerable invalid DB instance state&quot;</span>);
-                <span class="kw">return</span> <span class="ident">weight</span>;
+                <span class="macro">log::info!</span>(<span class="string">&quot;Staking runtime upgrade Genesis config&quot;</span>);
+
+                <span class="op">&lt;</span><span class="ident">StakingInvulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">poa_validators</span>.<span class="ident">clone</span>());
+
+                <span class="comment">// Set collator commission to default config</span>
+                <span class="ident">StakingValidatorFee::put</span>(<span class="ident">T::DefaultValidatorFee::get</span>());
+                <span class="comment">// Set total selected validators to minimum config</span>
+                <span class="ident">StakingTotalSelected::put</span>(<span class="ident">T::MinSelectedValidators::get</span>());
+                <span class="comment">// Set default slash reward fraction</span>
+                <span class="ident">StakingSlashRewardProportion::put</span>(<span class="ident">T::DefaultSlashRewardProportion::get</span>());
+
+                <span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">RocksDbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">0</span>, <span class="number">5</span>));
             }
 
             <span class="kw">for</span> <span class="ident">valid_acc</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">poa_validators</span> {
@@ -491,133 +589,137 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_empty_list_on_migration_works</span>() {
-        <span class="ident">ExtBuilder::default</span>().<span class="ident">build_and_execute</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="ident">mock::start_active_session</span>(<span class="number">1</span>);
+        <span class="ident">ExtBuilder::default</span>()
+            .<span class="ident">num_validators</span>(<span class="number">4</span>)
+            .<span class="ident">build_and_execute</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="ident">mock::start_active_session</span>(<span class="number">1</span>);
 
-            <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
-            ];
-            <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+                <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
+                ];
+                <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
 
-            <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
 
-            <span class="ident">NodleStaking::on_runtime_upgrade</span>();
+                <span class="ident">NodleStaking::on_runtime_upgrade</span>();
 
-            <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
-        });
+                <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+            });
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_valid_list_on_migration_works</span>() {
-        <span class="ident">ExtBuilder::default</span>().<span class="ident">build_and_execute</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="ident">mock::start_active_session</span>(<span class="number">1</span>);
+        <span class="ident">ExtBuilder::default</span>()
+            .<span class="ident">num_validators</span>(<span class="number">4</span>)
+            .<span class="ident">build_and_execute</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="ident">mock::start_active_session</span>(<span class="number">1</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
-            ];
-            <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
+                ];
+                <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
 
-            <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">3500</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">3500</span>);
 
-            <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
 
-            <span class="kw">let</span> <span class="ident">poa_validators</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>];
-            <span class="ident">Poa::initialize_members</span>(<span class="kw-2">&amp;</span><span class="ident">poa_validators</span>);
+                <span class="kw">let</span> <span class="ident">poa_validators</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>];
+                <span class="ident">Poa::initialize_members</span>(<span class="kw-2">&amp;</span><span class="ident">poa_validators</span>);
 
-            <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>(), [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].<span class="ident">to_vec</span>());
+                <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>(), [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].<span class="ident">to_vec</span>());
 
-            <span class="ident">NodleStaking::on_runtime_upgrade</span>();
+                <span class="ident">NodleStaking::on_runtime_upgrade</span>();
 
-            <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::invulnerables</span>(),
-                [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].<span class="ident">to_vec</span>()
-            );
+                <span class="macro">assert_eq!</span>(<span class="ident">Poa::validators</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::invulnerables</span>(),
+                    [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].<span class="ident">to_vec</span>()
+                );
 
-            <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">3500</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">3500</span>);
 
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">11</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-                <span class="ident">types::ValidatorStatus::Active</span>
-            );
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">11</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
+                    <span class="ident">types::ValidatorStatus::Active</span>
+                );
 
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">21</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-                <span class="ident">types::ValidatorStatus::Active</span>
-            );
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">21</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
+                    <span class="ident">types::ValidatorStatus::Active</span>
+                );
 
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">31</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-                <span class="ident">types::ValidatorStatus::Active</span>
-            );
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">31</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
+                    <span class="ident">types::ValidatorStatus::Active</span>
+                );
 
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">61</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-                <span class="ident">types::ValidatorStatus::Active</span>
-            );
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">61</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
+                    <span class="ident">types::ValidatorStatus::Active</span>
+                );
 
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">71</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-                <span class="ident">types::ValidatorStatus::Active</span>
-            );
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">71</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
+                    <span class="ident">types::ValidatorStatus::Active</span>
+                );
 
-            <span class="macro">assert_eq!</span>(
-                <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">81</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-                <span class="ident">types::ValidatorStatus::Active</span>
-            );
+                <span class="macro">assert_eq!</span>(
+                    <span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">81</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
+                    <span class="ident">types::ValidatorStatus::Active</span>
+                );
 
-            <span class="ident">mock::start_active_session</span>(<span class="number">2</span>);
+                <span class="ident">mock::start_active_session</span>(<span class="number">2</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new1</span> <span class="op">=</span> <span class="macro">vec!</span>[
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">11</span>, <span class="number">1500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">21</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">31</span>, <span class="number">0</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">41</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">61</span>, <span class="number">0</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">71</span>, <span class="number">0</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">81</span>, <span class="number">0</span>),
-                <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">10</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">3500</span>),
-            ];
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new1</span> <span class="op">=</span> <span class="macro">vec!</span>[
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">11</span>, <span class="number">1500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">21</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">31</span>, <span class="number">0</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">41</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">61</span>, <span class="number">0</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">71</span>, <span class="number">0</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">81</span>, <span class="number">0</span>),
+                    <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">10</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">3500</span>),
+                ];
 
-            <span class="ident">expected</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">new1</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+                <span class="ident">expected</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">new1</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
 
-            <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">31</span>), <span class="number">500</span>));
-            <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">61</span>), <span class="number">500</span>));
-            <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">71</span>), <span class="number">500</span>));
-            <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">81</span>), <span class="number">500</span>));
+                <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">31</span>), <span class="number">500</span>));
+                <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">61</span>), <span class="number">500</span>));
+                <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">71</span>), <span class="number">500</span>));
+                <span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">81</span>), <span class="number">500</span>));
 
-            <span class="ident">mock::start_active_session</span>(<span class="number">3</span>);
+                <span class="ident">mock::start_active_session</span>(<span class="number">3</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new2</span> <span class="op">=</span> <span class="macro">vec!</span>[
-                <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">31</span>, <span class="number">0</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">61</span>, <span class="number">0</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">71</span>, <span class="number">0</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">81</span>, <span class="number">0</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">11</span>, <span class="number">1500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">21</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">31</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">41</span>, <span class="number">1000</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">61</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">71</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">81</span>, <span class="number">500</span>),
-                <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">15</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">5500</span>),
-            ];
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new2</span> <span class="op">=</span> <span class="macro">vec!</span>[
+                    <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">31</span>, <span class="number">0</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">61</span>, <span class="number">0</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">71</span>, <span class="number">0</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">81</span>, <span class="number">0</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">11</span>, <span class="number">1500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">21</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">31</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">41</span>, <span class="number">1000</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">61</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">71</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">81</span>, <span class="number">500</span>),
+                    <span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">15</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">5500</span>),
+                ];
 
-            <span class="ident">expected</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">new2</span>);
-            <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+                <span class="ident">expected</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">new2</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
 
-            <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">5500</span>);
-        });
+                <span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">5500</span>);
+            });
     }
 }
 </pre></div>
