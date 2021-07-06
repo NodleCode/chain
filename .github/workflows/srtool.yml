@@ -1,0 +1,52 @@
+name: Srtool
+
+on:
+  push:
+    branches: master
+
+jobs:
+  srtool:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chain: ["nodle-chain"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Srtool build
+        id: srtool_build
+        uses: chevdor/srtool-actions@v0.2.0
+        with:
+          chain: ${{ matrix.chain }}
+          runtime_dir: runtime
+
+      - name: Summary
+        run: |
+          echo '${{ steps.srtool_build.outputs.json }}' | jq > ${{ matrix.chain }}-srtool-digest.json
+          cat ${{ matrix.chain }}-srtool-digest.json
+          echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
+
+      - name: Archive Runtime
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.chain }}-runtime-${{ github.sha }}.compact.wasm
+          path: |
+            ${{ steps.srtool_build.outputs.wasm }}
+
+      - name: Archive Metadata
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.chain }}-srtool-digest.json
+          path: |
+            ${{ matrix.chain }}-srtool-digest.json
+      
+      # TODO: once supported, upload compressed runtime too
+      # - name: Archive Runtime
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.chain }}-runtime-${{ github.sha }}
+      #     path: |
+      #       ${{ steps.srtool_build.outputs.wasm }}
+      #       ${{ steps.srtool_build.outputs.wasm_compressed }}
+      #       ${{ matrix.chain }}-srtool-digest.json

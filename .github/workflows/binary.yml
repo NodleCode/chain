@@ -1,14 +1,16 @@
-name: Test rust code
+name: Binary
 
-on: [push, pull_request]
+on:
+  push:
+    branches: master
 
 jobs:
 
-  test:
+  binary:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v2
@@ -51,34 +53,11 @@ jobs:
     - name: Setup toolchain
       run: ./scripts/init.sh
 
-    - name: Install tarpaulin
-      run: cargo install cargo-tarpaulin
-
-    - name: Cargo check
-      run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
-
-    - name: Generate coverage report
-      run: cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
-
-    - name: Upload to Codecov
-      uses: codecov/codecov-action@v1
+    - name: Cargo build
+      run: cargo build --release
+    
+    - name: Archive Binary
+      uses: actions/upload-artifact@v2
       with:
-        fail_ci_if_error: true
-
-    # - name: Run tests
-    #   run: SKIP_WASM_BUILD= cargo test --all-targets --all-features --workspace
-
-  fmt:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup toolchain
-      run: ./scripts/init.sh
-
-    - name: Install rustfmt
-      run: rustup component add rustfmt
-
-    - name: Run cargo fmt
-      run: cargo fmt --all -- --check
+        name: nodle-chain
+        path: ./target/release/nodle-chain

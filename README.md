@@ -1,10 +1,12 @@
 ![Nodle Banner](https://user-images.githubusercontent.com/10683430/80538204-2a6bef00-895a-11ea-94eb-2203ef6fae09.jpg)
 
-# Nodle Chain ![Security audit](https://github.com/NodleCode/chain/workflows/Security%20audit/badge.svg) ![Test rust code](https://github.com/NodleCode/chain/workflows/Test%20rust%20code/badge.svg) [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=NodleCode/chain)](https://dependabot.com)
+# Nodle Chain
 
 A Blockchain node for the Nodle Chain to connect and secure the next trillion things.
 
 > Built on [Substrate](https://substrate.dev).
+
+[**Read the documentation**](https://nodlecode.github.io/chain/nodle_chain/index.html)
 
 
 # Live networks
