@@ -7,7 +7,7 @@ COPY . /nodle-chain
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y cmake pkg-config libssl-dev git clang build-essential
+	DEBIAN_FRONTEND=noninteractive apt-get install -y cmake pkg-config libssl-dev git clang build-essential curl
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
         export PATH=$PATH:$HOME/.cargo/bin && \
         scripts/init.sh && \
