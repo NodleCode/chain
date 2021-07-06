@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/parity-scale-codec-derive-2.1.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/parity-scale-codec-derive-2.2.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../parity_scale_codec_derive/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
                 <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -331,8 +331,21 @@
 <span id="328">328</span>
 <span id="329">329</span>
 <span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="comment">// Copyright 2017-2018 Parity Technologies</span>
+<span class="comment">// Copyright 2017-2021 Parity Technologies</span>
 <span class="comment">//</span>
 <span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="comment">// you may not use this file except in compliance with the License.</span>
@@ -358,12 +371,15 @@
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">quote</span>;
 
 <span class="kw">use</span> <span class="ident">proc_macro2</span>::{<span class="ident">Ident</span>, <span class="ident">Span</span>};
-<span class="kw">use</span> <span class="ident">proc_macro_crate::crate_name</span>;
+<span class="kw">use</span> <span class="ident">proc_macro_crate</span>::{<span class="ident">crate_name</span>, <span class="ident">FoundCrate</span>};
 <span class="kw">use</span> <span class="ident">syn::spanned::Spanned</span>;
 <span class="kw">use</span> <span class="ident">syn</span>::{<span class="ident">Data</span>, <span class="ident">Field</span>, <span class="ident">Fields</span>, <span class="ident">DeriveInput</span>, <span class="ident">Error</span>};
 
+<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::utils::is_lint_attribute</span>;
+
 <span class="kw">mod</span> <span class="ident">decode</span>;
 <span class="kw">mod</span> <span class="ident">encode</span>;
+<span class="kw">mod</span> <span class="ident">max_encoded_len</span>;
 <span class="kw">mod</span> <span class="ident">utils</span>;
 <span class="kw">mod</span> <span class="ident">trait_bounds</span>;
 
@@ -374,7 +390,8 @@
 		<span class="macro">quote!</span>( <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">parity_scale_codec</span> <span class="kw">as</span> <span class="ident">_parity_scale_codec</span>; )
 	} <span class="kw">else</span> {
 		<span class="kw">match</span> <span class="ident">crate_name</span>(<span class="string">&quot;parity-scale-codec&quot;</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">parity_codec_crate</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span>( <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">parity_scale_codec</span> <span class="kw">as</span> <span class="ident">_parity_scale_codec</span>; ),
+			<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">parity_codec_crate</span>)) <span class="op">=</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">parity_codec_crate</span>, <span class="ident">Span::call_site</span>());
 				<span class="macro">quote!</span>( <span class="kw">extern</span> <span class="kw">crate</span> #<span class="ident">ident</span> <span class="kw">as</span> <span class="ident">_parity_scale_codec</span>; )
 			},
@@ -384,8 +401,9 @@
 }
 
 <span class="doccomment">/// Wraps the impl block in a &quot;dummy const&quot;</span>
-<span class="kw">fn</span> <span class="ident">wrap_with_dummy_const</span>(<span class="ident">impl_block</span>: <span class="ident">proc_macro2::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">wrap_with_dummy_const</span>(<span class="ident">input</span>: <span class="ident">DeriveInput</span>, <span class="ident">impl_block</span>: <span class="ident">proc_macro2::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">parity_codec_crate</span> <span class="op">=</span> <span class="ident">include_parity_scale_codec_crate</span>();
+	<span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">attrs</span>.<span class="ident">into_iter</span>().<span class="ident">filter</span>(<span class="ident">is_lint_attribute</span>);
 
 	<span class="kw">let</span> <span class="ident">generated</span> <span class="op">=</span> <span class="macro">quote!</span> {
 		<span class="kw">const</span> <span class="kw">_</span>: () <span class="op">=</span> {
@@ -393,6 +411,7 @@
 			<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cargo-clippy&quot;</span>, <span class="ident">allow</span>(<span class="ident">useless_attribute</span>))]</span>
 			<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">rust_2018_idioms</span>)]</span>
 			#<span class="ident">parity_codec_crate</span>
+			#(#<span class="ident">attrs</span>)<span class="op">*</span>
 			#<span class="ident">impl_block</span>
 		};
 	};
@@ -502,7 +521,7 @@
 		<span class="kw">impl</span> #<span class="ident">impl_generics</span> <span class="ident">_parity_scale_codec::EncodeLike</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">ty_generics</span> #<span class="ident">where_clause</span> {}
 	};
 
-	<span class="ident">wrap_with_dummy_const</span>(<span class="ident">impl_block</span>)
+	<span class="ident">wrap_with_dummy_const</span>(<span class="ident">input</span>, <span class="ident">impl_block</span>)
 }
 
 <span class="doccomment">/// Derive `parity_scale_codec::Decode` and for struct and enum.</span>
@@ -543,13 +562,13 @@
 		<span class="kw">impl</span> #<span class="ident">impl_generics</span> <span class="ident">_parity_scale_codec::Decode</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">ty_generics</span> #<span class="ident">where_clause</span> {
 			<span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">__CodecInputEdqy</span>: <span class="ident">_parity_scale_codec::Input</span><span class="op">&gt;</span>(
 				#<span class="ident">input_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">__CodecInputEdqy</span>
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">_parity_scale_codec::Error</span><span class="op">&gt;</span> {
+			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::core::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">_parity_scale_codec::Error</span><span class="op">&gt;</span> {
 				#<span class="ident">decoding</span>
 			}
 		}
 	};
 
-	<span class="ident">wrap_with_dummy_const</span>(<span class="ident">impl_block</span>)
+	<span class="ident">wrap_with_dummy_const</span>(<span class="ident">input</span>, <span class="ident">impl_block</span>)
 }
 
 <span class="doccomment">/// Derive `parity_scale_codec::Compact` and `parity_scale_codec::CompactAs` for struct with single</span>
@@ -645,9 +664,9 @@
 				#<span class="ident">inner_field</span>
 			}
 			<span class="kw">fn</span> <span class="ident">decode_from</span>(<span class="ident">x</span>: #<span class="ident">inner_ty</span>)
-				<span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span>#<span class="ident">name</span> #<span class="ident">ty_generics</span>, <span class="ident">_parity_scale_codec::Error</span><span class="op">&gt;</span>
+				<span class="op">-</span><span class="op">&gt;</span> <span class="ident">::core::result::Result</span><span class="op">&lt;</span>#<span class="ident">name</span> #<span class="ident">ty_generics</span>, <span class="ident">_parity_scale_codec::Error</span><span class="op">&gt;</span>
 			{
-				<span class="prelude-val">Ok</span>(#<span class="ident">constructor</span>)
+				<span class="ident">::core::result::Result::Ok</span>(#<span class="ident">constructor</span>)
 			}
 		}
 
@@ -660,7 +679,14 @@
 		}
 	};
 
-	<span class="ident">wrap_with_dummy_const</span>(<span class="ident">impl_block</span>)
+	<span class="ident">wrap_with_dummy_const</span>(<span class="ident">input</span>, <span class="ident">impl_block</span>)
+}
+
+<span class="doccomment">/// Derive `MaxEncodedLen`.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;max-encoded-len&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">proc_macro_derive</span>(<span class="ident">MaxEncodedLen</span>, <span class="ident">attributes</span>(<span class="ident">max_encoded_len_mod</span>))]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_max_encoded_len</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+	<span class="ident">max_encoded_len::derive_max_encoded_len</span>(<span class="ident">input</span>)
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="parity_scale_codec_derive" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
