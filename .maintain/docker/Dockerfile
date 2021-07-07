@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.11 as builder
+FROM ubuntu as builder
 
 ARG PROFILE=release
 WORKDIR /nodle-chain
@@ -7,7 +7,7 @@ COPY . /nodle-chain
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
-	apt-get install -y cmake pkg-config libssl-dev git clang
+	DEBIAN_FRONTEND=noninteractive apt-get install -y cmake pkg-config libssl-dev git clang build-essential curl
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
         export PATH=$PATH:$HOME/.cargo/bin && \
         scripts/init.sh && \
@@ -15,7 +15,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 
 # ===== SECOND STAGE ======
 
-FROM phusion/baseimage:0.11
+FROM ubuntu
 
 ARG PROFILE=release
 
