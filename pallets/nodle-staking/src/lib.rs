@@ -614,6 +614,140 @@ pub mod pallet {
 
             Ok(().into())
         }
+
+        #[pallet::weight(T::WeightInfo::nominator_nominate())]
+        pub fn nominator_move_nomination(
+            origin: OriginFor<T>,
+            from_validator: T::AccountId,
+            to_validator: T::AccountId,
+            amount: BalanceOf<T>,
+        ) -> DispatchResultWithPostInfo {
+            let nominator_acc = ensure_signed(origin)?;
+
+            // ensure validity of the args
+            ensure!(
+                Self::is_validator(&from_validator),
+                <Error<T>>::ValidatorDNE
+            );
+
+            // ensure validity of the args
+            ensure!(Self::is_validator(&to_validator), <Error<T>>::ValidatorDNE);
+
+            <NominatorState<T>>::try_mutate_exists(
+                nominator_acc.clone(),
+                |maybe_nominator| -> DispatchResultWithPostInfo {
+                    let mut nominator_state =
+                        maybe_nominator.as_mut().ok_or(<Error<T>>::ValidatorDNE)?;
+
+                    ensure!(
+                        (nominator_state.nominations.0.len() as u32)
+                            < T::MaxValidatorPerNominator::get(),
+                        <Error<T>>::ExceedMaxValidatorPerNom,
+                    );
+
+                    let mut to_validator_state =
+                        <ValidatorState<T>>::get(&to_validator).ok_or(<Error<T>>::ValidatorDNE)?;
+
+                    ensure!(
+                        (to_validator_state.nominators.0.len() as u32)
+                            < T::MaxNominatorsPerValidator::get(),
+                        <Error<T>>::TooManyNominators,
+                    );
+
+                    let old_active_bond = nominator_state.active_bond;
+                    let remaining = nominator_state
+                        .rm_nomination(from_validator.clone())
+                        .ok_or(<Error<T>>::NominationDNE)?;
+
+                    let mut total_nomination_amount = old_active_bond.saturating_sub(remaining);
+                    nominator_state.total = nominator_state
+                        .total
+                        .saturating_sub(total_nomination_amount);
+
+                    total_nomination_amount = total_nomination_amount.saturating_add(amount);
+
+                    ensure!(
+                        total_nomination_amount >= T::MinNomination::get(),
+                        <Error<T>>::NominationBelowMin
+                    );
+
+                    let nominator_free_balance = T::Currency::free_balance(&nominator_acc);
+
+                    ensure!(
+                        nominator_free_balance
+                            >= nominator_state
+                                .total
+                                .saturating_add(total_nomination_amount),
+                        <Error<T>>::InsufficientBalance
+                    );
+
+                    if nominator_state.add_nomination(Bond {
+                        owner: to_validator.clone(),
+                        amount: total_nomination_amount,
+                    }) {
+                        let nomination = Bond {
+                            owner: nominator_acc.clone(),
+                            amount: total_nomination_amount,
+                        };
+                        to_validator_state.nominators.insert(nomination);
+                        to_validator_state
+                            .inc_nominator(nominator_acc.clone(), total_nomination_amount);
+                    } else {
+                        let _ = nominator_state
+                            .inc_nomination(to_validator.clone(), total_nomination_amount)
+                            .ok_or(<Error<T>>::NominationDNE)?;
+                        to_validator_state
+                            .inc_nominator(nominator_acc.clone(), total_nomination_amount);
+                    }
+
+                    ensure!(
+                        nominator_state.total >= T::MinNominatorStake::get(),
+                        <Error<T>>::NominatorBondBelowMin,
+                    );
+
+                    T::Currency::set_lock(
+                        T::StakingLockId::get(),
+                        &nominator_acc,
+                        nominator_state.total,
+                        WithdrawReasons::all(),
+                    );
+
+                    if to_validator_state.is_active() {
+                        Self::update_validators_pool(
+                            to_validator.clone(),
+                            to_validator_state.total,
+                        );
+                    }
+                    // Already ensured nominator is part of validator state.
+                    // So ignoring the return value.
+                    let _ = Self::nominator_leaves_validator(
+                        nominator_acc.clone(),
+                        from_validator.clone(),
+                    );
+                    <Total<T>>::mutate(|x| *x = x.saturating_add(amount));
+                    <ValidatorState<T>>::insert(&to_validator, to_validator_state.clone());
+
+                    // Get the latest source validator info here
+                    // Error should not occur here.
+                    let from_validator_state = <ValidatorState<T>>::get(&from_validator)
+                        .ok_or(<Error<T>>::ValidatorDNE)?;
+
+                    Self::deposit_event(Event::NominationMoved(
+                        nominator_acc,
+                        nominator_state.total,
+                        from_validator,
+                        from_validator_state.total,
+                        to_validator,
+                        to_validator_state.total,
+                    ));
+
+                    Ok(().into())
+                },
+            )?;
+
+            Ok(().into())
+        }
+
         #[pallet::weight(T::WeightInfo::withdraw_unbonded())]
         pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
@@ -822,6 +956,16 @@ pub mod pallet {
         /// Nominator decreased the nomination bond value
         /// \[account, validator_account, before_validator_total_stake, after_validator_total_stake\]
         NominationDecreased(T::AccountId, T::AccountId, BalanceOf<T>, BalanceOf<T>),
+        /// Nominator switched nomination bond value from old to new validator
+        /// \[account, nominator_total_bond, old_validator_account, old_validator_total_stake, new_validator_account, new_validator_total_stake\]
+        NominationMoved(
+            T::AccountId,
+            BalanceOf<T>,
+            T::AccountId,
+            BalanceOf<T>,
+            T::AccountId,
+            BalanceOf<T>,
+        ),
         /// Nominator denominate validator
         /// \[account, validator_account, nominated_value, new_validator_total_stake\]
         NominatorLeftValidator(T::AccountId, T::AccountId, BalanceOf<T>, BalanceOf<T>),
