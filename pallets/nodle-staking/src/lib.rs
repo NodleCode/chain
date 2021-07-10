@@ -633,11 +633,13 @@ pub mod pallet {
             // ensure validity of the args
             ensure!(Self::is_validator(&to_validator), <Error<T>>::ValidatorDNE);
 
+            ensure!(from_validator != to_validator, <Error<T>>::ValidatorDNE);
+
             <NominatorState<T>>::try_mutate_exists(
                 nominator_acc.clone(),
                 |maybe_nominator| -> DispatchResultWithPostInfo {
                     let mut nominator_state =
-                        maybe_nominator.as_mut().ok_or(<Error<T>>::ValidatorDNE)?;
+                        maybe_nominator.as_mut().ok_or(<Error<T>>::NominatorDNE)?;
 
                     ensure!(
                         (nominator_state.nominations.0.len() as u32)
@@ -685,6 +687,7 @@ pub mod pallet {
                         owner: to_validator.clone(),
                         amount: total_nomination_amount,
                     }) {
+                        // Validator is new to the nomination pool
                         let nomination = Bond {
                             owner: nominator_acc.clone(),
                             amount: total_nomination_amount,
@@ -693,6 +696,7 @@ pub mod pallet {
                         to_validator_state
                             .inc_nominator(nominator_acc.clone(), total_nomination_amount);
                     } else {
+                        // Validator already exist in nomination pool
                         let _ = nominator_state
                             .inc_nomination(to_validator.clone(), total_nomination_amount)
                             .ok_or(<Error<T>>::NominationDNE)?;
@@ -1366,7 +1370,6 @@ pub mod pallet {
                     if state.is_active() {
                         Self::update_validators_pool(validator.clone(), state.total);
                     }
-                    <Total<T>>::mutate(|x| *x = x.saturating_sub(nominator_stake));
                     Self::deposit_event(Event::NominatorLeftValidator(
                         nominator,
                         validator,
@@ -1405,6 +1408,10 @@ pub mod pallet {
             }
 
             Self::nominator_leaves_validator(acc.clone(), validator)?;
+
+            <Total<T>>::mutate(|x| {
+                *x = x.saturating_sub(old_active_bond.saturating_sub(remaining))
+            });
 
             nominator_state.unlocking.push(UnlockChunk {
                 value: old_active_bond.saturating_sub(nominator_state.active_bond),
