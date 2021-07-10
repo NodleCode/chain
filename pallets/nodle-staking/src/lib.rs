@@ -615,7 +615,7 @@ pub mod pallet {
             Ok(().into())
         }
 
-        #[pallet::weight(T::WeightInfo::nominator_nominate())]
+        #[pallet::weight(T::WeightInfo::nominator_move_nomination())]
         pub fn nominator_move_nomination(
             origin: OriginFor<T>,
             from_validator: T::AccountId,
@@ -643,7 +643,7 @@ pub mod pallet {
 
                     ensure!(
                         (nominator_state.nominations.0.len() as u32)
-                            < T::MaxValidatorPerNominator::get(),
+                            <= T::MaxValidatorPerNominator::get(),
                         <Error<T>>::ExceedMaxValidatorPerNom,
                     );
 

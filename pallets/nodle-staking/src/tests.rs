@@ -1647,15 +1647,19 @@ fn switch_nomination_works() {
 
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 5, 10));
 
-            assert_noop!(
-                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 5, 0),
-                Error::<Test>::ExceedMaxValidatorPerNom
-            );
+            assert_ok!(NodleStaking::nominator_move_nomination(
+                Origin::signed(6),
+                2,
+                5,
+                0
+            ));
 
             let mut new4 = vec![
                 Event::NominatorLeftValidator(6, 3, 10, 20),
                 Event::NominationMoved(6, 45, 3, 20, 4, 35),
                 Event::Nomination(6, 10, 5, 20),
+                Event::NominatorLeftValidator(6, 2, 10, 40),
+                Event::NominationMoved(6, 55, 2, 40, 5, 30),
             ];
 
             expected.append(&mut new4);
@@ -1670,16 +1674,12 @@ fn switch_nomination_works() {
                             amount: 20,
                         },
                         Bond {
-                            owner: 2,
-                            amount: 10,
-                        },
-                        Bond {
                             owner: 4,
                             amount: 15,
                         },
                         Bond {
                             owner: 5,
-                            amount: 10,
+                            amount: 20,
                         },
                     ]
                     .to_vec()
