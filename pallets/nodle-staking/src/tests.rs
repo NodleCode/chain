@@ -1514,12 +1514,6 @@ fn switch_nomination_works() {
             assert_eq!(System::consumers(&10), 1);
 
             assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
-            // assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10));
-
-            // let mut new1 = vec![
-            //     Event::Nomination(6, 10, 2, 50),
-            //     Event::Nomination(6, 10, 3, 30),
-            // ];
 
             let mut new1 = vec![Event::Nomination(6, 10, 2, 50)];
 

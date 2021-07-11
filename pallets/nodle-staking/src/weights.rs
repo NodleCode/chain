@@ -36,199 +36,201 @@
 // --output=./pallets/nodle-staking/src/weights.rs
 // --template=./.maintain/frame-weight-template.hbs
 
-
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+    traits::Get,
+    weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_nodle_staking.
 pub trait WeightInfo {
-	fn set_invulnerables(c: u32, ) -> Weight;
-	fn set_total_validator_per_round(c: u32, ) -> Weight;
-	fn validator_join_pool() -> Weight;
-	fn validator_bond_more() -> Weight;
-	fn validator_bond_less() -> Weight;
-	fn validator_exit_pool() -> Weight;
-	fn nominator_nominate() -> Weight;
-	fn nominator_denominate() -> Weight;
-	fn nominator_bond_more() -> Weight;
-	fn nominator_bond_less() -> Weight;
-	fn nominator_denominate_all() -> Weight;
-	fn nominator_move_nomination() -> Weight;
-	fn withdraw_unbonded() -> Weight;
-	fn slash_cancel_deferred(s: u32, c: u32, ) -> Weight;
-	fn withdraw_staking_rewards() -> Weight;
+    fn set_invulnerables(c: u32) -> Weight;
+    fn set_total_validator_per_round(c: u32) -> Weight;
+    fn validator_join_pool() -> Weight;
+    fn validator_bond_more() -> Weight;
+    fn validator_bond_less() -> Weight;
+    fn validator_exit_pool() -> Weight;
+    fn nominator_nominate() -> Weight;
+    fn nominator_denominate() -> Weight;
+    fn nominator_bond_more() -> Weight;
+    fn nominator_bond_less() -> Weight;
+    fn nominator_denominate_all() -> Weight;
+    fn nominator_move_nomination() -> Weight;
+    fn withdraw_unbonded() -> Weight;
+    fn slash_cancel_deferred(s: u32, c: u32) -> Weight;
+    fn withdraw_staking_rewards() -> Weight;
 }
 
 /// Weights for pallet_nodle_staking using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn set_invulnerables(c: u32, ) -> Weight {
-		(26_862_000 as Weight)
-			// Standard Error: 20_000
-			.saturating_add((662_000 as Weight).saturating_mul(c as Weight))
-			.saturating_add(T::DbWeight::get().reads(4 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
-	fn set_total_validator_per_round(c: u32, ) -> Weight {
-		(28_021_000 as Weight)
-			// Standard Error: 8_000
-			.saturating_add((25_000 as Weight).saturating_mul(c as Weight))
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
-	fn validator_join_pool() -> Weight {
-		(104_245_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
-	}
-	fn validator_bond_more() -> Weight {
-		(103_514_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
-	}
-	fn validator_bond_less() -> Weight {
-		(66_765_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(8 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
-	}
-	fn validator_exit_pool() -> Weight {
-		(68_058_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(8 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
-	}
-	fn nominator_nominate() -> Weight {
-		(125_655_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(10 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
-	}
-	fn nominator_denominate() -> Weight {
-		(101_460_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(6 as Weight))
-	}
-	fn nominator_bond_more() -> Weight {
-		(112_100_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
-	}
-	fn nominator_bond_less() -> Weight {
-		(78_247_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().writes(6 as Weight))
-	}
-	fn nominator_denominate_all() -> Weight {
-		(1_647_980_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(33 as Weight))
-			.saturating_add(T::DbWeight::get().writes(30 as Weight))
-	}
-	fn nominator_move_nomination() -> Weight {
-		(190_457_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(10 as Weight))
-			.saturating_add(T::DbWeight::get().writes(8 as Weight))
-	}
-	fn withdraw_unbonded() -> Weight {
-		(46_016_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
-	fn slash_cancel_deferred(s: u32, _c: u32, ) -> Weight {
-		(16_915_132_000 as Weight)
-			// Standard Error: 18_000
-			.saturating_add((118_000 as Weight).saturating_mul(s as Weight))
-			.saturating_add(T::DbWeight::get().reads(1 as Weight))
-			.saturating_add(T::DbWeight::get().writes(1 as Weight))
-	}
-	fn withdraw_staking_rewards() -> Weight {
-		(145_132_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
+    fn set_invulnerables(c: u32) -> Weight {
+        (26_862_000 as Weight)
+            // Standard Error: 20_000
+            .saturating_add((662_000 as Weight).saturating_mul(c as Weight))
+            .saturating_add(T::DbWeight::get().reads(4 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+    fn set_total_validator_per_round(c: u32) -> Weight {
+        (28_021_000 as Weight)
+            // Standard Error: 8_000
+            .saturating_add((25_000 as Weight).saturating_mul(c as Weight))
+            .saturating_add(T::DbWeight::get().reads(5 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+    fn validator_join_pool() -> Weight {
+        (104_245_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(9 as Weight))
+            .saturating_add(T::DbWeight::get().writes(7 as Weight))
+    }
+    fn validator_bond_more() -> Weight {
+        (103_514_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(9 as Weight))
+            .saturating_add(T::DbWeight::get().writes(7 as Weight))
+    }
+    fn validator_bond_less() -> Weight {
+        (66_765_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(8 as Weight))
+            .saturating_add(T::DbWeight::get().writes(5 as Weight))
+    }
+    fn validator_exit_pool() -> Weight {
+        (68_058_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(8 as Weight))
+            .saturating_add(T::DbWeight::get().writes(5 as Weight))
+    }
+    fn nominator_nominate() -> Weight {
+        (125_655_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(10 as Weight))
+            .saturating_add(T::DbWeight::get().writes(7 as Weight))
+    }
+    fn nominator_denominate() -> Weight {
+        (101_460_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(9 as Weight))
+            .saturating_add(T::DbWeight::get().writes(6 as Weight))
+    }
+    fn nominator_bond_more() -> Weight {
+        (112_100_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(9 as Weight))
+            .saturating_add(T::DbWeight::get().writes(7 as Weight))
+    }
+    fn nominator_bond_less() -> Weight {
+        (78_247_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(9 as Weight))
+            .saturating_add(T::DbWeight::get().writes(6 as Weight))
+    }
+    fn nominator_denominate_all() -> Weight {
+        (1_647_980_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(33 as Weight))
+            .saturating_add(T::DbWeight::get().writes(30 as Weight))
+    }
+    fn nominator_move_nomination() -> Weight {
+        (190_457_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(10 as Weight))
+            .saturating_add(T::DbWeight::get().writes(8 as Weight))
+    }
+    fn withdraw_unbonded() -> Weight {
+        (46_016_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(6 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+    fn slash_cancel_deferred(s: u32, _c: u32) -> Weight {
+        (16_915_132_000 as Weight)
+            // Standard Error: 18_000
+            .saturating_add((118_000 as Weight).saturating_mul(s as Weight))
+            .saturating_add(T::DbWeight::get().reads(1 as Weight))
+            .saturating_add(T::DbWeight::get().writes(1 as Weight))
+    }
+    fn withdraw_staking_rewards() -> Weight {
+        (145_132_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(5 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn set_invulnerables(c: u32, ) -> Weight {
-		(26_862_000 as Weight)
-			// Standard Error: 20_000
-			.saturating_add((662_000 as Weight).saturating_mul(c as Weight))
-			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
-	fn set_total_validator_per_round(c: u32, ) -> Weight {
-		(28_021_000 as Weight)
-			// Standard Error: 8_000
-			.saturating_add((25_000 as Weight).saturating_mul(c as Weight))
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
-	fn validator_join_pool() -> Weight {
-		(104_245_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
-	}
-	fn validator_bond_more() -> Weight {
-		(103_514_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
-	}
-	fn validator_bond_less() -> Weight {
-		(66_765_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
-	}
-	fn validator_exit_pool() -> Weight {
-		(68_058_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
-	}
-	fn nominator_nominate() -> Weight {
-		(125_655_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
-	}
-	fn nominator_denominate() -> Weight {
-		(101_460_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
-	}
-	fn nominator_bond_more() -> Weight {
-		(112_100_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
-	}
-	fn nominator_bond_less() -> Weight {
-		(78_247_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
-	}
-	fn nominator_denominate_all() -> Weight {
-		(1_647_980_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(33 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(30 as Weight))
-	}
-	fn nominator_move_nomination() -> Weight {
-		(190_457_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(8 as Weight))
-	}
-	fn withdraw_unbonded() -> Weight {
-		(46_016_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
-	fn slash_cancel_deferred(s: u32, _c: u32, ) -> Weight {
-		(16_915_132_000 as Weight)
-			// Standard Error: 18_000
-			.saturating_add((118_000 as Weight).saturating_mul(s as Weight))
-			.saturating_add(RocksDbWeight::get().reads(1 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(1 as Weight))
-	}
-	fn withdraw_staking_rewards() -> Weight {
-		(145_132_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
+    fn set_invulnerables(c: u32) -> Weight {
+        (26_862_000 as Weight)
+            // Standard Error: 20_000
+            .saturating_add((662_000 as Weight).saturating_mul(c as Weight))
+            .saturating_add(RocksDbWeight::get().reads(4 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
+    fn set_total_validator_per_round(c: u32) -> Weight {
+        (28_021_000 as Weight)
+            // Standard Error: 8_000
+            .saturating_add((25_000 as Weight).saturating_mul(c as Weight))
+            .saturating_add(RocksDbWeight::get().reads(5 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
+    fn validator_join_pool() -> Weight {
+        (104_245_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(9 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(7 as Weight))
+    }
+    fn validator_bond_more() -> Weight {
+        (103_514_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(9 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(7 as Weight))
+    }
+    fn validator_bond_less() -> Weight {
+        (66_765_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(8 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
+    }
+    fn validator_exit_pool() -> Weight {
+        (68_058_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(8 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
+    }
+    fn nominator_nominate() -> Weight {
+        (125_655_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(10 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(7 as Weight))
+    }
+    fn nominator_denominate() -> Weight {
+        (101_460_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(9 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(6 as Weight))
+    }
+    fn nominator_bond_more() -> Weight {
+        (112_100_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(9 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(7 as Weight))
+    }
+    fn nominator_bond_less() -> Weight {
+        (78_247_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(9 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(6 as Weight))
+    }
+    fn nominator_denominate_all() -> Weight {
+        (1_647_980_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(33 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(30 as Weight))
+    }
+    fn nominator_move_nomination() -> Weight {
+        (190_457_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(10 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(8 as Weight))
+    }
+    fn withdraw_unbonded() -> Weight {
+        (46_016_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
+    fn slash_cancel_deferred(s: u32, _c: u32) -> Weight {
+        (16_915_132_000 as Weight)
+            // Standard Error: 18_000
+            .saturating_add((118_000 as Weight).saturating_mul(s as Weight))
+            .saturating_add(RocksDbWeight::get().reads(1 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(1 as Weight))
+    }
+    fn withdraw_staking_rewards() -> Weight {
+        (145_132_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(5 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
 }
