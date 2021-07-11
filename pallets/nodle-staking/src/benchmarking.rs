@@ -382,7 +382,37 @@ benchmarks! {
             T::MaxValidatorPerNominator::get() as usize
         );
     }
-
+    // Benchmark `nominator_move_nomination` extrinsic with the best possible conditions:
+    // * Origin of the Call is from signed origin.
+    // * Call will create the validator & nominator account.
+    nominator_move_nomination {
+        let validator_list = register_validator::<T>(
+            "nmn-validator",
+            T::MaxValidatorPerNominator::get()
+        );
+        let nominator_bond_val: BalanceOf<T> = T::MinNomination::get() * 1u32.into();
+        let nominator = create_funded_user::<T>(
+            "nmn-nominator",
+            SEED,
+            nominator_bond_val * T::MaxValidatorPerNominator::get().into()
+        );
+        whitelist_account!(nominator);
+        for valid_itm in validator_list.clone() {
+            assert_ok!(
+                <NodleStaking<T>>::nominator_nominate(
+                    RawOrigin::Signed(nominator.clone()).into(),
+                    valid_itm.clone(),
+                    nominator_bond_val
+                )
+            );
+        }
+    }: _(RawOrigin::Signed(nominator.clone()),validator_list[1].clone(),validator_list[0].clone(),Zero::zero())
+    verify {
+        assert_eq!(
+            <NominatorState<T>>::get(nominator.clone()).unwrap().active_bond,
+            nominator_bond_val * T::MaxValidatorPerNominator::get().into()
+        );
+    }
     // Benchmark `withdraw_unbonded` extrinsic with the best possible conditions:
     // * Origin of the Call is from signed origin.
     // * Call will create the validator & nominator account.
