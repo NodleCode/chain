@@ -2597,6 +2597,173 @@ fn set_invulnerables_works() {
 }
 
 #[test]
+fn set_total_validator_per_round_works() {
+    ExtBuilder::default().build_and_execute(|| {
+        let old_total_selected = NodleStaking::total_selected();
+        let new_total_selected = old_total_selected * 4u32;
+
+        assert_noop!(
+            NodleStaking::set_total_validator_per_round(Origin::signed(1), new_total_selected),
+            BadOrigin
+        );
+
+        assert_ok!(NodleStaking::set_total_validator_per_round(
+            Origin::signed(CancelOrigin::get()),
+            new_total_selected
+        ));
+
+        let mut expected = vec![Event::TotalSelectedSet(
+            old_total_selected,
+            new_total_selected,
+        )];
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::total_selected(), new_total_selected);
+
+        let new_total_selected = old_total_selected * 2u32;
+
+        assert_ok!(NodleStaking::set_total_validator_per_round(
+            Origin::root(),
+            new_total_selected
+        ));
+
+        let mut new1 = vec![Event::TotalSelectedSet(
+            old_total_selected * 4u32,
+            new_total_selected,
+        )];
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::total_selected(), new_total_selected);
+    });
+}
+
+#[test]
+fn set_staking_limits_works() {
+    ExtBuilder::default().build_and_execute(|| {
+        let old_max_validators = NodleStaking::staking_max_validators();
+        let old_min_stake = NodleStaking::staking_min_stake_session_selection();
+        let old_min_validator_bond = NodleStaking::staking_min_validator_bond();
+        let old_min_nomination_total_bond = NodleStaking::staking_min_nominator_total_bond();
+        let old_min_nomination_chill_threshold =
+            NodleStaking::staking_min_nomination_chill_threshold();
+
+        let new_max_validators = 100;
+        let new_min_stake = old_min_stake.saturating_mul(4u32.into());
+        let new_min_validator_bond = old_min_validator_bond.saturating_mul(4u32.into());
+        let new_min_nomination_total_bond =
+            old_min_nomination_total_bond.saturating_mul(4u32.into());
+        let new_min_nomination_chill_threshold =
+            old_min_nomination_chill_threshold.saturating_mul(4u32.into());
+
+        assert_noop!(
+            NodleStaking::set_staking_limits(
+                Origin::signed(1),
+                new_max_validators,
+                new_min_stake,
+                new_min_validator_bond,
+                new_min_nomination_total_bond,
+                new_min_nomination_chill_threshold,
+            ),
+            BadOrigin
+        );
+
+        assert_ok!(NodleStaking::set_staking_limits(
+            Origin::signed(CancelOrigin::get()),
+            new_max_validators,
+            new_min_stake,
+            new_min_validator_bond,
+            new_min_nomination_total_bond,
+            new_min_nomination_chill_threshold,
+        ));
+
+        let mut expected = vec![
+            Event::StakingMaxValidators(old_max_validators, new_max_validators),
+            Event::StakingMinStakeSessionSelection(old_min_stake, new_min_stake),
+            Event::StakingMinValidatorBond(old_min_validator_bond, new_min_validator_bond),
+            Event::StakingMinNominatorTotalBond(
+                old_min_nomination_total_bond,
+                new_min_nomination_total_bond,
+            ),
+            Event::StakingMinNominationChillThreshold(
+                old_min_nomination_chill_threshold,
+                new_min_nomination_chill_threshold,
+            ),
+        ];
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::staking_max_validators(), new_max_validators);
+        assert_eq!(
+            NodleStaking::staking_min_stake_session_selection(),
+            new_min_stake
+        );
+        assert_eq!(
+            NodleStaking::staking_min_validator_bond(),
+            new_min_validator_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nominator_total_bond(),
+            new_min_nomination_total_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nomination_chill_threshold(),
+            new_min_nomination_chill_threshold
+        );
+
+        let new2_max_validators = 75;
+        let new2_min_stake = old_min_stake.saturating_mul(2u32.into());
+        let new2_min_validator_bond = old_min_validator_bond.saturating_mul(2u32.into());
+        let new2_min_nomination_total_bond =
+            old_min_nomination_total_bond.saturating_mul(2u32.into());
+        let new2_min_nomination_chill_threshold =
+            old_min_nomination_chill_threshold.saturating_mul(2u32.into());
+
+        assert_ok!(NodleStaking::set_staking_limits(
+            Origin::root(),
+            new2_max_validators,
+            new2_min_stake,
+            new2_min_validator_bond,
+            new2_min_nomination_total_bond,
+            new2_min_nomination_chill_threshold,
+        ));
+
+        let mut new1 = vec![
+            Event::StakingMaxValidators(new_max_validators, new2_max_validators),
+            Event::StakingMinStakeSessionSelection(new_min_stake, new2_min_stake),
+            Event::StakingMinValidatorBond(new_min_validator_bond, new2_min_validator_bond),
+            Event::StakingMinNominatorTotalBond(
+                new_min_nomination_total_bond,
+                new2_min_nomination_total_bond,
+            ),
+            Event::StakingMinNominationChillThreshold(
+                new_min_nomination_chill_threshold,
+                new2_min_nomination_chill_threshold,
+            ),
+        ];
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::staking_max_validators(), new2_max_validators);
+        assert_eq!(
+            NodleStaking::staking_min_stake_session_selection(),
+            new2_min_stake
+        );
+        assert_eq!(
+            NodleStaking::staking_min_validator_bond(),
+            new2_min_validator_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nominator_total_bond(),
+            new2_min_nomination_total_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nomination_chill_threshold(),
+            new2_min_nomination_chill_threshold
+        );
+    });
+}
+
+#[test]
 fn payout_creates_controller() {
     ExtBuilder::default().build_and_execute(|| {
         let balance = 1000;
