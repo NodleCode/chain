@@ -32,7 +32,7 @@ impl SubstrateCli for Cli {
     }
 
     fn impl_version() -> String {
-        env!("CARGO_PKG_VERSION").into()
+        env!("SUBSTRATE_CLI_IMPL_VERSION").into()
     }
 
     fn description() -> String {
