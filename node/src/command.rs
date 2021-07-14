@@ -32,7 +32,7 @@ impl SubstrateCli for Cli {
     }
 
     fn impl_version() -> String {
-        env!("CARGO_PKG_VERSION").into()
+        env!("SUBSTRATE_CLI_IMPL_VERSION").into()
     }
 
     fn description() -> String {
@@ -55,8 +55,8 @@ impl SubstrateCli for Cli {
         Ok(match id {
             "dev" => Box::new(chain_spec::development_config()),
             "local" => Box::new(chain_spec::local_testnet_config()),
-            "main" => Box::new(chain_spec::main_config()),
-            "" | "arcadia" => Box::new(chain_spec::arcadia_config()),
+            "" | "main" => Box::new(chain_spec::main_config()),
+            "arcadia" => Box::new(chain_spec::arcadia_config()),
             path => Box::new(chain_spec::ChainSpec::from_json_file(
                 std::path::PathBuf::from(path),
             )?),
