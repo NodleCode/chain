@@ -237,6 +237,8 @@ pub mod pallet {
                 min_nominator_chill_threshold,
             ));
 
+            Self::active_stake_reconciliation();
+
             Ok(().into())
         }
         /// Join the set of validators pool
@@ -366,6 +368,11 @@ pub mod pallet {
                 <Error<T>>::InsufficientBalance,
             );
 
+            ensure!(
+                valid_state.bond.saturating_add(more) > Self::staking_min_validator_bond(),
+                <Error<T>>::ValidatorBondBelowMin,
+            );
+
             <ValidatorState<T>>::mutate(validator.clone(), |maybe_validator| {
                 if let Some(state) = maybe_validator {
                     let before = state.bond;
@@ -385,9 +392,15 @@ pub mod pallet {
                         );
                     }
                     <Total<T>>::mutate(|x| *x = x.saturating_add(more));
-                    Self::deposit_event(Event::ValidatorBondedMore(validator, before, after));
+                    Self::deposit_event(Event::ValidatorBondedMore(
+                        validator.clone(),
+                        before,
+                        after,
+                    ));
                 }
             });
+
+            Self::validator_stake_reconciliation(&validator);
 
             Ok(().into())
         }
@@ -447,6 +460,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             validator: T::AccountId,
             amount: BalanceOf<T>,
+            unfreeze_bond: bool,
         ) -> DispatchResultWithPostInfo {
             let nominator_acc = ensure_signed(origin)?;
 
@@ -454,11 +468,6 @@ pub mod pallet {
             ensure!(
                 !Self::is_validator(&nominator_acc),
                 <Error<T>>::ValidatorExists
-            );
-
-            ensure!(
-                amount >= <StakingMinNominationChillThreshold<T>>::get(),
-                <Error<T>>::NominationBelowMin
             );
 
             let mut validator_state =
@@ -471,6 +480,17 @@ pub mod pallet {
                 do_add_nomination = false;
                 Nominator::new(validator.clone(), amount)
             };
+
+            let amount = if unfreeze_bond {
+                amount.saturating_add(nominator_state.frozen_bond)
+            } else {
+                amount
+            };
+
+            ensure!(
+                amount >= <StakingMinNominationChillThreshold<T>>::get(),
+                <Error<T>>::NominationBelowMin
+            );
 
             ensure!(
                 (nominator_state.nominations.0.len() as u32) < T::MaxValidatorPerNominator::get(),
@@ -490,10 +510,13 @@ pub mod pallet {
                     <Error<T>>::InsufficientBalance
                 );
                 ensure!(
-                    nominator_state.add_nomination(Bond {
-                        owner: validator.clone(),
-                        amount
-                    }),
+                    nominator_state.add_nomination(
+                        Bond {
+                            owner: validator.clone(),
+                            amount,
+                        },
+                        unfreeze_bond,
+                    ),
                     <Error<T>>::AlreadyNominatedValidator,
                 );
             } else {
@@ -573,14 +596,27 @@ pub mod pallet {
             origin: OriginFor<T>,
             validator: T::AccountId,
             more: BalanceOf<T>,
+            unfreeze_bond: bool,
         ) -> DispatchResultWithPostInfo {
             let nominator = ensure_signed(origin)?;
             let mut nominations =
                 <NominatorState<T>>::get(&nominator).ok_or(<Error<T>>::NominatorDNE)?;
             let mut validator_state =
                 <ValidatorState<T>>::get(&validator).ok_or(<Error<T>>::ValidatorDNE)?;
+
+            let more = if unfreeze_bond {
+                more.saturating_add(nominations.frozen_bond)
+            } else {
+                more
+            };
+
+            ensure!(
+                more >= <StakingMinNominationChillThreshold<T>>::get(),
+                <Error<T>>::NominationBelowMin
+            );
+
             let _ = nominations
-                .inc_nomination(validator.clone(), more)
+                .inc_nomination(validator.clone(), more, unfreeze_bond)
                 .ok_or(<Error<T>>::NominationDNE)?;
 
             let nominator_free_balance = T::Currency::free_balance(&nominator);
@@ -681,6 +717,7 @@ pub mod pallet {
             from_validator: T::AccountId,
             to_validator: T::AccountId,
             amount: BalanceOf<T>,
+            unfreeze_bond: bool,
         ) -> DispatchResultWithPostInfo {
             let nominator_acc = ensure_signed(origin)?;
 
@@ -718,7 +755,7 @@ pub mod pallet {
 
                     let old_active_bond = nominator_state.active_bond;
                     let remaining = nominator_state
-                        .rm_nomination(from_validator.clone())
+                        .rm_nomination(from_validator.clone(), false)
                         .ok_or(<Error<T>>::NominationDNE)?;
 
                     let mut total_nomination_amount = old_active_bond.saturating_sub(remaining);
@@ -727,6 +764,11 @@ pub mod pallet {
                         .saturating_sub(total_nomination_amount);
 
                     total_nomination_amount = total_nomination_amount.saturating_add(amount);
+
+                    if unfreeze_bond {
+                        total_nomination_amount =
+                            total_nomination_amount.saturating_add(nominator_state.frozen_bond);
+                    }
 
                     ensure!(
                         total_nomination_amount >= <StakingMinNominationChillThreshold<T>>::get(),
@@ -743,10 +785,13 @@ pub mod pallet {
                         <Error<T>>::InsufficientBalance
                     );
 
-                    if nominator_state.add_nomination(Bond {
-                        owner: to_validator.clone(),
-                        amount: total_nomination_amount,
-                    }) {
+                    if nominator_state.add_nomination(
+                        Bond {
+                            owner: to_validator.clone(),
+                            amount: total_nomination_amount,
+                        },
+                        unfreeze_bond,
+                    ) {
                         // Validator is new to the nomination pool
                         let nomination = Bond {
                             owner: nominator_acc.clone(),
@@ -758,7 +803,11 @@ pub mod pallet {
                     } else {
                         // Validator already exist in nomination pool
                         let _ = nominator_state
-                            .inc_nomination(to_validator.clone(), total_nomination_amount)
+                            .inc_nomination(
+                                to_validator.clone(),
+                                total_nomination_amount,
+                                unfreeze_bond,
+                            )
                             .ok_or(<Error<T>>::NominationDNE)?;
                         to_validator_state
                             .inc_nominator(nominator_acc.clone(), total_nomination_amount);
@@ -1023,6 +1072,9 @@ pub mod pallet {
         /// Validator left the pool after unbonding duration
         /// \[account, validator_unbonded_stake, new_total_stake\]
         ValidatorLeft(T::AccountId, BalanceOf<T>, BalanceOf<T>),
+        /// Validator bond drops below threshold
+        /// \[account, validator_bond, validator_total_stake\]
+        ValidatorBondBelowThreashold(T::AccountId, BalanceOf<T>, BalanceOf<T>),
         /// Nominator nominated the validator
         /// \[account, nomination_value, validator_account, new_validator_total_stake\]
         Nomination(T::AccountId, BalanceOf<T>, T::AccountId, BalanceOf<T>),
@@ -1048,6 +1100,15 @@ pub mod pallet {
         /// Nominator withdraw all nominations
         /// \[account, nominator_total_stake_unlocked\]
         NominatorLeft(T::AccountId, BalanceOf<T>),
+        /// Nomination bond drops below threshold
+        /// \[account, validator_account, frozen_bond, total_frozen_bond, nominator_active_bond\]
+        NominationBelowThreashold(
+            T::AccountId,
+            T::AccountId,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+        ),
         /// Reward gained by stakers.
         /// \[account, reward_value\]
         StakeReward(T::AccountId, BalanceOf<T>),
@@ -1363,6 +1424,7 @@ pub mod pallet {
                         T::Origin::from(Some(actor.clone()).into()),
                         nominated_val.clone(),
                         balance,
+                        false,
                     )
                 } else {
                     <Pallet<T>>::validator_join_pool(
@@ -1522,7 +1584,7 @@ pub mod pallet {
 
             let old_active_bond = nominator_state.active_bond;
             let remaining = nominator_state
-                .rm_nomination(validator.clone())
+                .rm_nomination(validator.clone(), false)
                 .ok_or(<Error<T>>::NominationDNE)?;
 
             if !do_force {
@@ -1553,7 +1615,9 @@ pub mod pallet {
                 if let Some(nominator_state) = maybe_nominator_state.as_mut() {
                     let old_active_bond = nominator_state.active_bond;
 
-                    if let Some(_remaining) = nominator_state.rm_nomination(validator.clone()) {
+                    if let Some(_remaining) =
+                        nominator_state.rm_nomination(validator.clone(), false)
+                    {
                         nominator_state.unlocking.push(UnlockChunk {
                             value: old_active_bond.saturating_sub(nominator_state.active_bond),
                             session_idx: Self::active_session(),
@@ -1564,6 +1628,25 @@ pub mod pallet {
                             validator,
                             old_active_bond.saturating_sub(nominator_state.active_bond),
                             Zero::zero(),
+                        ));
+                    }
+                }
+            });
+        }
+
+        fn validator_freeze_nomination(nominator_acc: T::AccountId, validator: T::AccountId) {
+            <NominatorState<T>>::mutate(&nominator_acc, |maybe_nominator_state| {
+                if let Some(nominator_state) = maybe_nominator_state.as_mut() {
+                    let old_active_bond = nominator_state.active_bond;
+
+                    if let Some(_remaining) = nominator_state.rm_nomination(validator.clone(), true)
+                    {
+                        Self::deposit_event(Event::NominationBelowThreashold(
+                            nominator_acc.clone(),
+                            validator,
+                            old_active_bond.saturating_sub(nominator_state.active_bond),
+                            nominator_state.frozen_bond,
+                            nominator_state.active_bond,
                         ));
                     }
                 }
@@ -1693,6 +1776,59 @@ pub mod pallet {
                 .collect::<Vec<Bond<T::AccountId, SessionIndex>>>();
             <ExitQueue<T>>::put(OrderedSet::from(remain_exits));
         }
+
+        fn active_stake_reconciliation() {
+            let reconciled_list = <ValidatorPool<T>>::get()
+                .0
+                .into_iter()
+                .filter_map(|x| {
+                    Self::validator_stake_reconciliation(&x.owner);
+                    if let Some(valid_state) = <ValidatorState<T>>::get(&x.owner) {
+                        if valid_state.is_active()
+                            && valid_state.bond > Self::staking_min_validator_bond()
+                        {
+                            Some(Bond {
+                                owner: x.owner,
+                                amount: valid_state.total,
+                            })
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<Bond<T::AccountId, BalanceOf<T>>>>();
+            <ValidatorPool<T>>::put(OrderedSet::from(reconciled_list));
+        }
+
+        pub(crate) fn validator_stake_reconciliation(controller: &T::AccountId) {
+            <ValidatorState<T>>::mutate(&controller, |maybe_validator| {
+                if let Some(valid_state) = maybe_validator {
+                    for bond in valid_state.nominators.0.clone() {
+                        if bond.amount < Self::staking_min_nomination_chill_threshold() {
+                            Self::validator_freeze_nomination(
+                                bond.owner.clone(),
+                                controller.clone(),
+                            );
+                            valid_state.dec_nominator(bond.owner.clone(), bond.amount);
+                        }
+                    }
+
+                    if valid_state.bond < Self::staking_min_validator_bond()
+                        && valid_state.is_active()
+                    {
+                        valid_state.go_offline();
+                        Self::deposit_event(Event::ValidatorBondBelowThreashold(
+                            controller.clone(),
+                            valid_state.bond,
+                            valid_state.total,
+                        ));
+                    }
+                }
+            });
+        }
+
         /// Best as in most cumulatively supported in terms of stake
         pub(crate) fn select_session_validators(next: SessionIndex) -> (u32, BalanceOf<T>) {
             let (mut validators_count, mut total) = (0u32, <BalanceOf<T>>::zero());

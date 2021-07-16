@@ -953,8 +953,18 @@ fn validator_commission() {
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(5), 4, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(5),
+                4,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                4,
+                10,
+                false
+            ));
 
             let mut new2 = vec![
                 Event::Nomination(5, 10, 4, 30),
@@ -1158,21 +1168,36 @@ fn multiple_nominations() {
             assert_eq!(System::consumers(&10), 1);
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(6), 1, 10),
+                NodleStaking::nominator_nominate(Origin::signed(6), 1, 10, false),
                 Error::<Test>::AlreadyNominatedValidator,
             );
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(6), 2, 2),
+                NodleStaking::nominator_nominate(Origin::signed(6), 2, 2, false),
                 Error::<Test>::NominationBelowMin,
             );
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                4,
+                10,
+                false
+            ));
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(6), 5, 10),
+                NodleStaking::nominator_nominate(Origin::signed(6), 5, 10, false),
                 Error::<Test>::ExceedMaxValidatorPerNom,
             );
 
@@ -1199,14 +1224,19 @@ fn multiple_nominations() {
             expected.append(&mut new2);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 2, 80));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(7),
+                2,
+                80,
+                false
+            ));
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11),
+                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11, false),
                 Error::<Test>::InsufficientBalance
             );
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10),
+                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10, false),
                 Error::<Test>::TooManyNominators
             );
 
@@ -1513,7 +1543,12 @@ fn switch_nomination_works() {
             assert_eq!(System::consumers(&9), 1);
             assert_eq!(System::consumers(&10), 1);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                10,
+                false
+            ));
 
             let mut new1 = vec![Event::Nomination(6, 10, 2, 50)];
 
@@ -1542,22 +1577,22 @@ fn switch_nomination_works() {
 
             // Check with invalid arguments
             assert_noop!(
-                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 2, 5),
+                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 2, 5, false),
                 Error::<Test>::ValidatorDNE,
             );
 
             assert_noop!(
-                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 7, 5),
+                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 7, 5, false),
                 Error::<Test>::ValidatorDNE,
             );
 
             assert_noop!(
-                NodleStaking::nominator_move_nomination(Origin::signed(6), 7, 2, 5),
+                NodleStaking::nominator_move_nomination(Origin::signed(6), 7, 2, 5, false),
                 Error::<Test>::ValidatorDNE,
             );
 
             assert_noop!(
-                NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5),
+                NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5, false),
                 Error::<Test>::NominatorDNE,
             );
 
@@ -1565,7 +1600,8 @@ fn switch_nomination_works() {
                 Origin::signed(6),
                 2,
                 1,
-                0
+                0,
+                false,
             ));
 
             let mut new2 = vec![
@@ -1591,12 +1627,22 @@ fn switch_nomination_works() {
             assert_eq!(NodleStaking::total(), 150);
 
             assert_noop!(
-                NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5),
+                NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5, false),
                 Error::<Test>::NominatorDNE,
             );
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                10,
+                false
+            ));
 
             let mut new3 = vec![
                 Event::Nomination(6, 10, 2, 50),
@@ -1634,18 +1680,25 @@ fn switch_nomination_works() {
                 Origin::signed(6),
                 3,
                 4,
-                5
+                5,
+                false,
             ));
 
             assert_eq!(NodleStaking::total(), 175);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 5, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                5,
+                10,
+                false
+            ));
 
             assert_ok!(NodleStaking::nominator_move_nomination(
                 Origin::signed(6),
                 2,
                 5,
-                0
+                0,
+                false,
             ));
 
             let mut new4 = vec![
@@ -2009,15 +2062,15 @@ fn nominators_bond() {
             assert_eq!(NodleStaking::total(), 140);
 
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(1), 2, 50),
+                NodleStaking::nominator_bond_more(Origin::signed(1), 2, 50, false),
                 Error::<Test>::NominatorDNE,
             );
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(6), 2, 50),
+                NodleStaking::nominator_bond_more(Origin::signed(6), 2, 50, false),
                 Error::<Test>::NominationDNE,
             );
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(7), 6, 50),
+                NodleStaking::nominator_bond_more(Origin::signed(7), 6, 50, false),
                 Error::<Test>::ValidatorDNE,
             );
             assert_noop!(
@@ -2033,14 +2086,19 @@ fn nominators_bond() {
                 Error::<Test>::NominatorBondBelowMin,
             );
 
-            assert_ok!(NodleStaking::nominator_bond_more(Origin::signed(6), 1, 10));
+            assert_ok!(NodleStaking::nominator_bond_more(
+                Origin::signed(6),
+                1,
+                10,
+                false
+            ));
 
             assert_noop!(
                 NodleStaking::nominator_bond_less(Origin::signed(6), 2, 5),
                 Error::<Test>::NominationDNE,
             );
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(6), 1, 81),
+                NodleStaking::nominator_bond_more(Origin::signed(6), 1, 81, false),
                 Error::<Test>::InsufficientBalance,
             );
 
@@ -2225,8 +2283,18 @@ fn revoke_nomination_or_leave_nominators() {
                 NodleStaking::nominator_denominate_all(Origin::signed(1)),
                 Error::<Test>::NominatorDNE,
             );
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 3));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 3));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                3,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                3,
+                false
+            ));
             assert_ok!(NodleStaking::nominator_denominate(Origin::signed(6), 1));
 
             let mut new1 = vec![
@@ -2481,7 +2549,12 @@ fn payouts_follow_nomination_changes() {
             expected.append(&mut new3);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 1, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(8),
+                1,
+                10,
+                false
+            ));
 
             mock::start_active_session(8);
 
@@ -3585,7 +3658,8 @@ fn invulnerables_are_not_slashed() {
             assert_ok!(NodleStaking::nominator_nominate(
                 Origin::signed(201),
                 21,
-                500
+                500,
+                false,
             ));
 
             mock::start_active_session(3);
@@ -3866,7 +3940,11 @@ fn garbage_collection_after_slashing() {
                 &[Perbill::from_percent(100)],
             );
 
-            let mut new2 = vec![Event::Slash(11, 230398), Event::Slash(101, 115198)];
+            let mut new2 = vec![
+                Event::Slash(11, 230398),
+                Event::Slash(101, 115198),
+                Event::NominationBelowThreashold(101, 11, 2, 2, 0),
+            ];
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
@@ -3946,7 +4024,11 @@ fn garbage_collection_after_slashing_ed_1() {
                 &[Perbill::from_percent(100)],
             );
 
-            let mut new2 = vec![Event::Slash(11, 899), Event::Slash(101, 449)];
+            let mut new2 = vec![
+                Event::Slash(11, 899),
+                Event::Slash(101, 449),
+                Event::NominationBelowThreashold(101, 11, 1, 1, 0),
+            ];
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
@@ -4078,7 +4160,8 @@ fn slashing_nominators_by_span_max() {
             assert_ok!(NodleStaking::nominator_nominate(
                 Origin::signed(101),
                 21,
-                500
+                500,
+                false,
             ));
 
             mock::start_active_session(1);
@@ -4250,7 +4333,8 @@ fn slashes_are_summed_across_spans() {
             assert_ok!(NodleStaking::nominator_nominate(
                 Origin::signed(101),
                 21,
-                500
+                500,
+                false,
             ));
             mock::start_active_session(1);
             mock::start_active_session(2);
