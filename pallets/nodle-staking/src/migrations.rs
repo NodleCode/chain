@@ -86,6 +86,46 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
         }
     }
 
+    struct StakingMaxValidatorsStorageValuePrefix;
+    impl StorageInstance for StakingMaxValidatorsStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "StakingMaxValidators";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
+    struct StakingMinStakeSessionSelectionStorageValuePrefix;
+    impl StorageInstance for StakingMinStakeSessionSelectionStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "StakingMinStakeSessionSelection";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
+    struct StakingMinNominationChillThresholdStorageValuePrefix;
+    impl StorageInstance for StakingMinNominationChillThresholdStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "StakingMinNominationChillThreshold";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
+    struct StakingMinNominatorTotalBondStorageValuePrefix;
+    impl StorageInstance for StakingMinNominatorTotalBondStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "StakingMinNominatorTotalBond";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
+    struct StakingMinValidatorBondStorageValuePrefix;
+    impl StorageInstance for StakingMinValidatorBondStorageValuePrefix {
+        const STORAGE_PREFIX: &'static str = "StakingMinValidatorBond";
+        fn pallet_prefix() -> &'static str {
+            "NodleStaking"
+        }
+    }
+
     #[allow(type_alias_bounds)]
     type POAValidators<T: Config> =
         StorageValue<POAValidatorsStorageValuePrefix, Vec<T::AccountId>, OptionQuery>;
@@ -101,6 +141,29 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
     #[allow(type_alias_bounds)]
     type StakingSlashRewardProportion =
         StorageValue<StakingSlashRewardProportionStorageValuePrefix, Perbill, ValueQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingMaxValidators =
+        StorageValue<StakingMaxValidatorsStorageValuePrefix, u32, ValueQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingMinStakeSessionSelection<T: Config> =
+        StorageValue<StakingMinStakeSessionSelectionStorageValuePrefix, BalanceOf<T>, ValueQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingMinValidatorBond<T: Config> =
+        StorageValue<StakingMinValidatorBondStorageValuePrefix, BalanceOf<T>, ValueQuery>;
+
+    #[allow(type_alias_bounds)]
+    type StakingMinNominationChillThreshold<T: Config> = StorageValue<
+        StakingMinNominationChillThresholdStorageValuePrefix,
+        BalanceOf<T>,
+        ValueQuery,
+    >;
+
+    #[allow(type_alias_bounds)]
+    type StakingMinNominatorTotalBond<T: Config> =
+        StorageValue<StakingMinNominatorTotalBondStorageValuePrefix, BalanceOf<T>, ValueQuery>;
 
     #[allow(type_alias_bounds)]
     type StakingInvulnerables<T: Config> =
@@ -160,6 +223,18 @@ pub fn poa_validators_migration<T: Config>() -> Weight {
                 StakingTotalSelected::put(T::MinSelectedValidators::get());
                 // Set default slash reward fraction
                 StakingSlashRewardProportion::put(T::DefaultSlashRewardProportion::get());
+
+                StakingMaxValidators::put(T::DefaultStakingMaxValidators::get());
+                <StakingMinStakeSessionSelection<T>>::put(
+                    T::DefaultStakingMinStakeSessionSelection::get(),
+                );
+                <StakingMinValidatorBond<T>>::put(T::DefaultStakingMinValidatorBond::get());
+                <StakingMinNominationChillThreshold<T>>::put(
+                    T::DefaultStakingMinNominationChillThreshold::get(),
+                );
+                <StakingMinNominatorTotalBond<T>>::put(
+                    T::DefaultStakingMinNominatorTotalBond::get(),
+                );
 
                 weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 5));
             }

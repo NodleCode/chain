@@ -717,6 +717,8 @@ pub(crate) fn apply_slash<T: Config>(unapplied_slash: UnappliedSlash<T::AccountI
         );
     }
 
+    <Pallet<T>>::validator_stake_reconciliation(&unapplied_slash.validator);
+
     pay_reporters::<T>(reward_payout, slashed_imbalance, &unapplied_slash.reporters);
 }
 

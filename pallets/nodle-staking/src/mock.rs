@@ -230,9 +230,11 @@ parameter_types! {
     pub const DefaultValidatorFee: Perbill = Perbill::from_percent(20);
     pub const DefaultSlashRewardProportion: Perbill = Perbill::from_percent(10);
     pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(50);
-    pub const MinValidatorStake: Balance = 10;
-    pub const MinNominatorStake: Balance = 5;
-    pub const MinNomination: Balance = 3;
+    pub const DefaultStakingMaxValidators: u32 = 50;
+    pub const DefaultStakingMinStakeSessionSelection: Balance = 10;
+    pub const DefaultStakingMinValidatorBond: Balance = 10;
+    pub const DefaultStakingMinNominatorTotalBond: Balance = 5;
+    pub const DefaultStakingMinNominationChillThreshold: Balance = 3;
     pub const MaxChunkUnlock: usize = 32;
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
@@ -247,10 +249,11 @@ impl Config for Test {
     type DefaultValidatorFee = DefaultValidatorFee;
     type DefaultSlashRewardProportion = DefaultSlashRewardProportion;
     type DefaultSlashRewardFraction = DefaultSlashRewardFraction;
-    type MinValidatorStake = MinValidatorStake;
-    type MinValidatorPoolStake = MinValidatorStake;
-    type MinNominatorStake = MinNominatorStake;
-    type MinNomination = MinNomination;
+    type DefaultStakingMaxValidators = DefaultStakingMaxValidators;
+    type DefaultStakingMinStakeSessionSelection = DefaultStakingMinStakeSessionSelection;
+    type DefaultStakingMinValidatorBond = DefaultStakingMinValidatorBond;
+    type DefaultStakingMinNominatorTotalBond = DefaultStakingMinNominatorTotalBond;
+    type DefaultStakingMinNominationChillThreshold = DefaultStakingMinNominationChillThreshold;
     type RewardRemainder = RewardRemainderMock;
     type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
@@ -621,11 +624,6 @@ pub(crate) fn start_active_session(session_index: SessionIndex) {
 pub(crate) fn bond_validator(ctrl: AccountId, val: Balance) {
     let _ = Balances::make_free_balance_be(&ctrl, val);
     assert_ok!(NodleStaking::validator_join_pool(Origin::signed(ctrl), val));
-
-    // println!(
-    // 	"last event {:#?}",
-    // 	mock::last_event()
-    // );
 }
 
 pub(crate) fn bond_nominator(ctrl: AccountId, val: Balance, target: AccountId) {
@@ -633,7 +631,8 @@ pub(crate) fn bond_nominator(ctrl: AccountId, val: Balance, target: AccountId) {
     assert_ok!(NodleStaking::nominator_nominate(
         Origin::signed(ctrl),
         target,
-        val
+        val,
+        false,
     ));
 }
 
