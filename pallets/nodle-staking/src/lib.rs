@@ -208,32 +208,31 @@ pub mod pallet {
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
-            let old = <StakingMaxValidators<T>>::get();
+            let old_max_stake_validators = <StakingMaxValidators<T>>::get();
             <StakingMaxValidators<T>>::set(max_stake_validators);
-            Self::deposit_event(Event::StakingMaxValidators(old, max_stake_validators));
 
-            let old = <StakingMinStakeSessionSelection<T>>::get();
+            let old_min_stake_session_selection = <StakingMinStakeSessionSelection<T>>::get();
             <StakingMinStakeSessionSelection<T>>::set(min_stake_session_selection);
-            Self::deposit_event(Event::StakingMinStakeSessionSelection(
-                old,
-                min_stake_session_selection,
-            ));
 
-            let old = <StakingMinValidatorBond<T>>::get();
+            let old_min_validator_bond = <StakingMinValidatorBond<T>>::get();
             <StakingMinValidatorBond<T>>::set(min_validator_bond);
-            Self::deposit_event(Event::StakingMinValidatorBond(old, min_validator_bond));
 
-            let old = <StakingMinNominatorTotalBond<T>>::get();
+            let old_min_nominator_total_bond = <StakingMinNominatorTotalBond<T>>::get();
             <StakingMinNominatorTotalBond<T>>::set(min_nominator_total_bond);
-            Self::deposit_event(Event::StakingMinNominatorTotalBond(
-                old,
-                min_nominator_total_bond,
-            ));
 
-            let old = <StakingMinNominationChillThreshold<T>>::get();
+            let old_min_nominator_chill_threshold = <StakingMinNominationChillThreshold<T>>::get();
             <StakingMinNominationChillThreshold<T>>::set(min_nominator_chill_threshold);
-            Self::deposit_event(Event::StakingMinNominationChillThreshold(
-                old,
+
+            Self::deposit_event(Event::NewStakingLimits(
+                old_max_stake_validators,
+                max_stake_validators,
+                old_min_stake_session_selection,
+                min_stake_session_selection,
+                old_min_validator_bond,
+                min_validator_bond,
+                old_min_nominator_total_bond,
+                min_nominator_total_bond,
+                old_min_nominator_chill_threshold,
                 min_nominator_chill_threshold,
             ));
 
@@ -861,6 +860,40 @@ pub mod pallet {
             Ok(().into())
         }
 
+        #[pallet::weight(10_000)]
+        pub fn unbond_frozen(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
+            let nominator_acc = ensure_signed(origin)?;
+
+            <NominatorState<T>>::try_mutate_exists(
+                nominator_acc.clone(),
+                |maybe_nominator| -> DispatchResultWithPostInfo {
+                    let nominator_state =
+                        maybe_nominator.as_mut().ok_or(<Error<T>>::NominatorDNE)?;
+
+                    let pre_unfrozen_balance = nominator_state.frozen_bond;
+
+                    if let Some(unfrozen_balance) = nominator_state.unbond_frozen() {
+                        T::Currency::set_lock(
+                            T::StakingLockId::get(),
+                            &nominator_acc,
+                            unfrozen_balance,
+                            WithdrawReasons::all(),
+                        );
+                    };
+
+                    Self::deposit_event(Event::NominationUnbondFrozen(
+                        nominator_acc.clone(),
+                        pre_unfrozen_balance,
+                        nominator_state.active_bond,
+                        nominator_state.total,
+                    ));
+
+                    Ok(().into())
+                },
+            )?;
+            Ok(().into())
+        }
+
         #[pallet::weight(T::WeightInfo::withdraw_unbonded())]
         pub fn withdraw_unbonded(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
@@ -1043,14 +1076,23 @@ pub mod pallet {
         TotalSelectedSet(u32, u32),
         /// Updated staking config, maximum Validators allowed to join the validators pool
         StakingMaxValidators(u32, u32),
-        /// Updated staking config, minimum stake requirement for session  validator selection \[old, new\],
-        StakingMinStakeSessionSelection(BalanceOf<T>, BalanceOf<T>),
-        /// Updated staking config, minimum validator bond to join the pool \[old, new\],
-        StakingMinValidatorBond(BalanceOf<T>, BalanceOf<T>),
-        /// Updated staking config, minimum total nominator bond \[old, new\],
-        StakingMinNominatorTotalBond(BalanceOf<T>, BalanceOf<T>),
-        /// Updated staking config, minimum nomination bond threshold \[old, new\],
-        StakingMinNominationChillThreshold(BalanceOf<T>, BalanceOf<T>),
+        /// Updated staking config,
+        /// minimum validator bond to join the pool \[old, new\],
+        /// minimum stake requirement for session  validator selection \[old, new\],
+        /// minimum total nominator bond \[old, new\],
+        /// minimum nomination bond threshold \[old, new\],
+        NewStakingLimits(
+            u32,
+            u32,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+            BalanceOf<T>,
+        ),
         /// Prep task done for next new session,
         /// \[current_block_index, new_session_index, number_of_validator_selected, balance_staked_for_session\],
         NewSession(T::BlockNumber, SessionIndex, u32, BalanceOf<T>),
@@ -1109,6 +1151,9 @@ pub mod pallet {
             BalanceOf<T>,
             BalanceOf<T>,
         ),
+        /// Nomination unbond frozen balance
+        /// \[account, unfrozen_bond, new_active_bond, new_total_bond\]
+        NominationUnbondFrozen(T::AccountId, BalanceOf<T>, BalanceOf<T>, BalanceOf<T>),
         /// Reward gained by stakers.
         /// \[account, reward_value\]
         StakeReward(T::AccountId, BalanceOf<T>),

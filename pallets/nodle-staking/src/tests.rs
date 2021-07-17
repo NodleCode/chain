@@ -2750,19 +2750,18 @@ fn set_staking_limits_works() {
             new_min_nomination_chill_threshold,
         ));
 
-        let mut expected = vec![
-            Event::StakingMaxValidators(old_max_validators, new_max_validators),
-            Event::StakingMinStakeSessionSelection(old_min_stake, new_min_stake),
-            Event::StakingMinValidatorBond(old_min_validator_bond, new_min_validator_bond),
-            Event::StakingMinNominatorTotalBond(
-                old_min_nomination_total_bond,
-                new_min_nomination_total_bond,
-            ),
-            Event::StakingMinNominationChillThreshold(
-                old_min_nomination_chill_threshold,
-                new_min_nomination_chill_threshold,
-            ),
-        ];
+        let mut expected = vec![Event::NewStakingLimits(
+            old_max_validators,
+            new_max_validators,
+            old_min_stake,
+            new_min_stake,
+            old_min_validator_bond,
+            new_min_validator_bond,
+            old_min_nomination_total_bond,
+            new_min_nomination_total_bond,
+            old_min_nomination_chill_threshold,
+            new_min_nomination_chill_threshold,
+        )];
         assert_eq!(events(), expected);
 
         assert_eq!(NodleStaking::staking_max_validators(), new_max_validators);
@@ -2800,19 +2799,18 @@ fn set_staking_limits_works() {
             new2_min_nomination_chill_threshold,
         ));
 
-        let mut new1 = vec![
-            Event::StakingMaxValidators(new_max_validators, new2_max_validators),
-            Event::StakingMinStakeSessionSelection(new_min_stake, new2_min_stake),
-            Event::StakingMinValidatorBond(new_min_validator_bond, new2_min_validator_bond),
-            Event::StakingMinNominatorTotalBond(
-                new_min_nomination_total_bond,
-                new2_min_nomination_total_bond,
-            ),
-            Event::StakingMinNominationChillThreshold(
-                new_min_nomination_chill_threshold,
-                new2_min_nomination_chill_threshold,
-            ),
-        ];
+        let mut new1 = vec![Event::NewStakingLimits(
+            new_max_validators,
+            new2_max_validators,
+            new_min_stake,
+            new2_min_stake,
+            new_min_validator_bond,
+            new2_min_validator_bond,
+            new_min_nomination_total_bond,
+            new2_min_nomination_total_bond,
+            new_min_nomination_chill_threshold,
+            new2_min_nomination_chill_threshold,
+        )];
         expected.append(&mut new1);
         assert_eq!(events(), expected);
 

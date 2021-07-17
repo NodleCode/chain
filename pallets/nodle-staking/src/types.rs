@@ -395,6 +395,19 @@ impl<
             None
         }
     }
+
+    pub fn unbond_frozen(&mut self) -> Option<Balance> {
+        if self.frozen_bond > Zero::zero() {
+            let frozen_bond = self.frozen_bond;
+            self.active_bond = self.active_bond.saturating_sub(frozen_bond);
+            self.total = self.total.saturating_sub(frozen_bond);
+            self.frozen_bond = Zero::zero();
+            Some(frozen_bond)
+        } else {
+            None
+        }
+    }
+
     // Returns None if nomination not found
     pub fn inc_nomination(
         &mut self,
