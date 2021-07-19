@@ -145,7 +145,13 @@ benchmarks! {
     }: { call.dispatch_bypass_filter(caller)? }
     verify {
         assert_last_event::<T>(
-            Event::StakingMinNominationChillThreshold(T::DefaultStakingMinNominationChillThreshold::get(), min_nominator_chill_threshold).into()
+            Event::NewStakingLimits(
+                T::DefaultStakingMaxValidators::get(), max_validators,
+                T::DefaultStakingMinStakeSessionSelection::get(), min_stake_session_selection,
+                T::DefaultStakingMinValidatorBond::get(), min_validator_bond,
+                T::DefaultStakingMinNominatorTotalBond::get(), min_nominator_total_bond,
+                T::DefaultStakingMinNominationChillThreshold::get(), min_nominator_chill_threshold,
+            ).into()
         );
     }
 
@@ -250,7 +256,7 @@ benchmarks! {
         let nominator_bond_val: BalanceOf<T> = <StakingMinNominatorTotalBond<T>>::get() * 2u32.into();
         let nominator = create_funded_user::<T>("nom-nominator", SEED, nominator_bond_val);
         whitelist_account!(nominator);
-    }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_val)
+    }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_val, false)
     verify {
         assert_last_event::<T>(
             Event::Nomination(
@@ -283,7 +289,8 @@ benchmarks! {
                 <NodleStaking<T>>::nominator_nominate(
                     RawOrigin::Signed(nominator.clone()).into(),
                     validator.clone(),
-                    nominator_bond_val
+                    nominator_bond_val,
+                    false,
                 )
             );
         }
@@ -320,15 +327,17 @@ benchmarks! {
             <NodleStaking<T>>::nominator_nominate(
                 RawOrigin::Signed(nominator.clone()).into(),
                 validator.clone(),
-                nominator_bond_val
+                nominator_bond_val,
+                false
             )
         );
         let nominator_bond_addition: BalanceOf<T> = <StakingMinNominationChillThreshold<T>>::get() * 2u32.into();
-    }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_addition)
+    }: _(RawOrigin::Signed(nominator.clone()), validator.clone(), nominator_bond_addition, false)
     verify {
         assert_last_event::<T>(
             Event::NominationIncreased(
                 nominator,
+                nominator_bond_val * 2u32.into(),
                 validator.clone(),
                 <NodleStaking<T>>::validator_state(&validator).unwrap().total - nominator_bond_addition,
                 <NodleStaking<T>>::validator_state(&validator).unwrap().total
@@ -356,7 +365,8 @@ benchmarks! {
             <NodleStaking<T>>::nominator_nominate(
                 RawOrigin::Signed(nominator.clone()).into(),
                 validator.clone(),
-                nominator_bond_val
+                nominator_bond_val,
+                false
             )
         );
         let nominator_bond_removal: BalanceOf<T> = <StakingMinNominatorTotalBond<T>>::get() * 1u32.into();
@@ -399,7 +409,8 @@ benchmarks! {
                 <NodleStaking<T>>::nominator_nominate(
                     RawOrigin::Signed(nominator.clone()).into(),
                     valid_itm.clone(),
-                    nominator_bond_val
+                    nominator_bond_val,
+                    false
                 )
             );
         }
@@ -435,11 +446,12 @@ benchmarks! {
                 <NodleStaking<T>>::nominator_nominate(
                     RawOrigin::Signed(nominator.clone()).into(),
                     valid_itm.clone(),
-                    nominator_bond_val
+                    nominator_bond_val,
+                    false
                 )
             );
         }
-    }: _(RawOrigin::Signed(nominator.clone()),validator_list[1].clone(),validator_list[0].clone(),Zero::zero())
+    }: _(RawOrigin::Signed(nominator.clone()),validator_list[1].clone(),validator_list[0].clone(),Zero::zero(), false)
     verify {
         assert_eq!(
             <NominatorState<T>>::get(nominator.clone()).unwrap().active_bond,
@@ -468,7 +480,49 @@ benchmarks! {
             ).into()
         );
     }
+    // Benchmark `unbond_frozen` extrinsic with the best possible conditions:
+    // * Origin of the Call is from signed origin.
+    // * Call will create the validator & nominator account.
+    unbond_frozen {
+        let validator_bond_val: BalanceOf<T> = <StakingMinValidatorBond<T>>::get() * 2u32.into();
+        let validator = create_funded_user::<T>("frz-validator", SEED, validator_bond_val);
+        assert_ok!(
+            <NodleStaking<T>>::validator_join_pool(
+                RawOrigin::Signed(validator.clone()).into(),
+                validator_bond_val
+            )
+        );
+        let nominator_balance: BalanceOf<T> = <StakingMinNominationChillThreshold<T>>::get() * 4u32.into();
+        let nominator_bond_val: BalanceOf<T> = <StakingMinNominationChillThreshold<T>>::get() * 2u32.into();
+        let nominator = create_funded_user::<T>("frz-nominator", SEED, nominator_balance);
+        whitelist_account!(nominator);
 
+        assert_ok!(
+            <NodleStaking<T>>::nominator_nominate(
+                RawOrigin::Signed(nominator.clone()).into(),
+                validator.clone(),
+                nominator_bond_val,
+                false
+            )
+        );
+
+        let max_validators = T::DefaultStakingMaxValidators::get() * 2u32;
+        let min_stake_session_selection = T::DefaultStakingMinStakeSessionSelection::get() * 2u32.into();
+        let min_validator_bond = T::DefaultStakingMinValidatorBond::get() * 2u32.into();
+        let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get() * 2u32.into();
+        let min_nominator_chill_threshold = <StakingMinNominationChillThreshold<T>>::get() * 5u32.into();
+        let caller = T::CancelOrigin::successful_origin();
+        let call = Call::<T>::set_staking_limits(max_validators, min_stake_session_selection, min_validator_bond, min_nominator_total_bond, min_nominator_chill_threshold);
+        let _ = call.dispatch_bypass_filter(caller);
+    }: _(RawOrigin::Signed(nominator.clone()))
+    verify {
+        assert_last_event::<T>(
+            Event::NominatorLeft(
+                nominator,
+                nominator_bond_val
+            ).into()
+        );
+    }
     // Benchmark `withdraw_unbonded` extrinsic with the best possible conditions:
     // * Origin of the Call must be Root.
     // * Call will create the validator & nominator account.

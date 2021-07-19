@@ -399,7 +399,6 @@ impl<
     pub fn unbond_frozen(&mut self) -> Option<Balance> {
         if self.frozen_bond > Zero::zero() {
             let frozen_bond = self.frozen_bond;
-            self.active_bond = self.active_bond.saturating_sub(frozen_bond);
             self.total = self.total.saturating_sub(frozen_bond);
             self.frozen_bond = Zero::zero();
             Some(frozen_bond)
