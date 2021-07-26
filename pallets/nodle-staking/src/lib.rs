@@ -469,6 +469,8 @@ pub mod pallet {
                 <Error<T>>::ValidatorExists
             );
 
+            log::trace!("nominator_nominate:[{:#?}] - Entry!!!", line!());
+
             let mut validator_state =
                 <ValidatorState<T>>::get(&validator).ok_or(<Error<T>>::ValidatorDNE)?;
 
@@ -565,6 +567,8 @@ pub mod pallet {
                 validator,
                 validator_new_total,
             ));
+
+            log::trace!("nominator_nominate:[{:#?}] - Exit!!!", line!());
 
             Ok(().into())
         }
@@ -1466,7 +1470,7 @@ pub mod pallet {
             <StakingMinNominatorTotalBond<T>>::put(T::DefaultStakingMinNominatorTotalBond::get());
 
             log::trace!(
-                "GenesisBuild:[{:#?}] - Stakeing Cfg ([{:#?}],[{:#?}],[{:#?}],[{:#?}],[{:#?}])",
+                "GenesisBuild:[{:#?}] - Staking Cfg ([{:#?}],[{:#?}],[{:#?}],[{:#?}],[{:#?}])",
                 line!(),
                 <StakingMaxValidators<T>>::get(),
                 <StakingMinStakeSessionSelection<T>>::get(),
@@ -1964,9 +1968,11 @@ pub mod pallet {
         ) {
             let now = Self::active_session();
             for (validator, points) in validators_points.into_iter() {
-                let score_points = <AwardedPts<T>>::get(now, &validator).saturating_add(points);
-                <AwardedPts<T>>::insert(now, validator, score_points);
-                <Points<T>>::mutate(now, |x| *x = x.saturating_add(points));
+                if Self::is_validator(&validator) {
+                    let score_points = <AwardedPts<T>>::get(now, &validator).saturating_add(points);
+                    <AwardedPts<T>>::insert(now, validator, score_points);
+                    <Points<T>>::mutate(now, |x| *x = x.saturating_add(points));
+                }
             }
         }
 
