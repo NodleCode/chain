@@ -326,6 +326,7 @@ pub struct Nominator<AccountId, Balance> {
     pub nominations: OrderedSet<Bond<AccountId, Balance>>,
     pub total: Balance,
     pub active_bond: Balance,
+    pub frozen_bond: Balance,
     pub unlocking: Vec<UnlockChunk<Balance>>,
 }
 
@@ -349,12 +350,16 @@ impl<
             }]),
             total: amount,
             active_bond: amount,
+            frozen_bond: Zero::zero(),
             unlocking: Vec::new(),
         }
     }
-    pub fn add_nomination(&mut self, bond: Bond<AccountId, Balance>) -> bool {
+    pub fn add_nomination(&mut self, bond: Bond<AccountId, Balance>, unfreeze_bond: bool) -> bool {
         let amt = bond.amount;
         if self.nominations.insert(bond) {
+            if unfreeze_bond {
+                self.frozen_bond = Zero::zero();
+            }
             self.total = self.total.saturating_add(amt);
             self.active_bond = self.active_bond.saturating_add(amt);
             true
@@ -364,7 +369,7 @@ impl<
     }
     // Returns Some(remaining balance), must be more than MinNominatorStake
     // Returns None if nomination not found
-    pub fn rm_nomination(&mut self, validator: AccountId) -> Option<Balance> {
+    pub fn rm_nomination(&mut self, validator: AccountId, freeze_bond: bool) -> Option<Balance> {
         let mut amt: Option<Balance> = None;
         let nominations = self
             .nominations
@@ -382,13 +387,33 @@ impl<
         if let Some(balance) = amt {
             self.nominations = OrderedSet::from(nominations);
             self.active_bond = self.active_bond.saturating_sub(balance);
+            if freeze_bond {
+                self.frozen_bond = self.frozen_bond.saturating_add(balance);
+            }
             Some(self.active_bond)
         } else {
             None
         }
     }
+
+    pub fn unbond_frozen(&mut self) -> Option<Balance> {
+        if self.frozen_bond > Zero::zero() {
+            let frozen_bond = self.frozen_bond;
+            self.total = self.total.saturating_sub(frozen_bond);
+            self.frozen_bond = Zero::zero();
+            Some(frozen_bond)
+        } else {
+            None
+        }
+    }
+
     // Returns None if nomination not found
-    pub fn inc_nomination(&mut self, validator: AccountId, more: Balance) -> Option<Balance> {
+    pub fn inc_nomination(
+        &mut self,
+        validator: AccountId,
+        more: Balance,
+        unfreeze_bond: bool,
+    ) -> Option<Balance> {
         match self
             .nominations
             .0
@@ -399,6 +424,9 @@ impl<
                 nom_bond.amount = nom_bond.amount.saturating_add(more);
                 self.total = self.total.saturating_add(more);
                 self.active_bond = self.active_bond.saturating_add(more);
+                if unfreeze_bond {
+                    self.frozen_bond = Zero::zero();
+                }
                 Some(nom_bond.amount)
             }
             Err(_) => None,

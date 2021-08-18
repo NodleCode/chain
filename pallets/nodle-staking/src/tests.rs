@@ -23,6 +23,7 @@ use crate::mock::{
     on_offence_in_session, on_offence_now, set_author, start_session, Balance, Balances,
     CancelOrigin, Event as MetaEvent, ExtBuilder, NodleStaking, Origin, Session, System, Test,
 };
+use crate::set::OrderedSet;
 use crate::types::{Bond, ValidatorSnapshot, ValidatorStatus};
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::{
@@ -952,8 +953,18 @@ fn validator_commission() {
             expected.append(&mut new1);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(5), 4, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(5),
+                4,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                4,
+                10,
+                false
+            ));
 
             let mut new2 = vec![
                 Event::Nomination(5, 10, 4, 30),
@@ -1157,21 +1168,36 @@ fn multiple_nominations() {
             assert_eq!(System::consumers(&10), 1);
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(6), 1, 10),
+                NodleStaking::nominator_nominate(Origin::signed(6), 1, 10, false),
                 Error::<Test>::AlreadyNominatedValidator,
             );
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(6), 2, 2),
+                NodleStaking::nominator_nominate(Origin::signed(6), 2, 2, false),
                 Error::<Test>::NominationBelowMin,
             );
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 10));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 4, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                4,
+                10,
+                false
+            ));
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(6), 5, 10),
+                NodleStaking::nominator_nominate(Origin::signed(6), 5, 10, false),
                 Error::<Test>::ExceedMaxValidatorPerNom,
             );
 
@@ -1198,14 +1224,19 @@ fn multiple_nominations() {
             expected.append(&mut new2);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(7), 2, 80));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(7),
+                2,
+                80,
+                false
+            ));
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11),
+                NodleStaking::nominator_nominate(Origin::signed(7), 3, 11, false),
                 Error::<Test>::InsufficientBalance
             );
 
             assert_noop!(
-                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10),
+                NodleStaking::nominator_nominate(Origin::signed(10), 2, 10, false),
                 Error::<Test>::TooManyNominators
             );
 
@@ -1410,6 +1441,1060 @@ fn multiple_nominations() {
             assert_eq!(System::consumers(&10), 1);
 
             // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+        });
+}
+
+#[test]
+fn switch_nomination_works() {
+    ExtBuilder::default()
+        .with_balances(vec![
+            (1, 100),
+            (2, 100),
+            (3, 100),
+            (4, 100),
+            (5, 100),
+            (6, 100),
+            (7, 100),
+            (8, 100),
+            (9, 100),
+            (10, 100),
+        ])
+        .with_validators(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
+        .with_nominators(vec![
+            (6, 1, 10),
+            (7, 1, 10),
+            (8, 2, 10),
+            (9, 2, 10),
+            (10, 1, 10),
+        ])
+        .tst_staking_build()
+        .execute_with(|| {
+            mock::start_active_session(4);
+
+            // chooses top TotalSelectedCandidates (5), in order
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 50),
+                Event::ValidatorChosen(2, 2, 40),
+                Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
+                Event::ValidatorChosen(2, 5, 10),
+                Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(3, 1, 50),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(4, 1, 50),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
+            ];
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
+
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 2);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                10,
+                false
+            ));
+
+            let mut new1 = vec![Event::Nomination(6, 10, 2, 50)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 1,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 2,
+                            amount: 10,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 20);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 20);
+            assert_eq!(NodleStaking::total(), 150);
+
+            // Check with invalid arguments
+            assert_noop!(
+                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 2, 5, false),
+                Error::<Test>::ValidatorDNE,
+            );
+
+            assert_noop!(
+                NodleStaking::nominator_move_nomination(Origin::signed(6), 2, 7, 5, false),
+                Error::<Test>::ValidatorDNE,
+            );
+
+            assert_noop!(
+                NodleStaking::nominator_move_nomination(Origin::signed(6), 7, 2, 5, false),
+                Error::<Test>::ValidatorDNE,
+            );
+
+            assert_noop!(
+                NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5, false),
+                Error::<Test>::NominatorDNE,
+            );
+
+            assert_ok!(NodleStaking::nominator_move_nomination(
+                Origin::signed(6),
+                2,
+                1,
+                0,
+                false,
+            ));
+
+            let mut new2 = vec![
+                Event::NominatorLeftValidator(6, 2, 10, 40),
+                Event::NominationMoved(6, 20, 2, 40, 1, 60),
+            ];
+
+            expected.append(&mut new2);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 1,
+                        amount: 20,
+                    }]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 20);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 20);
+            assert_eq!(NodleStaking::total(), 150);
+
+            assert_noop!(
+                NodleStaking::nominator_move_nomination(Origin::signed(1), 2, 1, 5, false),
+                Error::<Test>::NominatorDNE,
+            );
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                10,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                10,
+                false
+            ));
+
+            let mut new3 = vec![
+                Event::Nomination(6, 10, 2, 50),
+                Event::Nomination(6, 10, 3, 30),
+            ];
+
+            expected.append(&mut new3);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 1,
+                            amount: 20,
+                        },
+                        Bond {
+                            owner: 2,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 3,
+                            amount: 10,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 40);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 40);
+            assert_eq!(NodleStaking::total(), 170);
+
+            assert_ok!(NodleStaking::nominator_move_nomination(
+                Origin::signed(6),
+                3,
+                4,
+                5,
+                false,
+            ));
+
+            assert_eq!(NodleStaking::total(), 175);
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                5,
+                10,
+                false
+            ));
+
+            assert_ok!(NodleStaking::nominator_move_nomination(
+                Origin::signed(6),
+                2,
+                5,
+                0,
+                false,
+            ));
+
+            let mut new4 = vec![
+                Event::NominatorLeftValidator(6, 3, 10, 20),
+                Event::NominationMoved(6, 45, 3, 20, 4, 35),
+                Event::Nomination(6, 10, 5, 20),
+                Event::NominatorLeftValidator(6, 2, 10, 40),
+                Event::NominationMoved(6, 55, 2, 40, 5, 30),
+            ];
+
+            expected.append(&mut new4);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 1,
+                            amount: 20,
+                        },
+                        Bond {
+                            owner: 4,
+                            amount: 15,
+                        },
+                        Bond {
+                            owner: 5,
+                            amount: 20,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 55);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 55);
+            assert_eq!(NodleStaking::total(), 185);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 55));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 2);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
+        });
+}
+
+#[test]
+fn reconciliation_basics_works() {
+    ExtBuilder::default()
+        .with_balances(vec![
+            (1, 100),
+            (2, 100),
+            (3, 100),
+            (4, 100),
+            (5, 100),
+            (6, 100),
+            (7, 100),
+            (8, 100),
+            (9, 100),
+            (10, 100),
+        ])
+        .with_validators(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
+        .with_nominators(vec![
+            (6, 1, 10),
+            (7, 1, 10),
+            (8, 2, 10),
+            (9, 2, 10),
+            (10, 1, 10),
+        ])
+        .tst_staking_build()
+        .execute_with(|| {
+            mock::start_active_session(4);
+
+            // chooses top TotalSelectedCandidates (5), in order
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 50),
+                Event::ValidatorChosen(2, 2, 40),
+                Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
+                Event::ValidatorChosen(2, 5, 10),
+                Event::NewSession(5, 2, 5, 140),
+                Event::ValidatorChosen(3, 1, 50),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 140),
+                Event::ValidatorChosen(4, 1, 50),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 140),
+                Event::ValidatorChosen(5, 1, 50),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 140),
+            ];
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 10));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 140);
+
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 2);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                40,
+                false
+            ));
+
+            assert_eq!(mock::balances(&6), (100, 50));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            let mut new1 = vec![Event::Nomination(6, 40, 2, 80)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 1,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 2,
+                            amount: 40,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 50);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 50);
+            assert_eq!(NodleStaking::total(), 180);
+
+            let s1_max_validators = NodleStaking::staking_max_validators();
+            let s1_min_stake = NodleStaking::staking_min_stake_session_selection();
+            let s1_min_validator_bond = NodleStaking::staking_min_validator_bond();
+            let s1_min_nomination_total_bond = NodleStaking::staking_min_nominator_total_bond();
+            let s1_min_nomination_chill_threshold =
+                NodleStaking::staking_min_nomination_chill_threshold();
+
+            let s1_new_min_nomination_total_bond = 25;
+            let s1_new_min_nomination_chill_threshold = 15;
+
+            assert_ok!(NodleStaking::set_staking_limits(
+                Origin::signed(CancelOrigin::get()),
+                s1_max_validators,
+                s1_min_stake,
+                s1_min_validator_bond,
+                s1_new_min_nomination_total_bond,
+                s1_new_min_nomination_chill_threshold,
+            ));
+
+            let mut new1 = vec![
+                Event::NewStakingLimits(
+                    s1_max_validators,
+                    s1_max_validators,
+                    s1_min_validator_bond,
+                    s1_min_validator_bond,
+                    s1_min_stake,
+                    s1_min_stake,
+                    s1_min_nomination_total_bond,
+                    s1_new_min_nomination_total_bond,
+                    s1_min_nomination_chill_threshold,
+                    s1_new_min_nomination_chill_threshold,
+                ),
+                Event::NominationBelowThreashold(6, 1, 10, 10, 40),
+                Event::NominationBelowThreashold(7, 1, 10, 10, 0),
+                Event::NominationBelowThreashold(10, 1, 10, 10, 0),
+                Event::NominationBelowThreashold(8, 2, 10, 10, 0),
+                Event::NominationBelowThreashold(9, 2, 10, 10, 0),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(NodleStaking::total(), 180);
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 2,
+                        amount: 40,
+                    },]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 50);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 40);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().frozen_bond, 10);
+
+            assert_eq!(
+                NodleStaking::nominator_state(7).unwrap().nominations,
+                OrderedSet::from([].to_vec()),
+            );
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 10);
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().active_bond, 0);
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().frozen_bond, 10);
+
+            assert_eq!(
+                NodleStaking::nominator_state(10).unwrap().nominations,
+                OrderedSet::from([].to_vec()),
+            );
+            assert_eq!(NodleStaking::nominator_state(10).unwrap().total, 10);
+            assert_eq!(NodleStaking::nominator_state(10).unwrap().active_bond, 0);
+            assert_eq!(NodleStaking::nominator_state(10).unwrap().frozen_bond, 10);
+
+            assert_eq!(
+                NodleStaking::nominator_state(8).unwrap().nominations,
+                OrderedSet::from([].to_vec()),
+            );
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().total, 10);
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().active_bond, 0);
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().frozen_bond, 10);
+
+            assert_eq!(
+                NodleStaking::nominator_state(9).unwrap().nominations,
+                OrderedSet::from([].to_vec()),
+            );
+            assert_eq!(NodleStaking::nominator_state(9).unwrap().total, 10);
+            assert_eq!(NodleStaking::nominator_state(9).unwrap().active_bond, 0);
+            assert_eq!(NodleStaking::nominator_state(9).unwrap().frozen_bond, 10);
+
+            assert_ok!(NodleStaking::unbond_frozen(Origin::signed(6)));
+
+            let mut new1 = vec![Event::NominationUnbondFrozen(6, 10, 40, 40)];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&6), (100, 40));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(System::consumers(&6), 1);
+
+            assert_ok!(NodleStaking::unbond_frozen(Origin::signed(7)));
+
+            let mut new1 = vec![
+                Event::NominationUnbondFrozen(7, 10, 0, 0),
+                Event::NominatorLeft(7, 10),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&7), (100, 0));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(System::consumers(&7), 0);
+
+            assert_noop!(
+                NodleStaking::nominator_bond_more(Origin::signed(7), 2, 50, false),
+                Error::<Test>::NominatorDNE,
+            );
+
+            assert_ok!(NodleStaking::unbond_frozen(Origin::signed(10)));
+
+            let mut new1 = vec![
+                Event::NominationUnbondFrozen(10, 10, 0, 0),
+                Event::NominatorLeft(10, 10),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&10), (100, 0));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(System::consumers(&10), 0);
+
+            assert_noop!(
+                NodleStaking::nominator_bond_more(Origin::signed(10), 2, 50, false),
+                Error::<Test>::NominatorDNE,
+            );
+
+            assert_ok!(NodleStaking::unbond_frozen(Origin::signed(8)));
+
+            let mut new1 = vec![
+                Event::NominationUnbondFrozen(8, 10, 0, 0),
+                Event::NominatorLeft(8, 10),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&8), (100, 0));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(System::consumers(&8), 0);
+
+            assert_noop!(
+                NodleStaking::nominator_bond_more(Origin::signed(8), 2, 50, false),
+                Error::<Test>::NominatorDNE,
+            );
+
+            assert_ok!(NodleStaking::unbond_frozen(Origin::signed(9)));
+
+            let mut new1 = vec![
+                Event::NominationUnbondFrozen(9, 10, 0, 0),
+                Event::NominatorLeft(9, 10),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&9), (100, 0));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(System::consumers(&9), 0);
+
+            assert_noop!(
+                NodleStaking::nominator_bond_more(Origin::signed(9), 2, 50, false),
+                Error::<Test>::NominatorDNE,
+            );
+        });
+}
+
+#[test]
+fn unfreeze_bond_arg_flag_works() {
+    ExtBuilder::default()
+        .with_balances(vec![
+            (1, 100),
+            (2, 100),
+            (3, 100),
+            (4, 100),
+            (5, 100),
+            (6, 100),
+            (7, 100),
+            (8, 100),
+            (9, 100),
+            (10, 100),
+        ])
+        .with_validators(vec![(1, 20), (2, 20), (3, 20), (4, 20), (5, 10)])
+        .with_nominators(vec![
+            (6, 1, 10),
+            (7, 1, 10),
+            (8, 2, 10),
+            (9, 2, 10),
+            (10, 1, 25),
+        ])
+        .tst_staking_build()
+        .execute_with(|| {
+            mock::start_active_session(4);
+
+            // chooses top TotalSelectedCandidates (5), in order
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 1, 65),
+                Event::ValidatorChosen(2, 2, 40),
+                Event::ValidatorChosen(2, 3, 20),
+                Event::ValidatorChosen(2, 4, 20),
+                Event::ValidatorChosen(2, 5, 10),
+                Event::NewSession(5, 2, 5, 155),
+                Event::ValidatorChosen(3, 1, 65),
+                Event::ValidatorChosen(3, 2, 40),
+                Event::ValidatorChosen(3, 3, 20),
+                Event::ValidatorChosen(3, 4, 20),
+                Event::ValidatorChosen(3, 5, 10),
+                Event::NewSession(10, 3, 5, 155),
+                Event::ValidatorChosen(4, 1, 65),
+                Event::ValidatorChosen(4, 2, 40),
+                Event::ValidatorChosen(4, 3, 20),
+                Event::ValidatorChosen(4, 4, 20),
+                Event::ValidatorChosen(4, 5, 10),
+                Event::NewSession(15, 4, 5, 155),
+                Event::ValidatorChosen(5, 1, 65),
+                Event::ValidatorChosen(5, 2, 40),
+                Event::ValidatorChosen(5, 3, 20),
+                Event::ValidatorChosen(5, 4, 20),
+                Event::ValidatorChosen(5, 5, 10),
+                Event::NewSession(20, 5, 5, 155),
+            ];
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 10));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 10));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 10));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 25));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 155);
+
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 2);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
+
+            assert_eq!(
+                NodleStaking::validator_state(1).unwrap().nominators,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 6,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 7,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 10,
+                            amount: 25,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                20,
+                false
+            ));
+
+            assert_eq!(mock::balances(&6), (100, 30));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            let mut new1 = vec![Event::Nomination(6, 20, 3, 40)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::validator_state(3).unwrap().nominators,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 6,
+                        amount: 20,
+                    },]
+                    .to_vec()
+                ),
+            );
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 1,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 3,
+                            amount: 20,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 30);
+            assert_eq!(NodleStaking::total(), 175);
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(7),
+                3,
+                20,
+                true,
+            ));
+
+            assert_eq!(mock::balances(&7), (100, 30));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            let mut new1 = vec![Event::Nomination(7, 20, 3, 60)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(7).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 1,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 3,
+                            amount: 20,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().active_bond, 30);
+            assert_eq!(NodleStaking::total(), 195);
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(8),
+                4,
+                20,
+                true,
+            ));
+
+            assert_eq!(mock::balances(&8), (100, 30));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            let mut new1 = vec![Event::Nomination(8, 20, 4, 40)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::nominator_state(8).unwrap().nominations,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 2,
+                            amount: 10,
+                        },
+                        Bond {
+                            owner: 4,
+                            amount: 20,
+                        },
+                    ]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().active_bond, 30);
+            assert_eq!(NodleStaking::total(), 215);
+
+            let s1_max_validators = NodleStaking::staking_max_validators();
+            let s1_min_stake = NodleStaking::staking_min_stake_session_selection();
+            let s1_min_validator_bond = NodleStaking::staking_min_validator_bond();
+            let s1_min_nomination_total_bond = NodleStaking::staking_min_nominator_total_bond();
+            let s1_min_nomination_chill_threshold =
+                NodleStaking::staking_min_nomination_chill_threshold();
+
+            let s1_new_min_nomination_total_bond = 25;
+            let s1_new_min_nomination_chill_threshold = 15;
+
+            assert_ok!(NodleStaking::set_staking_limits(
+                Origin::signed(CancelOrigin::get()),
+                s1_max_validators,
+                s1_min_stake,
+                s1_min_validator_bond,
+                s1_new_min_nomination_total_bond,
+                s1_new_min_nomination_chill_threshold,
+            ));
+
+            let mut new1 = vec![
+                Event::NewStakingLimits(
+                    s1_max_validators,
+                    s1_max_validators,
+                    s1_min_validator_bond,
+                    s1_min_validator_bond,
+                    s1_min_stake,
+                    s1_min_stake,
+                    s1_min_nomination_total_bond,
+                    s1_new_min_nomination_total_bond,
+                    s1_min_nomination_chill_threshold,
+                    s1_new_min_nomination_chill_threshold,
+                ),
+                Event::NominationBelowThreashold(6, 1, 10, 10, 20),
+                Event::NominationBelowThreashold(7, 1, 10, 10, 20),
+                Event::NominationBelowThreashold(8, 2, 10, 10, 20),
+                Event::NominationBelowThreashold(9, 2, 10, 10, 0),
+            ];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::validator_state(1).unwrap().nominators,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 10,
+                        amount: 25,
+                    },]
+                    .to_vec()
+                ),
+            );
+
+            assert_eq!(
+                NodleStaking::nominator_state(6).unwrap().nominations,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 3,
+                        amount: 20,
+                    },]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().active_bond, 20);
+            assert_eq!(NodleStaking::nominator_state(6).unwrap().frozen_bond, 10);
+
+            assert_eq!(
+                NodleStaking::nominator_state(7).unwrap().nominations,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 3,
+                        amount: 20,
+                    },]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().active_bond, 20);
+            assert_eq!(NodleStaking::nominator_state(7).unwrap().frozen_bond, 10);
+
+            assert_eq!(
+                NodleStaking::nominator_state(8).unwrap().nominations,
+                OrderedSet::from(
+                    [Bond {
+                        owner: 4,
+                        amount: 20,
+                    },]
+                    .to_vec()
+                ),
+            );
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().total, 30);
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().active_bond, 20);
+            assert_eq!(NodleStaking::nominator_state(8).unwrap().frozen_bond, 10);
+
+            assert_noop!(
+                NodleStaking::nominator_nominate(Origin::signed(6), 1, 14, false),
+                Error::<Test>::NominationBelowMin,
+            );
+
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                1,
+                14,
+                true
+            ));
+
+            let mut new1 = vec![Event::Nomination(6, 24, 1, 69)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_ok!(NodleStaking::nominator_bond_more(
+                Origin::signed(6),
+                1,
+                6,
+                true
+            ),);
+
+            let mut new1 = vec![Event::NominationIncreased(6, 30, 1, 69, 75)];
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::validator_state(1).unwrap().nominators,
+                OrderedSet::from(
+                    [
+                        Bond {
+                            owner: 6,
+                            amount: 30
+                        },
+                        Bond {
+                            owner: 10,
+                            amount: 25
+                        }
+                    ]
+                    .to_vec()
+                ),
+            );
+
+            assert_eq!(mock::balances(&1), (100, 20));
+            assert_eq!(Balances::total_balance(&1), 100);
+
+            assert_eq!(mock::balances(&2), (100, 20));
+            assert_eq!(Balances::total_balance(&2), 100);
+
+            assert_eq!(mock::balances(&3), (100, 20));
+            assert_eq!(Balances::total_balance(&3), 100);
+
+            assert_eq!(mock::balances(&4), (100, 20));
+            assert_eq!(Balances::total_balance(&4), 100);
+
+            assert_eq!(mock::balances(&5), (100, 10));
+            assert_eq!(Balances::total_balance(&5), 100);
+
+            assert_eq!(mock::balances(&6), (100, 60));
+            assert_eq!(Balances::total_balance(&6), 100);
+
+            assert_eq!(mock::balances(&7), (100, 30));
+            assert_eq!(Balances::total_balance(&7), 100);
+
+            assert_eq!(mock::balances(&8), (100, 30));
+            assert_eq!(Balances::total_balance(&8), 100);
+
+            assert_eq!(mock::balances(&9), (100, 10));
+            assert_eq!(Balances::total_balance(&9), 100);
+
+            assert_eq!(mock::balances(&10), (100, 25));
+            assert_eq!(Balances::total_balance(&10), 100);
+
+            assert_eq!(NodleStaking::total(), 245);
+
+            assert_eq!(System::consumers(&1), 2);
+            assert_eq!(System::consumers(&2), 2);
+            assert_eq!(System::consumers(&3), 2);
+            assert_eq!(System::consumers(&4), 2);
+            assert_eq!(System::consumers(&5), 2);
+            assert_eq!(System::consumers(&6), 1);
+            assert_eq!(System::consumers(&7), 1);
+            assert_eq!(System::consumers(&8), 1);
+            assert_eq!(System::consumers(&9), 1);
+            assert_eq!(System::consumers(&10), 1);
         });
 }
 
@@ -1708,15 +2793,15 @@ fn nominators_bond() {
             assert_eq!(NodleStaking::total(), 140);
 
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(1), 2, 50),
+                NodleStaking::nominator_bond_more(Origin::signed(1), 2, 50, false),
                 Error::<Test>::NominatorDNE,
             );
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(6), 2, 50),
+                NodleStaking::nominator_bond_more(Origin::signed(6), 2, 50, false),
                 Error::<Test>::NominationDNE,
             );
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(7), 6, 50),
+                NodleStaking::nominator_bond_more(Origin::signed(7), 6, 50, false),
                 Error::<Test>::ValidatorDNE,
             );
             assert_noop!(
@@ -1732,14 +2817,19 @@ fn nominators_bond() {
                 Error::<Test>::NominatorBondBelowMin,
             );
 
-            assert_ok!(NodleStaking::nominator_bond_more(Origin::signed(6), 1, 10));
+            assert_ok!(NodleStaking::nominator_bond_more(
+                Origin::signed(6),
+                1,
+                10,
+                false
+            ));
 
             assert_noop!(
                 NodleStaking::nominator_bond_less(Origin::signed(6), 2, 5),
                 Error::<Test>::NominationDNE,
             );
             assert_noop!(
-                NodleStaking::nominator_bond_more(Origin::signed(6), 1, 81),
+                NodleStaking::nominator_bond_more(Origin::signed(6), 1, 81, false),
                 Error::<Test>::InsufficientBalance,
             );
 
@@ -1750,7 +2840,7 @@ fn nominators_bond() {
             assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(1)));
 
             let mut new1 = vec![
-                Event::NominationIncreased(6, 1, 50, 60),
+                Event::NominationIncreased(6, 20, 1, 50, 60),
                 Event::ValidatorChosen(6, 1, 60),
                 Event::ValidatorChosen(6, 2, 40),
                 Event::ValidatorChosen(6, 3, 20),
@@ -1924,8 +3014,18 @@ fn revoke_nomination_or_leave_nominators() {
                 NodleStaking::nominator_denominate_all(Origin::signed(1)),
                 Error::<Test>::NominatorDNE,
             );
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 2, 3));
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(6), 3, 3));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                2,
+                3,
+                false
+            ));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(6),
+                3,
+                3,
+                false
+            ));
             assert_ok!(NodleStaking::nominator_denominate(Origin::signed(6), 1));
 
             let mut new1 = vec![
@@ -2180,7 +3280,12 @@ fn payouts_follow_nomination_changes() {
             expected.append(&mut new3);
             assert_eq!(events(), expected);
 
-            assert_ok!(NodleStaking::nominator_nominate(Origin::signed(8), 1, 10));
+            assert_ok!(NodleStaking::nominator_nominate(
+                Origin::signed(8),
+                1,
+                10,
+                false
+            ));
 
             mock::start_active_session(8);
 
@@ -2291,6 +3396,171 @@ fn set_invulnerables_works() {
         assert_noop!(
             NodleStaking::set_invulnerables(Origin::signed(1), new_set2.clone()),
             BadOrigin
+        );
+    });
+}
+
+#[test]
+fn set_total_validator_per_round_works() {
+    ExtBuilder::default().build_and_execute(|| {
+        let old_total_selected = NodleStaking::total_selected();
+        let new_total_selected = old_total_selected * 4u32;
+
+        assert_noop!(
+            NodleStaking::set_total_validator_per_round(Origin::signed(1), new_total_selected),
+            BadOrigin
+        );
+
+        assert_ok!(NodleStaking::set_total_validator_per_round(
+            Origin::signed(CancelOrigin::get()),
+            new_total_selected
+        ));
+
+        let mut expected = vec![Event::TotalSelectedSet(
+            old_total_selected,
+            new_total_selected,
+        )];
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::total_selected(), new_total_selected);
+
+        let new_total_selected = old_total_selected * 2u32;
+
+        assert_ok!(NodleStaking::set_total_validator_per_round(
+            Origin::root(),
+            new_total_selected
+        ));
+
+        let mut new1 = vec![Event::TotalSelectedSet(
+            old_total_selected * 4u32,
+            new_total_selected,
+        )];
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::total_selected(), new_total_selected);
+    });
+}
+
+#[test]
+fn set_staking_limits_works() {
+    ExtBuilder::default().build_and_execute(|| {
+        let old_max_validators = NodleStaking::staking_max_validators();
+        let old_min_stake = NodleStaking::staking_min_stake_session_selection();
+        let old_min_validator_bond = NodleStaking::staking_min_validator_bond();
+        let old_min_nomination_total_bond = NodleStaking::staking_min_nominator_total_bond();
+        let old_min_nomination_chill_threshold =
+            NodleStaking::staking_min_nomination_chill_threshold();
+
+        let new_max_validators = 100;
+        let new_min_stake = old_min_stake.saturating_mul(4u32.into());
+        let new_min_validator_bond = old_min_validator_bond.saturating_mul(4u32.into());
+        let new_min_nomination_total_bond =
+            old_min_nomination_total_bond.saturating_mul(4u32.into());
+        let new_min_nomination_chill_threshold =
+            old_min_nomination_chill_threshold.saturating_mul(4u32.into());
+
+        assert_noop!(
+            NodleStaking::set_staking_limits(
+                Origin::signed(1),
+                new_max_validators,
+                new_min_stake,
+                new_min_validator_bond,
+                new_min_nomination_total_bond,
+                new_min_nomination_chill_threshold,
+            ),
+            BadOrigin
+        );
+
+        assert_ok!(NodleStaking::set_staking_limits(
+            Origin::signed(CancelOrigin::get()),
+            new_max_validators,
+            new_min_stake,
+            new_min_validator_bond,
+            new_min_nomination_total_bond,
+            new_min_nomination_chill_threshold,
+        ));
+
+        let mut expected = vec![Event::NewStakingLimits(
+            old_max_validators,
+            new_max_validators,
+            old_min_stake,
+            new_min_stake,
+            old_min_validator_bond,
+            new_min_validator_bond,
+            old_min_nomination_total_bond,
+            new_min_nomination_total_bond,
+            old_min_nomination_chill_threshold,
+            new_min_nomination_chill_threshold,
+        )];
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::staking_max_validators(), new_max_validators);
+        assert_eq!(
+            NodleStaking::staking_min_stake_session_selection(),
+            new_min_stake
+        );
+        assert_eq!(
+            NodleStaking::staking_min_validator_bond(),
+            new_min_validator_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nominator_total_bond(),
+            new_min_nomination_total_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nomination_chill_threshold(),
+            new_min_nomination_chill_threshold
+        );
+
+        let new2_max_validators = 75;
+        let new2_min_stake = old_min_stake.saturating_mul(2u32.into());
+        let new2_min_validator_bond = old_min_validator_bond.saturating_mul(2u32.into());
+        let new2_min_nomination_total_bond =
+            old_min_nomination_total_bond.saturating_mul(2u32.into());
+        let new2_min_nomination_chill_threshold =
+            old_min_nomination_chill_threshold.saturating_mul(2u32.into());
+
+        assert_ok!(NodleStaking::set_staking_limits(
+            Origin::root(),
+            new2_max_validators,
+            new2_min_stake,
+            new2_min_validator_bond,
+            new2_min_nomination_total_bond,
+            new2_min_nomination_chill_threshold,
+        ));
+
+        let mut new1 = vec![Event::NewStakingLimits(
+            new_max_validators,
+            new2_max_validators,
+            new_min_stake,
+            new2_min_stake,
+            new_min_validator_bond,
+            new2_min_validator_bond,
+            new_min_nomination_total_bond,
+            new2_min_nomination_total_bond,
+            new_min_nomination_chill_threshold,
+            new2_min_nomination_chill_threshold,
+        )];
+        expected.append(&mut new1);
+        assert_eq!(events(), expected);
+
+        assert_eq!(NodleStaking::staking_max_validators(), new2_max_validators);
+        assert_eq!(
+            NodleStaking::staking_min_stake_session_selection(),
+            new2_min_stake
+        );
+        assert_eq!(
+            NodleStaking::staking_min_validator_bond(),
+            new2_min_validator_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nominator_total_bond(),
+            new2_min_nomination_total_bond
+        );
+        assert_eq!(
+            NodleStaking::staking_min_nomination_chill_threshold(),
+            new2_min_nomination_chill_threshold
         );
     });
 }
@@ -3117,7 +4387,8 @@ fn invulnerables_are_not_slashed() {
             assert_ok!(NodleStaking::nominator_nominate(
                 Origin::signed(201),
                 21,
-                500
+                500,
+                false,
             ));
 
             mock::start_active_session(3);
@@ -3398,7 +4669,11 @@ fn garbage_collection_after_slashing() {
                 &[Perbill::from_percent(100)],
             );
 
-            let mut new2 = vec![Event::Slash(11, 230398), Event::Slash(101, 115198)];
+            let mut new2 = vec![
+                Event::Slash(11, 230398),
+                Event::Slash(101, 115198),
+                Event::NominationBelowThreashold(101, 11, 2, 2, 0),
+            ];
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
@@ -3478,7 +4753,11 @@ fn garbage_collection_after_slashing_ed_1() {
                 &[Perbill::from_percent(100)],
             );
 
-            let mut new2 = vec![Event::Slash(11, 899), Event::Slash(101, 449)];
+            let mut new2 = vec![
+                Event::Slash(11, 899),
+                Event::Slash(101, 449),
+                Event::NominationBelowThreashold(101, 11, 1, 1, 0),
+            ];
 
             expected.append(&mut new2);
             assert_eq!(events(), expected);
@@ -3610,7 +4889,8 @@ fn slashing_nominators_by_span_max() {
             assert_ok!(NodleStaking::nominator_nominate(
                 Origin::signed(101),
                 21,
-                500
+                500,
+                false,
             ));
 
             mock::start_active_session(1);
@@ -3782,7 +5062,8 @@ fn slashes_are_summed_across_spans() {
             assert_ok!(NodleStaking::nominator_nominate(
                 Origin::signed(101),
                 21,
-                500
+                500,
+                false,
             ));
             mock::start_active_session(1);
             mock::start_active_session(2);
