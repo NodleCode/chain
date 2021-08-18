@@ -534,6 +534,34 @@
 <span id="532">532</span>
 <span id="533">533</span>
 <span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
 </pre><pre class="rust">
 <span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
@@ -863,6 +891,7 @@
     <span class="kw">pub</span> <span class="ident">nominations</span>: <span class="ident">OrderedSet</span><span class="op">&lt;</span><span class="ident">Bond</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">Balance</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">total</span>: <span class="ident">Balance</span>,
     <span class="kw">pub</span> <span class="ident">active_bond</span>: <span class="ident">Balance</span>,
+    <span class="kw">pub</span> <span class="ident">frozen_bond</span>: <span class="ident">Balance</span>,
     <span class="kw">pub</span> <span class="ident">unlocking</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">UnlockChunk</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
@@ -886,12 +915,16 @@
             }]),
             <span class="ident">total</span>: <span class="ident">amount</span>,
             <span class="ident">active_bond</span>: <span class="ident">amount</span>,
+            <span class="ident">frozen_bond</span>: <span class="ident">Zero::zero</span>(),
             <span class="ident">unlocking</span>: <span class="ident">Vec::new</span>(),
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_nomination</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bond</span>: <span class="ident">Bond</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">Balance</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_nomination</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bond</span>: <span class="ident">Bond</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">unfreeze_bond</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">amt</span> <span class="op">=</span> <span class="ident">bond</span>.<span class="ident">amount</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nominations</span>.<span class="ident">insert</span>(<span class="ident">bond</span>) {
+            <span class="kw">if</span> <span class="ident">unfreeze_bond</span> {
+                <span class="self">self</span>.<span class="ident">frozen_bond</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+            }
             <span class="self">self</span>.<span class="ident">total</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">total</span>.<span class="ident">saturating_add</span>(<span class="ident">amt</span>);
             <span class="self">self</span>.<span class="ident">active_bond</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">active_bond</span>.<span class="ident">saturating_add</span>(<span class="ident">amt</span>);
             <span class="bool-val">true</span>
@@ -901,7 +934,7 @@
     }
     <span class="comment">// Returns Some(remaining balance), must be more than MinNominatorStake</span>
     <span class="comment">// Returns None if nomination not found</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rm_nomination</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">validator</span>: <span class="ident">AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rm_nomination</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">validator</span>: <span class="ident">AccountId</span>, <span class="ident">freeze_bond</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">amt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">let</span> <span class="ident">nominations</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">nominations</span>
@@ -919,13 +952,33 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">balance</span>) <span class="op">=</span> <span class="ident">amt</span> {
             <span class="self">self</span>.<span class="ident">nominations</span> <span class="op">=</span> <span class="ident">OrderedSet::from</span>(<span class="ident">nominations</span>);
             <span class="self">self</span>.<span class="ident">active_bond</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">active_bond</span>.<span class="ident">saturating_sub</span>(<span class="ident">balance</span>);
+            <span class="kw">if</span> <span class="ident">freeze_bond</span> {
+                <span class="self">self</span>.<span class="ident">frozen_bond</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">frozen_bond</span>.<span class="ident">saturating_add</span>(<span class="ident">balance</span>);
+            }
             <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">active_bond</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
         }
     }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unbond_frozen</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">frozen_bond</span> <span class="op">&gt;</span> <span class="ident">Zero::zero</span>() {
+            <span class="kw">let</span> <span class="ident">frozen_bond</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">frozen_bond</span>;
+            <span class="self">self</span>.<span class="ident">total</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">total</span>.<span class="ident">saturating_sub</span>(<span class="ident">frozen_bond</span>);
+            <span class="self">self</span>.<span class="ident">frozen_bond</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+            <span class="prelude-val">Some</span>(<span class="ident">frozen_bond</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        }
+    }
+
     <span class="comment">// Returns None if nomination not found</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_nomination</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">validator</span>: <span class="ident">AccountId</span>, <span class="ident">more</span>: <span class="ident">Balance</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_nomination</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">validator</span>: <span class="ident">AccountId</span>,
+        <span class="ident">more</span>: <span class="ident">Balance</span>,
+        <span class="ident">unfreeze_bond</span>: <span class="ident">bool</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>
             .<span class="ident">nominations</span>
             .<span class="number">0</span>
@@ -936,6 +989,9 @@
                 <span class="ident">nom_bond</span>.<span class="ident">amount</span> <span class="op">=</span> <span class="ident">nom_bond</span>.<span class="ident">amount</span>.<span class="ident">saturating_add</span>(<span class="ident">more</span>);
                 <span class="self">self</span>.<span class="ident">total</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">total</span>.<span class="ident">saturating_add</span>(<span class="ident">more</span>);
                 <span class="self">self</span>.<span class="ident">active_bond</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">active_bond</span>.<span class="ident">saturating_add</span>(<span class="ident">more</span>);
+                <span class="kw">if</span> <span class="ident">unfreeze_bond</span> {
+                    <span class="self">self</span>.<span class="ident">frozen_bond</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+                }
                 <span class="prelude-val">Some</span>(<span class="ident">nom_bond</span>.<span class="ident">amount</span>)
             }
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
