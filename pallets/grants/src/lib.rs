@@ -203,7 +203,7 @@ pub mod pallet {
         /// Overwite all the vesting schedules for the given user. This will adjust
         /// the amount of locked coins for the given user.
         //#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
-        #[pallet::weight(100)]
+        #[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
         pub fn overwrite_vesting_schedules(
             origin: OriginFor<T>,
             who: <T::Lookup as StaticLookup>::Source,
