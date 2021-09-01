@@ -5,8 +5,8 @@
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use mock::{
-    CancelOrigin, Event as TestEvent, ExtBuilder, Origin, PalletBalances, System, Test as Runtime,
-    Vesting, ALICE, BOB,
+    CancelOrigin, Event as TestEvent, ExtBuilder, ForceOrigin, Origin, PalletBalances, System,
+    Test as Runtime, Vesting, ALICE, BOB,
 };
 use pallet_balances::{BalanceLock, Reasons};
 use sp_runtime::DispatchError::BadOrigin;
@@ -352,5 +352,136 @@ fn cancel_tolerates_corrupted_state() {
             ));
 
             assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+        });
+}
+
+#[test]
+fn overwrite_vesting_schedules_refuse_non_force_origin() {
+    ExtBuilder::default().build().execute_with(|| {
+        assert_noop!(
+            Vesting::overwrite_vesting_schedules(Origin::signed(ALICE), BOB, vec![],),
+            BadOrigin
+        );
+    });
+}
+
+#[test]
+fn overwrite_vesting_schedules_refuse_empty_schedules() {
+    ExtBuilder::default().build().execute_with(|| {
+        assert_noop!(
+            Vesting::overwrite_vesting_schedules(Origin::signed(ForceOrigin::get()), BOB, vec![],),
+            Error::<Runtime>::EmptySchedules,
+        );
+    });
+}
+
+#[test]
+fn overwrite_vesting_schedules_refuse_invalid_schedules() {
+    ExtBuilder::default().build().execute_with(|| {
+        assert_noop!(
+            Vesting::overwrite_vesting_schedules(
+                Origin::signed(ForceOrigin::get()),
+                BOB,
+                vec![VestingSchedule {
+                    start: 1u64,
+                    period: 0u64,
+                    period_count: 1u32,
+                    per_period: 100u64,
+                }],
+            ),
+            Error::<Runtime>::ZeroVestingPeriod,
+        );
+    });
+}
+
+#[test]
+fn overwrite_vesting_schedules_relock_appropriate_number_of_coins() {
+    ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build()
+        .execute_with(|| {
+            let schedule = VestingSchedule {
+                start: 0u64,
+                period: 10u64,
+                period_count: 2u32,
+                per_period: 10u64,
+            };
+            assert_ok!(Vesting::add_vesting_schedule(
+                Origin::signed(ALICE),
+                BOB,
+                schedule.clone()
+            ));
+
+            System::set_block_number(5);
+
+            let modified_schedules = vec![
+                VestingSchedule {
+                    start: 0u64,
+                    period: 5u64,
+                    period_count: 2u32,
+                    per_period: 5u64,
+                },
+                VestingSchedule {
+                    start: 0u64,
+                    period: 1u64,
+                    period_count: 2u32,
+                    per_period: 5u64,
+                },
+            ];
+
+            assert_ok!(Vesting::overwrite_vesting_schedules(
+                Origin::signed(ForceOrigin::get()),
+                BOB,
+                modified_schedules.clone(),
+            ));
+
+            assert_eq!(Vesting::vesting_schedules(BOB), modified_schedules);
+            assert_eq!(
+                PalletBalances::locks(&BOB).pop(),
+                Some(BalanceLock {
+                    id: VESTING_LOCK_ID,
+                    amount: 5u64,
+                    reasons: Reasons::All,
+                })
+            );
+        });
+}
+
+#[test]
+fn overwrite_vesting_schedules_may_clean_storage() {
+    ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build()
+        .execute_with(|| {
+            let schedule = VestingSchedule {
+                start: 0u64,
+                period: 10u64,
+                period_count: 2u32,
+                per_period: 10u64,
+            };
+            assert_ok!(Vesting::add_vesting_schedule(
+                Origin::signed(ALICE),
+                BOB,
+                schedule.clone()
+            ));
+
+            System::set_block_number(50);
+
+            // 5 periods of 2 blocks. should be completed after overwriting
+            let modified_schedules = vec![VestingSchedule {
+                start: 0u64,
+                period: 5u64,
+                period_count: 2u32,
+                per_period: 10u64,
+            }];
+
+            assert_ok!(Vesting::overwrite_vesting_schedules(
+                Origin::signed(ForceOrigin::get()),
+                BOB,
+                modified_schedules.clone(),
+            ));
+
+            assert_eq!(Vesting::vesting_schedules(BOB), vec![]);
+            assert_eq!(PalletBalances::locks(&BOB).pop(), None);
         });
 }

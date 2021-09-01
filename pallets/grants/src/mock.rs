@@ -74,12 +74,14 @@ impl pallet_balances::Config for Test {
 
 ord_parameter_types! {
     pub const CancelOrigin: AccountId = 42;
+    pub const ForceOrigin: AccountId = 43;
 }
 
 impl Config for Test {
     type Event = Event;
     type Currency = PalletBalances;
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
+    type ForceOrigin = EnsureSignedBy<ForceOrigin, AccountId>;
     type WeightInfo = ();
 }
 
@@ -109,6 +111,8 @@ impl ExtBuilder {
     }
 
     pub fn build(self) -> sp_io::TestExternalities {
+        sp_tracing::try_init_simple();
+
         let mut t = frame_system::GenesisConfig::default()
             .build_storage::<Test>()
             .unwrap();
