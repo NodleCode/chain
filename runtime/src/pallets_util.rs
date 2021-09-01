@@ -34,6 +34,8 @@ impl pallet_grants::Config for Runtime {
     type Currency = Balances;
     type CancelOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type ForceOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
 }
 
