@@ -10,7 +10,7 @@ git add .
 git commit -m "bump version for release"
 git push
 
-echo -n "Please wait for srtool github action to complete and enter the file name: "
+echo "Please wait for srtool github action to complete and enter the file name: "
 read runtime_file
 
 gh run download -n $runtime_file -n nodle-chain-srtool-digest.json
