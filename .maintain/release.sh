@@ -3,6 +3,7 @@
 VERSION_STRING="version = \"$1\""
 
 find . -name Cargo.toml -not -path "./target/*" -exec sed -i '' -e "s/^version = .*/${VERSION_STRING}/" {} \;
+cargo test --all --all-features
 
 git pull
 git add .
