@@ -72,6 +72,8 @@ pub mod pallet {
 
     pub use hooks::{SessionInterface, StashOf};
 
+    pub(crate) type StakingInvulnerables<T> = Vec<<T as frame_system::Config>::AccountId>;
+
     pub(crate) type BalanceOf<T> =
         <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
@@ -1083,10 +1085,15 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T> = "Balance")]
+    #[pallet::metadata(
+		T::AccountId = "AccountId",
+		BalanceOf<T> = "Balance",
+		T::BlockNumber = "BlockNumber",
+		StakingInvulnerables<T> = "StakingInvulnerables"
+	)]
     pub enum Event<T: Config> {
         /// Updated InVulnerable validator list \[validator_list\],
-        NewInvulnerables(Vec<T::AccountId>),
+        NewInvulnerables(StakingInvulnerables<T>),
         /// Updated total validators per session \[old, new\],
         TotalSelectedSet(u32, u32),
         /// Updated staking config, maximum Validators allowed to join the validators pool
@@ -1200,7 +1207,7 @@ pub mod pallet {
     /// invulnerables) and restricted to testnets.
     #[pallet::storage]
     #[pallet::getter(fn invulnerables)]
-    pub(crate) type Invulnerables<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub(crate) type Invulnerables<T: Config> = StorageValue<_, StakingInvulnerables<T>, ValueQuery>;
 
     /// Maximum Validators allowed to join the validators pool
     #[pallet::storage]
