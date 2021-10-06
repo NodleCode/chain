@@ -49,7 +49,7 @@ pub type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 pub type VestingScheduleOf<T> =
     VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
-pub type VestingScheduleOfColl<T> = Vec<VestingScheduleOf<T>>;
+pub type ListVestingScheduleOf<T> = Vec<VestingScheduleOf<T>>;
 pub type ScheduledGrant<T> = (
     <T as frame_system::Config>::BlockNumber,
     <T as frame_system::Config>::BlockNumber,
@@ -266,7 +266,7 @@ pub mod pallet {
 		T::AccountId = "AccountId",
 		BalanceOf<T> = "Balance",
 		VestingScheduleOf<T> = "VestingSchedule",
-		VestingScheduleOfColl<T> = "VestingScheduleOfColl"
+		ListVestingScheduleOf<T> = "ListVestingScheduleOf"
 	)]
     pub enum Event<T: Config> {
         /// Added new vesting schedule \[from, to, vesting_schedule\]
@@ -276,7 +276,7 @@ pub mod pallet {
         /// Canceled all vesting schedules \[who\]
         VestingSchedulesCanceled(T::AccountId),
         /// Overwritting vesting schedules \[who, vesting_schedules, locked_amount\]
-        VestingOverwritten(T::AccountId, VestingScheduleOfColl<T>, BalanceOf<T>),
+        VestingOverwritten(T::AccountId, ListVestingScheduleOf<T>, BalanceOf<T>),
     }
 
     #[pallet::error]
