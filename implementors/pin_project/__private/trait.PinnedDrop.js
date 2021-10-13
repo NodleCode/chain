@@ -1,4 +1,0 @@
-(function() {var implementors = {};
-implementors["futures_diagnose"] = [{"text":"impl&lt;T&gt; PinnedDrop for <a class=\"struct\" href=\"futures_diagnose/struct.DiagnoseFuture.html\" title=\"struct futures_diagnose::DiagnoseFuture\">DiagnoseFuture</a>&lt;T&gt;","synthetic":false,"types":["futures_diagnose::fut_with_diag::DiagnoseFuture"]}];
-implementors["rw_stream_sink"] = [{"text":"impl&lt;S:&nbsp;<a class=\"trait\" href=\"futures_core/stream/trait.TryStream.html\" title=\"trait futures_core::stream::TryStream\">TryStream</a>&gt; PinnedDrop for <a class=\"struct\" href=\"rw_stream_sink/struct.RwStreamSink.html\" title=\"struct rw_stream_sink::RwStreamSink\">RwStreamSink</a>&lt;S&gt;","synthetic":false,"types":["rw_stream_sink::RwStreamSink"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
