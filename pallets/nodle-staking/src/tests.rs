@@ -24,7 +24,7 @@ use crate::mock::{
     CancelOrigin, Event as MetaEvent, ExtBuilder, NodleStaking, Origin, Session, System, Test,
 };
 use crate::set::OrderedSet;
-use crate::types::{Bond, ValidatorSnapshot, ValidatorStatus};
+use crate::types::{Bond, StakeReward, ValidatorSnapshot, ValidatorStatus};
 use frame_support::{assert_noop, assert_ok, traits::Currency};
 use sp_runtime::{
     testing::UintAuthorityId,
@@ -676,6 +676,7 @@ fn exit_queue() {
 #[test]
 fn payout_distribution_to_solo_validators() {
     ExtBuilder::default()
+        .existential_deposit(3)
         .with_balances(vec![
             (1, 1000),
             (2, 1000),
@@ -857,7 +858,17 @@ fn payout_distribution_to_solo_validators() {
             assert_eq!(mock::balances(&4), (201000, 70));
             assert_eq!(Balances::total_balance(&4), 201000);
 
+            assert_eq!(
+                NodleStaking::stake_rewards(&5),
+                [StakeReward {
+                    session_idx: 7,
+                    value: 200000,
+                }]
+            );
+
             assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(5)));
+
+            assert_eq!(NodleStaking::stake_rewards(&5), []);
 
             let mut new8 = vec![Event::Rewarded(5, 200000)];
             expected.append(&mut new8);
@@ -866,14 +877,98 @@ fn payout_distribution_to_solo_validators() {
             assert_eq!(mock::balances(&5), (201000, 60));
             assert_eq!(Balances::total_balance(&5), 201000);
 
-            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)));
+            assert_eq!(NodleStaking::stake_rewards(&6), []);
+
+            assert_noop!(
+                NodleStaking::withdraw_staking_rewards(Origin::signed(6)),
+                Error::<Test>::RewardsDNE,
+            );
+
+            <NodleStaking as Store>::StakeRewards::mutate(&6, |rewards| {
+                rewards.push(StakeReward {
+                    session_idx: 7,
+                    value: 1,
+                })
+            });
+
+            assert_eq!(
+                NodleStaking::stake_rewards(&6),
+                [StakeReward {
+                    session_idx: 7,
+                    value: 1,
+                }]
+            );
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)),);
 
             let mut new9 = vec![Event::Rewarded(6, 0)];
             expected.append(&mut new9);
             assert_eq!(events(), expected);
 
-            assert_eq!(mock::balances(&6), (1000, 50));
-            assert_eq!(Balances::total_balance(&6), 1000);
+            assert_eq!(
+                NodleStaking::stake_rewards(&6),
+                [StakeReward {
+                    session_idx: 7,
+                    value: 1,
+                }]
+            );
+
+            mock::start_active_session(8);
+
+            <NodleStaking as Store>::StakeRewards::mutate(&6, |rewards| {
+                rewards.push(StakeReward {
+                    session_idx: 8,
+                    value: 2,
+                })
+            });
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)),);
+
+            let mut new10 = vec![Event::Rewarded(6, 0)];
+            expected.append(&mut new10);
+            assert_eq!(events(), expected);
+
+            assert_eq!(
+                NodleStaking::stake_rewards(&6),
+                [
+                    StakeReward {
+                        session_idx: 7,
+                        value: 1,
+                    },
+                    StakeReward {
+                        session_idx: 8,
+                        value: 2,
+                    }
+                ]
+            );
+
+            mock::start_active_session(9);
+
+            <NodleStaking as Store>::StakeRewards::mutate(&6, |rewards| {
+                rewards.push(StakeReward {
+                    session_idx: 9,
+                    value: 1,
+                })
+            });
+
+            assert_ok!(NodleStaking::withdraw_staking_rewards(Origin::signed(6)),);
+
+            let mut new11 = vec![
+                Event::ValidatorChosen(10, 1, 100),
+                Event::ValidatorChosen(10, 2, 90),
+                Event::ValidatorChosen(10, 3, 80),
+                Event::ValidatorChosen(10, 4, 70),
+                Event::ValidatorChosen(10, 5, 60),
+                Event::NewSession(45, 10, 5, 400),
+                Event::Rewarded(6, 4),
+            ];
+            expected.append(&mut new11);
+            assert_eq!(events(), expected);
+
+            assert_eq!(NodleStaking::stake_rewards(&6), []);
+
+            assert_eq!(mock::balances(&6), (1004, 50));
+            assert_eq!(Balances::total_balance(&6), 1004);
 
             assert_eq!(NodleStaking::total(), 450);
 
