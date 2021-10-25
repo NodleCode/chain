@@ -972,29 +972,31 @@ pub mod pallet {
         pub fn withdraw_staking_rewards(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
             let acc = ensure_signed(origin)?;
 
-            if <StakeRewards<T>>::contains_key(&acc) {
-                let mut total_rewards: BalanceOf<T> = Zero::zero();
+            <StakeRewards<T>>::try_mutate_exists(
+                &acc,
+                |maybe_rewards| -> DispatchResultWithPostInfo {
+                    let rewards = maybe_rewards.as_mut().ok_or(<Error<T>>::RewardsDNE)?;
 
-                let rewards = <StakeRewards<T>>::take(&acc);
+                    let mut total_rewards: BalanceOf<T> = Zero::zero();
 
-                // Iterate over the reward gains for the given account.
-                for reward in rewards.iter() {
-                    total_rewards = total_rewards.saturating_add(reward.value);
-                }
-
-                // deposit the reward gain to
-                if total_rewards > T::Currency::minimum_balance() {
-                    if let Ok(imb) = T::Currency::deposit_into_existing(&acc, total_rewards) {
-                        Self::deposit_event(Event::Rewarded(acc.clone(), imb.peek()));
+                    // Iterate over the reward gains for the given account.
+                    for reward in rewards.iter() {
+                        total_rewards = total_rewards.saturating_add(reward.value);
                     }
-                } else {
-                    // staking rewards are below ED
-                    Self::deposit_event(Event::Rewarded(acc.clone(), Zero::zero()));
-                }
-            } else {
-                // Not a validator or Nominator
-                Self::deposit_event(Event::Rewarded(acc.clone(), Zero::zero()));
-            }
+
+                    // deposit the reward gain to
+                    if total_rewards > T::Currency::minimum_balance() {
+                        if let Ok(imb) = T::Currency::deposit_into_existing(&acc, total_rewards) {
+                            *maybe_rewards = None;
+                            Self::deposit_event(Event::Rewarded(acc.clone(), imb.peek()));
+                        }
+                    } else {
+                        // staking rewards are below ED
+                        Self::deposit_event(Event::Rewarded(acc.clone(), Zero::zero()));
+                    }
+                    Ok(().into())
+                },
+            )?;
 
             Ok(().into())
         }
@@ -1051,6 +1053,8 @@ pub mod pallet {
         NominatorExists,
         /// Low free balance in caller account.
         InsufficientBalance,
+        /// Rewards don't exist.
+        RewardsDNE,
         /// Validator bond is less than `MinValidatorPoolStake` value.
         ValidatorBondBelowMin,
         /// Nominator bond is less than `MinNominatorStake` value.
