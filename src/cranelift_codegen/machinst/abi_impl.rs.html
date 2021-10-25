@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;machinst&#x2F;abi_impl.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>abi_impl.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;machinst&#x2F;abi_impl.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>abi_impl.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1509,8 +1509,7 @@
 <span id="1509">1509</span>
 <span id="1510">1510</span>
 <span id="1511">1511</span>
-</pre><pre class="rust">
-<span class="doccomment">//! Implementation of a vanilla ABI, shared between several machines. The</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Implementation of a vanilla ABI, shared between several machines. The</span>
 <span class="doccomment">//! implementation here assumes that arguments will be passed in registers</span>
 <span class="doccomment">//! first, then additional args on the stack; that the stack grows downward,</span>
 <span class="doccomment">//! contains a standard frame (return address and frame pointer), and the</span>
@@ -1620,13 +1619,13 @@
 <span class="doccomment">//!   - Return v1 in memory at `[P+8]`.</span>
 <span class="doccomment">//!   - Return v0 in memory at `[P+16]`.</span>
 
-<span class="kw">use</span> <span class="kw">super</span><span class="ident">::abi</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::binemit::StackMap</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir::types</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir</span>::{<span class="ident">ArgumentExtension</span>, <span class="ident">StackSlot</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::machinst</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::settings</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::CodegenResult</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::abi</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::binemit::StackMap</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::types</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="ident">ArgumentExtension</span>, <span class="ident">StackSlot</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::machinst</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::settings</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CodegenResult</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ir</span>, <span class="ident">isa</span>};
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">log</span>::{<span class="ident">debug</span>, <span class="ident">trace</span>};
@@ -1719,12 +1718,12 @@
 
     <span class="doccomment">/// Returns the number of bytes in a word.</span>
     <span class="kw">fn</span> <span class="ident">word_bytes</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
-        <span class="kw">return</span> <span class="self">Self</span><span class="ident">::word_bits</span>() <span class="op">/</span> <span class="number">8</span>;
+        <span class="kw">return</span> <span class="ident"><span class="self">Self</span>::word_bits</span>() <span class="op">/</span> <span class="number">8</span>;
     }
 
     <span class="doccomment">/// Returns word-size integer type.</span>
     <span class="kw">fn</span> <span class="ident">word_type</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Type</span> {
-        <span class="kw">match</span> <span class="self">Self</span><span class="ident">::word_bits</span>() {
+        <span class="kw">match</span> <span class="ident"><span class="self">Self</span>::word_bits</span>() {
             <span class="number">32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">I32</span>,
             <span class="number">64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">I64</span>,
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
@@ -1733,7 +1732,7 @@
 
     <span class="doccomment">/// Returns word register class.</span>
     <span class="kw">fn</span> <span class="ident">word_reg_class</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegClass</span> {
-        <span class="kw">match</span> <span class="self">Self</span><span class="ident">::word_bits</span>() {
+        <span class="kw">match</span> <span class="ident"><span class="self">Self</span>::word_bits</span>() {
             <span class="number">32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RegClass::I32</span>,
             <span class="number">64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RegClass::I64</span>,
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
@@ -1761,13 +1760,13 @@
     <span class="kw">fn</span> <span class="ident">fp_to_arg_offset</span>(<span class="ident">call_conv</span>: <span class="ident">isa::CallConv</span>, <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span>;
 
     <span class="doccomment">/// Generate a load from the stack.</span>
-    <span class="kw">fn</span> <span class="ident">gen_load_stack</span>(<span class="ident">mem</span>: <span class="ident">StackAMode</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_load_stack</span>(<span class="ident">mem</span>: <span class="ident">StackAMode</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate a store to the stack.</span>
-    <span class="kw">fn</span> <span class="ident">gen_store_stack</span>(<span class="ident">mem</span>: <span class="ident">StackAMode</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_store_stack</span>(<span class="ident">mem</span>: <span class="ident">StackAMode</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate a move.</span>
-    <span class="kw">fn</span> <span class="ident">gen_move</span>(<span class="ident">to_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_move</span>(<span class="ident">to_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate an integer-extend operation.</span>
     <span class="kw">fn</span> <span class="ident">gen_extend</span>(
@@ -1776,14 +1775,14 @@
         <span class="ident">is_signed</span>: <span class="ident">bool</span>,
         <span class="ident">from_bits</span>: <span class="ident">u8</span>,
         <span class="ident">to_bits</span>: <span class="ident">u8</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate a return instruction.</span>
-    <span class="kw">fn</span> <span class="ident">gen_ret</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_ret</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate an &quot;epilogue placeholder&quot; instruction, recognized by lowering</span>
     <span class="doccomment">/// when using the Baldrdash ABI.</span>
-    <span class="kw">fn</span> <span class="ident">gen_epilogue_placeholder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_epilogue_placeholder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate an add-with-immediate. Note that even if this uses a scratch</span>
     <span class="doccomment">/// register, it must satisfy two requirements:</span>
@@ -1794,16 +1793,16 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// - The add-imm sequence must work correctly when `from_reg` and/or</span>
     <span class="doccomment">///   `into_reg` are the register returned by `get_stacklimit_reg()`.</span>
-    <span class="kw">fn</span> <span class="ident">gen_add_imm</span>(<span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">imm</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_add_imm</span>(<span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">imm</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate a sequence that traps with a `TrapCode::StackOverflow` code if</span>
     <span class="doccomment">/// the stack pointer is less than the given limit register (assuming the</span>
     <span class="doccomment">/// stack grows downward).</span>
-    <span class="kw">fn</span> <span class="ident">gen_stack_lower_bound_trap</span>(<span class="ident">limit_reg</span>: <span class="ident">Reg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_stack_lower_bound_trap</span>(<span class="ident">limit_reg</span>: <span class="ident">Reg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate an instruction to compute an address of a stack slot (FP- or</span>
     <span class="doccomment">/// SP-based offset).</span>
-    <span class="kw">fn</span> <span class="ident">gen_get_stack_addr</span>(<span class="ident">mem</span>: <span class="ident">StackAMode</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_get_stack_addr</span>(<span class="ident">mem</span>: <span class="ident">StackAMode</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Get a fixed register to use to compute a stack limit. This is needed for</span>
     <span class="doccomment">/// certain sequences generated after the register allocator has already</span>
@@ -1819,27 +1818,27 @@
     <span class="kw">fn</span> <span class="ident">get_stacklimit_reg</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Reg</span>;
 
     <span class="doccomment">/// Generate a store to the given [base+offset] address.</span>
-    <span class="kw">fn</span> <span class="ident">gen_load_base_offset</span>(<span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">base</span>: <span class="ident">Reg</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_load_base_offset</span>(<span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">base</span>: <span class="ident">Reg</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate a load from the given [base+offset] address.</span>
-    <span class="kw">fn</span> <span class="ident">gen_store_base_offset</span>(<span class="ident">base</span>: <span class="ident">Reg</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_store_base_offset</span>(<span class="ident">base</span>: <span class="ident">Reg</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">from_reg</span>: <span class="ident">Reg</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Adjust the stack pointer up or down.</span>
-    <span class="kw">fn</span> <span class="ident">gen_sp_reg_adjust</span>(<span class="ident">amount</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_sp_reg_adjust</span>(<span class="ident">amount</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate a meta-instruction that adjusts the nominal SP offset.</span>
-    <span class="kw">fn</span> <span class="ident">gen_nominal_sp_adj</span>(<span class="ident">amount</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span>;
+    <span class="kw">fn</span> <span class="ident">gen_nominal_sp_adj</span>(<span class="ident">amount</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
     <span class="doccomment">/// Generate the usual frame-setup sequence for this architecture: e.g.,</span>
     <span class="doccomment">/// `push rbp / mov rbp, rsp` on x86-64, or `stp fp, lr, [sp, #-16]!` on</span>
     <span class="doccomment">/// AArch64.</span>
-    <span class="kw">fn</span> <span class="ident">gen_prologue_frame_setup</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_prologue_frame_setup</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate the usual frame-restore sequence for this architecture.</span>
-    <span class="kw">fn</span> <span class="ident">gen_epilogue_frame_restore</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_epilogue_frame_restore</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate a probestack call.</span>
-    <span class="kw">fn</span> <span class="ident">gen_probestack</span>(<span class="ident">_frame_size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_probestack</span>(<span class="ident">_frame_size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate a clobber-save sequence. This takes the list of *all* registers</span>
     <span class="doccomment">/// written/modified by the function body. The implementation here is</span>
@@ -1857,7 +1856,7 @@
         <span class="ident">clobbers</span>: <span class="kw-2">&amp;</span><span class="ident">Set</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">fixed_frame_storage_size</span>: <span class="ident">u32</span>,
         <span class="ident">outgoing_args_size</span>: <span class="ident">u32</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u64</span>, <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="self">Self</span><span class="ident">::I</span>; <span class="number">16</span>]<span class="op">&gt;</span>);
+    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u64</span>, <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident"><span class="self">Self</span>::I</span>; <span class="number">16</span>]<span class="op">&gt;</span>);
 
     <span class="doccomment">/// Generate a clobber-restore sequence. This sequence should perform the</span>
     <span class="doccomment">/// opposite of the clobber-save sequence generated above, assuming that SP</span>
@@ -1869,7 +1868,7 @@
         <span class="ident">clobbers</span>: <span class="kw-2">&amp;</span><span class="ident">Set</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">fixed_frame_storage_size</span>: <span class="ident">u32</span>,
         <span class="ident">outgoing_args_size</span>: <span class="ident">u32</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="self">Self</span><span class="ident">::I</span>; <span class="number">16</span>]<span class="op">&gt;</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident"><span class="self">Self</span>::I</span>; <span class="number">16</span>]<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate a call instruction/sequence. This method is provided one</span>
     <span class="doccomment">/// temporary register to use to synthesize the called address, if needed.</span>
@@ -1881,17 +1880,17 @@
         <span class="ident">tmp</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
         <span class="ident">callee_conv</span>: <span class="ident">isa::CallConv</span>,
         <span class="ident">callee_conv</span>: <span class="ident">isa::CallConv</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[(<span class="ident">InstIsSafepoint</span>, <span class="self">Self</span><span class="ident">::I</span>); <span class="number">2</span>]<span class="op">&gt;</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[(<span class="ident">InstIsSafepoint</span>, <span class="ident"><span class="self">Self</span>::I</span>); <span class="number">2</span>]<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Get the number of spillslots required for the given register-class and</span>
     <span class="doccomment">/// type.</span>
     <span class="kw">fn</span> <span class="ident">get_number_of_spillslots_for_value</span>(<span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span>;
 
     <span class="doccomment">/// Get the current virtual-SP offset from an instruction-emission state.</span>
-    <span class="kw">fn</span> <span class="ident">get_virtual_sp_offset_from_state</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span> <span class="kw">as</span> <span class="ident">MachInstEmit</span><span class="op">&gt;</span><span class="ident">::State</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span>;
+    <span class="kw">fn</span> <span class="ident">get_virtual_sp_offset_from_state</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span> <span class="kw">as</span> <span class="ident">MachInstEmit</span><span class="op">&gt;</span><span class="ident">::State</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span>;
 
     <span class="doccomment">/// Get the &quot;nominal SP to FP&quot; offset from an instruction-emission state.</span>
-    <span class="kw">fn</span> <span class="ident">get_nominal_sp_to_fp</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span> <span class="kw">as</span> <span class="ident">MachInstEmit</span><span class="op">&gt;</span><span class="ident">::State</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span>;
+    <span class="kw">fn</span> <span class="ident">get_nominal_sp_to_fp</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span> <span class="kw">as</span> <span class="ident">MachInstEmit</span><span class="op">&gt;</span><span class="ident">::State</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i64</span>;
 
     <span class="doccomment">/// Get all caller-save registers, that is, registers that we expect</span>
     <span class="doccomment">/// not to be saved across a call to a callee with the given ABI.</span>
@@ -2371,7 +2370,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">idx</span>: <span class="ident">usize</span>,
         <span class="ident">into_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span>[<span class="ident">idx</span>] {
             <span class="comment">// Extension mode doesn&#39;t matter (we&#39;re copying out, not in; we</span>
             <span class="comment">// ignore high bits by convention).</span>
@@ -2400,7 +2399,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">idx</span>: <span class="ident">usize</span>,
         <span class="ident">from_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
         <span class="kw">let</span> <span class="ident">word_bits</span> <span class="op">=</span> <span class="ident">M::word_bits</span>() <span class="kw">as</span> <span class="ident">u8</span>;
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">rets</span>[<span class="ident">idx</span>] {
@@ -2477,7 +2476,7 @@
         <span class="ident">ret</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">gen_retval_area_setup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">gen_retval_area_setup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_arg</span> {
             <span class="kw">let</span> <span class="ident">insts</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">gen_copy_arg_to_regs</span>(<span class="ident">i</span>, <span class="ident">ValueRegs::one</span>(<span class="self">self</span>.<span class="ident">ret_area_ptr</span>.<span class="ident">unwrap</span>()));
             <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="ident">insts</span>.<span class="ident">into_iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
@@ -2493,11 +2492,11 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">gen_ret</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span> {
+    <span class="kw">fn</span> <span class="ident">gen_ret</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span> {
         <span class="ident">M::gen_ret</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">gen_epilogue_placeholder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span> {
+    <span class="kw">fn</span> <span class="ident">gen_epilogue_placeholder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span> {
         <span class="ident">M::gen_epilogue_placeholder</span>()
     }
 
@@ -2516,7 +2515,7 @@
         <span class="ident">offset</span>: <span class="ident">u32</span>,
         <span class="ident">ty</span>: <span class="ident">Type</span>,
         <span class="ident">into_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="comment">// Offset from beginning of stackslot area, which is at nominal SP (see</span>
         <span class="comment">// [MemArg::NominalSPOffset] for more details on nominal SP tracking).</span>
         <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="ident">i64</span>;
@@ -2532,7 +2531,7 @@
         <span class="ident">offset</span>: <span class="ident">u32</span>,
         <span class="ident">ty</span>: <span class="ident">Type</span>,
         <span class="ident">from_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="comment">// Offset from beginning of stackslot area, which is at nominal SP (see</span>
         <span class="comment">// [MemArg::NominalSPOffset] for more details on nominal SP tracking).</span>
         <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="ident">i64</span>;
@@ -2542,7 +2541,7 @@
     }
 
     <span class="doccomment">/// Produce an instruction that computes a stackslot address.</span>
-    <span class="kw">fn</span> <span class="ident">stackslot_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot</span>: <span class="ident">StackSlot</span>, <span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span> {
+    <span class="kw">fn</span> <span class="ident">stackslot_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot</span>: <span class="ident">StackSlot</span>, <span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span> {
         <span class="comment">// Offset from beginning of stackslot area, which is at nominal SP (see</span>
         <span class="comment">// [MemArg::NominalSPOffset] for more details on nominal SP tracking).</span>
         <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="ident">i64</span>;
@@ -2556,7 +2555,7 @@
         <span class="ident">slot</span>: <span class="ident">SpillSlot</span>,
         <span class="ident">ty</span>: <span class="ident">Type</span>,
         <span class="ident">into_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="comment">// Offset from beginning of spillslot area, which is at nominal SP + stackslots_size.</span>
         <span class="kw">let</span> <span class="ident">islot</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">spill_off</span> <span class="op">=</span> <span class="ident">islot</span> <span class="op">*</span> <span class="ident">M::word_bytes</span>() <span class="kw">as</span> <span class="ident">i64</span>;
@@ -2571,7 +2570,7 @@
         <span class="ident">slot</span>: <span class="ident">SpillSlot</span>,
         <span class="ident">ty</span>: <span class="ident">Type</span>,
         <span class="ident">from_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="comment">// Offset from beginning of spillslot area, which is at nominal SP + stackslots_size.</span>
         <span class="kw">let</span> <span class="ident">islot</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">spill_off</span> <span class="op">=</span> <span class="ident">islot</span> <span class="op">*</span> <span class="ident">M::word_bytes</span>() <span class="kw">as</span> <span class="ident">i64</span>;
@@ -2583,7 +2582,7 @@
     <span class="kw">fn</span> <span class="ident">spillslots_to_stack_map</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">slots</span>: <span class="kw-2">&amp;</span>[<span class="ident">SpillSlot</span>],
-        <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span> <span class="kw">as</span> <span class="ident">MachInstEmit</span><span class="op">&gt;</span><span class="ident">::State</span>,
+        <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span> <span class="kw">as</span> <span class="ident">MachInstEmit</span><span class="op">&gt;</span><span class="ident">::State</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StackMap</span> {
         <span class="kw">let</span> <span class="ident">virtual_sp_offset</span> <span class="op">=</span> <span class="ident">M::get_virtual_sp_offset_from_state</span>(<span class="ident">state</span>);
         <span class="kw">let</span> <span class="ident">nominal_sp_to_fp</span> <span class="op">=</span> <span class="ident">M::get_nominal_sp_to_fp</span>(<span class="ident">state</span>);
@@ -2610,7 +2609,7 @@
         <span class="ident">StackMap::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">bits</span>[..])
     }
 
-    <span class="kw">fn</span> <span class="ident">gen_prologue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">gen_prologue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">insts</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>() {
             <span class="comment">// set up frame</span>
@@ -2717,7 +2716,7 @@
         <span class="ident">M::get_number_of_spillslots_for_value</span>(<span class="ident">rc</span>, <span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">gen_spill</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">to_slot</span>: <span class="ident">SpillSlot</span>, <span class="ident">from_reg</span>: <span class="ident">RealReg</span>, <span class="ident">ty</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span> {
+    <span class="kw">fn</span> <span class="ident">gen_spill</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">to_slot</span>: <span class="ident">SpillSlot</span>, <span class="ident">from_reg</span>: <span class="ident">RealReg</span>, <span class="ident">ty</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span> {
         <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty_from_ty_hint_or_reg_class</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">from_reg</span>.<span class="ident">to_reg</span>(), <span class="ident">ty</span>);
         <span class="self">self</span>.<span class="ident">store_spillslot</span>(<span class="ident">to_slot</span>, <span class="ident">ty</span>, <span class="ident">ValueRegs::one</span>(<span class="ident">from_reg</span>.<span class="ident">to_reg</span>()))
             .<span class="ident">into_iter</span>()
@@ -2730,7 +2729,7 @@
         <span class="ident">to_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span>,
         <span class="ident">from_slot</span>: <span class="ident">SpillSlot</span>,
         <span class="ident">ty</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::I</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span> {
         <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty_from_ty_hint_or_reg_class</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">to_reg</span>.<span class="ident">to_reg</span>().<span class="ident">to_reg</span>(), <span class="ident">ty</span>);
         <span class="self">self</span>.<span class="ident">load_spillslot</span>(
             <span class="ident">from_slot</span>,
@@ -2875,22 +2874,22 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">accumulate_outgoing_args_size</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
+    <span class="kw">fn</span> <span class="ident">accumulate_outgoing_args_size</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
         <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_arg_space</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_space</span>;
         <span class="ident">ctx</span>.<span class="ident">abi</span>().<span class="ident">accumulate_outgoing_args_size</span>(<span class="ident">off</span> <span class="kw">as</span> <span class="ident">u32</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">emit_stack_pre_adjust</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
+    <span class="kw">fn</span> <span class="ident">emit_stack_pre_adjust</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
         <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_arg_space</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_space</span>;
         <span class="ident">adjust_stack_and_nominal_sp</span>::<span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">C</span><span class="op">&gt;</span>(<span class="ident">ctx</span>, <span class="ident">off</span> <span class="kw">as</span> <span class="ident">i32</span>, <span class="comment">/* is_sub = */</span> <span class="bool-val">true</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">emit_stack_post_adjust</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
+    <span class="kw">fn</span> <span class="ident">emit_stack_post_adjust</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
         <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_arg_space</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_space</span>;
         <span class="ident">adjust_stack_and_nominal_sp</span>::<span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">C</span><span class="op">&gt;</span>(<span class="ident">ctx</span>, <span class="ident">off</span> <span class="kw">as</span> <span class="ident">i32</span>, <span class="comment">/* is_sub = */</span> <span class="bool-val">false</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">emit_copy_regs_to_arg</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="kw">fn</span> <span class="ident">emit_copy_regs_to_arg</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>,
         <span class="ident">idx</span>: <span class="ident">usize</span>,
@@ -2959,7 +2958,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">emit_copy_retval_to_regs</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="kw">fn</span> <span class="ident">emit_copy_retval_to_regs</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>,
         <span class="ident">idx</span>: <span class="ident">usize</span>,
@@ -2986,7 +2985,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">emit_call</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
+    <span class="kw">fn</span> <span class="ident">emit_call</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">C</span>) {
         <span class="kw">let</span> (<span class="ident">uses</span>, <span class="ident">defs</span>) <span class="op">=</span> (
             <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">uses</span>, <span class="ident">Default::default</span>()),
             <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">defs</span>, <span class="ident">Default::default</span>()),
@@ -3021,7 +3020,7 @@
         }
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="cranelift_codegen" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>

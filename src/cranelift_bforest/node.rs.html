@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-bforest-0.69.0&#x2F;src&#x2F;node.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>node.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_bforest/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-bforest-0.69.0&#x2F;src&#x2F;node.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>node.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_bforest/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -804,8 +804,7 @@
 <span id="804">804</span>
 <span id="805">805</span>
 <span id="806">806</span>
-</pre><pre class="rust">
-<span class="doccomment">//! B+-tree nodes.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! B+-tree nodes.</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">slice_insert</span>, <span class="ident">slice_shift</span>, <span class="ident">Forest</span>, <span class="ident">Node</span>, <span class="ident">SetValue</span>, <span class="ident">INNER_SIZE</span>};
 <span class="kw">use</span> <span class="ident">core::borrow</span>::{<span class="ident">Borrow</span>, <span class="ident">BorrowMut</span>};
@@ -863,7 +862,7 @@
     <span class="doccomment">/// Is this a free/unused node?</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_free</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Free</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+            <span class="ident"><span class="self">Self</span>::Free</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
         }
     }
@@ -874,9 +873,9 @@
     <span class="doccomment">/// a leaf node.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Inner</span> { <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">usize::from</span>(<span class="ident">size</span>) <span class="op">+</span> <span class="number">1</span>,
-            <span class="self">Self</span><span class="ident">::Leaf</span> { <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">usize::from</span>(<span class="ident">size</span>),
-            <span class="self">Self</span><span class="ident">::Free</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;freed node&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Inner</span> { <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">usize::from</span>(<span class="ident">size</span>) <span class="op">+</span> <span class="number">1</span>,
+            <span class="ident"><span class="self">Self</span>::Leaf</span> { <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">usize::from</span>(<span class="ident">size</span>),
+            <span class="ident"><span class="self">Self</span>::Free</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;freed node&quot;</span>),
         }
     }
 
@@ -886,7 +885,7 @@
         <span class="comment">// Saves us from inventing a default/reserved value.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tree</span> <span class="op">=</span> [<span class="ident">right</span>; <span class="ident">INNER_SIZE</span>];
         <span class="ident">tree</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">left</span>;
-        <span class="self">Self</span><span class="ident">::Inner</span> {
+        <span class="ident"><span class="self">Self</span>::Inner</span> {
             <span class="ident">size</span>: <span class="number">1</span>,
             <span class="ident">keys</span>: [<span class="ident">key</span>; <span class="ident">INNER_SIZE</span> <span class="op">-</span> <span class="number">1</span>],
             <span class="ident">tree</span>,
@@ -895,7 +894,7 @@
 
     <span class="doccomment">/// Create a leaf node with a single key-value pair.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">leaf</span>(<span class="ident">key</span>: <span class="ident">F::Key</span>, <span class="ident">value</span>: <span class="ident">F::Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::Leaf</span> {
+        <span class="ident"><span class="self">Self</span>::Leaf</span> {
             <span class="ident">size</span>: <span class="number">1</span>,
             <span class="ident">keys</span>: <span class="ident">F::splat_key</span>(<span class="ident">key</span>),
             <span class="ident">vals</span>: <span class="ident">F::splat_value</span>(<span class="ident">value</span>),
@@ -905,7 +904,7 @@
     <span class="doccomment">/// Unwrap an inner node into two slices (keys, trees).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="kw-2">&amp;</span>[<span class="ident">F::Key</span>], <span class="kw-2">&amp;</span>[<span class="ident">Node</span>]) {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Inner</span> {
+            <span class="ident"><span class="self">Self</span>::Inner</span> {
                 <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="ident">tree</span>,
@@ -922,7 +921,7 @@
     <span class="doccomment">/// Unwrap a leaf node into two slices (keys, values) of the same length.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_leaf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="kw-2">&amp;</span>[<span class="ident">F::Key</span>], <span class="kw-2">&amp;</span>[<span class="ident">F::Value</span>]) {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Leaf</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> {
                 <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="ident">vals</span>,
@@ -941,7 +940,7 @@
     <span class="doccomment">/// Unwrap a mutable leaf node into two slices (keys, values) of the same length.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_leaf_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">F::Key</span>], <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">F::Value</span>]) {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Leaf</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> {
                 <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">vals</span>,
@@ -961,7 +960,7 @@
     <span class="doccomment">/// This is simply the first key.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">leaf_crit_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">F::Key</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Leaf</span> { <span class="ident">size</span>, <span class="kw-2">ref</span> <span class="ident">keys</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> { <span class="ident">size</span>, <span class="kw-2">ref</span> <span class="ident">keys</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">debug_assert!</span>(<span class="ident">size</span> <span class="op">&gt;</span> <span class="number">0</span>, <span class="string">&quot;Empty leaf node&quot;</span>);
                 <span class="ident">keys</span>.<span class="ident">borrow</span>()[<span class="number">0</span>]
             }
@@ -974,7 +973,7 @@
     <span class="doccomment">/// If the node is full, this leaves the node unchanged and returns false.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_inner_insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">key</span>: <span class="ident">F::Key</span>, <span class="ident">node</span>: <span class="ident">Node</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Inner</span> {
+            <span class="ident"><span class="self">Self</span>::Inner</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">tree</span>,
@@ -1000,7 +999,7 @@
     <span class="doccomment">/// is full.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_leaf_insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">key</span>: <span class="ident">F::Key</span>, <span class="ident">value</span>: <span class="ident">F::Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Leaf</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">vals</span>,
@@ -1031,7 +1030,7 @@
     <span class="doccomment">/// node will be split in half with a bias towards an even split after the insertion is retried.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">split</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">insert_index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SplitOff</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Inner</span> {
+            <span class="ident"><span class="self">Self</span>::Inner</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="ident">tree</span>,
@@ -1063,14 +1062,14 @@
                     <span class="ident">lhs_entries</span>: <span class="ident">l_ents</span>,
                     <span class="ident">rhs_entries</span>: <span class="ident">r_ents</span>,
                     <span class="ident">crit_key</span>: <span class="ident">keys</span>[<span class="ident">l_ents</span> <span class="op">-</span> <span class="number">1</span>],
-                    <span class="ident">rhs_data</span>: <span class="self">Self</span><span class="ident">::Inner</span> {
+                    <span class="ident">rhs_data</span>: <span class="ident"><span class="self">Self</span>::Inner</span> {
                         <span class="ident">size</span>: (<span class="ident">r_ents</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>,
                         <span class="ident">keys</span>: <span class="ident">r_keys</span>,
                         <span class="ident">tree</span>: <span class="ident">r_tree</span>,
                     },
                 }
             }
-            <span class="self">Self</span><span class="ident">::Leaf</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="ident">vals</span>,
@@ -1096,7 +1095,7 @@
                     <span class="ident">lhs_entries</span>: <span class="ident">l_size</span>,
                     <span class="ident">rhs_entries</span>: <span class="ident">r_size</span>,
                     <span class="ident">crit_key</span>: <span class="ident">o_keys</span>[<span class="ident">l_size</span>],
-                    <span class="ident">rhs_data</span>: <span class="self">Self</span><span class="ident">::Leaf</span> {
+                    <span class="ident">rhs_data</span>: <span class="ident"><span class="self">Self</span>::Leaf</span> {
                         <span class="ident">size</span>: <span class="ident">r_size</span> <span class="kw">as</span> <span class="ident">u8</span>,
                         <span class="ident">keys</span>: <span class="ident">r_keys</span>,
                         <span class="ident">vals</span>: <span class="ident">r_vals</span>,
@@ -1116,7 +1115,7 @@
     <span class="doccomment">/// Return an indication of the node&#39;s health (i.e. below half capacity).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inner_remove</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Removed</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Inner</span> {
+            <span class="ident"><span class="self">Self</span>::Inner</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">tree</span>,
@@ -1141,7 +1140,7 @@
     <span class="doccomment">/// Return an indication of the node&#39;s health (i.e. below half capacity).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">leaf_remove</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Removed</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Leaf</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">size</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">keys</span>,
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">vals</span>,
@@ -1171,12 +1170,12 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">balance</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">crit_key</span>: <span class="ident">F::Key</span>, <span class="ident">rhs</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">F::Key</span><span class="op">&gt;</span> {
         <span class="kw">match</span> (<span class="self">self</span>, <span class="ident">rhs</span>) {
             (
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="ident">::Inner</span> {
+                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Inner</span> {
                     <span class="ident">size</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l_size</span>,
                     <span class="ident">keys</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l_keys</span>,
                     <span class="ident">tree</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l_tree</span>,
                 },
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="ident">::Inner</span> {
+                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Inner</span> {
                     <span class="ident">size</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r_size</span>,
                     <span class="ident">keys</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r_keys</span>,
                     <span class="ident">tree</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r_tree</span>,
@@ -1219,12 +1218,12 @@
                 }
             }
             (
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="ident">::Leaf</span> {
+                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Leaf</span> {
                     <span class="ident">size</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l_size</span>,
                     <span class="ident">keys</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l_keys</span>,
                     <span class="ident">vals</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l_vals</span>,
                 },
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="ident">::Leaf</span> {
+                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Leaf</span> {
                     <span class="ident">size</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r_size</span>,
                     <span class="ident">keys</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r_keys</span>,
                     <span class="ident">vals</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r_vals</span>,
@@ -1329,14 +1328,14 @@
     <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">removed</span>: <span class="ident">usize</span>, <span class="ident">new_size</span>: <span class="ident">usize</span>, <span class="ident">capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">if</span> <span class="number">2</span> <span class="op">*</span> <span class="ident">new_size</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">capacity</span> {
             <span class="kw">if</span> <span class="ident">removed</span> <span class="op">=</span><span class="op">=</span> <span class="ident">new_size</span> {
-                <span class="self">Self</span><span class="ident">::Rightmost</span>
+                <span class="ident"><span class="self">Self</span>::Rightmost</span>
             } <span class="kw">else</span> {
-                <span class="self">Self</span><span class="ident">::Healthy</span>
+                <span class="ident"><span class="self">Self</span>::Healthy</span>
             }
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">new_size</span> <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="self">Self</span><span class="ident">::Underflow</span>
+            <span class="ident"><span class="self">Self</span>::Underflow</span>
         } <span class="kw">else</span> {
-            <span class="self">Self</span><span class="ident">::Empty</span>
+            <span class="ident"><span class="self">Self</span>::Empty</span>
         }
     }
 }
@@ -1366,14 +1365,14 @@
 {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="self">Self</span><span class="ident">::Inner</span> { <span class="ident">size</span>, <span class="ident">keys</span>, <span class="ident">tree</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::Inner</span> { <span class="ident">size</span>, <span class="ident">keys</span>, <span class="ident">tree</span> } <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[ {}&quot;</span>, <span class="ident">tree</span>[<span class="number">0</span>])<span class="question-mark">?</span>;
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">usize::from</span>(<span class="ident">size</span>) {
                     <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot; {} {}&quot;</span>, <span class="ident">keys</span>[<span class="ident">i</span>], <span class="ident">tree</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>])<span class="question-mark">?</span>;
                 }
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot; ]&quot;</span>)
             }
-            <span class="self">Self</span><span class="ident">::Leaf</span> { <span class="ident">size</span>, <span class="ident">keys</span>, <span class="ident">vals</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::Leaf</span> { <span class="ident">size</span>, <span class="ident">keys</span>, <span class="ident">vals</span> } <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">keys</span>.<span class="ident">borrow</span>();
                 <span class="kw">let</span> <span class="ident">vals</span> <span class="op">=</span> <span class="ident">vals</span>.<span class="ident">borrow</span>();
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[&quot;</span>)<span class="question-mark">?</span>;
@@ -1383,8 +1382,8 @@
                 }
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot; ]&quot;</span>)
             }
-            <span class="self">Self</span><span class="ident">::Free</span> { <span class="ident">next</span>: <span class="prelude-val">Some</span>(<span class="ident">n</span>) } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[ free -&gt; {} ]&quot;</span>, <span class="ident">n</span>),
-            <span class="self">Self</span><span class="ident">::Free</span> { <span class="ident">next</span>: <span class="prelude-val">None</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[ free ]&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Free</span> { <span class="ident">next</span>: <span class="prelude-val">Some</span>(<span class="ident">n</span>) } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[ free -&gt; {} ]&quot;</span>, <span class="ident">n</span>),
+            <span class="ident"><span class="self">Self</span>::Free</span> { <span class="ident">next</span>: <span class="prelude-val">None</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[ free ]&quot;</span>),
         }
     }
 }
@@ -1404,11 +1403,11 @@
         <span class="kw">type</span> <span class="ident">LeafKeys</span> <span class="op">=</span> [<span class="ident">char</span>; <span class="number">15</span>];
         <span class="kw">type</span> <span class="ident">LeafValues</span> <span class="op">=</span> [<span class="ident">SetValue</span>; <span class="number">15</span>];
 
-        <span class="kw">fn</span> <span class="ident">splat_key</span>(<span class="ident">key</span>: <span class="self">Self</span><span class="ident">::Key</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::LeafKeys</span> {
+        <span class="kw">fn</span> <span class="ident">splat_key</span>(<span class="ident">key</span>: <span class="ident"><span class="self">Self</span>::Key</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::LeafKeys</span> {
             [<span class="ident">key</span>; <span class="number">15</span>]
         }
 
-        <span class="kw">fn</span> <span class="ident">splat_value</span>(<span class="ident">value</span>: <span class="self">Self</span><span class="ident">::Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::LeafValues</span> {
+        <span class="kw">fn</span> <span class="ident">splat_value</span>(<span class="ident">value</span>: <span class="ident"><span class="self">Self</span>::Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::LeafValues</span> {
             [<span class="ident">value</span>; <span class="number">15</span>]
         }
     }
@@ -1611,7 +1610,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">rhs</span>.<span class="ident">to_string</span>(), <span class="string">&quot;[ 0 1 2 3 4 5 6 7 ]&quot;</span>);
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cranelift_bforest" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

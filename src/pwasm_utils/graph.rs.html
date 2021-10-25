@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;pwasm-utils-0.16.0&#x2F;src&#x2F;graph.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>graph.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pwasm_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;pwasm-utils-0.16.0&#x2F;src&#x2F;graph.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>graph.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pwasm_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -978,14 +978,13 @@
 <span id="978">978</span>
 <span id="979">979</span>
 <span id="980">980</span>
-</pre><pre class="rust">
-<span class="doccomment">//! Wasm binary graph format</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Wasm binary graph format</span>
 
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">parity_wasm::elements</span>;
-<span class="kw">use</span> <span class="kw">super</span><span class="ident">::ref_list</span>::{<span class="ident">RefList</span>, <span class="ident">EntryRef</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::std</span>::{
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ref_list</span>::{<span class="ident">RefList</span>, <span class="ident">EntryRef</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std</span>::{
 	<span class="ident">vec::Vec</span>,
 	<span class="ident">borrow::ToOwned</span>,
 	<span class="ident">string::String</span>,
@@ -1392,7 +1391,7 @@
 
 	<span class="doccomment">/// Generate raw format representation.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">elements::Module</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-		<span class="kw">use</span> <span class="self">self</span><span class="ident">::ImportedOrDeclared</span>::<span class="kw-2">*</span>;
+		<span class="kw">use</span> <span class="ident"><span class="self">self</span>::ImportedOrDeclared</span>::<span class="kw-2">*</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idx</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sections</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -1757,13 +1756,13 @@
 
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements</span>;
 
-	<span class="kw">fn</span> <span class="ident">load_sample</span>(<span class="ident">wat</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">super</span><span class="ident">::Module</span> {
-		<span class="kw">super</span><span class="ident">::parse</span>(<span class="kw-2">&amp;</span><span class="ident">wabt::wat2wasm</span>(<span class="ident">wat</span>).<span class="ident">expect</span>(<span class="string">&quot;faled to parse wat!&quot;</span>)[..])
+	<span class="kw">fn</span> <span class="ident">load_sample</span>(<span class="ident">wat</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">super</span>::Module</span> {
+		<span class="ident"><span class="kw">super</span>::parse</span>(<span class="kw-2">&amp;</span><span class="ident">wabt::wat2wasm</span>(<span class="ident">wat</span>).<span class="ident">expect</span>(<span class="string">&quot;faled to parse wat!&quot;</span>)[..])
 			.<span class="ident">expect</span>(<span class="string">&quot;error making representation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">validate_sample</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw">super</span><span class="ident">::Module</span>) {
-		<span class="kw">let</span> <span class="ident">binary</span> <span class="op">=</span> <span class="kw">super</span><span class="ident">::generate</span>(<span class="ident">module</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to generate binary&quot;</span>);
+	<span class="kw">fn</span> <span class="ident">validate_sample</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">super</span>::Module</span>) {
+		<span class="kw">let</span> <span class="ident">binary</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::generate</span>(<span class="ident">module</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to generate binary&quot;</span>);
 		<span class="ident">wabt::Module::read_binary</span>(<span class="kw-2">&amp;</span><span class="ident">binary</span>, <span class="kw-2">&amp;</span><span class="ident">Default::default</span>())
 			.<span class="ident">expect</span>(<span class="string">&quot;Wabt failed to read final binary&quot;</span>)
 			.<span class="ident">validate</span>()
@@ -1865,12 +1864,12 @@
 			<span class="kw">let</span> <span class="ident">declared_func_2</span> <span class="op">=</span> <span class="ident">sample</span>.<span class="ident">funcs</span>.<span class="ident">clone_ref</span>(<span class="number">2</span>);
 
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tx</span> <span class="op">=</span> <span class="ident">sample</span>.<span class="ident">funcs</span>.<span class="ident">begin_insert_not_until</span>(
-				<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">matches!</span>(<span class="ident">f</span>.<span class="ident">origin</span>, <span class="kw">super</span><span class="ident">::ImportedOrDeclared::Imported</span>(<span class="kw">_</span>, <span class="kw">_</span>))
+				<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="macro">matches!</span>(<span class="ident">f</span>.<span class="ident">origin</span>, <span class="ident"><span class="kw">super</span>::ImportedOrDeclared::Imported</span>(<span class="kw">_</span>, <span class="kw">_</span>))
 			);
 
-			<span class="kw">let</span> <span class="ident">new_import_func</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">push</span>(<span class="kw">super</span><span class="ident">::Func</span> {
+			<span class="kw">let</span> <span class="ident">new_import_func</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">push</span>(<span class="ident"><span class="kw">super</span>::Func</span> {
 				<span class="ident">type_ref</span>: <span class="ident">type_ref_0</span>,
-				<span class="ident">origin</span>: <span class="kw">super</span><span class="ident">::ImportedOrDeclared::Imported</span>(<span class="string">&quot;env&quot;</span>.<span class="ident">to_owned</span>(), <span class="string">&quot;bar&quot;</span>.<span class="ident">to_owned</span>()),
+				<span class="ident">origin</span>: <span class="ident"><span class="kw">super</span>::ImportedOrDeclared::Imported</span>(<span class="string">&quot;env&quot;</span>.<span class="ident">to_owned</span>(), <span class="string">&quot;bar&quot;</span>.<span class="ident">to_owned</span>()),
 			});
 
 			<span class="ident">tx</span>.<span class="ident">done</span>();
@@ -1879,9 +1878,9 @@
 			<span class="macro">assert_eq!</span>(<span class="ident">declared_func_2</span>.<span class="ident">order</span>(), <span class="prelude-val">Some</span>(<span class="number">3</span>));
 			<span class="macro">assert_eq!</span>(
 				<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">declared_func_2</span>.<span class="ident">read</span>().<span class="ident">origin</span> {
-					<span class="kw">super</span><span class="ident">::ImportedOrDeclared::Declared</span>(<span class="ident">body</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident"><span class="kw">super</span>::ImportedOrDeclared::Declared</span>(<span class="ident">body</span>) <span class="op">=</span><span class="op">&gt;</span> {
 						<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">body</span>.<span class="ident">code</span>[<span class="number">1</span>] {
-							<span class="kw">super</span><span class="ident">::Instruction::Call</span>(<span class="ident">called_func</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">called_func</span>.<span class="ident">order</span>(),
+							<span class="ident"><span class="kw">super</span>::Instruction::Call</span>(<span class="ident">called_func</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">called_func</span>.<span class="ident">order</span>(),
 							<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;instruction #2 should be a call!&quot;</span>),
 						}
 					},
@@ -1946,9 +1945,9 @@
 		<span class="kw">let</span> <span class="ident">declared_func_2</span> <span class="op">=</span> <span class="ident">sample</span>.<span class="ident">funcs</span>.<span class="ident">clone_ref</span>(<span class="number">2</span>);
 		<span class="macro">assert_eq!</span>(
 			<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">declared_func_2</span>.<span class="ident">read</span>().<span class="ident">origin</span> {
-				<span class="kw">super</span><span class="ident">::ImportedOrDeclared::Declared</span>(<span class="ident">body</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident"><span class="kw">super</span>::ImportedOrDeclared::Declared</span>(<span class="ident">body</span>) <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">body</span>.<span class="ident">code</span>[<span class="number">0</span>] {
-						<span class="kw">super</span><span class="ident">::Instruction::Call</span>(<span class="ident">called_func</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">called_func</span>.<span class="ident">order</span>(),
+						<span class="ident"><span class="kw">super</span>::Instruction::Call</span>(<span class="ident">called_func</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">called_func</span>.<span class="ident">order</span>(),
 						<span class="ident">wrong_instruction</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;instruction #2 should be a call but got {:?}!&quot;</span>, <span class="ident">wrong_instruction</span>),
 					}
 				},
@@ -1959,7 +1958,7 @@
 		);
 	}
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pwasm_utils" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

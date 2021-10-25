@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;regalloc&#x2F;coloring.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>coloring.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;regalloc&#x2F;coloring.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>coloring.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1322,8 +1322,7 @@
 <span id="1322">1322</span>
 <span id="1323">1323</span>
 <span id="1324">1324</span>
-</pre><pre class="rust">
-<span class="doccomment">//! Register allocator coloring pass.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Register allocator coloring pass.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The coloring pass assigns a physical register to every SSA value with a register affinity,</span>
 <span class="doccomment">//! under the assumption that the register pressure has been lowered sufficiently by spilling and</span>
@@ -1367,22 +1366,22 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The exception is the entry block whose arguments are colored from the ABI requirements.</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::cursor</span>::{<span class="ident">Cursor</span>, <span class="ident">EncCursor</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::dominator_tree::DominatorTree</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::flowgraph::ControlFlowGraph</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir</span>::{<span class="ident">ArgumentLoc</span>, <span class="ident">InstBuilder</span>, <span class="ident">ValueDef</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir</span>::{<span class="ident">Block</span>, <span class="ident">Function</span>, <span class="ident">Inst</span>, <span class="ident">InstructionData</span>, <span class="ident">Layout</span>, <span class="ident">Opcode</span>, <span class="ident">SigRef</span>, <span class="ident">Value</span>, <span class="ident">ValueLoc</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::isa</span>::{<span class="ident">regs_overlap</span>, <span class="ident">RegClass</span>, <span class="ident">RegInfo</span>, <span class="ident">RegUnit</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::isa</span>::{<span class="ident">ConstraintKind</span>, <span class="ident">EncInfo</span>, <span class="ident">OperandConstraint</span>, <span class="ident">RecipeConstraints</span>, <span class="ident">TargetIsa</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::packed_option::PackedOption</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::affinity::Affinity</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::diversion::RegDiversions</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::live_value_tracker</span>::{<span class="ident">LiveValue</span>, <span class="ident">LiveValueTracker</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::liveness::Liveness</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::liverange::LiveRange</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::register_set::RegisterSet</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::solver</span>::{<span class="ident">Solver</span>, <span class="ident">SolverError</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::timing</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cursor</span>::{<span class="ident">Cursor</span>, <span class="ident">EncCursor</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dominator_tree::DominatorTree</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::flowgraph::ControlFlowGraph</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="ident">ArgumentLoc</span>, <span class="ident">InstBuilder</span>, <span class="ident">ValueDef</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="ident">Block</span>, <span class="ident">Function</span>, <span class="ident">Inst</span>, <span class="ident">InstructionData</span>, <span class="ident">Layout</span>, <span class="ident">Opcode</span>, <span class="ident">SigRef</span>, <span class="ident">Value</span>, <span class="ident">ValueLoc</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa</span>::{<span class="ident">regs_overlap</span>, <span class="ident">RegClass</span>, <span class="ident">RegInfo</span>, <span class="ident">RegUnit</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa</span>::{<span class="ident">ConstraintKind</span>, <span class="ident">EncInfo</span>, <span class="ident">OperandConstraint</span>, <span class="ident">RecipeConstraints</span>, <span class="ident">TargetIsa</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::packed_option::PackedOption</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::affinity::Affinity</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::diversion::RegDiversions</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::live_value_tracker</span>::{<span class="ident">LiveValue</span>, <span class="ident">LiveValueTracker</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::liveness::Liveness</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::liverange::LiveRange</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::register_set::RegisterSet</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::solver</span>::{<span class="ident">Solver</span>, <span class="ident">SolverError</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::timing</span>;
 <span class="kw">use</span> <span class="ident">core::mem</span>;
 <span class="kw">use</span> <span class="ident">log::debug</span>;
 
@@ -1540,7 +1539,7 @@
                         <span class="ident">regs</span>.<span class="ident">input</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">reginfo</span>),
                         <span class="self">self</span>.<span class="ident">divert</span>.<span class="ident">display</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">reginfo</span>)
                     );
-                    <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir::instructions::BranchInfo</span>::<span class="kw-2">*</span>;
+                    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::instructions::BranchInfo</span>::<span class="kw-2">*</span>;
                     <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">cur</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">analyze_branch</span>(<span class="ident">branch</span>) {
                         <span class="ident">NotABranch</span> <span class="op">|</span> <span class="ident">Table</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(
                             <span class="string">&quot;unexpected instruction {} after a conditional branch&quot;</span>,
@@ -2414,7 +2413,7 @@
     <span class="doccomment">/// branch destinations. Branch arguments and block parameters are not considered live on the</span>
     <span class="doccomment">/// edge.</span>
     <span class="kw">fn</span> <span class="ident">is_live_on_outgoing_edge</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir::instructions::BranchInfo</span>::<span class="kw-2">*</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::instructions::BranchInfo</span>::<span class="kw-2">*</span>;
 
         <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cur</span>.<span class="ident">current_inst</span>().<span class="ident">expect</span>(<span class="string">&quot;Not on an instruction&quot;</span>);
         <span class="kw">let</span> <span class="ident">layout</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cur</span>.<span class="ident">func</span>.<span class="ident">layout</span>;
@@ -2443,7 +2442,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The solver needs to be reminded of the available registers before any moves are inserted.</span>
     <span class="kw">fn</span> <span class="ident">shuffle_inputs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">regs</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RegisterSet</span>) {
-        <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc::solver::Move</span>::<span class="kw-2">*</span>;
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc::solver::Move</span>::<span class="kw-2">*</span>;
 
         <span class="kw">let</span> <span class="ident">spills</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">solver</span>.<span class="ident">schedule_moves</span>(<span class="ident">regs</span>);
 
@@ -2647,7 +2646,7 @@
         <span class="self">self</span>.<span class="ident">global</span>.<span class="ident">take</span>(<span class="ident">rc</span>, <span class="ident">reg</span>);
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="cranelift_codegen" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>

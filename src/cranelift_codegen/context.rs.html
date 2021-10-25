@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;context.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>context.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input"name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;context.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>context.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -487,8 +487,7 @@
 <span id="487">487</span>
 <span id="488">488</span>
 <span id="489">489</span>
-</pre><pre class="rust">
-<span class="doccomment">//! Cranelift compilation context and main entry point.</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Cranelift compilation context and main entry point.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! When compiling many small functions, it is important to avoid repeatedly allocating and</span>
 <span class="doccomment">//! deallocating the data structures needed for compilation. The `Context` struct is used to hold</span>
@@ -499,40 +498,40 @@
 <span class="doccomment">//! contexts concurrently. Typically, you would have one context per compilation thread and only a</span>
 <span class="doccomment">//! single ISA instance.</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::binemit</span>::{
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::binemit</span>::{
     <span class="ident">relax_branches</span>, <span class="ident">shrink_instructions</span>, <span class="ident">CodeInfo</span>, <span class="ident">MemoryCodeSink</span>, <span class="ident">RelocSink</span>, <span class="ident">StackMapSink</span>,
     <span class="ident">TrapSink</span>,
 };
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::dce::do_dce</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::dominator_tree::DominatorTree</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::flowgraph::ControlFlowGraph</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::ir::Function</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::isa::TargetIsa</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::legalize_function</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::legalizer::simple_legalize</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::licm::do_licm</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::loop_analysis::LoopAnalysis</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::machinst</span>::{<span class="ident">MachCompileResult</span>, <span class="ident">MachStackMap</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::nan_canonicalization::do_nan_canonicalization</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::postopt::do_postopt</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::redundant_reload_remover::RedundantReloadRemover</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::regalloc</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::remove_constant_phis::do_remove_constant_phis</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::result::CodegenResult</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::settings</span>::{<span class="ident">FlagsOrIsa</span>, <span class="ident">OptLevel</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::simple_gvn::do_simple_gvn</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::simple_preopt::do_preopt</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::timing</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::unreachable_code::eliminate_unreachable_code</span>;
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::value_label</span>::{<span class="ident">build_value_labels_ranges</span>, <span class="ident">ComparableSourceLoc</span>, <span class="ident">ValueLabelsRanges</span>};
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::verifier</span>::{<span class="ident">verify_context</span>, <span class="ident">verify_locations</span>, <span class="ident">VerifierErrors</span>, <span class="ident">VerifierResult</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dce::do_dce</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dominator_tree::DominatorTree</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::flowgraph::ControlFlowGraph</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::Function</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::TargetIsa</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::legalize_function</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::legalizer::simple_legalize</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::licm::do_licm</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::loop_analysis::LoopAnalysis</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::machinst</span>::{<span class="ident">MachCompileResult</span>, <span class="ident">MachStackMap</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::nan_canonicalization::do_nan_canonicalization</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::postopt::do_postopt</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::redundant_reload_remover::RedundantReloadRemover</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::regalloc</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::remove_constant_phis::do_remove_constant_phis</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::result::CodegenResult</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::settings</span>::{<span class="ident">FlagsOrIsa</span>, <span class="ident">OptLevel</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::simple_gvn::do_simple_gvn</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::simple_preopt::do_preopt</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::timing</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::unreachable_code::eliminate_unreachable_code</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::value_label</span>::{<span class="ident">build_value_labels_ranges</span>, <span class="ident">ComparableSourceLoc</span>, <span class="ident">ValueLabelsRanges</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::verifier</span>::{<span class="ident">verify_context</span>, <span class="ident">verify_locations</span>, <span class="ident">VerifierErrors</span>, <span class="ident">VerifierResult</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;souper-harvest&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">log::debug</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;souper-harvest&quot;</span>)]</span>
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::souper_harvest::do_souper_harvest</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::souper_harvest::do_souper_harvest</span>;
 
 <span class="doccomment">/// Persistent data structures and compilation pipeline.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Context</span> {
@@ -567,7 +566,7 @@
     <span class="doccomment">/// The returned instance should be reused for compiling multiple functions in order to avoid</span>
     <span class="doccomment">/// needless allocator thrashing.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span><span class="ident">::for_function</span>(<span class="ident">Function::new</span>())
+        <span class="ident"><span class="self">Self</span>::for_function</span>(<span class="ident">Function::new</span>())
     }
 
     <span class="doccomment">/// Allocate a new compilation context with an existing Function.</span>
@@ -755,10 +754,10 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_unwind_info</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">crate</span><span class="ident">::isa::unwind::UnwindInfo</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">backend</span>) <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">get_mach_backend</span>() {
-            <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::isa::CallConv</span>;
-            <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::machinst::UnwindInfoKind</span>;
+            <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::CallConv</span>;
+            <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::machinst::UnwindInfoKind</span>;
             <span class="kw">let</span> <span class="ident">unwind_info_kind</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">signature</span>.<span class="ident">call_conv</span> {
                 <span class="ident">CallConv::Fast</span> <span class="op">|</span> <span class="ident">CallConv::Cold</span> <span class="op">|</span> <span class="ident">CallConv::SystemV</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UnwindInfoKind::SystemV</span>,
                 <span class="ident">CallConv::WindowsFastcall</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UnwindInfoKind::Windows</span>,
@@ -977,7 +976,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 }
-</pre></div>
+</code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cranelift_codegen" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>
