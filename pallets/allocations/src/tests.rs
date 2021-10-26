@@ -20,7 +20,7 @@
 
 use super::*;
 use crate::{self as pallet_allocations};
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types};
+use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
@@ -139,6 +139,22 @@ fn non_oracle_can_not_trigger_allocation() {
                 Vec::new(),
             ),
             Errors::OracleAccessDenied
+        );
+    })
+}
+
+#[test]
+fn oracle_does_not_pay_fees() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+        assert_eq!(
+            Allocations::allocate(
+                Origin::signed(Oracle::get()),
+                Grantee::get(),
+                50,
+                Vec::new(),
+            ),
+            Ok(Pays::No.into())
         );
     })
 }
