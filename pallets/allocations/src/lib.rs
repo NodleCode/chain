@@ -131,7 +131,7 @@ pub mod pallet {
                 amount_for_protocol,
                 proof,
             ));
-            Ok(().into())
+            Ok(Pays::No.into())
         }
     }
 
