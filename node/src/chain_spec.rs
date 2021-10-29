@@ -312,6 +312,38 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
+#[cfg(feature = "with-staking")]
+fn local_staking_genesis() -> GenesisConfig {
+    testnet_genesis(
+        vec![get_authority_keys_from_seed("Alice")],
+        vec![
+            get_account_id_from_seed::<sr25519::Public>("Alice"),
+            get_account_id_from_seed::<sr25519::Public>("Bob"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+            get_account_id_from_seed::<sr25519::Public>("Dave"),
+        ],
+        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
+        None,
+        None,
+    )
+}
+
+/// Local testnet config to test the staking pallet
+#[cfg(feature = "with-staking")]
+pub fn local_staking_config() -> ChainSpec {
+    ChainSpec::from_genesis(
+        "Local Staking Testnet",
+        "local_staking_testnet",
+        ChainType::Local,
+        local_staking_genesis,
+        vec![],
+        None,
+        Some("nodl"),
+        Some(build_local_properties()),
+        Default::default(),
+    )
+}
+
 /// Arcadia config, from json chainspec
 pub fn arcadia_config() -> ChainSpec {
     ChainSpec::from_json_bytes(&include_bytes!("../res/arcadia.json")[..]).unwrap()
@@ -335,6 +367,12 @@ pub(crate) mod tests {
     #[test]
     fn test_create_local_testnet_chain_spec() {
         local_testnet_config().build_storage().unwrap();
+    }
+
+    #[test]
+    #[cfg(feature = "with-staking")]
+    fn test_create_staking_local_chain_spec() {
+        local_staking_config().build_storage().unwrap();
     }
 
     #[test]
