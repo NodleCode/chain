@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 #[cfg(feature = "with-staking")]
-use nodle_chain_runtime::NodleStakingConfig;
-use nodle_chain_runtime::{
+use nodle_chain_main_runtime::NodleStakingConfig;
+use nodle_chain_main_runtime::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
     RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
     ValidatorsSetConfig, VestingConfig,
 };
+use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use serde_json::json;

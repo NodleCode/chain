@@ -21,8 +21,8 @@
 use crate::rpc::{self, DenyUnsafe, IoHandler};
 use futures::prelude::*;
 use nodle_chain_executor::Executor;
+use nodle_chain_main_runtime::RuntimeApi;
 use nodle_chain_primitives::Block;
-use nodle_chain_runtime::RuntimeApi;
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_babe;
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};

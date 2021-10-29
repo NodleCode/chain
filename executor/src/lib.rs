@@ -26,7 +26,7 @@ pub use sc_executor::NativeExecutor;
 // equivalent wasm code.
 native_executor_instance!(
     pub Executor,
-    nodle_chain_runtime::api::dispatch,
-    nodle_chain_runtime::native_version,
+    nodle_chain_main_runtime::api::dispatch,
+    nodle_chain_main_runtime::native_version,
     frame_benchmarking::benchmarking::HostFunctions,
 );

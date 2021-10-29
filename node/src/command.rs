@@ -66,7 +66,7 @@ impl SubstrateCli for Cli {
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        &nodle_chain_runtime::VERSION
+        &nodle_chain_main_runtime::VERSION
     }
 }
 
