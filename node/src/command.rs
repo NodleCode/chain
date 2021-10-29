@@ -57,6 +57,8 @@ impl SubstrateCli for Cli {
             "local" => Box::new(chain_spec::local_testnet_config()),
             "" | "main" => Box::new(chain_spec::main_config()),
             "arcadia" => Box::new(chain_spec::arcadia_config()),
+            #[cfg(feature = "with-staking")]
+            "staking-local" => Box::new(chain_spec::local_staking_config()),
             path => Box::new(chain_spec::ChainSpec::from_json_file(
                 std::path::PathBuf::from(path),
             )?),
