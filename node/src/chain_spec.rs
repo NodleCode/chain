@@ -40,7 +40,7 @@ pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
 fn build_local_properties() -> Properties {
     let mut props = Properties::new();
-    props.insert("tokenDecimals".to_string(), json!(12));
+    props.insert("tokenDecimals".to_string(), json!(11));
     props.insert("tokenSymbol".to_string(), json!("NODL"));
 
     props
