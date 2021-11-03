@@ -23,9 +23,9 @@ use crate::{
     Grandpa, Historical, ImOnline, Offences, Poa, Runtime,
 };
 use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
-use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use primitives::{AccountId, BlockNumber, Moment};
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2},

@@ -20,7 +20,7 @@
 
 use crate::{constants, Call, Event, Origin, RootCommittee, Runtime};
 use frame_support::parameter_types;
-use nodle_chain_primitives::{AccountId, BlockNumber};
+use primitives::{AccountId, BlockNumber};
 use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 

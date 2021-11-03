@@ -24,7 +24,7 @@ use frame_support::{
     },
 };
 use frame_system::limits::BlockWeights;
-use nodle_chain_primitives::{Balance, BlockNumber};
+use primitives::{Balance, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 use static_assertions::const_assert;
 

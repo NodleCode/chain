@@ -38,12 +38,12 @@ use frame_support::{
     construct_runtime,
     traits::{KeyOwnerProofSystem, Randomness},
 };
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, CertificateId, Index, Signature};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+use primitives::{AccountId, Balance, BlockNumber, CertificateId, Index, Signature};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -75,7 +75,7 @@ pub use version::VERSION;
 construct_runtime! {
     pub enum Runtime where
         Block = Block,
-        NodeBlock = nodle_chain_primitives::Block,
+        NodeBlock = primitives::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System

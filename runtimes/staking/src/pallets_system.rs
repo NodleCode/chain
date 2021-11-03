@@ -19,17 +19,17 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, version::VERSION, Babe, Balances, Call, Event, NodleStaking, Origin, PalletInfo,
-    Runtime, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
+    constants, version::VERSION, Babe, Balances, Call, Event, Origin, PalletInfo, Runtime,
+    SignedExtra, SignedPayload, Staking, System, UncheckedExtrinsic,
 };
 use frame_support::{
     debug, parameter_types,
     weights::{constants::RocksDbWeight, IdentityFee},
 };
 use frame_system::limits::BlockLength;
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Hash, Index, Moment, Signature};
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
 use parity_scale_codec::Encode;
+use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Moment, Signature};
 use sp_runtime::{
     generic,
     traits::{AccountIdLookup, BlakeTwo256, SaturatedConversion, StaticLookup},
@@ -105,7 +105,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-    type OnChargeTransaction = CurrencyAdapter<Balances, NodleStaking>;
+    type OnChargeTransaction = CurrencyAdapter<Balances, Staking>;
     type TransactionByteFee = TransactionByteFee;
     type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate =

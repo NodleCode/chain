@@ -24,8 +24,8 @@ use crate::{
 };
 
 use frame_support::{parameter_types, weights::Weight};
-use nodle_chain_primitives::{AccountId, Balance};
 use pallet_contracts::weights::WeightInfo;
+use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 

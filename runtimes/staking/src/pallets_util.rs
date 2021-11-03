@@ -21,7 +21,7 @@
 use crate::{constants, Balances, Call, Event, Origin, OriginCaller, Runtime};
 
 use frame_support::{parameter_types, weights::Weight};
-use nodle_chain_primitives::{AccountId, Balance};
+use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
 impl pallet_utility::Config for Runtime {

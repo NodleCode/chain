@@ -29,7 +29,7 @@ use frame_support::{
     traits::{ChangeMembers, Currency, Get, InitializeMembers},
 };
 use frame_system::ensure_signed;
-use nodle_support::WithAccountId;
+use support::WithAccountId;
 
 use sp_runtime::{
     traits::{CheckedAdd, Saturating},

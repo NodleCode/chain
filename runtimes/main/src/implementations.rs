@@ -21,7 +21,7 @@
 
 use crate::{Authorship, Balances, CompanyReserve};
 use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
-use nodle_chain_primitives::AccountId;
+use primitives::AccountId;
 
 /// Logic for the author to get a portion of fees.
 pub struct Author;

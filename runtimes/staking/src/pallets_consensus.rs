@@ -20,16 +20,16 @@
 
 use crate::{
     constants, pallets_governance::RootCollective, AuthorityDiscovery, Babe, Balances, Call, Event,
-    Grandpa, Historical, ImOnline, NodleStaking, Offences, Runtime, Session,
+    Grandpa, Historical, ImOnline, Offences, Runtime, Session, Staking,
 };
 use frame_support::{
     parameter_types,
     traits::{KeyOwnerProofSystem, LockIdentifier},
     weights::Weight,
 };
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Moment};
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use primitives::{AccountId, Balance, BlockNumber, Moment};
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2},
@@ -108,7 +108,7 @@ impl pallet_authorship::Config for Runtime {
     type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
     type UncleGenerations = UncleGenerations;
     type FilterUncle = ();
-    type EventHandler = (NodleStaking, ImOnline);
+    type EventHandler = (Staking, ImOnline);
 }
 
 parameter_types! {
@@ -133,21 +133,21 @@ parameter_types! {
 }
 
 impl pallet_session::Config for Runtime {
-    type SessionManager = NodleStaking;
+    type SessionManager = Staking;
     type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
     type Event = Event;
     type Keys = SessionKeys;
     type ValidatorId = AccountId;
-    type ValidatorIdOf = pallet_nodle_staking::StashOf<Runtime>;
+    type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = Babe;
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_session::historical::Config for Runtime {
-    type FullIdentification = pallet_nodle_staking::ValidatorSnapshot<AccountId, Balance>;
-    type FullIdentificationOf = pallet_nodle_staking::ValidatorSnapshotOf<Runtime>;
+    type FullIdentification = pallet_staking::ValidatorSnapshot<AccountId, Balance>;
+    type FullIdentificationOf = pallet_staking::ValidatorSnapshotOf<Runtime>;
 }
 
 // TODO::Have to fine tune parameters for practical use-case
@@ -169,7 +169,7 @@ parameter_types! {
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
 }
-impl pallet_nodle_staking::Config for Runtime {
+impl pallet_staking::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
     type BondedDuration = BondingDuration;
@@ -194,7 +194,7 @@ impl pallet_nodle_staking::Config for Runtime {
     type ValidatorRegistration = Session;
     type CancelOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type WeightInfo = pallet_nodle_staking::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -205,6 +205,6 @@ parameter_types! {
 impl pallet_offences::Config for Runtime {
     type Event = Event;
     type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
-    type OnOffenceHandler = NodleStaking;
+    type OnOffenceHandler = Staking;
     type WeightSoftLimit = OffencesWeightSoftLimit;
 }

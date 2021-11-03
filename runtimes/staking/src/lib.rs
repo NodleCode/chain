@@ -38,12 +38,12 @@ use frame_support::{
     construct_runtime,
     traits::{KeyOwnerProofSystem, Randomness},
 };
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Index, Signature};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+use primitives::{AccountId, Balance, BlockNumber, Index, Signature};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -73,7 +73,7 @@ pub use version::VERSION;
 construct_runtime! {
     pub enum Runtime where
         Block = Block,
-        NodeBlock = nodle_chain_primitives::Block,
+        NodeBlock = primitives::Block,
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
@@ -89,7 +89,7 @@ construct_runtime! {
         Authorship: pallet_authorship::{Module, Call, Storage, Inherent} = 7,
         ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
         Offences: pallet_offences::{Module, Call, Storage, Event} = 9,
-        NodleStaking: pallet_nodle_staking::{Module, Call, Storage, Event<T>, Config<T>} = 11,
+        Staking: pallet_staking::{Module, Call, Storage, Event<T>, Config<T>} = 11,
         Session: pallet_session::{Module, Call, Storage, Event, Config<T>} = 12,
         Historical: pallet_session_historical::{Module} = 13,
         AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config} = 14,
