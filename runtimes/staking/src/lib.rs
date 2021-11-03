@@ -349,7 +349,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_collective, RootCommittee);
             add_benchmark!(params, batches, pallet_grandpa, Grandpa);
-            add_benchmark!(params, batches, pallet_nodle_staking, NodleStaking);
+            add_benchmark!(params, batches, pallet_nodle_staking, Staking);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
