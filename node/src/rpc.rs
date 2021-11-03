@@ -18,8 +18,8 @@
 
 //! RPC APIs instantiation code for the Nodle Chain.
 
-use nodle_chain_primitives::{AccountId, Balance, Block, BlockNumber, CertificateId, Hash, Index};
 use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi, RootOfTrustRuntimeApi};
+use primitives::{AccountId, Balance, Block, BlockNumber, CertificateId, Hash, Index};
 use sc_consensus_babe::{Config, Epoch};
 use sc_consensus_babe_rpc::BabeRpcHandler;
 use sc_consensus_epochs::SharedEpochChanges;
