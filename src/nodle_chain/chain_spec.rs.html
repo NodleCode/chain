@@ -377,14 +377,6 @@
 <span id="377">377</span>
 <span id="378">378</span>
 <span id="379">379</span>
-<span id="380">380</span>
-<span id="381">381</span>
-<span id="382">382</span>
-<span id="383">383</span>
-<span id="384">384</span>
-<span id="385">385</span>
-<span id="386">386</span>
-<span id="387">387</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -403,16 +395,14 @@
  * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
  */</span>
 
-<span class="kw">use</span> <span class="ident">nodle_chain_primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span>, <span class="ident">Signature</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-staking&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">nodle_chain_runtime::NodleStakingConfig</span>;
-<span class="kw">use</span> <span class="ident">nodle_chain_runtime</span>::{
+<span class="kw">use</span> <span class="ident">pallet_im_online::sr25519::AuthorityId</span> <span class="kw">as</span> <span class="ident">ImOnlineId</span>;
+<span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span>, <span class="ident">Signature</span>};
+<span class="kw">use</span> <span class="ident">runtime_main</span>::{
     <span class="ident">constants</span>::<span class="kw-2">*</span>, <span class="ident">wasm_binary_unwrap</span>, <span class="ident">AuthorityDiscoveryConfig</span>, <span class="ident">BabeConfig</span>, <span class="ident">BalancesConfig</span>,
     <span class="ident">ContractsConfig</span>, <span class="ident">FinancialMembershipConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">GrandpaConfig</span>, <span class="ident">ImOnlineConfig</span>,
     <span class="ident">RootMembershipConfig</span>, <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SystemConfig</span>, <span class="ident">TechnicalMembershipConfig</span>,
     <span class="ident">ValidatorsSetConfig</span>, <span class="ident">VestingConfig</span>,
 };
-<span class="kw">use</span> <span class="ident">pallet_im_online::sr25519::AuthorityId</span> <span class="kw">as</span> <span class="ident">ImOnlineId</span>;
 <span class="kw">use</span> <span class="ident">sc_service::ChainType</span>;
 <span class="kw">use</span> <span class="ident">serde_json::json</span>;
 <span class="kw">use</span> <span class="ident">sp_authority_discovery::AuthorityId</span> <span class="kw">as</span> <span class="ident">AuthorityDiscoveryId</span>;
@@ -527,9 +517,7 @@
     });
 
     <span class="kw">const</span> <span class="ident">ENDOWMENT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">10_000</span> <span class="op">*</span> <span class="ident">NODL</span>;
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-staking&quot;</span>)]</span>
-    <span class="kw">const</span> <span class="ident">STASH</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">ENDOWMENT</span> <span class="op">/</span> <span class="number">1_000</span>;
+    <span class="comment">//const STASH: Balance = ENDOWMENT / 1_000;</span>
 
     <span class="ident">GenesisConfig</span> {
         <span class="comment">// Core</span>
@@ -592,15 +580,14 @@
         <span class="ident">pallet_grandpa</span>: <span class="prelude-val">Some</span>(<span class="ident">GrandpaConfig</span> {
             <span class="ident">authorities</span>: <span class="macro">vec!</span>[],
         }),
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-staking&quot;</span>)]</span>
-        <span class="ident">pallet_nodle_staking</span>: <span class="prelude-val">Some</span>(<span class="ident">NodleStakingConfig</span> {
-            <span class="ident">stakers</span>: <span class="ident">initial_authorities</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> (<span class="ident">x</span>.<span class="number">0</span>.<span class="ident">clone</span>(), <span class="prelude-val">None</span>, <span class="ident">STASH</span>))
-                .<span class="ident">collect</span>(),
-            <span class="ident">invulnerables</span>: <span class="ident">initial_authorities</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>(),
-            ..<span class="ident">Default::default</span>()
-        }),
+        <span class="comment">// pallet_nodle_staking: Some(NodleStakingConfig {</span>
+        <span class="comment">//     stakers: initial_authorities</span>
+        <span class="comment">//         .iter()</span>
+        <span class="comment">//         .map(|x| (x.0.clone(), None, STASH))</span>
+        <span class="comment">//         .collect(),</span>
+        <span class="comment">//     invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),</span>
+        <span class="comment">//     ..Default::default()</span>
+        <span class="comment">// }),</span>
         <span class="ident">pallet_membership_Instance2</span>: <span class="prelude-val">Some</span>(<span class="ident">ValidatorsSetConfig</span> {
             <span class="ident">members</span>: <span class="ident">initial_authorities</span>
                 .<span class="ident">iter</span>()
@@ -699,7 +686,6 @@
     )
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-staking&quot;</span>)]</span>
 <span class="kw">fn</span> <span class="ident">local_staking_genesis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GenesisConfig</span> {
     <span class="ident">testnet_genesis</span>(
         <span class="macro">vec!</span>[<span class="ident">get_authority_keys_from_seed</span>(<span class="string">&quot;Alice&quot;</span>)],
@@ -716,7 +702,6 @@
 }
 
 <span class="doccomment">/// Local testnet config to test the staking pallet</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-staking&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_staking_config</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChainSpec</span> {
     <span class="ident">ChainSpec::from_genesis</span>(
         <span class="string">&quot;Local Staking Testnet&quot;</span>,
@@ -757,7 +742,6 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-staking&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">test_create_staking_local_chain_spec</span>() {
         <span class="ident">local_staking_config</span>().<span class="ident">build_storage</span>().<span class="ident">unwrap</span>();
     }
