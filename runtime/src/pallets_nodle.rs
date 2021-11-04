@@ -19,9 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants,
-    pallets_governance::{RootCollective, TechnicalCollective},
-    Allocations, Balances, CompanyReserve, Event, PkiRootOfTrust, Runtime,
+    constants, pallets_governance::RootCollective, Balances, CompanyReserve, Event, PkiRootOfTrust,
+    Runtime,
 };
 
 use frame_support::parameter_types;
@@ -98,20 +97,4 @@ impl pallet_allocations::Config for Runtime {
     type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
     type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
     type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = Allocations;
-    type MembershipChanged = Allocations;
 }

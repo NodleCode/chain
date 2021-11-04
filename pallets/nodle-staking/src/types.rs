@@ -32,7 +32,7 @@ pub(crate) type SpanIndex = u32;
 /// The type define for validators reward
 pub(crate) type RewardPoint = u32;
 
-#[derive(Default, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(Default, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub struct Bond<AccountId, Balance> {
     pub owner: AccountId,
     pub amount: Balance,
@@ -68,7 +68,7 @@ impl<AccountId: Ord, Balance> PartialOrd for Bond<AccountId, Balance> {
 }
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, Copy)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug, Copy, scale_info::TypeInfo)]
 pub struct UnlockChunk<Balance> {
     /// Amount of funds to be unlocked.
     pub(crate) value: Balance,
@@ -78,7 +78,7 @@ pub struct UnlockChunk<Balance> {
 
 pub(crate) type StakeReward<Balance> = UnlockChunk<Balance>;
 
-#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug)]
+#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 /// The activity status of the validator
 pub enum ValidatorStatus {
     /// Committed to be online and producing valid blocks
@@ -95,7 +95,7 @@ impl Default for ValidatorStatus {
     }
 }
 
-#[derive(Encode, Decode, Clone, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, RuntimeDebug, scale_info::TypeInfo)]
 /// Global validator state with commission fee, bonded stake, and nominations
 pub struct Validator<AccountId, Balance> {
     pub id: AccountId,
@@ -258,7 +258,7 @@ where
     }
 }
 
-#[derive(Clone, Default, Encode, Decode, RuntimeDebug)]
+#[derive(Clone, Default, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 /// Snapshot of validator state at the start of the round for which they are selected
 pub struct ValidatorSnapshot<AccountId, Balance> {
     pub bond: Balance,
@@ -321,7 +321,7 @@ impl<T: Config> Convert<T::AccountId, Option<ValidatorSnapshot<T::AccountId, Bal
     }
 }
 
-#[derive(Encode, Decode, Clone, RuntimeDebug)]
+#[derive(Encode, Decode, Clone, RuntimeDebug, scale_info::TypeInfo)]
 pub struct Nominator<AccountId, Balance> {
     pub nominations: OrderedSet<Bond<AccountId, Balance>>,
     pub total: Balance,
@@ -547,7 +547,7 @@ where
 
 /// A pending slash record. The value of the slash has been computed but not applied yet,
 /// rather deferred for several eras.
-#[derive(Encode, Decode, Default, RuntimeDebug, Clone)]
+#[derive(Encode, Decode, Default, RuntimeDebug, Clone, scale_info::TypeInfo)]
 pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
     /// The stash ID of the offending validator.
     pub(crate) validator: AccountId,

@@ -19,9 +19,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        PalletBalances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        Vesting: vesting::{Module, Call, Storage, Event<T>, Config<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        PalletBalances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        Vesting: vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
     }
 );
 
@@ -51,7 +51,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 
@@ -68,7 +69,9 @@ impl pallet_balances::Config for Test {
     type Event = Event;
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
 

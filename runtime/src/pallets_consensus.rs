@@ -19,12 +19,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Call, Event,
-    Grandpa, Historical, ImOnline, Offences, Runtime,
+    constants, AuthorityDiscovery, Babe, Call, Event, Grandpa, Historical, ImOnline, Offences,
+    Runtime, Session,
 };
 
 #[cfg(feature = "with-staking")]
-use crate::{pallets_governance::FinancialCollective, Session};
+use crate::pallets_governance::FinancialCollective;
 
 #[cfg(not(feature = "with-staking"))]
 use crate::Poa;
@@ -33,30 +33,31 @@ use crate::Poa;
 use sp_runtime::traits::ConvertInto;
 
 #[cfg(feature = "with-staking")]
+use sp_runtime::Perbill;
+
+#[cfg(feature = "with-staking")]
+use sp_core::u32_trait::{_1, _2};
+
+#[cfg(feature = "with-staking")]
 use crate::{Balances, CompanyReserve, NodleStaking};
 
-use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
+use frame_support::{parameter_types, traits::KeyOwnerProofSystem};
 
 #[cfg(feature = "with-staking")]
 use frame_support::traits::LockIdentifier;
 
-use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
+use nodle_chain_primitives::{AccountId, Moment};
 
 #[cfg(feature = "with-staking")]
 use nodle_chain_primitives::Balance;
 
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use sp_core::{
-    crypto::KeyTypeId,
-    u32_trait::{_1, _2},
-};
-use sp_runtime::{
-    impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, Perbill,
-};
+use sp_core::crypto::KeyTypeId;
+use sp_runtime::{impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority};
 
 #[cfg(feature = "with-staking")]
-use sp_runtime::ModuleId;
+use frame_support::PalletId;
 
 use sp_std::prelude::*;
 
@@ -86,6 +87,8 @@ impl pallet_babe::Config for Runtime {
     type EpochDuration = EpochDuration;
     type ExpectedBlockTime = ExpectedBlockTime;
     type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+    type DisabledValidators = Session;
+
     type KeyOwnerProofSystem = Historical;
     type KeyOwnerProof = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
         KeyTypeId,
@@ -98,6 +101,7 @@ impl pallet_babe::Config for Runtime {
     type HandleEquivocation =
         pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
     type WeightInfo = ();
+    type MaxAuthorities = MaxAuthorities;
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -116,9 +120,12 @@ impl pallet_grandpa::Config for Runtime {
         ReportLongevity,
     >;
     type WeightInfo = ();
+    type MaxAuthorities = MaxAuthorities;
 }
 
-impl pallet_authority_discovery::Config for Runtime {}
+impl pallet_authority_discovery::Config for Runtime {
+    type MaxAuthorities = MaxAuthorities;
+}
 
 parameter_types! {
     pub const UncleGenerations: u32 = 5;
@@ -137,24 +144,24 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_SLOTS as _;
     pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+    pub const MaxAuthorities: u32 = 100;
+    pub const MaxKeys: u32 = 10_000;
+    pub const MaxPeerInHeartbeats: u32 = 10_000;
+    pub const MaxPeerDataEncodingSize: u32 = 1_000;
 }
 
 impl pallet_im_online::Config for Runtime {
     type AuthorityId = ImOnlineId;
     type Event = Event;
     type ValidatorSet = Historical;
-    type SessionDuration = SessionDuration;
+    type NextSessionRotation = Babe;
     type ReportUnresponsiveness = Offences;
     type UnsignedPriority = ImOnlineUnsignedPriority;
     type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    // When this percentage is reached the module will force a new era, we never
-    // call `session.disable()` so this should never be used.
-    pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
+    type MaxKeys = MaxKeys;
+    type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
+    type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
 }
 
 #[cfg(not(feature = "with-staking"))]
@@ -166,7 +173,6 @@ impl pallet_session::Config for Runtime {
     type Keys = SessionKeys;
     type ValidatorId = AccountId;
     type ValidatorIdOf = ConvertInto;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = Babe;
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
@@ -180,23 +186,6 @@ impl pallet_session::historical::Config for Runtime {
 #[cfg(not(feature = "with-staking"))]
 impl pallet_poa::Config for Runtime {}
 
-#[cfg(not(feature = "with-staking"))]
-impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = Poa;
-    type MembershipChanged = Poa;
-}
-
 #[cfg(feature = "with-staking")]
 impl pallet_session::Config for Runtime {
     type SessionManager = NodleStaking;
@@ -206,7 +195,6 @@ impl pallet_session::Config for Runtime {
     type Keys = SessionKeys;
     type ValidatorId = AccountId;
     type ValidatorIdOf = pallet_nodle_staking::StashOf<Runtime>;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = Babe;
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
@@ -234,7 +222,7 @@ parameter_types! {
     pub const DefaultStakingMinNominatorTotalBond: Balance = 10 * constants::MILLICENTS;
     pub const DefaultStakingMinNominationChillThreshold: Balance = 3 * constants::MILLICENTS;
     pub const MaxChunkUnlock: usize = 32;
-    pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    pub const StakingPalletId: PalletId = PalletId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
 }
 #[cfg(feature = "with-staking")]
@@ -266,10 +254,10 @@ impl pallet_nodle_staking::Config for Runtime {
     type WeightInfo = pallet_nodle_staking::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-    pub OffencesWeightSoftLimit: Weight = Perbill::from_percent(60) *
-        constants::RuntimeBlockWeights::get().max_block;
-}
+// parameter_types! {
+//     pub OffencesWeightSoftLimit: Weight = Perbill::from_percent(60) *
+//         constants::RuntimeBlockWeights::get().max_block;
+// }
 
 impl pallet_offences::Config for Runtime {
     type Event = Event;
@@ -280,26 +268,4 @@ impl pallet_offences::Config for Runtime {
 
     #[cfg(feature = "with-staking")]
     type OnOffenceHandler = NodleStaking;
-
-    type WeightSoftLimit = OffencesWeightSoftLimit;
-}
-
-#[cfg(feature = "with-staking")]
-impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    // TODO :: Have to revisit this change.
-    // type MembershipInitialized = NodleStaking;
-    // type MembershipChanged = NodleStaking;
-    type MembershipInitialized = ();
-    type MembershipChanged = ();
 }

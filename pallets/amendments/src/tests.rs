@@ -44,9 +44,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Storage, Config, Event<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
-        Amendments: amendments::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Config, Event<T>},
+        Amendments: amendments::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -77,7 +77,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -122,7 +123,9 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 fn make_proposal(value: u64) -> Box<Call> {
-    Box::new(Call::System(frame_system::Call::remark(value.encode())))
+    Box::new(Call::System(frame_system::Call::remark {
+        remark: value.encode(),
+    }))
 }
 
 #[test]

@@ -71,6 +71,13 @@ const_assert!(NORMAL_DISPATCH_RATIO.deconstruct() >= AVERAGE_ON_INITIALIZE_RATIO
 /// This is used to limit the maximal weight of a single extrinsic.
 pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 
+/// The BABE epoch configuration at genesis.
+pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
+    sp_consensus_babe::BabeEpochConfiguration {
+        c: PRIMARY_PROBABILITY,
+        allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
+    };
+
 parameter_types! {
     pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
         .base_block(BlockExecutionWeight::get())

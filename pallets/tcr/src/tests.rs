@@ -38,9 +38,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: system::{Module, Call, Config, Storage, Event<T>},
-        BalancesModule: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        TestModule: pallet_tcr::{Module, Call, Storage, Event<T>},
+        System: system::{Pallet, Call, Config, Storage, Event<T>},
+        BalancesModule: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_tcr::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -68,7 +68,8 @@ impl system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -79,9 +80,11 @@ impl pallet_balances::Config for Test {
     type Balance = u64;
     type Event = ();
     type DustRemoval = ();
-    type AccountStore = system::Module<Test>;
+    type AccountStore = system::Pallet<Test>;
     type MaxLocks = MaxLocks;
     type ExistentialDeposit = ();
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
 parameter_types! {
@@ -122,7 +125,7 @@ impl ChangeMembers<u64> for TestChangeMembers {
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type MinimumApplicationAmount = MinimumApplicationAmount;
     type MinimumCounterAmount = MinimumCounterAmount;
     type MinimumChallengeAmount = MinimumChallengeAmount;
@@ -338,8 +341,8 @@ fn can_not_counter_application_if_not_enough_funds() {
                 voters_for: vec![],
                 votes_against: 0u64,
                 voters_against: vec![],
-                created_block: <system::Module<Test>>::block_number(),
-                challenged_block: <system::Module<Test>>::block_number(),
+                created_block: <system::Pallet<Test>>::block_number(),
+                challenged_block: <system::Pallet<Test>>::block_number(),
             },
         );
 
@@ -551,7 +554,7 @@ fn finalize_application_if_not_challenged_and_enough_time_elapsed() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
 
@@ -584,7 +587,7 @@ fn does_not_finalize_countered_or_challenged_application() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
@@ -605,7 +608,7 @@ fn does_not_finalize_application_if_not_enough_time_elapsed() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number() - 1,
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number() - 1,
         );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), true);
@@ -639,7 +642,7 @@ fn finalize_challenge_if_enough_time_elapsed_drop() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeChallengePeriod::get() + <system::Pallet<Test>>::block_number(),
         );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
@@ -698,7 +701,7 @@ fn finalize_challenge_if_enough_time_elapsed_accept() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeChallengePeriod::get() + <system::Pallet<Test>>::block_number(),
         );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
@@ -756,7 +759,7 @@ fn finalize_challenge_if_enough_time_elapsed_drop_and_kill_member() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
 
@@ -767,7 +770,7 @@ fn finalize_challenge_if_enough_time_elapsed_drop_and_kill_member() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeChallengePeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(
             MEMBERS.with(|m| m.borrow().clone()),
@@ -798,7 +801,7 @@ fn does_not_finalize_challenge_if_not_enough_time_elapsed() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number() - 1,
+            FinalizeChallengePeriod::get() + <system::Pallet<Test>>::block_number() - 1,
         );
 
         assert_eq!(<Applications<Test>>::contains_key(CANDIDATE), false);
@@ -819,7 +822,7 @@ fn can_challenge_member_application() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
 
@@ -851,11 +854,11 @@ fn can_challenge_member_application() {
         assert_eq!(<Challenges<Test>>::get(CANDIDATE).voters_against, vec![]);
         assert_eq!(
             <Challenges<Test>>::get(CANDIDATE).challenged_block,
-            <system::Module<Test>>::block_number()
+            <system::Pallet<Test>>::block_number()
         );
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeChallengePeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeChallengePeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(
             MEMBERS.with(|m| m.borrow().clone()),
@@ -879,7 +882,7 @@ fn can_not_challenge_twice() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
 
@@ -929,7 +932,7 @@ fn can_not_challenge_member_applicaton_if_not_enough_funds() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
 
         assert_noop!(
@@ -969,7 +972,7 @@ fn can_not_apply_if_already_member() {
         ));
 
         <TestModule as OnFinalize<<Test as system::Config>::BlockNumber>>::on_finalize(
-            FinalizeApplicationPeriod::get() + <system::Module<Test>>::block_number(),
+            FinalizeApplicationPeriod::get() + <system::Pallet<Test>>::block_number(),
         );
         assert_eq!(MEMBERS.with(|m| m.borrow().clone()), vec![CANDIDATE]);
 

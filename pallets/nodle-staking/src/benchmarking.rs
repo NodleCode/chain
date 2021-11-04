@@ -66,13 +66,13 @@ fn update_stake_config<T: Config>() {
     let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get();
     let min_nominator_chill_threshold = T::DefaultStakingMinNominationChillThreshold::get();
     let caller = T::CancelOrigin::successful_origin();
-    let call = Call::<T>::set_staking_limits(
-        max_validators,
-        min_stake_session_selection,
-        min_validator_bond,
-        min_nominator_total_bond,
-        min_nominator_chill_threshold,
-    );
+    let call = Call::<T>::set_staking_limits {
+        max_stake_validators: max_validators,
+        min_stake_session_selection: min_stake_session_selection,
+        min_validator_bond: min_validator_bond,
+        min_nominator_total_bond: min_nominator_total_bond,
+        min_nominator_chill_threshold: min_nominator_chill_threshold,
+    };
     let _ = call.dispatch_bypass_filter(caller);
 }
 
@@ -110,7 +110,9 @@ benchmarks! {
         log::trace!("[set_invulnerables > {:#?}]=> - Itern-{:#?}", line!(), c);
         let inv_validators = register_validator::<T>("sinv-validator", c);
         let caller = T::CancelOrigin::successful_origin();
-        let call = Call::<T>::set_invulnerables(inv_validators.clone());
+        let call = Call::<T>::set_invulnerables{
+            invulnerables: inv_validators.clone()
+        };
     }: { call.dispatch_bypass_filter(caller)? }
     verify {
         assert_last_event::<T>(
@@ -123,7 +125,9 @@ benchmarks! {
    set_total_validator_per_round {
        let c in 5 .. T::MinSelectedValidators::get() * 2;
        let caller = T::CancelOrigin::successful_origin();
-       let call = Call::<T>::set_total_validator_per_round(c);
+       let call = Call::<T>::set_total_validator_per_round{
+        new: c
+       };
        let old = <TotalSelected<T>>::get();
    }: { call.dispatch_bypass_filter(caller)? }
    verify {
@@ -141,7 +145,13 @@ benchmarks! {
         let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get() * 2u32.into();
         let min_nominator_chill_threshold = T::DefaultStakingMinNominationChillThreshold::get() * 2u32.into();
         let caller = T::CancelOrigin::successful_origin();
-        let call = Call::<T>::set_staking_limits(max_validators, min_stake_session_selection, min_validator_bond, min_nominator_total_bond, min_nominator_chill_threshold);
+        let call = Call::<T>::set_staking_limits {
+            max_stake_validators: max_validators,
+            min_stake_session_selection: min_stake_session_selection,
+            min_validator_bond: min_validator_bond,
+            min_nominator_total_bond: min_nominator_total_bond,
+            min_nominator_chill_threshold: min_nominator_chill_threshold
+        };
     }: { call.dispatch_bypass_filter(caller)? }
     verify {
         assert_last_event::<T>(
@@ -512,7 +522,13 @@ benchmarks! {
         let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get() * 2u32.into();
         let min_nominator_chill_threshold = <StakingMinNominationChillThreshold<T>>::get() * 5u32.into();
         let caller = T::CancelOrigin::successful_origin();
-        let call = Call::<T>::set_staking_limits(max_validators, min_stake_session_selection, min_validator_bond, min_nominator_total_bond, min_nominator_chill_threshold);
+        let call = Call::<T>::set_staking_limits {
+            max_stake_validators: max_validators,
+            min_stake_session_selection: min_stake_session_selection,
+            min_validator_bond: min_validator_bond,
+            min_nominator_total_bond: min_nominator_total_bond,
+            min_nominator_chill_threshold: min_nominator_chill_threshold
+        };
         let _ = call.dispatch_bypass_filter(caller);
     }: _(RawOrigin::Signed(nominator.clone()))
     verify {
@@ -593,10 +609,11 @@ benchmarks! {
             ).into()
         );
     }
-}
 
-impl_benchmark_test_suite!(
-    NodleStaking,
-    crate::mock::ExtBuilder::default().has_stakers(true).build(),
-    crate::mock::Test,
-);
+    impl_benchmark_test_suite!(
+        NodleStaking,
+        crate::mock::ExtBuilder::default().has_stakers(true).build(),
+        crate::mock::Test,
+    );
+
+}
