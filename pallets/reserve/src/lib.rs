@@ -29,12 +29,12 @@ use frame_support::{
     traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
     weights::GetDispatchInfo,
 };
-use nodle_support::WithAccountId;
 use sp_runtime::{
     traits::{AccountIdConversion, Dispatchable},
     DispatchResult, ModuleId,
 };
 use sp_std::prelude::Box;
+use support::WithAccountId;
 
 #[cfg(feature = "std")]
 use frame_support::traits::GenesisBuild;

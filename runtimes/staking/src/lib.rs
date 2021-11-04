@@ -38,12 +38,12 @@ use frame_support::{
     construct_runtime,
     traits::{KeyOwnerProofSystem, Randomness},
 };
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, CertificateId, Index, Signature};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+use primitives::{AccountId, Balance, BlockNumber, Index, Signature};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -58,10 +58,8 @@ use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 
 pub mod constants;
-mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
-mod pallets_nodle;
 mod pallets_system;
 mod pallets_util;
 mod version;
@@ -72,75 +70,40 @@ pub use pallets_consensus::SessionKeys;
 pub use version::native_version;
 pub use version::VERSION;
 
-macro_rules! construct_nodle_runtime {
-	($( $modules:tt )*) => {
-		#[allow(clippy::large_enum_variant)]
-		construct_runtime! {
-			pub enum Runtime where
-				Block = Block,
-				NodeBlock = nodle_chain_primitives::Block,
-				UncheckedExtrinsic = UncheckedExtrinsic
-			{
-				// System
-				System: frame_system::{Module, Call, Storage, Config, Event<T>} = 0,
-				Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent} = 1,
-				Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 2,
-				TransactionPayment: pallet_transaction_payment::{Module, Storage} = 3,
-				RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage} = 4,
+construct_runtime! {
+    pub enum Runtime where
+        Block = Block,
+        NodeBlock = primitives::Block,
+        UncheckedExtrinsic = UncheckedExtrinsic
+    {
+        // System
+        System: frame_system::{Module, Call, Storage, Config, Event<T>} = 0,
+        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent} = 1,
+        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 2,
+        TransactionPayment: pallet_transaction_payment::{Module, Storage} = 3,
+        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage} = 4,
 
-				// Consensus
-				Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned} = 5,
-				Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event, ValidateUnsigned} = 6,
-				Authorship: pallet_authorship::{Module, Call, Storage, Inherent} = 7,
-				ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
-				Offences: pallet_offences::{Module, Call, Storage, Event} = 9,
-				ValidatorsSet: pallet_membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>} = 10,
-				$($modules)*
-				Session: pallet_session::{Module, Call, Storage, Event, Config<T>} = 12,
-				Historical: pallet_session_historical::{Module} = 13,
-				AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config} = 14,
+        // Consensus
+        Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned} = 5,
+        Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event, ValidateUnsigned} = 6,
+        Authorship: pallet_authorship::{Module, Call, Storage, Inherent} = 7,
+        ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
+        Offences: pallet_offences::{Module, Call, Storage, Event} = 9,
+        Staking: pallet_staking::{Module, Call, Storage, Event<T>, Config<T>} = 11,
+        Session: pallet_session::{Module, Call, Storage, Event, Config<T>} = 12,
+        Historical: pallet_session_historical::{Module} = 13,
+        AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config} = 14,
 
-				// Governance
-				TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 15,
-				TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>} = 16,
-				FinancialCommittee: pallet_collective::<Instance3>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 17,
-				FinancialMembership: pallet_membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>} = 18,
-				RootCommittee: pallet_collective::<Instance4>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
-				RootMembership: pallet_membership::<Instance4>::{Module, Call, Storage, Event<T>, Config<T>} = 20,
-				Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>} = 21,
-				Amendments: pallet_amendments::{Module, Call, Storage, Event<T>} = 22,
-				Mandate: pallet_mandate::{Module, Call, Event} = 23,
-				CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>} = 24,
-				InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config<T>, Event<T>} = 25,
-				UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config<T>, Event<T>} = 26,
-				Vesting: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>} = 27,
+        // Governance
+        RootCommittee: pallet_collective::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
+        RootMembership: pallet_membership::{Module, Call, Storage, Event<T>, Config<T>} = 20,
+        Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>} = 21,
+        Mandate: pallet_mandate::{Module, Call, Event} = 23,
 
-				// Neat things
-				Utility: pallet_utility::{Module, Call, Event} = 28,
-				Multisig: pallet_multisig::{Module, Call, Storage, Event<T>} = 29,
-				Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>} = 30,
-
-				// Nodle Stack
-				PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>} = 31,
-				PkiRootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>} = 32,
-				EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event<T>, Storage} = 33,
-				Allocations: pallet_allocations::{Module, Call, Event<T>, Storage} = 34,
-				AllocationsOracles: pallet_membership::<Instance5>::{Module, Call, Storage, Event<T>, Config<T>} = 35,
-			}
-		}
-	}
-}
-
-#[cfg(not(feature = "with-staking"))]
-construct_nodle_runtime! {
-    // Consensus
-    Poa: pallet_poa::{Module, Storage} = 11,
-}
-
-#[cfg(feature = "with-staking")]
-construct_nodle_runtime! {
-    // Consensus & NodleStaking
-    NodleStaking: pallet_nodle_staking::{Module, Call, Storage, Event<T>, Config<T>} = 11,
+        // Neat things
+        Utility: pallet_utility::{Module, Call, Event} = 28,
+        Multisig: pallet_multisig::{Module, Call, Storage, Event<T>} = 29,
+    }
 }
 
 /// The address format for describing accounts.
@@ -171,17 +134,6 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-#[cfg(not(feature = "with-staking"))]
-pub type Executive = frame_executive::Executive<
-    Runtime,
-    Block,
-    frame_system::ChainContext<Runtime>,
-    Runtime,
-    AllModules,
->;
-
-/// Executive: handles dispatch to the various modules.
-#[cfg(feature = "with-staking")]
 pub type Executive = frame_executive::Executive<
     Runtime,
     Block,
@@ -356,33 +308,6 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber>
-    for Runtime
-    {
-        fn call(
-            origin: AccountId,
-            dest: AccountId,
-            value: Balance,
-            gas_limit: u64,
-            input_data: Vec<u8>,
-        ) -> pallet_contracts_primitives::ContractExecResult {
-            Contracts::bare_call(origin, dest, value, gas_limit, input_data)
-        }
-
-        fn get_storage(
-            address: AccountId,
-            key: [u8; 32],
-        ) -> pallet_contracts_primitives::GetStorageResult {
-            Contracts::get_storage(address, key)
-        }
-
-        fn rent_projection(
-            address: AccountId,
-        ) -> pallet_contracts_primitives::RentProjectionResult<BlockNumber> {
-            Contracts::rent_projection(address)
-        }
-    }
-
     impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<
         Block,
         Balance,
@@ -393,16 +318,6 @@ sp_api::impl_runtime_apis! {
 
         fn query_fee_details(uxt: <Block as BlockT>::Extrinsic, len: u32) -> FeeDetails<Balance> {
             TransactionPayment::query_fee_details(uxt, len)
-        }
-    }
-
-    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, CertificateId> for Runtime {
-        fn is_root_certificate_valid(cert: &CertificateId) -> bool {
-            PkiRootOfTrust::is_root_certificate_valid(cert)
-        }
-
-        fn is_child_certificate_valid(root: &CertificateId, child: &CertificateId) -> bool {
-            PkiRootOfTrust::is_child_certificate_valid(root, child)
         }
     }
 
@@ -430,27 +345,16 @@ sp_api::impl_runtime_apis! {
             let params = (&config, &whitelist);
 
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_allocations, Allocations);
-            add_benchmark!(params, batches, pallet_amendments, Amendments);
             add_benchmark!(params, batches, pallet_babe, Babe);
             add_benchmark!(params, batches, pallet_balances, Balances);
-            add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
-            add_benchmark!(params, batches, pallet_contracts, Contracts);
-            add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
+            add_benchmark!(params, batches, pallet_collective, RootCommittee);
             add_benchmark!(params, batches, pallet_grandpa, Grandpa);
-
-            #[cfg(feature = "with-staking")]
-            add_benchmark!(params, batches, pallet_nodle_staking, NodleStaking);
-
-            add_benchmark!(params, batches, pallet_grants, Vesting);
+            add_benchmark!(params, batches, pallet_nodle_staking, Staking);
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
-            add_benchmark!(params, batches, pallet_tcr, PkiTcr);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_utility, Utility);
 

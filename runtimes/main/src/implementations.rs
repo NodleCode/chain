@@ -20,12 +20,8 @@
 //! Auxillary struct/enums for polkadot runtime.
 
 use crate::{Authorship, Balances, CompanyReserve};
-
-#[cfg(feature = "with-staking")]
-use crate::NodleStaking;
-
 use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
-use nodle_chain_primitives::AccountId;
+use primitives::AccountId;
 
 /// Logic for the author to get a portion of fees.
 pub struct Author;
@@ -49,13 +45,7 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
                 tips.ration_merge_into(20, 80, &mut split);
             }
             CompanyReserve::on_unbalanced(split.0);
-
-            #[cfg(not(feature = "with-staking"))]
             Author::on_unbalanced(split.1);
-
-            // 80% is moved to staking pallet, when staking is enabled.
-            #[cfg(feature = "with-staking")]
-            NodleStaking::on_unbalanced(split.1);
         }
     }
 }

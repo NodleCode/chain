@@ -19,45 +19,25 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Call, Event,
-    Grandpa, Historical, ImOnline, Offences, Runtime,
+    constants, pallets_governance::RootCollective, AuthorityDiscovery, Babe, Balances, Call, Event,
+    Grandpa, Historical, ImOnline, Offences, Runtime, Session, Staking,
 };
-
-#[cfg(feature = "with-staking")]
-use crate::{pallets_governance::FinancialCollective, Session};
-
-#[cfg(not(feature = "with-staking"))]
-use crate::Poa;
-
-#[cfg(not(feature = "with-staking"))]
-use sp_runtime::traits::ConvertInto;
-
-#[cfg(feature = "with-staking")]
-use crate::{Balances, CompanyReserve, NodleStaking};
-
-use frame_support::{parameter_types, traits::KeyOwnerProofSystem, weights::Weight};
-
-#[cfg(feature = "with-staking")]
-use frame_support::traits::LockIdentifier;
-
-use nodle_chain_primitives::{AccountId, BlockNumber, Moment};
-
-#[cfg(feature = "with-staking")]
-use nodle_chain_primitives::Balance;
-
+use frame_support::{
+    parameter_types,
+    traits::{KeyOwnerProofSystem, LockIdentifier},
+    weights::Weight,
+};
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use primitives::{AccountId, Balance, BlockNumber, Moment};
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2},
 };
 use sp_runtime::{
-    impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, Perbill,
+    impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, ModuleId,
+    Perbill,
 };
-
-#[cfg(feature = "with-staking")]
-use sp_runtime::ModuleId;
-
 use sp_std::prelude::*;
 
 impl_opaque_keys! {
@@ -128,12 +108,7 @@ impl pallet_authorship::Config for Runtime {
     type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Babe>;
     type UncleGenerations = UncleGenerations;
     type FilterUncle = ();
-
-    #[cfg(not(feature = "with-staking"))]
-    type EventHandler = ImOnline;
-
-    #[cfg(feature = "with-staking")]
-    type EventHandler = (NodleStaking, ImOnline);
+    type EventHandler = (Staking, ImOnline);
 }
 
 parameter_types! {
@@ -157,68 +132,25 @@ parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
 }
 
-#[cfg(not(feature = "with-staking"))]
 impl pallet_session::Config for Runtime {
-    type SessionManager = Poa;
+    type SessionManager = Staking;
     type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
     type ShouldEndSession = Babe;
     type Event = Event;
     type Keys = SessionKeys;
     type ValidatorId = AccountId;
-    type ValidatorIdOf = ConvertInto;
+    type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
     type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = Babe;
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-#[cfg(not(feature = "with-staking"))]
 impl pallet_session::historical::Config for Runtime {
-    type FullIdentification = pallet_poa::FullIdentification;
-    type FullIdentificationOf = pallet_poa::FullIdentificationOf<Runtime>;
-}
-
-#[cfg(not(feature = "with-staking"))]
-impl pallet_poa::Config for Runtime {}
-
-#[cfg(not(feature = "with-staking"))]
-impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = Poa;
-    type MembershipChanged = Poa;
-}
-
-#[cfg(feature = "with-staking")]
-impl pallet_session::Config for Runtime {
-    type SessionManager = NodleStaking;
-    type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-    type ShouldEndSession = Babe;
-    type Event = Event;
-    type Keys = SessionKeys;
-    type ValidatorId = AccountId;
-    type ValidatorIdOf = pallet_nodle_staking::StashOf<Runtime>;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
-    type NextSessionRotation = Babe;
-    type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
-}
-
-#[cfg(feature = "with-staking")]
-impl pallet_session::historical::Config for Runtime {
-    type FullIdentification = pallet_nodle_staking::ValidatorSnapshot<AccountId, Balance>;
-    type FullIdentificationOf = pallet_nodle_staking::ValidatorSnapshotOf<Runtime>;
+    type FullIdentification = pallet_staking::ValidatorSnapshot<AccountId, Balance>;
+    type FullIdentificationOf = pallet_staking::ValidatorSnapshotOf<Runtime>;
 }
 
 // TODO::Have to fine tune parameters for practical use-case
-#[cfg(feature = "with-staking")]
 parameter_types! {
     // 27 Days
     pub const SlashDeferDuration: sp_staking::SessionIndex = 27 * 6;
@@ -237,8 +169,7 @@ parameter_types! {
     pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
 }
-#[cfg(feature = "with-staking")]
-impl pallet_nodle_staking::Config for Runtime {
+impl pallet_staking::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
     type BondedDuration = BondingDuration;
@@ -253,17 +184,17 @@ impl pallet_nodle_staking::Config for Runtime {
     type DefaultStakingMinStakeSessionSelection = DefaultStakingMinStakeSessionSelection;
     type DefaultStakingMinNominatorTotalBond = DefaultStakingMinNominatorTotalBond;
     type DefaultStakingMinNominationChillThreshold = DefaultStakingMinNominationChillThreshold;
-    type RewardRemainder = CompanyReserve;
+    type RewardRemainder = ();
     type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
     type StakingLockId = StakingLockId;
-    type Slash = CompanyReserve;
+    type Slash = ();
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
     type ValidatorRegistration = Session;
     type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type WeightInfo = pallet_nodle_staking::weights::SubstrateWeight<Runtime>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -274,32 +205,6 @@ parameter_types! {
 impl pallet_offences::Config for Runtime {
     type Event = Event;
     type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
-
-    #[cfg(not(feature = "with-staking"))]
-    type OnOffenceHandler = ();
-
-    #[cfg(feature = "with-staking")]
-    type OnOffenceHandler = NodleStaking;
-
+    type OnOffenceHandler = Staking;
     type WeightSoftLimit = OffencesWeightSoftLimit;
-}
-
-#[cfg(feature = "with-staking")]
-impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    // TODO :: Have to revisit this change.
-    // type MembershipInitialized = NodleStaking;
-    // type MembershipChanged = NodleStaking;
-    type MembershipInitialized = ();
-    type MembershipChanged = ();
 }

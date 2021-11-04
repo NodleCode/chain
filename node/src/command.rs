@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use crate::service::Executor;
 use crate::{
     chain_spec,
     cli::{Cli, Subcommand},
     service::{self, new_partial},
 };
-use nodle_chain_executor::Executor;
-use nodle_chain_primitives::Block;
+use primitives::Block;
 use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 
@@ -57,7 +57,6 @@ impl SubstrateCli for Cli {
             "local" => Box::new(chain_spec::local_testnet_config()),
             "" | "main" => Box::new(chain_spec::main_config()),
             "arcadia" => Box::new(chain_spec::arcadia_config()),
-            #[cfg(feature = "with-staking")]
             "staking-local" => Box::new(chain_spec::local_staking_config()),
             path => Box::new(chain_spec::ChainSpec::from_json_file(
                 std::path::PathBuf::from(path),
@@ -66,7 +65,7 @@ impl SubstrateCli for Cli {
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        &nodle_chain_runtime::VERSION
+        &runtime_main::VERSION
     }
 }
 

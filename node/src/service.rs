@@ -20,11 +20,11 @@
 
 use crate::rpc::{self, DenyUnsafe, IoHandler};
 use futures::prelude::*;
-use nodle_chain_executor::Executor;
-use nodle_chain_primitives::Block;
-use nodle_chain_runtime::RuntimeApi;
+use primitives::Block;
+use runtime_main::RuntimeApi;
 use sc_client_api::{ExecutorProvider, RemoteBackend};
 use sc_consensus_babe;
+use sc_executor::native_executor_instance;
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
 use sc_network::{Event, NetworkService};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
@@ -32,6 +32,14 @@ use sc_telemetry::TelemetryConnectionNotifier;
 use sp_inherents::InherentDataProviders;
 use sp_runtime::traits::Block as BlockT;
 use std::sync::Arc;
+
+// Our native executor instance.
+native_executor_instance!(
+    pub Executor,
+    runtime_main::api::dispatch,
+    runtime_main::native_version,
+    frame_benchmarking::benchmarking::HostFunctions,
+);
 
 type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;

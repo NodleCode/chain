@@ -16,16 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, Signature};
-#[cfg(feature = "with-staking")]
-use nodle_chain_runtime::NodleStakingConfig;
-use nodle_chain_runtime::{
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use primitives::{AccountId, Balance, BlockNumber, Signature};
+use runtime_main::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
     RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
     ValidatorsSetConfig, VestingConfig,
 };
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_service::ChainType;
 use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
@@ -140,9 +138,7 @@ pub fn testnet_genesis(
     });
 
     const ENDOWMENT: Balance = 10_000 * NODL;
-
-    #[cfg(feature = "with-staking")]
-    const STASH: Balance = ENDOWMENT / 1_000;
+    //const STASH: Balance = ENDOWMENT / 1_000;
 
     GenesisConfig {
         // Core
@@ -205,15 +201,14 @@ pub fn testnet_genesis(
         pallet_grandpa: Some(GrandpaConfig {
             authorities: vec![],
         }),
-        #[cfg(feature = "with-staking")]
-        pallet_nodle_staking: Some(NodleStakingConfig {
-            stakers: initial_authorities
-                .iter()
-                .map(|x| (x.0.clone(), None, STASH))
-                .collect(),
-            invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-            ..Default::default()
-        }),
+        // pallet_nodle_staking: Some(NodleStakingConfig {
+        //     stakers: initial_authorities
+        //         .iter()
+        //         .map(|x| (x.0.clone(), None, STASH))
+        //         .collect(),
+        //     invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
+        //     ..Default::default()
+        // }),
         pallet_membership_Instance2: Some(ValidatorsSetConfig {
             members: initial_authorities
                 .iter()
@@ -312,7 +307,6 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
-#[cfg(feature = "with-staking")]
 fn local_staking_genesis() -> GenesisConfig {
     testnet_genesis(
         vec![get_authority_keys_from_seed("Alice")],
@@ -329,7 +323,6 @@ fn local_staking_genesis() -> GenesisConfig {
 }
 
 /// Local testnet config to test the staking pallet
-#[cfg(feature = "with-staking")]
 pub fn local_staking_config() -> ChainSpec {
     ChainSpec::from_genesis(
         "Local Staking Testnet",
@@ -370,7 +363,6 @@ pub(crate) mod tests {
     }
 
     #[test]
-    #[cfg(feature = "with-staking")]
     fn test_create_staking_local_chain_spec() {
         local_staking_config().build_storage().unwrap();
     }

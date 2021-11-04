@@ -25,7 +25,7 @@ use crate::{
 };
 
 use frame_support::parameter_types;
-use nodle_chain_primitives::{AccountId, Balance, BlockNumber, CertificateId};
+use primitives::{AccountId, Balance, BlockNumber, CertificateId};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 
