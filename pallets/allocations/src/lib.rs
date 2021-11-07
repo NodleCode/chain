@@ -18,7 +18,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -91,7 +93,7 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             Self::ensure_oracle(origin)?;
             ensure!(
-                !pallet_emergency_shutdown::Module::<T>::shutdown(),
+                !pallet_emergency_shutdown::Pallet::<T>::shutdown(),
                 Error::<T>::UnderShutdown
             );
 
@@ -137,7 +139,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T> = "Balance")]
     pub enum Event<T: Config> {
         /// An allocation was triggered \[who, value, fee, proof\]
         NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),

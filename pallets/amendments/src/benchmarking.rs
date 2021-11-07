@@ -34,21 +34,22 @@ benchmarks! {
     propose {
         let b in 1 .. MAX_BYTES;
 
-        let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; b as usize]).into();
-        let call = Call::<T>::propose(Box::new(amendment));
+        let amendment: T::Amendment = SystemCall::<T>::remark{ remark: vec![1; b as usize] }.into();
+        let call = Call::<T>::propose{ amendment: Box::new(amendment) };
         let origin = T::SubmissionOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 
     veto {
-        let amendment: T::Amendment = SystemCall::<T>::remark(vec![1; MAX_BYTES as usize]).into();
+        let amendment: T::Amendment = SystemCall::<T>::remark{ remark: vec![1; MAX_BYTES as usize] }.into();
         Pallet::<T>::propose(
             SystemOrigin::Root.into(),
             Box::new(amendment)
         )?;
 
-        let call = Call::<T>::veto(0);
+        let call = Call::<T>::veto{ amendment_id: 0 };
         let origin = T::VetoOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
-}
 
-impl_benchmark_test_suite!(Amendments, crate::tests::new_test_ext(), crate::tests::Test,);
+    impl_benchmark_test_suite!(Amendments, crate::tests::new_test_ext(), crate::tests::Test,);
+
+}

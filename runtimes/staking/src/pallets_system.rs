@@ -23,7 +23,7 @@ use crate::{
     SignedExtra, SignedPayload, Staking, System, UncheckedExtrinsic,
 };
 use frame_support::{
-    debug, parameter_types,
+    parameter_types,
     weights::{constants::RocksDbWeight, IdentityFee},
 };
 use frame_system::limits::BlockLength;
@@ -46,7 +46,7 @@ parameter_types! {
 }
 
 impl frame_system::Config for Runtime {
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
     type BlockWeights = constants::RuntimeBlockWeights;
     type BlockLength = RuntimeBlockLength;
     type DbWeight = RocksDbWeight;
@@ -68,6 +68,8 @@ impl frame_system::Config for Runtime {
     type OnKilledAccount = ();
     type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
     type SS58Prefix = SS58Prefix;
+    /// The set code logic, just the default since we're not a parachain.
+    type OnSetCode = ();
 }
 
 parameter_types! {
@@ -89,6 +91,8 @@ parameter_types! {
 }
 impl pallet_balances::Config for Runtime {
     type MaxLocks = MaxLocks;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type Balance = Balance;
     type DustRemoval = ();
     type Event = Event;
@@ -99,6 +103,7 @@ impl pallet_balances::Config for Runtime {
 
 parameter_types! {
     pub const TransactionByteFee: Balance = 10 * constants::MILLICENTS;
+    pub const OperationalFeeMultiplier: u8 = 5;
     pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
     pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(1, 100_000);
     pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000_000u128);
@@ -107,6 +112,7 @@ parameter_types! {
 impl pallet_transaction_payment::Config for Runtime {
     type OnChargeTransaction = CurrencyAdapter<Balances, Staking>;
     type TransactionByteFee = TransactionByteFee;
+    type OperationalFeeMultiplier = OperationalFeeMultiplier;
     type WeightToFee = IdentityFee<Balance>;
     type FeeMultiplierUpdate =
         TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
@@ -147,8 +153,8 @@ where
             pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
         );
         let raw_payload = SignedPayload::new(call, extra)
-            .map_err(|e| {
-                debug::warn!("Unable to create signed payload: {:?}", e);
+            .map_err(|_e| {
+                // debug::warn!("Unable to create signed payload: {:?}", e);
             })
             .ok()?;
         let signature = raw_payload.using_encoded(|payload| C::sign(payload, public))?;

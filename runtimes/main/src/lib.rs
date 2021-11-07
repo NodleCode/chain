@@ -34,16 +34,13 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
     )
 }
 
-use frame_support::{
-    construct_runtime,
-    traits::{KeyOwnerProofSystem, Randomness},
-};
+use frame_support::{construct_runtime, traits::KeyOwnerProofSystem};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, CertificateId, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, CertificateId, Hash, Index, Signature};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -79,50 +76,50 @@ construct_runtime! {
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: frame_system::{Module, Call, Storage, Config, Event<T>} = 0,
-        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent} = 1,
-        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 2,
-        TransactionPayment: pallet_transaction_payment::{Module, Storage} = 3,
-        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage} = 4,
+        System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
+        Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
+        Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 2,
+        TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 3,
+        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 4,
 
         // Consensus
-        Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned} = 5,
-        Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event, ValidateUnsigned} = 6,
-        Authorship: pallet_authorship::{Module, Call, Storage, Inherent} = 7,
-        ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
-        Offences: pallet_offences::{Module, Call, Storage, Event} = 9,
-        ValidatorsSet: pallet_membership::<Instance2>::{Module, Call, Storage, Event<T>, Config<T>} = 10,
-        Poa: pallet_poa::{Module, Storage} = 11,
-        Session: pallet_session::{Module, Call, Storage, Event, Config<T>} = 12,
-        Historical: pallet_session_historical::{Module} = 13,
-        AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config} = 14,
+        Babe: pallet_babe::{Pallet, Call, Storage, Config, ValidateUnsigned} = 5,
+        Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event, ValidateUnsigned} = 6,
+        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 7,
+        ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
+        Offences: pallet_offences::{Pallet, Storage, Event} = 9,
+        ValidatorsSet: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 10,
+        Poa: pallet_poa::{Pallet, Storage} = 11,
+        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 12,
+        Historical: pallet_session_historical::{Pallet} = 13,
+        AuthorityDiscovery: pallet_authority_discovery::{Pallet, Config} = 14,
 
         // Governance
-        TechnicalCommittee: pallet_collective::<Instance2>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 15,
-        TechnicalMembership: pallet_membership::<Instance1>::{Module, Call, Storage, Event<T>, Config<T>} = 16,
-        FinancialCommittee: pallet_collective::<Instance3>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 17,
-        FinancialMembership: pallet_membership::<Instance3>::{Module, Call, Storage, Event<T>, Config<T>} = 18,
-        RootCommittee: pallet_collective::<Instance4>::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
-        RootMembership: pallet_membership::<Instance4>::{Module, Call, Storage, Event<T>, Config<T>} = 20,
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>} = 21,
-        Amendments: pallet_amendments::{Module, Call, Storage, Event<T>} = 22,
-        Mandate: pallet_mandate::{Module, Call, Event} = 23,
-        CompanyReserve: pallet_reserve::<Instance1>::{Module, Call, Storage, Config<T>, Event<T>} = 24,
-        InternationalReserve: pallet_reserve::<Instance2>::{Module, Call, Storage, Config<T>, Event<T>} = 25,
-        UsaReserve: pallet_reserve::<Instance3>::{Module, Call, Storage, Config<T>, Event<T>} = 26,
-        Vesting: pallet_grants::{Module, Call, Storage, Config<T>, Event<T>} = 27,
+        TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 15,
+        TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 16,
+        FinancialCommittee: pallet_collective::<Instance3>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 17,
+        FinancialMembership: pallet_membership::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>} = 18,
+        RootCommittee: pallet_collective::<Instance4>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
+        RootMembership: pallet_membership::<Instance4>::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 21,
+        Amendments: pallet_amendments::{Pallet, Call, Storage, Event<T>} = 22,
+        Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 23,
+        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 24,
+        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
+        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
+        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 27,
 
         // Neat things
-        Utility: pallet_utility::{Module, Call, Event} = 28,
-        Multisig: pallet_multisig::{Module, Call, Storage, Event<T>} = 29,
-        Contracts: pallet_contracts::{Module, Call, Config<T>, Storage, Event<T>} = 30,
+        Utility: pallet_utility::{Pallet, Call, Event} = 28,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
+        Contracts: pallet_contracts::{Pallet, Call, Storage, Event<T>} = 30,
 
         // Nodle Stack
-        PkiTcr: pallet_tcr::<Instance1>::{Module, Call, Storage, Event<T>} = 31,
-        PkiRootOfTrust: pallet_root_of_trust::{Module, Call, Storage, Event<T>} = 32,
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Event<T>, Storage} = 33,
-        Allocations: pallet_allocations::{Module, Call, Event<T>, Storage} = 34,
-        AllocationsOracles: pallet_membership::<Instance5>::{Module, Call, Storage, Event<T>, Config<T>} = 35,
+        PkiTcr: pallet_tcr::<Instance1>::{Pallet, Call, Storage, Event<T>} = 31,
+        PkiRootOfTrust: pallet_root_of_trust::{Pallet, Call, Storage, Event<T>} = 32,
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
+        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 34,
+        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 35,
     }
 }
 
@@ -158,7 +155,7 @@ pub type Executive = frame_executive::Executive<
     Block,
     frame_system::ChainContext<Runtime>,
     Runtime,
-    AllModules,
+    AllPallets,
 >;
 
 sp_api::impl_runtime_apis! {
@@ -178,7 +175,7 @@ sp_api::impl_runtime_apis! {
 
     impl sp_api::Metadata<Block> for Runtime {
         fn metadata() -> OpaqueMetadata {
-            Runtime::metadata().into()
+            OpaqueMetadata::new(Runtime::metadata().into())
         }
     }
 
@@ -201,15 +198,15 @@ sp_api::impl_runtime_apis! {
         ) -> sp_inherents::CheckInherentsResult {
             data.check_extrinsics(&block)
         }
-
-        fn random_seed() -> <Block as BlockT>::Hash {
-            RandomnessCollectiveFlip::random_seed()
-        }
     }
 
     impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
-        fn validate_transaction(source: TransactionSource, tx: <Block as BlockT>::Extrinsic) -> TransactionValidity {
-            Executive::validate_transaction(source, tx)
+        fn validate_transaction(
+            source: TransactionSource,
+            tx: <Block as BlockT>::Extrinsic,
+            block_hash: <Block as BlockT>::Hash,
+        ) -> TransactionValidity {
+            Executive::validate_transaction(source, tx, block_hash)
         }
     }
 
@@ -222,6 +219,10 @@ sp_api::impl_runtime_apis! {
     impl fg_primitives::GrandpaApi<Block> for Runtime {
         fn grandpa_authorities() -> GrandpaAuthorityList {
             Grandpa::grandpa_authorities()
+        }
+
+        fn current_set_id() -> fg_primitives::SetId {
+            Grandpa::current_set_id()
         }
 
         fn submit_report_equivocation_unsigned_extrinsic(
@@ -258,13 +259,15 @@ sp_api::impl_runtime_apis! {
             // slot duration and expected target block time, for safely
             // resisting network delays of maximum two seconds.
             // <https://research.web3.foundation/en/latest/polkadot/BABE/Babe/#6-practical-results>
+            // c: crate::constants::PRIMARY_PROBABILITY,
+            // allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
             sp_consensus_babe::BabeGenesisConfiguration {
                 slot_duration: Babe::slot_duration(),
                 epoch_length: EpochDuration::get(),
-                c: crate::constants::PRIMARY_PROBABILITY,
-                genesis_authorities: Babe::authorities(),
+                c: constants::BABE_GENESIS_EPOCH_CONFIG.c,
+                genesis_authorities: Babe::authorities().to_vec(),
                 randomness: Babe::randomness(),
-                allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
+                allowed_slots: constants::BABE_GENESIS_EPOCH_CONFIG.allowed_slots,
             }
         }
 
@@ -327,7 +330,9 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber>
+    impl pallet_contracts_rpc_runtime_api::ContractsApi<
+        Block, AccountId, Balance, BlockNumber, Hash,
+    >
     for Runtime
     {
         fn call(
@@ -337,7 +342,19 @@ sp_api::impl_runtime_apis! {
             gas_limit: u64,
             input_data: Vec<u8>,
         ) -> pallet_contracts_primitives::ContractExecResult {
-            Contracts::bare_call(origin, dest, value, gas_limit, input_data)
+            Contracts::bare_call(origin, dest, value, gas_limit, input_data, true)
+        }
+
+        fn instantiate(
+            origin: AccountId,
+            endowment: Balance,
+            gas_limit: u64,
+            code: pallet_contracts_primitives::Code<Hash>,
+            data: Vec<u8>,
+            salt: Vec<u8>,
+        ) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId>
+        {
+            Contracts::bare_instantiate(origin, endowment, gas_limit, code, data, salt, true)
         }
 
         fn get_storage(
@@ -345,12 +362,6 @@ sp_api::impl_runtime_apis! {
             key: [u8; 32],
         ) -> pallet_contracts_primitives::GetStorageResult {
             Contracts::get_storage(address, key)
-        }
-
-        fn rent_projection(
-            address: AccountId,
-        ) -> pallet_contracts_primitives::RentProjectionResult<BlockNumber> {
-            Contracts::rent_projection(address)
         }
     }
 

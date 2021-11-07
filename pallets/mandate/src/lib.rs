@@ -20,29 +20,25 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
-
-#[cfg(test)]
-mod tests;
-
-pub mod weights;
-pub use weights::WeightInfo;
 
 pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use super::*;
-    use frame_support::pallet_prelude::*;
+    use frame_support::{
+        pallet_prelude::*, traits::EnsureOrigin, weights::GetDispatchInfo, Parameter,
+    };
     use frame_system::pallet_prelude::*;
+    use sp_runtime::{traits::Dispatchable, DispatchResult};
+    use sp_std::prelude::Box;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-        type ShutdownOrigin: EnsureOrigin<Self::Origin>;
-        /// Weight information for extrinsics in this pallet.
-        type WeightInfo: WeightInfo;
+        type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+        /// Origin that can call this module and execute sudo actions. Typically
+        /// the `collective` module.
+        type ExternalOrigin: EnsureOrigin<Self::Origin>;
     }
 
     #[pallet::pallet]
@@ -54,15 +50,18 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// Toggle the shutdown state if authorized to do so.
-        #[pallet::weight(T::WeightInfo::toggle())]
-        pub fn toggle(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
-            T::ShutdownOrigin::try_origin(origin)
-                .map(|_| ())
-                .or_else(ensure_root)?;
+        /// Let the configured origin dispatch a call as root
+        #[pallet::weight(call.get_dispatch_info().weight + 10_000)]
+        pub fn apply(
+            origin: OriginFor<T>,
+            call: Box<<T as Config>::Call>,
+        ) -> DispatchResultWithPostInfo {
+            T::ExternalOrigin::ensure_origin(origin)?;
 
-            <Shutdown<T>>::put(!Self::shutdown());
-            Self::deposit_event(Event::ShutdownToggled(Self::shutdown()));
+            // Shamelessly stollen from the `sudo` module
+            let res = call.dispatch(frame_system::RawOrigin::Root.into());
+
+            Self::deposit_event(Event::RootOp(res.map(|_| ()).map_err(|e| e.error)));
 
             Ok(().into())
         }
@@ -71,11 +70,7 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Shutdown state was toggled, to either on or off.
-        ShutdownToggled(bool),
+        /// A root operation was executed, show result
+        RootOp(DispatchResult),
     }
-
-    #[pallet::storage]
-    #[pallet::getter(fn shutdown)]
-    pub type Shutdown<T: Config> = StorageValue<_, bool, ValueQuery>;
 }

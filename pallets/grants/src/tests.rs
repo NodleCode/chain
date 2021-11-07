@@ -33,7 +33,7 @@ fn add_vesting_schedule_works() {
             assert_eq!(Vesting::vesting_schedules(&BOB), vec![schedule.clone()]);
 
             let vested_event =
-                TestEvent::vesting(Event::VestingScheduleAdded(ALICE, BOB, schedule));
+                TestEvent::Vesting(Event::VestingScheduleAdded(ALICE, BOB, schedule));
             assert!(System::events()
                 .iter()
                 .any(|record| record.event == vested_event));
@@ -73,7 +73,7 @@ fn add_new_vesting_schedule_merges_with_current_locked_balance_and_until() {
             ));
 
             assert_eq!(
-                PalletBalances::locks(&BOB).pop(),
+                PalletBalances::locks(&BOB).to_vec().pop(),
                 Some(BalanceLock {
                     id: VESTING_LOCK_ID,
                     amount: 17u64,
@@ -437,7 +437,7 @@ fn overwrite_vesting_schedules_relock_appropriate_number_of_coins() {
 
             assert_eq!(Vesting::vesting_schedules(BOB), modified_schedules);
             assert_eq!(
-                PalletBalances::locks(&BOB).pop(),
+                PalletBalances::locks(&BOB).to_vec().pop(),
                 Some(BalanceLock {
                     id: VESTING_LOCK_ID,
                     amount: 5u64,
@@ -482,6 +482,6 @@ fn overwrite_vesting_schedules_may_clean_storage() {
             ));
 
             assert_eq!(Vesting::vesting_schedules(BOB), vec![]);
-            assert_eq!(PalletBalances::locks(&BOB).pop(), None);
+            assert_eq!(PalletBalances::locks(&BOB).to_vec().pop(), None);
         });
 }

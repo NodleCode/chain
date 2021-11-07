@@ -38,10 +38,10 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event<T>},
-        Allocations: pallet_allocations::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
+        Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -69,7 +69,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -83,9 +84,10 @@ impl pallet_balances::Config for Test {
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
     type AccountStore = frame_system::Pallet<Test>;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
-
 ord_parameter_types! {
     pub const ShutdownAdmin: u64 = 21;
 }

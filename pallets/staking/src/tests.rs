@@ -68,7 +68,7 @@ fn join_validator_pool_works() {
             assert_ok!(NodleStaking::validator_join_pool(Origin::signed(7), 10u128,));
             assert_eq!(
                 last_event(),
-                MetaEvent::nodle_staking(Event::JoinedValidatorPool(7, 10u128, 1121u128))
+                MetaEvent::NodleStaking(Event::JoinedValidatorPool(7, 10u128, 1121u128))
             );
         });
 }
@@ -221,7 +221,7 @@ fn validator_exit_executes_after_delay() {
             assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(2)));
             assert_eq!(
                 last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(6, 2, 8)),
+                MetaEvent::NodleStaking(Event::ValidatorScheduledExit(6, 2, 8)),
             );
 
             let mut new1 = vec![
@@ -372,7 +372,7 @@ fn validator_selection_chooses_top_candidates() {
             assert_ok!(NodleStaking::validator_exit_pool(Origin::signed(6)));
             assert_eq!(
                 last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(4, 6, 6)),
+                MetaEvent::NodleStaking(Event::ValidatorScheduledExit(4, 6, 6)),
             );
             let info = NodleStaking::validator_state(&6).unwrap();
             assert_eq!(info.state, ValidatorStatus::Leaving(6));
@@ -408,7 +408,7 @@ fn validator_selection_chooses_top_candidates() {
 
             assert_eq!(
                 mock::last_event(),
-                MetaEvent::nodle_staking(Event::JoinedValidatorPool(6, 69, 469u128))
+                MetaEvent::NodleStaking(Event::JoinedValidatorPool(6, 69, 469u128))
             );
 
             mock::start_active_session(8);
@@ -1028,7 +1028,7 @@ fn validator_commission() {
             assert_ok!(NodleStaking::validator_join_pool(Origin::signed(4), 20u128));
             assert_eq!(
                 last_event(),
-                MetaEvent::nodle_staking(Event::JoinedValidatorPool(4, 20u128, 60u128))
+                MetaEvent::NodleStaking(Event::JoinedValidatorPool(4, 20u128, 60u128))
             );
 
             assert_ok!(Session::set_keys(
@@ -1354,7 +1354,7 @@ fn multiple_nominations() {
 
             assert_eq!(
                 last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorScheduledExit(6, 2, 8))
+                MetaEvent::NodleStaking(Event::ValidatorScheduledExit(6, 2, 8))
             );
 
             mock::start_active_session(7);
@@ -3669,7 +3669,7 @@ fn payout_creates_controller() {
 
         assert_eq!(
             last_event(),
-            MetaEvent::nodle_staking(Event::JoinedValidatorPool(10, balance, 4500)),
+            MetaEvent::NodleStaking(Event::JoinedValidatorPool(10, balance, 4500)),
         );
 
         // Create a nominator
@@ -3677,7 +3677,7 @@ fn payout_creates_controller() {
 
         assert_eq!(
             last_event(),
-            MetaEvent::nodle_staking(Event::Nomination(1337, 100, 10, 1100,),),
+            MetaEvent::NodleStaking(Event::Nomination(1337, 100, 10, 1100,),),
         );
 
         mock::mint_rewards(1_000_000);
@@ -3707,7 +3707,7 @@ fn reward_from_authorship_event_handler_works() {
         .num_validators(4)
         .build_and_execute(|| {
             use pallet_authorship::EventHandler;
-            assert_eq!(<pallet_authorship::Module<Test>>::author(), 11);
+            assert_eq!(<pallet_authorship::Pallet<Test>>::author(), 11);
             NodleStaking::note_author(11);
             NodleStaking::note_uncle(21, 1);
             // Rewarding the same two times works.
@@ -4034,11 +4034,9 @@ fn nominators_also_get_slashed_pro_rata() {
 
             let slash_amount = slash_percent * exposed_stake;
             let validator_share =
-                Perbill::from_rational_approximation(exposed_validator, exposed_stake)
-                    * slash_amount;
+                Perbill::from_rational(exposed_validator, exposed_stake) * slash_amount;
             let nominator_share =
-                Perbill::from_rational_approximation(exposed_nominator, exposed_stake)
-                    * slash_amount;
+                Perbill::from_rational(exposed_nominator, exposed_stake) * slash_amount;
 
             // both slash amounts need to be positive for the test to make sense.
             assert!(validator_share > 0);
@@ -4223,7 +4221,7 @@ fn slash_in_old_span_does_not_deselect() {
             );
             assert_eq!(
                 mock::last_event(),
-                MetaEvent::nodle_staking(Event::ValidatorBondedMore(11, 800, 810))
+                MetaEvent::NodleStaking(Event::ValidatorBondedMore(11, 800, 810))
             );
 
             mock::start_active_session(11);

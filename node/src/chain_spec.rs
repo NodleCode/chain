@@ -20,14 +20,14 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Balance, BlockNumber, Signature};
 use runtime_main::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
-    ContractsConfig, FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
-    RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig,
-    ValidatorsSetConfig, VestingConfig,
+    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig,
+    SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
+    VestingConfig,
 };
+use sc_chain_spec::Properties;
 use sc_service::ChainType;
 use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use sp_chain_spec::Properties;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
@@ -142,11 +142,11 @@ pub fn testnet_genesis(
 
     GenesisConfig {
         // Core
-        frame_system: Some(SystemConfig {
+        system: SystemConfig {
             code: wasm_binary_unwrap().to_vec(),
             changes_trie_config: Default::default(),
-        }),
-        pallet_balances: Some(BalancesConfig {
+        },
+        balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
                 .cloned()
@@ -171,17 +171,12 @@ pub fn testnet_genesis(
 
                     acc
                 }),
-        }),
-        pallet_grants: Some(VestingConfig {
+        },
+        vesting: VestingConfig {
             vesting: vested_grants,
-        }),
-        pallet_contracts: Some(ContractsConfig {
-            current_schedule: pallet_contracts::Schedule {
-                ..Default::default()
-            },
-        }),
+        },
         // Consensus
-        pallet_session: Some(SessionConfig {
+        session: SessionConfig {
             keys: initial_authorities
                 .iter()
                 .map(|x| {
@@ -192,56 +187,49 @@ pub fn testnet_genesis(
                     )
                 })
                 .collect::<Vec<_>>(),
-        }),
-        pallet_babe: Some(BabeConfig {
+        },
+        babe: BabeConfig {
             authorities: vec![],
-        }),
-        pallet_im_online: Some(ImOnlineConfig { keys: vec![] }),
-        pallet_authority_discovery: Some(AuthorityDiscoveryConfig { keys: vec![] }),
-        pallet_grandpa: Some(GrandpaConfig {
+            epoch_config: Some(runtime_main::constants::BABE_GENESIS_EPOCH_CONFIG),
+        },
+        im_online: ImOnlineConfig { keys: vec![] },
+        authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
+        grandpa: GrandpaConfig {
             authorities: vec![],
-        }),
-        // pallet_nodle_staking: Some(NodleStakingConfig {
-        //     stakers: initial_authorities
-        //         .iter()
-        //         .map(|x| (x.0.clone(), None, STASH))
-        //         .collect(),
-        //     invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-        //     ..Default::default()
-        // }),
-        pallet_membership_Instance2: Some(ValidatorsSetConfig {
+        },
+        validators_set: ValidatorsSetConfig {
             members: initial_authorities
                 .iter()
                 .map(|x| x.0.clone())
                 .collect::<Vec<_>>(),
             phantom: Default::default(),
-        }),
+        },
 
         // Governance
         // Technical Committee
-        pallet_collective_Instance2: Some(Default::default()),
-        pallet_membership_Instance1: Some(TechnicalMembershipConfig {
+        technical_committee: Default::default(),
+        technical_membership: TechnicalMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
+        },
         // Financial Committee
-        pallet_collective_Instance3: Some(Default::default()),
-        pallet_membership_Instance3: Some(FinancialMembershipConfig {
+        financial_committee: Default::default(),
+        financial_membership: FinancialMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
-        pallet_reserve_Instance1: Some(Default::default()),
-        pallet_reserve_Instance2: Some(Default::default()),
-        pallet_reserve_Instance3: Some(Default::default()),
+        },
+        company_reserve: Default::default(),
+        international_reserve: Default::default(),
+        usa_reserve: Default::default(),
         // Root Committee
-        pallet_collective_Instance4: Some(Default::default()),
-        pallet_membership_Instance4: Some(RootMembershipConfig {
+        root_committee: Default::default(),
+        root_membership: RootMembershipConfig {
             members: roots.clone(),
             phantom: Default::default(),
-        }),
+        },
 
         // Allocations
-        pallet_membership_Instance5: Some(Default::default()),
+        allocations_oracles: Default::default(),
     }
 }
 

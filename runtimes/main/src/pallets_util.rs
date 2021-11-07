@@ -23,7 +23,7 @@ use crate::{
     OriginCaller, RandomnessCollectiveFlip, Runtime, Timestamp,
 };
 
-use frame_support::{parameter_types, weights::Weight};
+use frame_support::{parameter_types, traits::Nothing, weights::Weight};
 use pallet_contracts::weights::WeightInfo;
 use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
@@ -52,7 +52,6 @@ parameter_types! {
     pub const DepositFactor: Balance = constants::deposit(0, 32);
     pub const MaxSignatories: u16 = 100;
 }
-
 impl pallet_multisig::Config for Runtime {
     type Event = Event;
     type Call = Call;
@@ -63,54 +62,41 @@ impl pallet_multisig::Config for Runtime {
     type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_randomness_collective_flip::Config for Runtime {}
+
 parameter_types! {
-    pub const TombstoneDeposit: Balance = constants::deposit(
+    pub ContractDeposit: Balance = constants::deposit(
         1,
-        sp_std::mem::size_of::<pallet_contracts::ContractInfo<Runtime>>() as u32
+        <pallet_contracts::Pallet<Runtime>>::contract_info_size(),
     );
-    pub const DepositPerContract: Balance = TombstoneDeposit::get();
-    pub const DepositPerStorageByte: Balance = constants::deposit(0, 1);
-    pub const DepositPerStorageItem: Balance = constants::deposit(1, 0);
-    pub RentFraction: Perbill = Perbill::from_rational_approximation(1u32, 30 * constants::DAYS);
-    pub const SurchargeReward: Balance = 150 * constants::MILLICENTS;
-    pub const SignedClaimHandicap: u32 = 2;
-    pub const MaxDepth: u32 = 32;
     pub const MaxValueSize: u32 = 16 * 1024;
+    // The lazy deletion runs inside on_initialize.
+    pub DeletionWeightLimit: Weight = constants::AVERAGE_ON_INITIALIZE_RATIO *
+        constants::RuntimeBlockWeights::get().max_block;
     // The weight needed for decoding the queue should be less or equal than a fifth
     // of the overall weight dedicated to the lazy deletion.
     pub DeletionQueueDepth: u32 = ((DeletionWeightLimit::get() / (
             <Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(1) -
             <Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(0)
         )) / 5) as u32;
-    pub MaxCodeSize: u32 = 128 * 1024;
-    // The lazy deletion runs inside on_initialize.
-    pub DeletionWeightLimit: Weight = constants::AVERAGE_ON_INITIALIZE_RATIO *
-        constants::RuntimeBlockWeights::get().max_block;
+    pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
 }
-
 impl pallet_contracts::Config for Runtime {
     type Time = Timestamp;
     type Randomness = RandomnessCollectiveFlip;
     type Currency = Balances;
     type Event = Event;
-    type RentPayment = ();
-    type SignedClaimHandicap = SignedClaimHandicap;
-    type TombstoneDeposit = TombstoneDeposit;
-    type DepositPerContract = DepositPerContract;
-    type DepositPerStorageByte = DepositPerStorageByte;
-    type DepositPerStorageItem = DepositPerStorageItem;
-    type RentFraction = RentFraction;
-    type SurchargeReward = SurchargeReward;
-    type MaxDepth = MaxDepth;
-    type MaxValueSize = MaxValueSize;
-    type WeightPrice = pallet_transaction_payment::Module<Self>;
+    type Call = Call;
+    type CallFilter = Nothing;
+    type ContractDeposit = ContractDeposit;
+    type CallStack = [pallet_contracts::Frame<Self>; 31];
+    type WeightPrice = pallet_transaction_payment::Pallet<Self>;
     type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
     type ChainExtension = ();
     type DeletionQueueDepth = DeletionQueueDepth;
     type DeletionWeightLimit = DeletionWeightLimit;
-    type MaxCodeSize = MaxCodeSize;
+    type Schedule = Schedule;
 }
-
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
         constants::RuntimeBlockWeights::get().max_block;

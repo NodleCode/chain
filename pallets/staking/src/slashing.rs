@@ -31,7 +31,7 @@ use sp_staking::SessionIndex;
 use sp_std::vec::Vec;
 
 // A range of start..end eras for a slashing span.
-#[derive(Encode, Decode)]
+#[derive(Encode, Decode, scale_info::TypeInfo)]
 #[cfg_attr(test, derive(Debug, PartialEq))]
 pub(crate) struct SlashingSpan {
     pub(crate) index: SpanIndex,
@@ -49,7 +49,7 @@ impl SlashingSpan {
 }
 
 /// An encoding of all of a nominator's slashing spans.
-#[derive(Encode, Decode, RuntimeDebug)]
+#[derive(Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub struct SlashingSpans {
     // the index of the current slashing span of the nominator. different for
     // every controller, resets when the account hits free balance 0.
@@ -152,7 +152,7 @@ impl SlashingSpans {
 }
 
 /// A slashing-span record for a particular controller.
-#[derive(Encode, Decode, Default)]
+#[derive(Encode, Decode, Default, scale_info::TypeInfo)]
 pub struct SpanRecord<Balance> {
     pub slashed: Balance,
     pub paid_out: Balance,
@@ -523,8 +523,8 @@ impl<'a, T: 'a + Config> Drop for InspectingSpans<'a, T> {
 
 /// Clear slashing metadata for an obsolete session.
 pub(crate) fn clear_session_metadata<T: Config>(obsolete_session: SessionIndex) {
-    <Pallet<T> as Store>::ValidatorSlashInSession::remove_prefix(&obsolete_session);
-    <Pallet<T> as Store>::NominatorSlashInSession::remove_prefix(&obsolete_session);
+    <Pallet<T> as Store>::ValidatorSlashInSession::remove_prefix(&obsolete_session, None);
+    <Pallet<T> as Store>::NominatorSlashInSession::remove_prefix(&obsolete_session, None);
 }
 
 /// Clear slashing metadata for a dead account.

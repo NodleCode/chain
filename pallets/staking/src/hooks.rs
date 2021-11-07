@@ -73,7 +73,7 @@ where
     fn note_uncle(author: T::AccountId, _age: T::BlockNumber) {
         log::trace!("note_uncle:[{:#?}] - Author[{:#?}]", line!(), author);
         Self::reward_by_ids(vec![
-            (<pallet_authorship::Module<T>>::author(), 2),
+            (<pallet_authorship::Pallet<T>>::author(), 2),
             (author, 1),
         ])
     }
@@ -192,7 +192,7 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
     /// Returns `true` if new era should be forced at the end of this session.
     /// This allows preventing a situation where there is too many validators
     /// disabled and block production stalls.
-    fn disable_validator(validator: &AccountId) -> Result<bool, ()>;
+    fn disable_validator(validator: &AccountId) -> bool;
     /// Get the validators from session.
     fn validators() -> Vec<AccountId>;
     /// Prune historical session tries up to but not including the given index.
@@ -216,16 +216,16 @@ where
         Option<<T as frame_system::Config>::AccountId>,
     >,
 {
-    fn disable_validator(validator: &<T as frame_system::Config>::AccountId) -> Result<bool, ()> {
-        <pallet_session::Module<T>>::disable(validator)
+    fn disable_validator(validator: &<T as frame_system::Config>::AccountId) -> bool {
+        <pallet_session::Pallet<T>>::disable(validator)
     }
 
     fn validators() -> Vec<<T as frame_system::Config>::AccountId> {
-        <pallet_session::Module<T>>::validators()
+        <pallet_session::Pallet<T>>::validators()
     }
 
     fn prune_historical_up_to(up_to: SessionIndex) {
-        <pallet_session::historical::Module<T>>::prune_up_to(up_to);
+        <pallet_session::historical::Pallet<T>>::prune_up_to(up_to);
     }
 }
 
@@ -281,7 +281,7 @@ where
         >],
         slash_fraction: &[Perbill],
         slash_session: SessionIndex,
-    ) -> Result<Weight, ()> {
+    ) -> Weight {
         log::trace!(
             "on_offence:[{:#?}] - Sess-idx [{:#?}] | Slash-Frac [{:#?}]",
             line!(),
@@ -369,10 +369,6 @@ where
                 add_db_reads_writes(4 /* fetch_spans */, 5 /* kick_out_if_recent */);
             }
         }
-        Ok(consumed_weight)
-    }
-
-    fn can_report() -> bool {
-        true
+        consumed_weight
     }
 }
