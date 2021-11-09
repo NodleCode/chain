@@ -390,6 +390,45 @@ sp_api::impl_runtime_apis! {
 
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
+		fn benchmark_metadata(extra: bool) -> (
+            Vec<frame_benchmarking::BenchmarkList>,
+            Vec<frame_support::traits::StorageInfo>,
+        ) {
+            use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
+            use frame_support::traits::StorageInfoTrait;
+
+            // Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
+            // issues. To get around that, we separated the Session benchmarks into its own crate,
+            // which is why we need these two lines below.
+            // use pallet_loans_benchmarking::Pallet as LoansBench;
+            use frame_system_benchmarking::Pallet as SystemBench;
+
+            let mut list = Vec::<BenchmarkList>::new();
+
+			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
+			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
+			list_benchmark!(list, extra, pallet_balances, Balances);
+			list_benchmark!(list, extra, pallet_babe, Babe);
+			list_benchmark!(list, extra, pallet_grandpa, Grandpa);
+			list_benchmark!(list, extra, pallet_im_online, ImOnline);
+			list_benchmark!(list, extra, pallet_collective, TechnicalCommittee);
+			list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+			list_benchmark!(list, extra, pallet_amendments, Amendments);
+			list_benchmark!(list, extra, pallet_multisig, Multisig);
+			list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
+			list_benchmark!(list, extra, pallet_grants, Vesting);
+			list_benchmark!(list, extra, pallet_utility, Utility);
+			list_benchmark!(list, extra, pallet_tcr, PkiTcr);
+			list_benchmark!(list, extra, pallet_root_of_trust, PkiRootOfTrust);
+			list_benchmark!(list, extra, pallet_contracts, Contracts);
+			list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
+			list_benchmark!(list, extra, pallet_allocations, Allocations);
+
+            let storage_info = AllPalletsWithSystem::storage_info();
+
+            (list, storage_info)
+        }
+
         fn dispatch_benchmark(
             config: frame_benchmarking::BenchmarkConfig,
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
@@ -399,38 +438,32 @@ sp_api::impl_runtime_apis! {
 
             use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey, add_benchmark};
 
-            use frame_system_benchmarking::Module as SystemBench;
-            //use pallet_offences_benchmarking::Module as OffencesBench;
-            //use pallet_session_benchmarking::Module as SessionBench;
+            use frame_system_benchmarking::Pallet as SystemBench;
 
             impl frame_system_benchmarking::Config for Runtime {}
-            //impl pallet_offences_benchmarking::Config for Runtime{}
-            //impl pallet_session_benchmarking::Config for Runtime {}
 
             let whitelist: Vec<TrackedStorageKey> = vec![];
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&config, &whitelist);
 
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_allocations, Allocations);
-            add_benchmark!(params, batches, pallet_amendments, Amendments);
+			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
+			add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_babe, Babe);
-            add_benchmark!(params, batches, pallet_balances, Balances);
-            add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
-            add_benchmark!(params, batches, pallet_contracts, Contracts);
-            add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
-            add_benchmark!(params, batches, pallet_grandpa, Grandpa);
-            add_benchmark!(params, batches, pallet_grants, Vesting);
-            add_benchmark!(params, batches, pallet_im_online, ImOnline);
+			add_benchmark!(params, batches, pallet_grandpa, Grandpa);
+			add_benchmark!(params, batches, pallet_im_online, ImOnline);
+			add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
+			add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+			add_benchmark!(params, batches, pallet_amendments, Amendments);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
-            //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
-            //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
-            add_benchmark!(params, batches, pallet_scheduler, Scheduler);
-            add_benchmark!(params, batches, pallet_tcr, PkiTcr);
-            add_benchmark!(params, batches, pallet_timestamp, Timestamp);
+			add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_utility, Utility);
+			add_benchmark!(params, batches, pallet_tcr, PkiTcr);
+			add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
+			add_benchmark!(params, batches, pallet_contracts, Contracts);
+			add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
+			add_benchmark!(params, batches, pallet_allocations, Allocations);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

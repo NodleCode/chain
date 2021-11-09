@@ -20,7 +20,6 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
-#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
 #[cfg(test)]

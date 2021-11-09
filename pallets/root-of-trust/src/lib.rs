@@ -21,7 +21,6 @@
 //! This module implements a Root Of Trust linked to a `membership` or `tcr` pallet which
 //! can be used to let entities represented by their `AccountId` manage certificates
 //! and off-chain certificates in Public Key Infrastructure fashion (SSL / TLS like).
-#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
 #[cfg(test)]

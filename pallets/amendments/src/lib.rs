@@ -20,7 +20,6 @@
 
 //! An amendment module instance manages amendments to the chain. There could be a security
 //! delay configured along with a veto capability.
-#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
 #[cfg(test)]

@@ -20,7 +20,6 @@
 
 //! A module that is called by the `collective` and is in charge of holding
 //! the company funds.
-#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
 #[cfg(test)]

@@ -21,7 +21,6 @@
 //! This module implements a Token Curated Registry where members (represented by their
 //! `AccountId`) are accepted based on the number of tokens staked in support to their
 //! application.
-#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
 #[cfg(test)]

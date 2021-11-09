@@ -21,7 +21,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(any(feature = "runtime-benchmarks", test))]
 mod benchmarking;
 
 #[cfg(test)]
