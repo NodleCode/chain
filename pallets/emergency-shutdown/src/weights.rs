@@ -36,33 +36,35 @@
 // --output=./pallets/emergency-shutdown/src/weights.rs
 // --template=./.maintain/frame-weight-template.hbs
 
-
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+    traits::Get,
+    weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_emergency_shutdown.
 pub trait WeightInfo {
-	fn toggle() -> Weight;
+    fn toggle() -> Weight;
 }
 
 /// Weights for pallet_emergency_shutdown using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn toggle() -> Weight {
-		(18_996_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
+    fn toggle() -> Weight {
+        (18_996_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(5 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn toggle() -> Weight {
-		(18_996_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
+    fn toggle() -> Weight {
+        (18_996_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(5 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
 }

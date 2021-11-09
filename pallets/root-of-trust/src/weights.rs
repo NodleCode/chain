@@ -36,66 +36,68 @@
 // --output=./pallets/root-of-trust/src/weights.rs
 // --template=./.maintain/frame-weight-template.hbs
 
-
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+    traits::Get,
+    weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_root_of_trust.
 pub trait WeightInfo {
-	fn book_slot() -> Weight;
-	fn renew_slot() -> Weight;
-	fn revoke_slot() -> Weight;
-	fn revoke_child() -> Weight;
+    fn book_slot() -> Weight;
+    fn renew_slot() -> Weight;
+    fn revoke_slot() -> Weight;
+    fn revoke_child() -> Weight;
 }
 
 /// Weights for pallet_root_of_trust using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn book_slot() -> Weight {
-		(70_522_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(8 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
-	}
-	fn renew_slot() -> Weight {
-		(72_536_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(8 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
-	}
-	fn revoke_slot() -> Weight {
-		(27_331_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
-	fn revoke_child() -> Weight {
-		(28_003_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
-	}
+    fn book_slot() -> Weight {
+        (70_522_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(8 as Weight))
+            .saturating_add(T::DbWeight::get().writes(5 as Weight))
+    }
+    fn renew_slot() -> Weight {
+        (72_536_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(8 as Weight))
+            .saturating_add(T::DbWeight::get().writes(5 as Weight))
+    }
+    fn revoke_slot() -> Weight {
+        (27_331_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(6 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
+    fn revoke_child() -> Weight {
+        (28_003_000 as Weight)
+            .saturating_add(T::DbWeight::get().reads(6 as Weight))
+            .saturating_add(T::DbWeight::get().writes(3 as Weight))
+    }
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn book_slot() -> Weight {
-		(70_522_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
-	}
-	fn renew_slot() -> Weight {
-		(72_536_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
-	}
-	fn revoke_slot() -> Weight {
-		(27_331_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
-	fn revoke_child() -> Weight {
-		(28_003_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
-	}
+    fn book_slot() -> Weight {
+        (70_522_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(8 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
+    }
+    fn renew_slot() -> Weight {
+        (72_536_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(8 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
+    }
+    fn revoke_slot() -> Weight {
+        (27_331_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
+    fn revoke_child() -> Weight {
+        (28_003_000 as Weight)
+            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
+            .saturating_add(RocksDbWeight::get().writes(3 as Weight))
+    }
 }

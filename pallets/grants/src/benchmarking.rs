@@ -120,12 +120,12 @@ benchmarks! {
         let origin = T::ForceOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 
-	impl_benchmark_test_suite!(
-		Grants,
-		crate::mock::ExtBuilder::default()
-			.one_hundred_for_alice()
-			.build(),
-		crate::mock::Test,
-	);
+    impl_benchmark_test_suite!(
+        Grants,
+        crate::mock::ExtBuilder::default()
+            .one_hundred_for_alice()
+            .build(),
+        crate::mock::Test,
+    );
 
 }
