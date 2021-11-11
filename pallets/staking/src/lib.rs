@@ -144,9 +144,19 @@ pub mod pallet {
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        #[cfg(feature = "try-runtime")]
+        fn pre_upgrade() -> Result<(), &'static str> {
+            migrations::v1::PoAToStaking::<T>::pre_upgrade()
+        }
+
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
             let weight = migrations::v1::PoAToStaking::<T>::on_runtime_upgrade();
             weight
+        }
+
+        #[cfg(feature = "try-runtime")]
+        fn post_upgrade() -> Result<(), &'static str> {
+            migrations::v1::PoAToStaking::<T>::post_upgrade()
         }
     }
 
