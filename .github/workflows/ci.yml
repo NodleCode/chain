@@ -9,7 +9,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-
+        toolchain:
+          - nightly
+        target: [ "x86_64-unknown-linux-gnu", "wasm32-unknown-unknown" ]
     steps:
     - uses: actions/checkout@v2
 
@@ -48,28 +50,39 @@ jobs:
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-    - name: Setup toolchain
-      run: ./scripts/init.sh
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.toolchain }}
 
-    - name: Install tarpaulin
-      run: |
-        rustup toolchain install $(cat rust-toolchain)
-        rustup target add --toolchain $(cat rust-toolchain) wasm32-unknown-unknown
-        cargo install cargo-tarpaulin --version 0.18.4
+    - name: Add target
+      run: rustup target add ${{ matrix.target }}
 
-    - name: Cargo check
-      run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
+    - name: Install Tarpaulin
+      uses: actions-rs/cargo@v1
+      with:
+        command: install
+        args: cargo-tarpaulin --version 0.18.4
 
     - name: Generate coverage report
-      run: |
-        cargo \
-          +$(cat rust-toolchain) \
-          tarpaulin \
+      uses: actions-rs/cargo@v1
+      with:
+        command: tarpaulin
+        args: |
           --verbose \
           --all-features \
           --workspace \
           --timeout 120 \
           --out Xml
+
+    - name: Cargo check
+      uses: actions-rs/cargo@v1
+      env:
+        SKIP_WASM_BUILD: '='
+      with:
+        command: check
+        args: --all-targets --all-features --workspace
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v2.0.3
