@@ -16,6 +16,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: Swatinem/rust-cache@v1
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ env.nightly }}
+        override: true
+        components: rustfmt, rustc-dev
 
     - name: Install ubuntu native dependencies
       if: matrix.os == 'ubuntu-latest'
@@ -27,13 +32,6 @@ jobs:
         sudo apt clean
         sudo rm -rf "/usr/local/share/boost"
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ env.nightly }}
-        override: true
-        components: rustfmt, rustc-dev
 
     - name: Add target
       run: rustup target add ${{ env.target }}
