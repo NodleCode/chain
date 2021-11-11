@@ -47,6 +47,7 @@ pub use pallet::*;
 pub mod pallet {
     use super::*;
     use crate::set::OrderedSet;
+    use frame_support::traits::OnRuntimeUpgrade;
     use frame_support::{
         pallet_prelude::*,
         traits::{
@@ -138,29 +139,13 @@ pub mod pallet {
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(crate) trait Store)]
+    #[pallet::storage_version(migrations::v1::STORAGE_VERSION)]
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            let mut weight = Weight::from(0u64);
-
-            // migrates our storage to pallet version 2.0.6
-            // let version: PalletVersion =
-            //     <Pallet<T>>::storage_version().unwrap_or(<Pallet<T>>::current_version());
-
-            // log::info!(
-            //     "on_runtime_upgrade>[{:#?}]=> - Current Pallet Version-[{:#?}]",
-            //     line!(),
-            //     version,
-            // );
-
-            // if version.major == 2 && version.minor == 0 {
-            //     weight = migrations::poa_validators_migration::<T>();
-            // }
-
-            weight = migrations::poa_validators_migration::<T>();
-
+            let weight = migrations::v1::PoAToStaking::<T>::on_runtime_upgrade();
             weight
         }
     }
