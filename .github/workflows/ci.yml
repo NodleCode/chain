@@ -20,41 +20,16 @@ jobs:
       with:
         toolchain: ${{ env.nightly }}
         override: true
-        components: rustfmt, rustc-dev
 
     - name: Install ubuntu native dependencies
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt install -y cmake pkg-config libssl-dev git build-essential clang libclang-dev
 
-    - name: Cleanup ubuntu filesystem
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt clean
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
-    - name: Add target
-      run: rustup target add ${{ env.target }}
-
-    - name: Install Tarpaulin
-      uses: actions-rs/cargo@v1
+    - name: Run cargo-tarpaulin
+      uses: actions-rs/tarpaulin@v0.1
       with:
-        command: install
-        args: cargo-tarpaulin --version 0.18.4
-
-    - name: Generate coverage report
-      uses: actions-rs/cargo@v1
-      with:
-        command: tarpaulin
-        args: --verbose --all-features --workspace --timeout 120 --out Xml
-
-    - name: Cargo check
-      uses: actions-rs/cargo@v1
-      env:
-        SKIP_WASM_BUILD: ' '
-      with:
-        command: check
-        args: --all-targets --all-features --workspace
+        version: '0.18.4'
+        args: '--verbose --all-features --workspace --timeout 120 --out Xml'
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v2.0.3
