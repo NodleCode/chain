@@ -25,11 +25,22 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt install -y cmake pkg-config libssl-dev git build-essential clang libclang-dev
 
-    - name: Run cargo-tarpaulin
-      uses: actions-rs/tarpaulin@v0.1
+    - name: Install cargo-tarpaulin
+      uses: actions-rs/cargo@v1
       with:
-        version: '0.18.4'
-        args: '+${{ env.nightly }} --verbose --all-features --workspace --timeout 120 --out Xml'
+        command: install
+        args: 'cargo-tarpaulin --version 0.18.4'
+
+    - name: Generate coverage report
+      run: |
+        cargo \
+        +${{ env.nightly }} \
+        tarpaulin \
+        --verbose \
+        --all-features \
+        --workspace \
+        --timeout 120 \
+        --out Xml
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v2.0.3
