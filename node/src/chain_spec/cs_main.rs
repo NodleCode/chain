@@ -146,7 +146,7 @@ pub fn testnet_genesis(
         },
         babe: BabeConfig {
             authorities: vec![],
-            epoch_config: Some(runtime_main::constants::BABE_GENESIS_EPOCH_CONFIG),
+            epoch_config: Some(main_runtime::constants::BABE_GENESIS_EPOCH_CONFIG),
         },
         im_online: ImOnlineConfig { keys: vec![] },
         authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
