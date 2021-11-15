@@ -16,8 +16,69 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use sc_cli::{KeySubcommand, RunCmd, SignCmd, VanityCmd, VerifyCmd};
+use sc_cli::{KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
+use std::{fmt, str::FromStr};
 use structopt::StructOpt;
+
+#[derive(Debug, Clone)]
+pub struct RuntimeInstanceError(String);
+
+impl fmt::Display for RuntimeInstanceError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let RuntimeInstanceError(message) = self;
+        write!(f, "RuntimeInstanceError: {}", message)
+    }
+}
+
+#[derive(Debug, StructOpt)]
+pub enum RuntimeInstance {
+    Main,
+    Staking,
+}
+
+impl RuntimeInstance {
+    fn variants() -> [&'static str; 2] {
+        ["main", "staking"]
+    }
+
+    pub fn is_staking_runtime(&self) -> bool {
+        match self {
+            Self::Main => false,
+            Self::Staking => true,
+        }
+    }
+}
+
+impl fmt::Display for RuntimeInstance {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Main => write!(f, "main"),
+            Self::Staking => write!(f, "staking"),
+        }
+    }
+}
+
+impl Default for RuntimeInstance {
+    fn default() -> Self {
+        RuntimeInstance::Main
+    }
+}
+
+impl FromStr for RuntimeInstance {
+    type Err = RuntimeInstanceError;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        let input_lower = input.to_lowercase();
+        match input_lower.as_str() {
+            "staking" => Ok(RuntimeInstance::Staking),
+            "main" | "" => Ok(RuntimeInstance::Main),
+            other => Err(RuntimeInstanceError(format!(
+                "Invalid variant: `{}`",
+                other
+            ))),
+        }
+    }
+}
 
 /// An overarching CLI command definition.
 #[derive(Debug, StructOpt)]
@@ -28,6 +89,16 @@ pub struct Cli {
     #[allow(missing_docs)]
     #[structopt(flatten)]
     pub run: RunCmd,
+}
+
+#[derive(Debug, StructOpt)]
+pub struct RunCmd {
+    #[structopt(flatten)]
+    pub base: sc_cli::RunCmd,
+
+    /// Specify the runtime used by the node.
+    #[structopt(default_value, long, possible_values = &RuntimeInstance::variants(), case_insensitive = true)]
+    pub runtime: RuntimeInstance,
 }
 
 /// Possible subcommands of the main binary.

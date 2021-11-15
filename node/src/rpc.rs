@@ -96,6 +96,10 @@ pub struct FullDeps<C, P, SC, B> {
 /// A IO handler that uses all Full RPC extensions.
 pub type IoHandler = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 
+// TODO :: Hit with some trait bound issues
+// C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber, Hash>,
+// C::Api: RootOfTrustRuntimeApi<Block, CertificateId>,
+
 /// Instantiate all Full RPC extensions.
 pub fn create_full<C, P, SC, B>(
     deps: FullDeps<C, P, SC, B>,
@@ -109,8 +113,6 @@ where
         + Send
         + 'static,
     C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
-    C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber, Hash>,
-    C::Api: RootOfTrustRuntimeApi<Block, CertificateId>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BabeApi<Block>,
     C::Api: BlockBuilder<Block>,
@@ -119,7 +121,7 @@ where
     B: sc_client_api::Backend<Block> + Send + Sync + 'static,
     B::State: sc_client_api::backend::StateBackend<sp_runtime::traits::HashFor<Block>>,
 {
-    use pallet_contracts_rpc::{Contracts, ContractsApi};
+    // use pallet_contracts_rpc::{Contracts, ContractsApi};
     use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
     use substrate_frame_rpc_system::{FullSystem, SystemApi};
 
@@ -156,7 +158,7 @@ where
     // Making synchronous calls in light client freezes the browser currently,
     // more context: https://github.com/paritytech/substrate/pull/3480
     // These RPCs should use an asynchronous caller instead.
-    io.extend_with(ContractsApi::to_delegate(Contracts::new(client.clone())));
+    // io.extend_with(ContractsApi::to_delegate(Contracts::new(client.clone())));
 
     io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
         client.clone(),
@@ -180,7 +182,7 @@ where
             finality_provider,
         ),
     ));
-    io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(client)));
+    // io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(client)));
 
     Ok(io)
 }
