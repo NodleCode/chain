@@ -22,10 +22,9 @@ use crate::{
     constants, Call, Event, FinancialCommittee, Origin, OriginCaller, RootCommittee, Runtime,
     Scheduler, TechnicalCommittee,
 };
-use frame_support::parameter_types;
+use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
 use sp_core::u32_trait::{_1, _2};
-use sp_runtime::ModuleId;
 pub use sp_runtime::{Perbill, Perquintill};
 
 // Shared parameters with all collectives / committees
@@ -61,6 +60,8 @@ impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 // --- Financial committee
@@ -89,6 +90,8 @@ impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = FinancialCommittee;
     type MembershipChanged = FinancialCommittee;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 // --- Root committee
@@ -117,47 +120,49 @@ impl pallet_membership::Config<pallet_membership::Instance4> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-    pub const CompanyReserveModuleId: ModuleId = ModuleId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
+    pub const CompanyReservePalletId: PalletId = PalletId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
-    type Currency = pallet_balances::Module<Runtime>;
+    type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
-    type ModuleId = CompanyReserveModuleId;
+    type PalletId = CompanyReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-    pub const InternationalReserveModuleId: ModuleId = ModuleId(*b"py/rvint"); // 5EYCAe5ijiYfi6GQAEPSHYDwvw4CkyGtPTS52BjLh42GygSv
+    pub const InternationalReservePalletId: PalletId = PalletId(*b"py/rvint"); // 5EYCAe5ijiYfi6GQAEPSHYDwvw4CkyGtPTS52BjLh42GygSv
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
     type Event = Event;
-    type Currency = pallet_balances::Module<Runtime>;
+    type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
-    type ModuleId = InternationalReserveModuleId;
+    type PalletId = InternationalReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-    pub const UsaReserveModuleId: ModuleId = ModuleId(*b"py/rvusa"); // 5EYCAe5ijiYfi6MEfWpZC3nJ38KFZ9EQSFpsj9mgYgTtVNri
+    pub const UsaReservePalletId: PalletId = PalletId(*b"py/rvusa"); // 5EYCAe5ijiYfi6MEfWpZC3nJ38KFZ9EQSFpsj9mgYgTtVNri
 }
 
 impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
     type Event = Event;
-    type Currency = pallet_balances::Module<Runtime>;
+    type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type Call = Call;
-    type ModuleId = UsaReserveModuleId;
+    type PalletId = UsaReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 

@@ -34,10 +34,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
     )
 }
 
-use frame_support::{
-    construct_runtime,
-    traits::{KeyOwnerProofSystem, Randomness},
-};
+use frame_support::{construct_runtime, traits::KeyOwnerProofSystem};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -77,32 +74,32 @@ construct_runtime! {
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: frame_system::{Module, Call, Storage, Config, Event<T>} = 0,
-        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent} = 1,
-        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>} = 2,
-        TransactionPayment: pallet_transaction_payment::{Module, Storage} = 3,
-        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Module, Call, Storage} = 4,
+        System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
+        Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
+        Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 2,
+        TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 3,
+        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 4,
 
         // Consensus
-        Babe: pallet_babe::{Module, Call, Storage, Config, Inherent, ValidateUnsigned} = 5,
-        Grandpa: pallet_grandpa::{Module, Call, Storage, Config, Event, ValidateUnsigned} = 6,
-        Authorship: pallet_authorship::{Module, Call, Storage, Inherent} = 7,
-        ImOnline: pallet_im_online::{Module, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
-        Offences: pallet_offences::{Module, Call, Storage, Event} = 9,
-        Staking: pallet_staking::{Module, Call, Storage, Event<T>, Config<T>} = 11,
-        Session: pallet_session::{Module, Call, Storage, Event, Config<T>} = 12,
-        Historical: pallet_session_historical::{Module} = 13,
-        AuthorityDiscovery: pallet_authority_discovery::{Module, Call, Config} = 14,
+        Babe: pallet_babe::{Pallet, Call, Storage, Config, ValidateUnsigned} = 5,
+        Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config, Event, ValidateUnsigned} = 6,
+        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 7,
+        ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 8,
+        Offences: pallet_offences::{Pallet, Storage, Event} = 9,
+        Staking: pallet_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 11,
+        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 12,
+        Historical: pallet_session_historical::{Pallet} = 13,
+        AuthorityDiscovery: pallet_authority_discovery::{Pallet, Config} = 14,
 
         // Governance
-        RootCommittee: pallet_collective::{Module, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
-        RootMembership: pallet_membership::{Module, Call, Storage, Event<T>, Config<T>} = 20,
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Event<T>} = 21,
-        Mandate: pallet_mandate::{Module, Call, Event} = 23,
+        RootCommittee: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
+        RootMembership: pallet_membership::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 21,
+        Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 23,
 
         // Neat things
-        Utility: pallet_utility::{Module, Call, Event} = 28,
-        Multisig: pallet_multisig::{Module, Call, Storage, Event<T>} = 29,
+        Utility: pallet_utility::{Pallet, Call, Event} = 28,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
     }
 }
 
@@ -139,7 +136,7 @@ pub type Executive = frame_executive::Executive<
     Block,
     frame_system::ChainContext<Runtime>,
     Runtime,
-    AllModules,
+    AllPallets,
 >;
 
 sp_api::impl_runtime_apis! {
@@ -159,7 +156,7 @@ sp_api::impl_runtime_apis! {
 
     impl sp_api::Metadata<Block> for Runtime {
         fn metadata() -> OpaqueMetadata {
-            Runtime::metadata().into()
+            OpaqueMetadata::new(Runtime::metadata().into())
         }
     }
 
@@ -182,15 +179,15 @@ sp_api::impl_runtime_apis! {
         ) -> sp_inherents::CheckInherentsResult {
             data.check_extrinsics(&block)
         }
-
-        fn random_seed() -> <Block as BlockT>::Hash {
-            RandomnessCollectiveFlip::random_seed()
-        }
     }
 
     impl sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block> for Runtime {
-        fn validate_transaction(source: TransactionSource, tx: <Block as BlockT>::Extrinsic) -> TransactionValidity {
-            Executive::validate_transaction(source, tx)
+        fn validate_transaction(
+            source: TransactionSource,
+            tx: <Block as BlockT>::Extrinsic,
+            block_hash: <Block as BlockT>::Hash,
+        ) -> TransactionValidity {
+            Executive::validate_transaction(source, tx, block_hash)
         }
     }
 
@@ -203,6 +200,10 @@ sp_api::impl_runtime_apis! {
     impl fg_primitives::GrandpaApi<Block> for Runtime {
         fn grandpa_authorities() -> GrandpaAuthorityList {
             Grandpa::grandpa_authorities()
+        }
+
+        fn current_set_id() -> fg_primitives::SetId {
+            Grandpa::current_set_id()
         }
 
         fn submit_report_equivocation_unsigned_extrinsic(
@@ -242,10 +243,10 @@ sp_api::impl_runtime_apis! {
             sp_consensus_babe::BabeGenesisConfiguration {
                 slot_duration: Babe::slot_duration(),
                 epoch_length: EpochDuration::get(),
-                c: crate::constants::PRIMARY_PROBABILITY,
-                genesis_authorities: Babe::authorities(),
+                c: constants::BABE_GENESIS_EPOCH_CONFIG.c,
+                genesis_authorities: Babe::authorities().to_vec(),
                 randomness: Babe::randomness(),
-                allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
+                allowed_slots: constants::BABE_GENESIS_EPOCH_CONFIG.allowed_slots,
             }
         }
 
@@ -323,6 +324,38 @@ sp_api::impl_runtime_apis! {
 
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
+        fn benchmark_metadata(extra: bool) -> (
+            Vec<frame_benchmarking::BenchmarkList>,
+            Vec<frame_support::traits::StorageInfo>,
+        ) {
+            use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
+            use frame_support::traits::StorageInfoTrait;
+
+            // Trying to add benchmarks directly to the Session Pallet caused cyclic dependency
+            // issues. To get around that, we separated the Session benchmarks into its own crate,
+            // which is why we need these two lines below.
+            // use pallet_loans_benchmarking::Pallet as LoansBench;
+            use frame_system_benchmarking::Pallet as SystemBench;
+
+            let mut list = Vec::<BenchmarkList>::new();
+
+            list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
+            list_benchmark!(list, extra, pallet_timestamp, Timestamp);
+            list_benchmark!(list, extra, pallet_balances, Balances);
+            list_benchmark!(list, extra, pallet_babe, Babe);
+            list_benchmark!(list, extra, pallet_grandpa, Grandpa);
+            list_benchmark!(list, extra, pallet_im_online, ImOnline);
+            list_benchmark!(list, extra, pallet_staking, Staking);
+            list_benchmark!(list, extra, pallet_collective, RootCommittee);
+            list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+            list_benchmark!(list, extra, pallet_utility, Utility);
+            list_benchmark!(list, extra, pallet_multisig, Multisig);
+
+            let storage_info = AllPalletsWithSystem::storage_info();
+
+            (list, storage_info)
+        }
+
         fn dispatch_benchmark(
             config: frame_benchmarking::BenchmarkConfig,
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
@@ -332,31 +365,25 @@ sp_api::impl_runtime_apis! {
 
             use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey, add_benchmark};
 
-            use frame_system_benchmarking::Module as SystemBench;
-            //use pallet_offences_benchmarking::Module as OffencesBench;
-            //use pallet_session_benchmarking::Module as SessionBench;
+            use frame_system_benchmarking::Pallet as SystemBench;
 
             impl frame_system_benchmarking::Config for Runtime {}
-            //impl pallet_offences_benchmarking::Config for Runtime{}
-            //impl pallet_session_benchmarking::Config for Runtime {}
 
             let whitelist: Vec<TrackedStorageKey> = vec![];
             let mut batches = Vec::<BenchmarkBatch>::new();
             let params = (&config, &whitelist);
 
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_babe, Babe);
-            add_benchmark!(params, batches, pallet_balances, Balances);
-            add_benchmark!(params, batches, pallet_collective, RootCommittee);
-            add_benchmark!(params, batches, pallet_grandpa, Grandpa);
-            add_benchmark!(params, batches, pallet_nodle_staking, Staking);
-            add_benchmark!(params, batches, pallet_im_online, ImOnline);
-            add_benchmark!(params, batches, pallet_multisig, Multisig);
-            //add_benchmark!(params, batches, pallet_offences, OffencesBench::<Runtime>);
-            //add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
-            add_benchmark!(params, batches, pallet_scheduler, Scheduler);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
+            add_benchmark!(params, batches, pallet_balances, Balances);
+            add_benchmark!(params, batches, pallet_babe, Babe);
+            add_benchmark!(params, batches, pallet_grandpa, Grandpa);
+            add_benchmark!(params, batches, pallet_im_online, ImOnline);
+            add_benchmark!(params, batches, pallet_staking, Staking);
+            add_benchmark!(params, batches, pallet_collective, RootCommittee);
+            add_benchmark!(params, batches, pallet_scheduler, Scheduler);
             add_benchmark!(params, batches, pallet_utility, Utility);
+            add_benchmark!(params, batches, pallet_multisig, Multisig);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

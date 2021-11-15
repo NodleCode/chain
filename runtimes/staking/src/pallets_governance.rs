@@ -30,7 +30,7 @@ parameter_types! {
     pub const MaxMembers: u32 = 50;
 }
 
-pub type RootCollective = pallet_collective::DefaultInstance;
+pub type RootCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<RootCollective> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
@@ -55,6 +55,8 @@ impl pallet_membership::Config for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_mandate::Config for Runtime {

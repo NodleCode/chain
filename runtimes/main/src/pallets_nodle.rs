@@ -20,7 +20,7 @@
 
 use crate::{
     constants,
-    pallets_governance::{RootCollective, TechnicalCollective},
+    pallets_governance::{MaxMembers, RootCollective, TechnicalCollective},
     Allocations, Balances, CompanyReserve, Event, PkiRootOfTrust, Runtime,
 };
 
@@ -114,4 +114,6 @@ impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = Allocations;
     type MembershipChanged = Allocations;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }

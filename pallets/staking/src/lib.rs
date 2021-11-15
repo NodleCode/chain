@@ -21,10 +21,11 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(any(feature = "runtime-benchmarks", test))]
 mod benchmarking;
+
 #[cfg(test)]
 mod mock;
+
 #[cfg(test)]
 mod tests;
 
@@ -46,17 +47,19 @@ pub use pallet::*;
 pub mod pallet {
     use super::*;
     use crate::set::OrderedSet;
+    use frame_support::traits::OnRuntimeUpgrade;
     use frame_support::{
         pallet_prelude::*,
         traits::{
-            Currency, ExistenceRequirement, Get, GetPalletVersion, Imbalance, LockIdentifier,
-            LockableCurrency, OnUnbalanced, PalletVersion, ValidatorRegistration, WithdrawReasons,
+            Currency, ExistenceRequirement, Get, Imbalance, LockIdentifier, LockableCurrency,
+            OnUnbalanced, ValidatorRegistration, WithdrawReasons,
         },
+        PalletId,
     };
     use frame_system::pallet_prelude::*;
     use sp_runtime::{
         traits::{AccountIdConversion, Saturating, Zero},
-        DispatchResult, ModuleId, Perbill,
+        DispatchResult, Perbill,
     };
     use sp_staking::SessionIndex;
     use sp_std::{convert::From, prelude::*};
@@ -123,7 +126,7 @@ pub mod pallet {
         type ValidatorRegistration: ValidatorRegistration<Self::AccountId>;
         /// This pallet's module id. Used to derivate a dedicated account id to store session
         /// rewards for validators and nominators in.
-        type PalletId: Get<ModuleId>;
+        type PalletId: Get<PalletId>;
         /// staking pallet Lock Identifier used for set_lock()
         type StakingLockId: Get<LockIdentifier>;
         /// Max number of unbond request supported by queue
@@ -136,28 +139,24 @@ pub mod pallet {
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(crate) trait Store)]
+    #[pallet::storage_version(migrations::v1::STORAGE_VERSION)]
     pub struct Pallet<T>(PhantomData<T>);
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+        #[cfg(feature = "try-runtime")]
+        fn pre_upgrade() -> Result<(), &'static str> {
+            migrations::v1::PoAToStaking::<T>::pre_upgrade()
+        }
+
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            let mut weight = Weight::from(0u64);
-
-            // migrates our storage to pallet version 2.0.6
-            let version: PalletVersion =
-                <Pallet<T>>::storage_version().unwrap_or(<Pallet<T>>::current_version());
-
-            log::info!(
-                "on_runtime_upgrade>[{:#?}]=> - Current Pallet Version-[{:#?}]",
-                line!(),
-                version,
-            );
-
-            if version.major == 2 && version.minor == 0 {
-                weight = migrations::poa_validators_migration::<T>();
-            }
-
+            let weight = migrations::v1::PoAToStaking::<T>::on_runtime_upgrade();
             weight
+        }
+
+        #[cfg(feature = "try-runtime")]
+        fn post_upgrade() -> Result<(), &'static str> {
+            migrations::v1::PoAToStaking::<T>::post_upgrade()
         }
     }
 
@@ -1089,12 +1088,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(
-		T::AccountId = "AccountId",
-		BalanceOf<T> = "Balance",
-		T::BlockNumber = "BlockNumber",
-		StakingInvulnerables<T> = "StakingInvulnerables"
-	)]
     pub enum Event<T: Config> {
         /// Updated InVulnerable validator list \[validator_list\],
         NewInvulnerables(StakingInvulnerables<T>),
@@ -1752,7 +1745,7 @@ pub mod pallet {
             // let issuance = Self::compute_issuance(total_staked);
             let issuance = Self::session_validator_reward(next);
             for (val, pts) in <AwardedPts<T>>::iter_prefix(next) {
-                let pct_due = Perbill::from_rational_approximation(pts, total);
+                let pct_due = Perbill::from_rational(pts, total);
                 let mut amt_due = pct_due * issuance;
 
                 log::trace!(
@@ -1783,7 +1776,7 @@ pub mod pallet {
                     mint(amt_due, val.clone());
                     log::trace!("pay_stakers:[{:#?}] - L3 Solo Mode", line!());
                 } else {
-                    let val_pct = Perbill::from_rational_approximation(state.bond, state.total);
+                    let val_pct = Perbill::from_rational(state.bond, state.total);
                     let commission = validator_fee * amt_due;
                     let val_due = if commission > T::Currency::minimum_balance() {
                         amt_due = amt_due.saturating_sub(commission);
@@ -1804,7 +1797,7 @@ pub mod pallet {
                     mint(val_due, val.clone());
                     // pay nominators due portion
                     for Bond { owner, amount } in state.nominators {
-                        let percent = Perbill::from_rational_approximation(amount, state.total);
+                        let percent = Perbill::from_rational(amount, state.total);
                         let due = percent * amt_due;
                         mint(due, owner);
                     }
@@ -2014,9 +2007,9 @@ pub mod pallet {
             );
 
             <Staked<T>>::remove(session_idx);
-            <AtStake<T>>::remove_prefix(session_idx);
+            <AtStake<T>>::remove_prefix(session_idx, None);
             <Points<T>>::remove(session_idx);
-            <AwardedPts<T>>::remove_prefix(session_idx);
+            <AwardedPts<T>>::remove_prefix(session_idx, None);
             <SessionValidatorReward<T>>::remove(session_idx);
             <UnappliedSlashes<T>>::remove(session_idx);
             slashing::clear_session_metadata::<T>(session_idx);

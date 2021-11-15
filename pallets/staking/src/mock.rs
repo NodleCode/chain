@@ -25,6 +25,7 @@ use frame_support::{
         OneSessionHandler,
     },
     weights::constants::RocksDbWeight,
+    PalletId,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
@@ -32,7 +33,7 @@ use sp_io;
 use sp_runtime::{
     testing::{Header, UintAuthorityId},
     traits::{IdentityLookup, Zero},
-    ModuleId, Perbill,
+    Perbill,
 };
 use sp_staking::{
     offence::{OffenceDetails, OnOffenceHandler},
@@ -76,10 +77,10 @@ impl OneSessionHandler<AccountId> for OtherSessionHandler {
         });
     }
 
-    fn on_disabled(validator_index: usize) {
+    fn on_disabled(validator_index: u32) {
         SESSION.with(|d| {
             let mut d = d.borrow_mut();
-            let value = d.0[validator_index];
+            let value = d.0[validator_index as usize];
             d.1.insert(value);
         })
     }
@@ -98,13 +99,13 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Authorship: pallet_authorship::{Module, Call, Storage, Inherent},
-        Timestamp: pallet_timestamp::{Module, Call, Storage, Inherent},
-        Balances: pallet_balances::{Module, Call, Storage, Config<T>, Event<T>},
-        NodleStaking: nodle_staking::{Module, Call, Config<T>, Storage, Event<T>},
-        Poa: pallet_poa::{Module, Storage},
-        Session: pallet_session::{Module, Call, Storage, Event, Config<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
+        Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
+        Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+        NodleStaking: nodle_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
+        Poa: pallet_poa::{Pallet, Storage},
+        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
     }
 );
 
@@ -135,9 +136,7 @@ parameter_types! {
     pub static Offset: BlockNumber = 0;
     pub static MaxIterations: u32 = 0;
 }
-
 impl frame_system::Config for Test {
-    type BaseCallFilter = ();
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = RocksDbWeight;
@@ -157,6 +156,8 @@ impl frame_system::Config for Test {
     type AccountData = pallet_balances::AccountData<Balance>;
     type OnNewAccount = ();
     type OnKilledAccount = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
     type SS58Prefix = ();
 }
@@ -167,6 +168,8 @@ impl pallet_balances::Config for Test {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
 parameter_types! {
@@ -194,7 +197,6 @@ impl pallet_session::Config for Test {
     type Event = Event;
     type ValidatorId = AccountId;
     type ValidatorIdOf = hooks::StashOf<Test>;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
     type WeightInfo = ();
 }
@@ -206,7 +208,7 @@ impl pallet_authorship::Config for Test {
     type FindAuthor = Author11;
     type UncleGenerations = UncleGenerations;
     type FilterUncle = ();
-    type EventHandler = Module<Test>;
+    type EventHandler = Pallet<Test>;
 }
 
 impl pallet_poa::Config for Test {}
@@ -236,7 +238,7 @@ parameter_types! {
     pub const DefaultStakingMinNominatorTotalBond: Balance = 5;
     pub const DefaultStakingMinNominationChillThreshold: Balance = 3;
     pub const MaxChunkUnlock: usize = 32;
-    pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    pub const StakingPalletId: PalletId = PalletId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
 }
 impl Config for Test {
@@ -554,7 +556,7 @@ pub(crate) fn events() -> Vec<pallet::Event<Test>> {
         .into_iter()
         .map(|r| r.event)
         .filter_map(|e| {
-            if let Event::nodle_staking(inner) = e {
+            if let Event::NodleStaking(inner) = e {
                 Some(inner)
             } else {
                 None
@@ -570,7 +572,7 @@ pub(crate) fn set_author(session: u32, acc: u64, pts: u32) {
 }
 
 pub(crate) fn mint_rewards(amount: Balance) {
-    let imbalance = <pallet_balances::Module<Test> as Currency<AccountId>>::issue(amount);
+    let imbalance = <pallet_balances::Pallet<Test> as Currency<AccountId>>::issue(amount);
     NodleStaking::on_unbalanced(imbalance);
     log::trace!(
         "mint_rewards:[{:#?}]=> - {:#?}",

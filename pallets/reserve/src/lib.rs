@@ -20,19 +20,17 @@
 
 //! A module that is called by the `collective` and is in charge of holding
 //! the company funds.
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
 use frame_support::{
     traits::{Currency, ExistenceRequirement, Get, Imbalance, OnUnbalanced},
     weights::GetDispatchInfo,
+    PalletId,
 };
-use sp_runtime::{
-    traits::{AccountIdConversion, Dispatchable},
-    DispatchResult, ModuleId,
-};
+use sp_runtime::traits::{AccountIdConversion, Dispatchable};
 use sp_std::prelude::Box;
 use support::WithAccountId;
 
@@ -62,7 +60,7 @@ pub mod pallet {
         type ExternalOrigin: EnsureOrigin<Self::Origin>;
         type Currency: Currency<Self::AccountId>;
         type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
-        type ModuleId: Get<ModuleId>;
+        type PalletId: Get<PalletId>;
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
     }
@@ -141,7 +139,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T, I> = "Balance")]
     pub enum Event<T: Config<I>, I: 'static = ()> {
         /// Some amount was deposited (e.g. for transaction fees).
         Deposit(BalanceOf<T, I>),
@@ -199,7 +196,7 @@ impl<T: Config<I>, I: 'static> GenesisConfig<T, I> {
 
 impl<T: Config<I>, I: 'static> WithAccountId<T::AccountId> for Pallet<T, I> {
     fn account_id() -> T::AccountId {
-        T::ModuleId::get().into_account()
+        T::PalletId::get().into_account()
     }
 }
 

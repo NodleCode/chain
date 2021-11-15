@@ -15,290 +15,224 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use super::{BalanceOf, Config};
-use crate::types::Validator;
-use frame_support::{
-    pallet_prelude::*,
-    traits::{Get, StorageInstance},
-    weights::{constants::RocksDbWeight, Weight},
-};
-
-use sp_runtime::{traits::Zero, Perbill};
-
+use sp_runtime::traits::Zero;
 use sp_std::vec::Vec;
 
-/// This migration is in charge of moving the validators from POA to Staking pallet to
-/// work with the last chain reboot.
-/// We have to do two things:
-/// - read "Validators" storage instance from POA.
-/// - with read info update the "Invulnerables" & "ValidatorState" of staking pallet.
-pub fn poa_validators_migration<T: Config>() -> Weight {
-    // Buffer to account for misc checks
-    let mut weight: Weight = 1_000;
+pub mod v1 {
+    use super::*;
 
-    log::info!("🕊️ Starting Poa validators migration...");
+    use crate::{
+        types::Validator, BalanceOf, Config, Invulnerables, Pallet, SlashRewardProportion,
+        StakingMaxValidators, StakingMinNominationChillThreshold, StakingMinNominatorTotalBond,
+        StakingMinStakeSessionSelection, StakingMinValidatorBond, TotalSelected, ValidatorFee,
+        ValidatorState,
+    };
+    use frame_support::{
+        generate_storage_alias,
+        pallet_prelude::*,
+        traits::{Get, OnRuntimeUpgrade, StorageVersion},
+        weights::{constants::RocksDbWeight, Weight},
+    };
 
-    struct POAValidatorsStorageValuePrefix;
-    impl StorageInstance for POAValidatorsStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "Validators";
-        fn pallet_prefix() -> &'static str {
-            "Poa"
-        }
-    }
+    /// The current storage version.
+    pub const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
-    struct StakingValidatorStateStorageMapPrefix;
-    impl StorageInstance for StakingValidatorStateStorageMapPrefix {
-        const STORAGE_PREFIX: &'static str = "ValidatorState";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingInvulnerablesStorageValuePrefix;
-    impl StorageInstance for StakingInvulnerablesStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "Invulnerables";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingTotalSelectedStorageValuePrefix;
-    impl StorageInstance for StakingTotalSelectedStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "TotalSelected";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingValidatorFeeStorageValuePrefix;
-    impl StorageInstance for StakingValidatorFeeStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "ValidatorFee";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingSlashRewardProportionStorageValuePrefix;
-    impl StorageInstance for StakingSlashRewardProportionStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "SlashRewardProportion";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingMaxValidatorsStorageValuePrefix;
-    impl StorageInstance for StakingMaxValidatorsStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "StakingMaxValidators";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingMinStakeSessionSelectionStorageValuePrefix;
-    impl StorageInstance for StakingMinStakeSessionSelectionStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "StakingMinStakeSessionSelection";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingMinNominationChillThresholdStorageValuePrefix;
-    impl StorageInstance for StakingMinNominationChillThresholdStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "StakingMinNominationChillThreshold";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingMinNominatorTotalBondStorageValuePrefix;
-    impl StorageInstance for StakingMinNominatorTotalBondStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "StakingMinNominatorTotalBond";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    struct StakingMinValidatorBondStorageValuePrefix;
-    impl StorageInstance for StakingMinValidatorBondStorageValuePrefix {
-        const STORAGE_PREFIX: &'static str = "StakingMinValidatorBond";
-        fn pallet_prefix() -> &'static str {
-            "NodleStaking"
-        }
-    }
-
-    #[allow(type_alias_bounds)]
-    type POAValidators<T: Config> =
-        StorageValue<POAValidatorsStorageValuePrefix, Vec<T::AccountId>, OptionQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingTotalSelected =
-        StorageValue<StakingTotalSelectedStorageValuePrefix, u32, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingValidatorFee =
-        StorageValue<StakingValidatorFeeStorageValuePrefix, Perbill, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingSlashRewardProportion =
-        StorageValue<StakingSlashRewardProportionStorageValuePrefix, Perbill, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingMaxValidators =
-        StorageValue<StakingMaxValidatorsStorageValuePrefix, u32, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingMinStakeSessionSelection<T: Config> =
-        StorageValue<StakingMinStakeSessionSelectionStorageValuePrefix, BalanceOf<T>, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingMinValidatorBond<T: Config> =
-        StorageValue<StakingMinValidatorBondStorageValuePrefix, BalanceOf<T>, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingMinNominationChillThreshold<T: Config> = StorageValue<
-        StakingMinNominationChillThresholdStorageValuePrefix,
-        BalanceOf<T>,
-        ValueQuery,
-    >;
-
-    #[allow(type_alias_bounds)]
-    type StakingMinNominatorTotalBond<T: Config> =
-        StorageValue<StakingMinNominatorTotalBondStorageValuePrefix, BalanceOf<T>, ValueQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingInvulnerables<T: Config> =
-        StorageValue<StakingInvulnerablesStorageValuePrefix, Vec<T::AccountId>, OptionQuery>;
-
-    #[allow(type_alias_bounds)]
-    type StakingValidatorState<T: Config> = StorageMap<
-        StakingValidatorStateStorageMapPrefix,
-        Twox64Concat,
-        T::AccountId,
-        Validator<T::AccountId, BalanceOf<T>>,
-        OptionQuery,
-    >;
-
-    log::info!(
-        "<POAValidators<T>>::exits()? {:?}",
-        <POAValidators<T>>::exists()
+    generate_storage_alias!(
+        Poa, Validators<T: Config> => Value<
+            Vec<T::AccountId>,
+            OptionQuery
+        >
     );
-    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
-    log::info!(
-        "<StakingInvulnerables<T>>::exits()? {:?}",
-        <StakingInvulnerables<T>>::exists()
-    );
-    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+    pub struct PoAToStaking<T>(PhantomData<T>);
+    impl<T: Config> OnRuntimeUpgrade for PoAToStaking<T> {
+        fn on_runtime_upgrade() -> Weight {
+            let mut weight: Weight = 1_000;
+            log::info!("Starting Poa to Staking migration...");
 
-    if !<POAValidators<T>>::exists() {
-        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
-        log::info!("🕊️ POA Validators doesn't exist Nothing to migrate!!!");
-    } else {
-        if let Some(poa_validators) = <POAValidators<T>>::get() {
-            weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
-
-            if let Some(pre_invulnerable_validators) = <StakingInvulnerables<T>>::get() {
-                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
-
-                let mut post_invulnerable_validators = pre_invulnerable_validators
-                    .clone()
-                    .iter()
-                    .chain(poa_validators.iter())
-                    .map(|x| x.clone())
-                    .collect::<Vec<T::AccountId>>();
-
-                post_invulnerable_validators.sort();
-                post_invulnerable_validators.dedup();
-
-                <StakingInvulnerables<T>>::put(post_invulnerable_validators.clone());
-                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
-            } else {
-                log::info!("Staking runtime upgrade Genesis config");
-
-                <StakingInvulnerables<T>>::put(poa_validators.clone());
-
-                // Set collator commission to default config
-                StakingValidatorFee::put(T::DefaultValidatorFee::get());
-                // Set total selected validators to minimum config
-                StakingTotalSelected::put(T::MinSelectedValidators::get());
-                // Set default slash reward fraction
-                StakingSlashRewardProportion::put(T::DefaultSlashRewardProportion::get());
-
-                StakingMaxValidators::put(T::DefaultStakingMaxValidators::get());
-                <StakingMinStakeSessionSelection<T>>::put(
-                    T::DefaultStakingMinStakeSessionSelection::get(),
-                );
-                <StakingMinValidatorBond<T>>::put(T::DefaultStakingMinValidatorBond::get());
-                <StakingMinNominationChillThreshold<T>>::put(
-                    T::DefaultStakingMinNominationChillThreshold::get(),
-                );
-                <StakingMinNominatorTotalBond<T>>::put(
-                    T::DefaultStakingMinNominatorTotalBond::get(),
-                );
-
-                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 5));
-            }
-
-            for valid_acc in &poa_validators {
-                if <StakingValidatorState<T>>::contains_key(&valid_acc) {
-                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
-
-                    log::trace!(
-                    "poa_validators_migration>[{:#?}]=> - Already staker Ignoring Address -[{:#?}]",
-                    line!(),
-                    valid_acc
-                );
-                } else {
-                    log::trace!(
-                        "poa_validators_migration>[{:#?}]=> - Adding Address -[{:#?}]",
-                        line!(),
-                        valid_acc
-                    );
-
-                    <StakingValidatorState<T>>::insert(
-                        &valid_acc,
-                        Validator::<T::AccountId, BalanceOf<T>>::new(
-                            valid_acc.clone(),
-                            Zero::zero(),
-                        ),
-                    );
-
-                    log::trace!(
-                        "poa_validators_migration>[{:#?}]=> - Address Added-[{:#?}]",
-                        line!(),
-                        <StakingValidatorState<T>>::contains_key(&valid_acc),
-                    );
-
-                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
-                }
-            }
-
-            <POAValidators<T>>::kill();
+            let storage_version = StorageVersion::get::<Pallet<T>>();
 
             log::info!(
-                "🕊️ Sucess!!! POA Validators of len {:#?} moved to Staking pallet",
-                poa_validators.len()
+                "on_runtime_upgrade>[{:#?}]=> - Storage Version Current-[{:#?}], New-[{:#?}]",
+                line!(),
+                storage_version,
+                STORAGE_VERSION
             );
-        } else {
-            log::warn!("🕊️ Warning!!! Unable to read POA Validators instance");
+
+            // Check for storage version
+            if storage_version >= STORAGE_VERSION {
+                return weight;
+            }
+
+            if let Some(poa_validators) = <Validators<T>>::get() {
+                weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+
+                let pre_invulnerable_validators = <Invulnerables<T>>::get();
+                if !pre_invulnerable_validators.is_empty() {
+                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+
+                    let mut post_invulnerable_validators = pre_invulnerable_validators
+                        .clone()
+                        .iter()
+                        .chain(poa_validators.iter())
+                        .map(|x| x.clone())
+                        .collect::<Vec<T::AccountId>>();
+
+                    post_invulnerable_validators.sort();
+                    post_invulnerable_validators.dedup();
+
+                    <Invulnerables<T>>::put(post_invulnerable_validators.clone());
+                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
+                } else {
+                    log::info!("Staking runtime upgrade Genesis config");
+
+                    <Invulnerables<T>>::put(poa_validators.clone());
+
+                    // Set collator commission to default config
+                    <ValidatorFee<T>>::put(T::DefaultValidatorFee::get());
+                    // Set total selected validators to minimum config
+                    <TotalSelected<T>>::put(T::MinSelectedValidators::get());
+                    // Set default slash reward fraction
+                    <SlashRewardProportion<T>>::put(T::DefaultSlashRewardProportion::get());
+
+                    <StakingMaxValidators<T>>::put(T::DefaultStakingMaxValidators::get());
+                    <StakingMinStakeSessionSelection<T>>::put(
+                        T::DefaultStakingMinStakeSessionSelection::get(),
+                    );
+                    <StakingMinValidatorBond<T>>::put(T::DefaultStakingMinValidatorBond::get());
+                    <StakingMinNominationChillThreshold<T>>::put(
+                        T::DefaultStakingMinNominationChillThreshold::get(),
+                    );
+                    <StakingMinNominatorTotalBond<T>>::put(
+                        T::DefaultStakingMinNominatorTotalBond::get(),
+                    );
+
+                    weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 5));
+                }
+
+                for valid_acc in &poa_validators {
+                    if <ValidatorState<T>>::contains_key(&valid_acc) {
+                        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
+                        log::trace!(
+							"on_runtime_upgrade>[{:#?}]=> - Already staker Ignoring Address -[{:#?}]",
+							line!(),
+							valid_acc
+						);
+                    } else {
+                        log::trace!(
+                            "on_runtime_upgrade>[{:#?}]=> - Adding Address -[{:#?}]",
+                            line!(),
+                            valid_acc
+                        );
+
+                        <ValidatorState<T>>::insert(
+                            &valid_acc,
+                            Validator::<T::AccountId, BalanceOf<T>>::new(
+                                valid_acc.clone(),
+                                Zero::zero(),
+                            ),
+                        );
+
+                        log::trace!(
+                            "on_runtime_upgrade>[{:#?}]=> - Address Added-[{:#?}]",
+                            line!(),
+                            <ValidatorState<T>>::contains_key(&valid_acc),
+                        );
+
+                        weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 1));
+                    }
+                }
+
+                <Validators<T>>::kill();
+
+                STORAGE_VERSION.put::<Pallet<T>>();
+
+                log::info!(
+                    "on_runtime_upgrade>[{:#?}]=>Sucess!!! POA Validators of len {:#?} moved to Staking pallet",
+					line!(),
+					poa_validators.len()
+                );
+            }
+
+            let storage_version = StorageVersion::get::<Pallet<T>>();
+
+            log::info!(
+                "on_runtime_upgrade>[{:#?}]=> - Storage Version Current-[{:#?}], New-[{:#?}]",
+                line!(),
+                storage_version,
+                STORAGE_VERSION
+            );
+
+            weight
+        }
+
+        #[cfg(feature = "try-runtime")]
+        fn pre_upgrade() -> Result<(), &'static str> {
+            log::info!(
+                "pre_upgrade[{:#?}]=>Validators.exits()? {:?}",
+                line!(),
+                <Validators<T>>::get().is_some()
+            );
+
+            let storage_version = StorageVersion::get::<Pallet<T>>();
+
+            log::info!(
+                "pre_upgrade>[{:#?}]=> - Storage Version Current-[{:#?}], New-[{:#?}]",
+                line!(),
+                storage_version,
+                STORAGE_VERSION
+            );
+
+            // these must exist.
+            assert!(
+                <Validators<T>>::get().is_some(),
+                "Poa Validators storage item not found!"
+            );
+            Ok(())
+        }
+
+        #[cfg(feature = "try-runtime")]
+        fn post_upgrade() -> Result<(), &'static str> {
+            log::info!(
+                "post_upgrade[{:#?}]=>Validators.exits()? {:?}",
+                line!(),
+                <Validators<T>>::get().is_some()
+            );
+
+            let storage_version = StorageVersion::get::<Pallet<T>>();
+
+            log::info!(
+                "post_upgrade>[{:#?}]=> - Storage Version Current-[{:#?}], New-[{:#?}]",
+                line!(),
+                storage_version,
+                STORAGE_VERSION
+            );
+
+            // should not exist.
+            assert!(
+                !<Validators<T>>::get().is_some(),
+                "Poa Validators storage item not cleaned up!"
+            );
+            Ok(())
         }
     }
-
-    weight
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::migrations;
     use crate::mock;
-    use crate::mock::{events, AccountId, ExtBuilder, NodleStaking, Origin, Poa};
+    use crate::mock::{events, AccountId, ExtBuilder, NodleStaking, Origin, Poa, Test};
     use crate::types;
     use frame_support::assert_ok;
     use frame_support::traits::InitializeMembers;
+    use frame_support::traits::OnRuntimeUpgrade;
 
     use crate as nodle_staking;
 
     #[test]
+    #[cfg(not(tarpaulin))]
     fn test_empty_list_on_migration_works() {
         ExtBuilder::default()
             .num_validators(4)
@@ -316,7 +250,13 @@ mod tests {
                 assert_eq!(Poa::validators().len(), 0);
                 assert_eq!(NodleStaking::invulnerables().len(), 0);
 
-                NodleStaking::on_runtime_upgrade();
+                // #[cfg(feature = "try-runtime")]
+                // assert_ok!(migrations::v1::PoAToStaking::<Test>::pre_upgrade());
+
+                migrations::v1::PoAToStaking::<Test>::on_runtime_upgrade();
+
+                // #[cfg(feature = "try-runtime")]
+                // assert_ok!(migrations::v1::PoAToStaking::<Test>::post_upgrade());
 
                 assert_eq!(Poa::validators().len(), 0);
                 assert_eq!(NodleStaking::invulnerables().len(), 0);
@@ -348,7 +288,13 @@ mod tests {
 
                 assert_eq!(Poa::validators(), [11, 21, 31, 61, 71, 81].to_vec());
 
-                NodleStaking::on_runtime_upgrade();
+                #[cfg(feature = "try-runtime")]
+                assert_ok!(migrations::v1::PoAToStaking::<Test>::pre_upgrade());
+
+                migrations::v1::PoAToStaking::<Test>::on_runtime_upgrade();
+
+                #[cfg(feature = "try-runtime")]
+                assert_ok!(migrations::v1::PoAToStaking::<Test>::post_upgrade());
 
                 assert_eq!(Poa::validators().len(), 0);
                 assert_eq!(

@@ -20,8 +20,8 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -69,7 +69,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata()]
     pub enum Event<T: Config> {
         /// Shutdown state was toggled, to either on or off.
         ShutdownToggled(bool),

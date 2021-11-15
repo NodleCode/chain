@@ -2,8 +2,12 @@ name: Test rust code
 
 on: [push, pull_request]
 
-jobs:
+env:
+  nightly: nightly-2021-11-01
+  target: wasm32-unknown-unknown
+  tarpaulin-vers: '0.18.4'
 
+jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -12,19 +16,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ env.nightly }}
+        override: true
+        target: ${{ env.target }}
 
-    - name: Cache cargo registry  
-      uses: actions/cache@v2.1.6  
-      with: 
-        path: ~/.cargo/registry 
+    - name: Cache cargo registry
+      uses: actions/cache@v2.1.6
+      with:
+        path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-registry-
 
-    - name: Cache cargo index 
-      uses: actions/cache@v2.1.6  
-      with: 
-        path: ~/.cargo/git  
+    - name: Cache cargo index
+      uses: actions/cache@v2.1.6
+      with:
+        path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-index-
@@ -41,32 +50,19 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt install -y cmake pkg-config libssl-dev git build-essential clang libclang-dev
 
-    - name: Cleanup ubuntu filesystem
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt clean
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
-    - name: Setup toolchain
-      run: ./scripts/init.sh
-
-    - name: Install tarpaulin
-      run: cargo install cargo-tarpaulin
-
-    - name: Cargo check
-      run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
-
-    - name: Generate coverage report
-      run: cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
+    - name: Run cargo-tarpaulin
+      uses: actions-rs/tarpaulin@v0.1
+      with:
+        version: ${{ env.tarpaulin-vers }}
+        args: '--avoid-cfg-tarpaulin --verbose --all-features --workspace --timeout 120'
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v2.0.3
       with:
         fail_ci_if_error: true
 
-    # - name: Run tests
-    #   run: SKIP_WASM_BUILD= cargo test --all-targets --all-features --workspace
+    - name: Cargo check
+      run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
 
   fmt:
     runs-on: ubuntu-latest

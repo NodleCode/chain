@@ -20,6 +20,7 @@
 
 use pallet_root_of_trust_rpc::{RootOfTrust, RootOfTrustApi, RootOfTrustRuntimeApi};
 use primitives::{AccountId, Balance, Block, BlockNumber, CertificateId, Hash, Index};
+use sc_client_api::AuxStore;
 use sc_consensus_babe::{Config, Epoch};
 use sc_consensus_babe_rpc::BabeRpcHandler;
 use sc_consensus_epochs::SharedEpochChanges;
@@ -29,13 +30,13 @@ use sc_finality_grandpa::{
 use sc_finality_grandpa_rpc::GrandpaRpcHandler;
 use sc_rpc::SubscriptionTaskExecutor;
 pub use sc_rpc_api::DenyUnsafe;
+use sc_transaction_pool_api::TransactionPool;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 use sp_consensus::SelectChain;
 use sp_consensus_babe::BabeApi;
 use sp_keystore::SyncCryptoStorePtr;
-use sp_transaction_pool::TransactionPool;
 use std::sync::Arc;
 
 /// Light client extra dependencies.
@@ -82,6 +83,8 @@ pub struct FullDeps<C, P, SC, B> {
     pub pool: Arc<P>,
     /// The SelectChain Strategy
     pub select_chain: SC,
+    /// A copy of the chain spec.
+    pub chain_spec: Box<dyn sc_chain_spec::ChainSpec>,
     /// Whether to deny unsafe calls
     pub deny_unsafe: DenyUnsafe,
     /// BABE specific dependencies.
@@ -96,13 +99,17 @@ pub type IoHandler = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 /// Instantiate all Full RPC extensions.
 pub fn create_full<C, P, SC, B>(
     deps: FullDeps<C, P, SC, B>,
-) -> jsonrpc_core::IoHandler<sc_rpc_api::Metadata>
+) -> Result<jsonrpc_core::IoHandler<sc_rpc_api::Metadata>, Box<dyn std::error::Error + Send + Sync>>
 where
-    C: ProvideRuntimeApi<Block>,
-    C: HeaderBackend<Block> + HeaderMetadata<Block, Error = BlockChainError> + 'static,
-    C: Send + Sync + 'static,
+    C: ProvideRuntimeApi<Block>
+        + HeaderBackend<Block>
+        + AuxStore
+        + HeaderMetadata<Block, Error = BlockChainError>
+        + Sync
+        + Send
+        + 'static,
     C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
-    C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber>,
+    C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber, Hash>,
     C::Api: RootOfTrustRuntimeApi<Block, CertificateId>,
     C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
     C::Api: BabeApi<Block>,
@@ -121,6 +128,7 @@ where
         client,
         pool,
         select_chain,
+        chain_spec: _,
         deny_unsafe,
         babe,
         grandpa,
@@ -165,7 +173,7 @@ where
     ));
     io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(
         GrandpaRpcHandler::new(
-            shared_authority_set,
+            shared_authority_set.clone(),
             shared_voter_state,
             justification_stream,
             subscription_executor,
@@ -174,7 +182,7 @@ where
     ));
     io.extend_with(RootOfTrustApi::to_delegate(RootOfTrust::new(client)));
 
-    io
+    Ok(io)
 }
 
 /// Instantiate all Light RPC extensions.

@@ -43,9 +43,12 @@ benchmarks_instance_pallet! {
         let dest = account("dest", 0, SEED);
         let value = T::Currency::minimum_balance().saturating_mul(100u32.into());
 
-        let call = Call::<T, I>::spend(dest, value);
+        let call = Call::<T, I>::spend{
+            to: dest,
+            amount: value
+        };
         let origin = T::ExternalOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
-}
 
-impl_benchmark_test_suite!(Reserve, crate::tests::new_test_ext(), crate::tests::Test,);
+    impl_benchmark_test_suite!(Reserve, crate::tests::new_test_ext(), crate::tests::Test,);
+}

@@ -25,18 +25,17 @@ use crate::{
 use frame_support::{
     parameter_types,
     traits::{KeyOwnerProofSystem, LockIdentifier},
-    weights::Weight,
+    PalletId,
 };
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use primitives::{AccountId, Balance, BlockNumber, Moment};
+use primitives::{AccountId, Balance, Moment};
 use sp_core::{
     crypto::KeyTypeId,
     u32_trait::{_1, _2},
 };
 use sp_runtime::{
-    impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, ModuleId,
-    Perbill,
+    impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, Perbill,
 };
 use sp_std::prelude::*;
 
@@ -66,6 +65,8 @@ impl pallet_babe::Config for Runtime {
     type EpochDuration = EpochDuration;
     type ExpectedBlockTime = ExpectedBlockTime;
     type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+    type DisabledValidators = Session;
+
     type KeyOwnerProofSystem = Historical;
     type KeyOwnerProof = <Self::KeyOwnerProofSystem as KeyOwnerProofSystem<(
         KeyTypeId,
@@ -78,6 +79,7 @@ impl pallet_babe::Config for Runtime {
     type HandleEquivocation =
         pallet_babe::EquivocationHandler<Self::KeyOwnerIdentification, Offences, ReportLongevity>;
     type WeightInfo = ();
+    type MaxAuthorities = MaxAuthorities;
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -96,9 +98,12 @@ impl pallet_grandpa::Config for Runtime {
         ReportLongevity,
     >;
     type WeightInfo = ();
+    type MaxAuthorities = MaxAuthorities;
 }
 
-impl pallet_authority_discovery::Config for Runtime {}
+impl pallet_authority_discovery::Config for Runtime {
+    type MaxAuthorities = MaxAuthorities;
+}
 
 parameter_types! {
     pub const UncleGenerations: u32 = 5;
@@ -112,24 +117,24 @@ impl pallet_authorship::Config for Runtime {
 }
 
 parameter_types! {
-    pub const SessionDuration: BlockNumber = constants::EPOCH_DURATION_IN_SLOTS as _;
     pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
+    pub const MaxAuthorities: u32 = 100;
+    pub const MaxKeys: u32 = 10_000;
+    pub const MaxPeerInHeartbeats: u32 = 10_000;
+    pub const MaxPeerDataEncodingSize: u32 = 1_000;
 }
 
 impl pallet_im_online::Config for Runtime {
     type AuthorityId = ImOnlineId;
     type Event = Event;
     type ValidatorSet = Historical;
-    type SessionDuration = SessionDuration;
+    type NextSessionRotation = Babe;
     type ReportUnresponsiveness = Offences;
     type UnsignedPriority = ImOnlineUnsignedPriority;
     type WeightInfo = pallet_im_online::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    // When this percentage is reached the module will force a new era, we never
-    // call `session.disable()` so this should never be used.
-    pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(17);
+    type MaxKeys = MaxKeys;
+    type MaxPeerInHeartbeats = MaxPeerInHeartbeats;
+    type MaxPeerDataEncodingSize = MaxPeerDataEncodingSize;
 }
 
 impl pallet_session::Config for Runtime {
@@ -140,7 +145,6 @@ impl pallet_session::Config for Runtime {
     type Keys = SessionKeys;
     type ValidatorId = AccountId;
     type ValidatorIdOf = pallet_staking::StashOf<Runtime>;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type NextSessionRotation = Babe;
     type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
@@ -166,7 +170,7 @@ parameter_types! {
     pub const DefaultStakingMinNominatorTotalBond: Balance = 10 * constants::MILLICENTS;
     pub const DefaultStakingMinNominationChillThreshold: Balance = 3 * constants::MILLICENTS;
     pub const MaxChunkUnlock: usize = 32;
-    pub const StakingPalletId: ModuleId = ModuleId(*b"mockstak");
+    pub const StakingPalletId: PalletId = PalletId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
 }
 impl pallet_staking::Config for Runtime {
@@ -197,14 +201,8 @@ impl pallet_staking::Config for Runtime {
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-    pub OffencesWeightSoftLimit: Weight = Perbill::from_percent(60) *
-        constants::RuntimeBlockWeights::get().max_block;
-}
-
 impl pallet_offences::Config for Runtime {
     type Event = Event;
     type IdentificationTuple = pallet_session::historical::IdentificationTuple<Self>;
     type OnOffenceHandler = Staking;
-    type WeightSoftLimit = OffencesWeightSoftLimit;
 }

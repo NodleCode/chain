@@ -21,8 +21,8 @@
 //! This module implements a Token Curated Registry where members (represented by their
 //! `AccountId`) are accepted based on the number of tokens staked in support to their
 //! application.
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -32,6 +32,7 @@ use frame_support::{
 };
 use frame_system::{self as system};
 use parity_scale_codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use sp_runtime::{
     traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating, Zero},
     Perbill,
@@ -50,7 +51,7 @@ type NegativeImbalanceOf<T, I> =
 type PositiveImbalanceOf<T, I> =
     <<T as Config<I>>::Currency as Currency<<T as system::Config>::AccountId>>::PositiveImbalance;
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[derive(Encode, Decode, Default, Clone, PartialEq, TypeInfo)]
 pub struct Application<AccountId, Balance, BlockNumber> {
     candidate: AccountId,
     candidate_deposit: Balance,
@@ -197,7 +198,7 @@ pub mod pallet {
                     votes_against: Zero::zero(),
                     voters_against: Vec::new(),
 
-                    created_block: <system::Module<T>>::block_number(),
+                    created_block: <system::Pallet<T>>::block_number(),
                     challenged_block: Zero::zero(),
                 },
             );
@@ -231,7 +232,7 @@ pub mod pallet {
             let mut application = <Applications<T, I>>::take(member.clone());
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
+            application.challenged_block = <system::Pallet<T>>::block_number();
 
             <Challenges<T, I>>::insert(member.clone(), application);
 
@@ -304,7 +305,7 @@ pub mod pallet {
             let mut application = <Members<T, I>>::get(member.clone());
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
+            application.challenged_block = <system::Pallet<T>>::block_number();
             application.votes_for = Zero::zero();
             application.voters_for = Vec::new();
             application.votes_against = Zero::zero();
@@ -319,7 +320,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T, I> = "Balance")]
     pub enum Event<T: Config<I>, I: 'static = ()> {
         /// Someone applied to join the registry
         NewApplication(T::AccountId, BalanceOf<T, I>),

@@ -19,8 +19,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 mod benchmarking;
+
 #[cfg(test)]
 mod mock;
+
+#[cfg(test)]
 mod tests;
 
 use frame_support::{
@@ -65,7 +68,7 @@ pub type ScheduledItem<T> = (
 ///
 /// Benefits would be granted gradually, `per_period` amount every `period` of blocks
 /// after `start`.
-#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, scale_info::TypeInfo)]
 pub struct VestingSchedule<BlockNumber, Balance> {
     pub start: BlockNumber,
     pub period: BlockNumber,
@@ -228,7 +231,7 @@ pub mod pallet {
             let target = T::Lookup::lookup(who)?;
             VestingSchedules::<T>::insert(target.clone(), new_schedules.clone());
 
-            let now = <frame_system::Module<T>>::block_number();
+            let now = <frame_system::Pallet<T>>::block_number();
             let new_lock: BalanceOf<T> = new_schedules
                 .iter()
                 .fold(Zero::zero(), |acc, s| {
@@ -262,12 +265,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(
-		T::AccountId = "AccountId",
-		BalanceOf<T> = "Balance",
-		VestingScheduleOf<T> = "VestingSchedule",
-		ListVestingScheduleOf<T> = "ListVestingScheduleOf"
-	)]
     pub enum Event<T: Config> {
         /// Added new vesting schedule \[from, to, vesting_schedule\]
         VestingScheduleAdded(T::AccountId, T::AccountId, VestingScheduleOf<T>),
@@ -377,7 +374,7 @@ impl<T: Config> Pallet<T> {
 
     /// Returns locked balance based on current block number.
     fn locked_balance(who: &T::AccountId) -> BalanceOf<T> {
-        let now = <frame_system::Module<T>>::block_number();
+        let now = <frame_system::Pallet<T>>::block_number();
         Self::vesting_schedules(who)
             .iter()
             .fold(Zero::zero(), |acc, s| {

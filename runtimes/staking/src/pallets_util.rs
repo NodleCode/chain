@@ -48,6 +48,8 @@ impl pallet_multisig::Config for Runtime {
     type WeightInfo = pallet_multisig::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_randomness_collective_flip::Config for Runtime {}
+
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
         constants::RuntimeBlockWeights::get().max_block;

@@ -70,17 +70,17 @@ benchmarks! {
 
         // Add some existing schedules according to b
         for x in 0 .. MAX_SCHEDULES {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
-    }:  _(RawOrigin::Signed(config.granter), config.grantee_lookup, config.schedule)
+    }:  _(RawOrigin::Signed(config.granter.clone()), config.grantee_lookup.clone(), config.schedule.clone())
 
     claim {
         let config = create_shared_config::<T>(1);
-        Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
         // Add some existing schedules according to b
         for x in 0 .. MAX_SCHEDULES {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
     }: _(RawOrigin::Signed(config.grantee))
 
@@ -89,16 +89,20 @@ benchmarks! {
 
         // Add some existing schedules according to b
         for x in 0 .. MAX_SCHEDULES {
-            Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+            Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
         }
 
-        let call = Call::<T>::cancel_all_vesting_schedules(config.grantee_lookup, config.collector_lookup, true);
+        let call = Call::<T>::cancel_all_vesting_schedules{
+            who: config.grantee_lookup,
+            funds_collector: config.collector_lookup,
+            limit_to_free_balance: true
+        };
         let origin = T::CancelOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
 
     overwrite_vesting_schedules {
         let config = create_shared_config::<T>(1);
-        Module::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
+        Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
         let updated_schedules = vec![
             VestingSchedule {
@@ -109,15 +113,19 @@ benchmarks! {
             }
         ];
 
-        let call = Call::<T>::overwrite_vesting_schedules(config.grantee_lookup, updated_schedules);
+        let call = Call::<T>::overwrite_vesting_schedules {
+            who: config.grantee_lookup,
+            new_schedules: updated_schedules
+        };
         let origin = T::ForceOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
-}
 
-impl_benchmark_test_suite!(
-    Grants,
-    crate::mock::ExtBuilder::default()
-        .one_hundred_for_alice()
-        .build(),
-    crate::mock::Test,
-);
+    impl_benchmark_test_suite!(
+        Grants,
+        crate::mock::ExtBuilder::default()
+            .one_hundred_for_alice()
+            .build(),
+        crate::mock::Test,
+    );
+
+}
