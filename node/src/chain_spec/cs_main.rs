@@ -27,6 +27,7 @@ use runtime_main::{
     SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
     VestingConfig,
 };
+use sc_chain_spec::Properties;
 use sc_service::ChainType;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
@@ -130,7 +131,6 @@ pub fn testnet_genesis(
         vesting: VestingConfig {
             vesting: vested_grants,
         },
-
         // Consensus
         session: SessionConfig {
             keys: initial_authorities
