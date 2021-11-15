@@ -106,7 +106,6 @@ pub fn run() -> Result<()> {
 
     match &cli.subcommand {
         None => {
-            let run_staking_runtime = cli.run.runtime.is_staking_runtime();
             let runner = cli.create_runner(&cli.run.base)?;
             runner.run_node_until_exit(|config| async move {
                 match config.role {
