@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;mio-0.6.23&#x2F;src&#x2F;token.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>token.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../mio/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;mio-0.7.14&#x2F;src&#x2F;token.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>token.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../mio/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -136,37 +136,30 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
-<span id="144">144</span>
-<span id="145">145</span>
-<span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
-</pre><pre class="rust"><code><span class="doccomment">/// Associates readiness notifications with [`Evented`] handles.</span>
+</pre><pre class="rust"><code><span class="doccomment">/// Associates readiness events with [`event::Source`]s.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `Token` is a wrapper around `usize` and is used as an argument to</span>
-<span class="doccomment">/// [`Poll::register`] and [`Poll::reregister`].</span>
+<span class="doccomment">/// [`Registry::register`] and [`Registry::reregister`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [`Poll`] for more documentation on polling.</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// [`event::Source`]: ./event/trait.Source.html</span>
+<span class="doccomment">/// [`Poll`]: struct.Poll.html</span>
+<span class="doccomment">/// [`Registry::register`]: struct.Registry.html#method.register</span>
+<span class="doccomment">/// [`Registry::reregister`]: struct.Registry.html#method.reregister</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Using `Token` to track which socket generated the notification. In this</span>
-<span class="doccomment">/// example, `HashMap` is used, but usually something like [`slab`] is better.</span>
+<span class="doccomment">/// Using `Token` to track which socket generated the event. In this example,</span>
+<span class="doccomment">/// `HashMap` is used, but usually something like [`slab`] is better.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
+<span class="doccomment">/// [`slab`]: https://crates.io/crates/slab</span>
+<span class="doccomment">///</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;os-poll&quot;</span>, <span class="ident">features</span> <span class="op">=</span> <span class="string">&quot;net&quot;</span>), <span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;```&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;os-poll&quot;</span>, <span class="ident">features</span> <span class="op">=</span> <span class="string">&quot;net&quot;</span>)), <span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;```ignore&quot;</span>)]</span>
 <span class="doccomment">/// # use std::error::Error;</span>
-<span class="doccomment">/// # fn try_main() -&gt; Result&lt;(), Box&lt;Error&gt;&gt; {</span>
-<span class="doccomment">/// use mio::{Events, Ready, Poll, PollOpt, Token};</span>
+<span class="doccomment">/// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {</span>
+<span class="doccomment">/// use mio::{Events, Interest, Poll, Token};</span>
 <span class="doccomment">/// use mio::net::TcpListener;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// use std::thread;</span>
@@ -187,16 +180,13 @@
 <span class="doccomment">/// let mut next_socket_index = 0;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // The `Poll` instance</span>
-<span class="doccomment">/// let poll = Poll::new()?;</span>
+<span class="doccomment">/// let mut poll = Poll::new()?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Tcp listener</span>
-<span class="doccomment">/// let listener = TcpListener::bind(&amp;&quot;127.0.0.1:0&quot;.parse()?)?;</span>
+<span class="doccomment">/// let mut listener = TcpListener::bind(&quot;127.0.0.1:0&quot;.parse()?)?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Register the listener</span>
-<span class="doccomment">/// poll.register(&amp;listener,</span>
-<span class="doccomment">///               LISTENER,</span>
-<span class="doccomment">///               Ready::readable(),</span>
-<span class="doccomment">///               PollOpt::edge())?;</span>
+<span class="doccomment">/// poll.registry().register(&amp;mut listener, LISTENER, Interest::READABLE)?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Spawn a thread that will connect a bunch of sockets then close them</span>
 <span class="doccomment">/// let addr = listener.local_addr()?;</span>
@@ -206,7 +196,7 @@
 <span class="doccomment">///     // +1 here is to connect an extra socket to signal the socket to close</span>
 <span class="doccomment">///     for _ in 0..(MAX_SOCKETS+1) {</span>
 <span class="doccomment">///         // Connect then drop the socket</span>
-<span class="doccomment">///         let _ = TcpStream::connect(&amp;addr).unwrap();</span>
+<span class="doccomment">///         let _ = TcpStream::connect(addr).unwrap();</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// });</span>
 <span class="doccomment">///</span>
@@ -228,7 +218,7 @@
 <span class="doccomment">///                 // encountered.</span>
 <span class="doccomment">///                 loop {</span>
 <span class="doccomment">///                     match listener.accept() {</span>
-<span class="doccomment">///                         Ok((socket, _)) =&gt; {</span>
+<span class="doccomment">///                         Ok((mut socket, _)) =&gt; {</span>
 <span class="doccomment">///                             // Shutdown the server</span>
 <span class="doccomment">///                             if next_socket_index == MAX_SOCKETS {</span>
 <span class="doccomment">///                                 return Ok(());</span>
@@ -239,10 +229,7 @@
 <span class="doccomment">///                             next_socket_index += 1;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///                             // Register the new socket w/ poll</span>
-<span class="doccomment">///                             poll.register(&amp;socket,</span>
-<span class="doccomment">///                                          token,</span>
-<span class="doccomment">///                                          Ready::readable(),</span>
-<span class="doccomment">///                                          PollOpt::edge())?;</span>
+<span class="doccomment">///                             poll.registry().register(&amp;mut socket, token, Interest::READABLE)?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///                             // Store the socket</span>
 <span class="doccomment">///                             sockets.insert(token, socket);</span>
@@ -277,27 +264,10 @@
 <span class="doccomment">///         }</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
-<span class="doccomment">/// #     Ok(())</span>
-<span class="doccomment">/// # }</span>
-<span class="doccomment">/// #</span>
-<span class="doccomment">/// # fn main() {</span>
-<span class="doccomment">/// #     try_main().unwrap();</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`Evented`]: event/trait.Evented.html</span>
-<span class="doccomment">/// [`Poll`]: struct.Poll.html</span>
-<span class="doccomment">/// [`Poll::register`]: struct.Poll.html#method.register</span>
-<span class="doccomment">/// [`Poll::reregister`]: struct.Poll.html#method.reregister</span>
-<span class="doccomment">/// [`slab`]: https://crates.io/crates/slab</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Token</span>(<span class="kw">pub</span> <span class="ident">usize</span>);
-
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Token</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">val</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Token</span> {
-        <span class="ident">Token</span>(<span class="ident">val</span>)
-    }
-}
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">usize</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">val</span>: <span class="ident">Token</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {

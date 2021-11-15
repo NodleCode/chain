@@ -184,6 +184,11 @@
 <span id="184">184</span>
 <span id="185">185</span>
 <span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -208,10 +213,9 @@
     <span class="ident">constants</span>, <span class="ident">Call</span>, <span class="ident">Event</span>, <span class="ident">FinancialCommittee</span>, <span class="ident">Origin</span>, <span class="ident">OriginCaller</span>, <span class="ident">RootCommittee</span>, <span class="ident">Runtime</span>,
     <span class="ident">Scheduler</span>, <span class="ident">TechnicalCommittee</span>,
 };
-<span class="kw">use</span> <span class="ident">frame_support::parameter_types</span>;
+<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">parameter_types</span>, <span class="ident">PalletId</span>};
 <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">BlockNumber</span>};
 <span class="kw">use</span> <span class="ident">sp_core::u32_trait</span>::{<span class="ident">_1</span>, <span class="ident">_2</span>};
-<span class="kw">use</span> <span class="ident">sp_runtime::ModuleId</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sp_runtime</span>::{<span class="ident">Perbill</span>, <span class="ident">Perquintill</span>};
 
 <span class="comment">// Shared parameters with all collectives / committees</span>
@@ -247,6 +251,8 @@
         <span class="ident">pallet_collective::EnsureProportionMoreThan</span><span class="op">&lt;</span><span class="ident">_1</span>, <span class="ident">_2</span>, <span class="ident">AccountId</span>, <span class="ident">RootCollective</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">MembershipInitialized</span> <span class="op">=</span> <span class="ident">TechnicalCommittee</span>;
     <span class="kw">type</span> <span class="ident">MembershipChanged</span> <span class="op">=</span> <span class="ident">TechnicalCommittee</span>;
+    <span class="kw">type</span> <span class="ident">MaxMembers</span> <span class="op">=</span> <span class="ident">MaxMembers</span>;
+    <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_membership::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
 <span class="comment">// --- Financial committee</span>
@@ -275,6 +281,8 @@
         <span class="ident">pallet_collective::EnsureProportionMoreThan</span><span class="op">&lt;</span><span class="ident">_1</span>, <span class="ident">_2</span>, <span class="ident">AccountId</span>, <span class="ident">RootCollective</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">MembershipInitialized</span> <span class="op">=</span> <span class="ident">FinancialCommittee</span>;
     <span class="kw">type</span> <span class="ident">MembershipChanged</span> <span class="op">=</span> <span class="ident">FinancialCommittee</span>;
+    <span class="kw">type</span> <span class="ident">MaxMembers</span> <span class="op">=</span> <span class="ident">MaxMembers</span>;
+    <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_membership::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
 <span class="comment">// --- Root committee</span>
@@ -303,47 +311,49 @@
         <span class="ident">pallet_collective::EnsureProportionMoreThan</span><span class="op">&lt;</span><span class="ident">_1</span>, <span class="ident">_2</span>, <span class="ident">AccountId</span>, <span class="ident">RootCollective</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">MembershipInitialized</span> <span class="op">=</span> <span class="ident">RootCommittee</span>;
     <span class="kw">type</span> <span class="ident">MembershipChanged</span> <span class="op">=</span> <span class="ident">RootCommittee</span>;
+    <span class="kw">type</span> <span class="ident">MaxMembers</span> <span class="op">=</span> <span class="ident">MaxMembers</span>;
+    <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_membership::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
 <span class="macro">parameter_types!</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CompanyReserveModuleId</span>: <span class="ident">ModuleId</span> <span class="op">=</span> <span class="ident">ModuleId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/resrv&quot;</span>); <span class="comment">// 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CompanyReservePalletId</span>: <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">PalletId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/resrv&quot;</span>); <span class="comment">// 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR</span>
 }
 
 <span class="kw">impl</span> <span class="ident">pallet_reserve::Config</span><span class="op">&lt;</span><span class="ident">pallet_reserve::Instance1</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
     <span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
-    <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Module</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Pallet</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">ExternalOrigin</span> <span class="op">=</span>
         <span class="ident">pallet_collective::EnsureProportionMoreThan</span><span class="op">&lt;</span><span class="ident">_1</span>, <span class="ident">_2</span>, <span class="ident">AccountId</span>, <span class="ident">FinancialCollective</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
-    <span class="kw">type</span> <span class="ident">ModuleId</span> <span class="op">=</span> <span class="ident">CompanyReserveModuleId</span>;
+    <span class="kw">type</span> <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">CompanyReservePalletId</span>;
     <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_reserve::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
 <span class="macro">parameter_types!</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">InternationalReserveModuleId</span>: <span class="ident">ModuleId</span> <span class="op">=</span> <span class="ident">ModuleId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/rvint&quot;</span>); <span class="comment">// 5EYCAe5ijiYfi6GQAEPSHYDwvw4CkyGtPTS52BjLh42GygSv</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">InternationalReservePalletId</span>: <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">PalletId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/rvint&quot;</span>); <span class="comment">// 5EYCAe5ijiYfi6GQAEPSHYDwvw4CkyGtPTS52BjLh42GygSv</span>
 }
 
 <span class="kw">impl</span> <span class="ident">pallet_reserve::Config</span><span class="op">&lt;</span><span class="ident">pallet_reserve::Instance2</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
     <span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
-    <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Module</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Pallet</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">ExternalOrigin</span> <span class="op">=</span>
         <span class="ident">pallet_collective::EnsureProportionMoreThan</span><span class="op">&lt;</span><span class="ident">_1</span>, <span class="ident">_2</span>, <span class="ident">AccountId</span>, <span class="ident">FinancialCollective</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
-    <span class="kw">type</span> <span class="ident">ModuleId</span> <span class="op">=</span> <span class="ident">InternationalReserveModuleId</span>;
+    <span class="kw">type</span> <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">InternationalReservePalletId</span>;
     <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_reserve::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
 <span class="macro">parameter_types!</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">UsaReserveModuleId</span>: <span class="ident">ModuleId</span> <span class="op">=</span> <span class="ident">ModuleId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/rvusa&quot;</span>); <span class="comment">// 5EYCAe5ijiYfi6MEfWpZC3nJ38KFZ9EQSFpsj9mgYgTtVNri</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">UsaReservePalletId</span>: <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">PalletId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/rvusa&quot;</span>); <span class="comment">// 5EYCAe5ijiYfi6MEfWpZC3nJ38KFZ9EQSFpsj9mgYgTtVNri</span>
 }
 
 <span class="kw">impl</span> <span class="ident">pallet_reserve::Config</span><span class="op">&lt;</span><span class="ident">pallet_reserve::Instance3</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
     <span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
-    <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Module</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Pallet</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">ExternalOrigin</span> <span class="op">=</span>
         <span class="ident">pallet_collective::EnsureProportionMoreThan</span><span class="op">&lt;</span><span class="ident">_1</span>, <span class="ident">_2</span>, <span class="ident">AccountId</span>, <span class="ident">FinancialCollective</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
-    <span class="kw">type</span> <span class="ident">ModuleId</span> <span class="op">=</span> <span class="ident">UsaReserveModuleId</span>;
+    <span class="kw">type</span> <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">UsaReservePalletId</span>;
     <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_reserve::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 

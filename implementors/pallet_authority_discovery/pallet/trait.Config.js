@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["runtime_main"] = [{"text":"impl <a class=\"trait\" href=\"pallet_authority_discovery/pallet/trait.Config.html\" title=\"trait pallet_authority_discovery::pallet::Config\">Config</a> for <a class=\"struct\" href=\"runtime_main/struct.Runtime.html\" title=\"struct runtime_main::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_main::Runtime"]}];
+implementors["runtime_staking"] = [{"text":"impl <a class=\"trait\" href=\"pallet_authority_discovery/pallet/trait.Config.html\" title=\"trait pallet_authority_discovery::pallet::Config\">Config</a> for <a class=\"struct\" href=\"runtime_staking/struct.Runtime.html\" title=\"struct runtime_staking::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_staking::Runtime"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

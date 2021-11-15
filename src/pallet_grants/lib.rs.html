@@ -415,9 +415,6 @@
 <span id="415">415</span>
 <span id="416">416</span>
 <span id="417">417</span>
-<span id="418">418</span>
-<span id="419">419</span>
-<span id="420">420</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -439,8 +436,11 @@
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 
 <span class="kw">mod</span> <span class="ident">benchmarking</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">mock</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
 <span class="kw">use</span> <span class="ident">frame_support</span>::{
@@ -485,7 +485,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Benefits would be granted gradually, `per_period` amount every `period` of blocks</span>
 <span class="doccomment">/// after `start`.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">RuntimeDebug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VestingSchedule</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Balance</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="ident">start</span>: <span class="ident">BlockNumber</span>,
     <span class="kw">pub</span> <span class="ident">period</span>: <span class="ident">BlockNumber</span>,
@@ -648,7 +648,7 @@
             <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">T::Lookup::lookup</span>(<span class="ident">who</span>)<span class="question-mark">?</span>;
             <span class="ident">VestingSchedules</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">new_schedules</span>.<span class="ident">clone</span>());
 
-            <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Module</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
+            <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
             <span class="kw">let</span> <span class="ident">new_lock</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">new_schedules</span>
                 .<span class="ident">iter</span>()
                 .<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">acc</span>, <span class="ident">s</span><span class="op">|</span> {
@@ -682,12 +682,6 @@
 
     <span class="attribute">#[<span class="ident">pallet::event</span>]</span>
     <span class="attribute">#[<span class="ident">pallet::generate_deposit</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">deposit_event</span>)]</span>
-    <span class="attribute">#[<span class="ident">pallet::metadata</span>(
-		<span class="ident">T::AccountId</span> <span class="op">=</span> <span class="string">&quot;AccountId&quot;</span>,
-		<span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="string">&quot;Balance&quot;</span>,
-		<span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="string">&quot;VestingSchedule&quot;</span>,
-		<span class="ident">ListVestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="string">&quot;ListVestingScheduleOf&quot;</span>
-	)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
         <span class="doccomment">/// Added new vesting schedule \[from, to, vesting_schedule\]</span>
         <span class="ident">VestingScheduleAdded</span>(<span class="ident">T::AccountId</span>, <span class="ident">T::AccountId</span>, <span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>),
@@ -797,7 +791,7 @@
 
     <span class="doccomment">/// Returns locked balance based on current block number.</span>
     <span class="kw">fn</span> <span class="ident">locked_balance</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Module</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
+        <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
         <span class="ident"><span class="self">Self</span>::vesting_schedules</span>(<span class="ident">who</span>)
             .<span class="ident">iter</span>()
             .<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">acc</span>, <span class="ident">s</span><span class="op">|</span> {

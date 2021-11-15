@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["wasmtime"] = [{"text":"impl <a class=\"trait\" href=\"wasmtime/trait.ResourceLimiter.html\" title=\"trait wasmtime::ResourceLimiter\">ResourceLimiter</a> for <a class=\"struct\" href=\"wasmtime/struct.StoreLimits.html\" title=\"struct wasmtime::StoreLimits\">StoreLimits</a>","synthetic":false,"types":["wasmtime::limits::StoreLimits"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;machinst&#x2F;abi_impl.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>abi_impl.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.77.0&#x2F;src&#x2F;machinst&#x2F;abi_impl.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>abi_impl.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1509,6 +1509,256 @@
 <span id="1509">1509</span>
 <span id="1510">1510</span>
 <span id="1511">1511</span>
+<span id="1512">1512</span>
+<span id="1513">1513</span>
+<span id="1514">1514</span>
+<span id="1515">1515</span>
+<span id="1516">1516</span>
+<span id="1517">1517</span>
+<span id="1518">1518</span>
+<span id="1519">1519</span>
+<span id="1520">1520</span>
+<span id="1521">1521</span>
+<span id="1522">1522</span>
+<span id="1523">1523</span>
+<span id="1524">1524</span>
+<span id="1525">1525</span>
+<span id="1526">1526</span>
+<span id="1527">1527</span>
+<span id="1528">1528</span>
+<span id="1529">1529</span>
+<span id="1530">1530</span>
+<span id="1531">1531</span>
+<span id="1532">1532</span>
+<span id="1533">1533</span>
+<span id="1534">1534</span>
+<span id="1535">1535</span>
+<span id="1536">1536</span>
+<span id="1537">1537</span>
+<span id="1538">1538</span>
+<span id="1539">1539</span>
+<span id="1540">1540</span>
+<span id="1541">1541</span>
+<span id="1542">1542</span>
+<span id="1543">1543</span>
+<span id="1544">1544</span>
+<span id="1545">1545</span>
+<span id="1546">1546</span>
+<span id="1547">1547</span>
+<span id="1548">1548</span>
+<span id="1549">1549</span>
+<span id="1550">1550</span>
+<span id="1551">1551</span>
+<span id="1552">1552</span>
+<span id="1553">1553</span>
+<span id="1554">1554</span>
+<span id="1555">1555</span>
+<span id="1556">1556</span>
+<span id="1557">1557</span>
+<span id="1558">1558</span>
+<span id="1559">1559</span>
+<span id="1560">1560</span>
+<span id="1561">1561</span>
+<span id="1562">1562</span>
+<span id="1563">1563</span>
+<span id="1564">1564</span>
+<span id="1565">1565</span>
+<span id="1566">1566</span>
+<span id="1567">1567</span>
+<span id="1568">1568</span>
+<span id="1569">1569</span>
+<span id="1570">1570</span>
+<span id="1571">1571</span>
+<span id="1572">1572</span>
+<span id="1573">1573</span>
+<span id="1574">1574</span>
+<span id="1575">1575</span>
+<span id="1576">1576</span>
+<span id="1577">1577</span>
+<span id="1578">1578</span>
+<span id="1579">1579</span>
+<span id="1580">1580</span>
+<span id="1581">1581</span>
+<span id="1582">1582</span>
+<span id="1583">1583</span>
+<span id="1584">1584</span>
+<span id="1585">1585</span>
+<span id="1586">1586</span>
+<span id="1587">1587</span>
+<span id="1588">1588</span>
+<span id="1589">1589</span>
+<span id="1590">1590</span>
+<span id="1591">1591</span>
+<span id="1592">1592</span>
+<span id="1593">1593</span>
+<span id="1594">1594</span>
+<span id="1595">1595</span>
+<span id="1596">1596</span>
+<span id="1597">1597</span>
+<span id="1598">1598</span>
+<span id="1599">1599</span>
+<span id="1600">1600</span>
+<span id="1601">1601</span>
+<span id="1602">1602</span>
+<span id="1603">1603</span>
+<span id="1604">1604</span>
+<span id="1605">1605</span>
+<span id="1606">1606</span>
+<span id="1607">1607</span>
+<span id="1608">1608</span>
+<span id="1609">1609</span>
+<span id="1610">1610</span>
+<span id="1611">1611</span>
+<span id="1612">1612</span>
+<span id="1613">1613</span>
+<span id="1614">1614</span>
+<span id="1615">1615</span>
+<span id="1616">1616</span>
+<span id="1617">1617</span>
+<span id="1618">1618</span>
+<span id="1619">1619</span>
+<span id="1620">1620</span>
+<span id="1621">1621</span>
+<span id="1622">1622</span>
+<span id="1623">1623</span>
+<span id="1624">1624</span>
+<span id="1625">1625</span>
+<span id="1626">1626</span>
+<span id="1627">1627</span>
+<span id="1628">1628</span>
+<span id="1629">1629</span>
+<span id="1630">1630</span>
+<span id="1631">1631</span>
+<span id="1632">1632</span>
+<span id="1633">1633</span>
+<span id="1634">1634</span>
+<span id="1635">1635</span>
+<span id="1636">1636</span>
+<span id="1637">1637</span>
+<span id="1638">1638</span>
+<span id="1639">1639</span>
+<span id="1640">1640</span>
+<span id="1641">1641</span>
+<span id="1642">1642</span>
+<span id="1643">1643</span>
+<span id="1644">1644</span>
+<span id="1645">1645</span>
+<span id="1646">1646</span>
+<span id="1647">1647</span>
+<span id="1648">1648</span>
+<span id="1649">1649</span>
+<span id="1650">1650</span>
+<span id="1651">1651</span>
+<span id="1652">1652</span>
+<span id="1653">1653</span>
+<span id="1654">1654</span>
+<span id="1655">1655</span>
+<span id="1656">1656</span>
+<span id="1657">1657</span>
+<span id="1658">1658</span>
+<span id="1659">1659</span>
+<span id="1660">1660</span>
+<span id="1661">1661</span>
+<span id="1662">1662</span>
+<span id="1663">1663</span>
+<span id="1664">1664</span>
+<span id="1665">1665</span>
+<span id="1666">1666</span>
+<span id="1667">1667</span>
+<span id="1668">1668</span>
+<span id="1669">1669</span>
+<span id="1670">1670</span>
+<span id="1671">1671</span>
+<span id="1672">1672</span>
+<span id="1673">1673</span>
+<span id="1674">1674</span>
+<span id="1675">1675</span>
+<span id="1676">1676</span>
+<span id="1677">1677</span>
+<span id="1678">1678</span>
+<span id="1679">1679</span>
+<span id="1680">1680</span>
+<span id="1681">1681</span>
+<span id="1682">1682</span>
+<span id="1683">1683</span>
+<span id="1684">1684</span>
+<span id="1685">1685</span>
+<span id="1686">1686</span>
+<span id="1687">1687</span>
+<span id="1688">1688</span>
+<span id="1689">1689</span>
+<span id="1690">1690</span>
+<span id="1691">1691</span>
+<span id="1692">1692</span>
+<span id="1693">1693</span>
+<span id="1694">1694</span>
+<span id="1695">1695</span>
+<span id="1696">1696</span>
+<span id="1697">1697</span>
+<span id="1698">1698</span>
+<span id="1699">1699</span>
+<span id="1700">1700</span>
+<span id="1701">1701</span>
+<span id="1702">1702</span>
+<span id="1703">1703</span>
+<span id="1704">1704</span>
+<span id="1705">1705</span>
+<span id="1706">1706</span>
+<span id="1707">1707</span>
+<span id="1708">1708</span>
+<span id="1709">1709</span>
+<span id="1710">1710</span>
+<span id="1711">1711</span>
+<span id="1712">1712</span>
+<span id="1713">1713</span>
+<span id="1714">1714</span>
+<span id="1715">1715</span>
+<span id="1716">1716</span>
+<span id="1717">1717</span>
+<span id="1718">1718</span>
+<span id="1719">1719</span>
+<span id="1720">1720</span>
+<span id="1721">1721</span>
+<span id="1722">1722</span>
+<span id="1723">1723</span>
+<span id="1724">1724</span>
+<span id="1725">1725</span>
+<span id="1726">1726</span>
+<span id="1727">1727</span>
+<span id="1728">1728</span>
+<span id="1729">1729</span>
+<span id="1730">1730</span>
+<span id="1731">1731</span>
+<span id="1732">1732</span>
+<span id="1733">1733</span>
+<span id="1734">1734</span>
+<span id="1735">1735</span>
+<span id="1736">1736</span>
+<span id="1737">1737</span>
+<span id="1738">1738</span>
+<span id="1739">1739</span>
+<span id="1740">1740</span>
+<span id="1741">1741</span>
+<span id="1742">1742</span>
+<span id="1743">1743</span>
+<span id="1744">1744</span>
+<span id="1745">1745</span>
+<span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
+<span id="1749">1749</span>
+<span id="1750">1750</span>
+<span id="1751">1751</span>
+<span id="1752">1752</span>
+<span id="1753">1753</span>
+<span id="1754">1754</span>
+<span id="1755">1755</span>
+<span id="1756">1756</span>
+<span id="1757">1757</span>
+<span id="1758">1758</span>
+<span id="1759">1759</span>
+<span id="1760">1760</span>
+<span id="1761">1761</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Implementation of a vanilla ABI, shared between several machines. The</span>
 <span class="doccomment">//! implementation here assumes that arguments will be passed in registers</span>
 <span class="doccomment">//! first, then additional args on the stack; that the stack grows downward,</span>
@@ -1533,26 +1783,41 @@
 <span class="doccomment">//! area on the stack, given by a hidden extra parameter.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Note that the exact stack layout is up to us. We settled on the</span>
-<span class="doccomment">//! below design based on several requirements. In particular, we need to be</span>
-<span class="doccomment">//! able to generate instructions (or instruction sequences) to access</span>
-<span class="doccomment">//! arguments, stack slots, and spill slots before we know how many spill slots</span>
-<span class="doccomment">//! or clobber-saves there will be, because of our pass structure. We also</span>
-<span class="doccomment">//! prefer positive offsets to negative offsets because of an asymmetry in</span>
-<span class="doccomment">//! some machines&#39; addressing modes (e.g., on AArch64, positive offsets have a</span>
-<span class="doccomment">//! larger possible range without a long-form sequence to synthesize an</span>
-<span class="doccomment">//! arbitrary offset). Finally, it is not allowed to access memory below the</span>
-<span class="doccomment">//! current SP value.</span>
+<span class="doccomment">//! below design based on several requirements. In particular, we need</span>
+<span class="doccomment">//! to be able to generate instructions (or instruction sequences) to</span>
+<span class="doccomment">//! access arguments, stack slots, and spill slots before we know how</span>
+<span class="doccomment">//! many spill slots or clobber-saves there will be, because of our</span>
+<span class="doccomment">//! pass structure. We also prefer positive offsets to negative</span>
+<span class="doccomment">//! offsets because of an asymmetry in some machines&#39; addressing modes</span>
+<span class="doccomment">//! (e.g., on AArch64, positive offsets have a larger possible range</span>
+<span class="doccomment">//! without a long-form sequence to synthesize an arbitrary</span>
+<span class="doccomment">//! offset). We also need clobber-save registers to be &quot;near&quot; the</span>
+<span class="doccomment">//! frame pointer: Windows unwind information requires it to be within</span>
+<span class="doccomment">//! 240 bytes of RBP. Finally, it is not allowed to access memory</span>
+<span class="doccomment">//! below the current SP value.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! We assume that a prologue first pushes the frame pointer (and return address</span>
-<span class="doccomment">//! above that, if the machine does not do that in hardware). We set FP to point</span>
-<span class="doccomment">//! to this two-word frame record. We store all other frame slots below this</span>
-<span class="doccomment">//! two-word frame record, with the stack pointer remaining at or below this</span>
-<span class="doccomment">//! fixed frame storage for the rest of the function. We can then access frame</span>
-<span class="doccomment">//! storage slots using positive offsets from SP. In order to allow codegen for</span>
-<span class="doccomment">//! the latter before knowing how many clobber-saves we have, and also allow it</span>
-<span class="doccomment">//! while SP is being adjusted to set up a call, we implement a &quot;nominal SP&quot;</span>
-<span class="doccomment">//! tracking feature by which a fixup (distance between actual SP and a</span>
-<span class="doccomment">//! &quot;nominal&quot; SP) is known at each instruction.</span>
+<span class="doccomment">//! We assume that a prologue first pushes the frame pointer (and</span>
+<span class="doccomment">//! return address above that, if the machine does not do that in</span>
+<span class="doccomment">//! hardware). We set FP to point to this two-word frame record. We</span>
+<span class="doccomment">//! store all other frame slots below this two-word frame record, with</span>
+<span class="doccomment">//! the stack pointer remaining at or below this fixed frame storage</span>
+<span class="doccomment">//! for the rest of the function. We can then access frame storage</span>
+<span class="doccomment">//! slots using positive offsets from SP. In order to allow codegen</span>
+<span class="doccomment">//! for the latter before knowing how SP might be adjusted around</span>
+<span class="doccomment">//! callsites, we implement a &quot;nominal SP&quot; tracking feature by which a</span>
+<span class="doccomment">//! fixup (distance between actual SP and a &quot;nominal&quot; SP) is known at</span>
+<span class="doccomment">//! each instruction.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Note that if we ever support dynamic stack-space allocation (for</span>
+<span class="doccomment">//! `alloca`), we will need a way to reference spill slots and stack</span>
+<span class="doccomment">//! slots without &quot;nominal SP&quot;, because we will no longer be able to</span>
+<span class="doccomment">//! know a static offset from SP to the slots at any particular</span>
+<span class="doccomment">//! program point. Probably the best solution at that point will be to</span>
+<span class="doccomment">//! revert to using the frame pointer as the reference for all slots,</span>
+<span class="doccomment">//! and creating a &quot;nominal FP&quot; synthetic addressing mode (analogous</span>
+<span class="doccomment">//! to &quot;nominal SP&quot; today) to allow generating spill/reload and</span>
+<span class="doccomment">//! stackslot accesses before we know how large the clobber-saves will</span>
+<span class="doccomment">//! be.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Stack Layout</span>
 <span class="doccomment">//!</span>
@@ -1571,17 +1836,17 @@
 <span class="doccomment">//! FP after prologue --------&gt;  | FP (pushed by prologue)   |</span>
 <span class="doccomment">//!                              +---------------------------+</span>
 <span class="doccomment">//!                              |          ...              |</span>
+<span class="doccomment">//!                              | clobbered callee-saves    |</span>
+<span class="doccomment">//! unwind-frame base     ----&gt;  | (pushed by prologue)      |</span>
+<span class="doccomment">//!                              +---------------------------+</span>
+<span class="doccomment">//!                              |          ...              |</span>
 <span class="doccomment">//!                              | spill slots               |</span>
 <span class="doccomment">//!                              | (accessed via nominal SP) |</span>
 <span class="doccomment">//!                              |          ...              |</span>
 <span class="doccomment">//!                              | stack slots               |</span>
 <span class="doccomment">//!                              | (accessed via nominal SP) |</span>
 <span class="doccomment">//! nominal SP ---------------&gt;  | (alloc&#39;d by prologue)     |</span>
-<span class="doccomment">//!                              +---------------------------+</span>
-<span class="doccomment">//!                              |          ...              |</span>
-<span class="doccomment">//!                              | clobbered callee-saves    |</span>
-<span class="doccomment">//! SP at end of prologue ----&gt;  | (pushed by prologue)      |</span>
-<span class="doccomment">//!                              +---------------------------+</span>
+<span class="doccomment">//! (SP at end of prologue)      +---------------------------+</span>
 <span class="doccomment">//!                              | [alignment as needed]     |</span>
 <span class="doccomment">//!                              |          ...              |</span>
 <span class="doccomment">//!                              | args for call             |</span>
@@ -1598,7 +1863,7 @@
 <span class="doccomment">//! support the SpiderMonkey Wasm ABI.  For details of the multi-value return</span>
 <span class="doccomment">//! ABI, see:</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! https://searchfox.org/mozilla-central/rev/bc3600def806859c31b2c7ac06e3d69271052a89/js/src/wasm/WasmStubs.h#134</span>
+<span class="doccomment">//! &lt;https://searchfox.org/mozilla-central/rev/bc3600def806859c31b2c7ac06e3d69271052a89/js/src/wasm/WasmStubs.h#134&gt;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In brief:</span>
 <span class="doccomment">//! - Return values are processed in *reverse* order.</span>
@@ -1622,39 +1887,122 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::abi</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::binemit::StackMap</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::types</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="ident">ArgumentExtension</span>, <span class="ident">StackSlot</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="ident">ArgumentExtension</span>, <span class="ident">ArgumentPurpose</span>, <span class="ident">StackSlot</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::machinst</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::settings</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CodegenResult</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ir</span>, <span class="ident">isa</span>};
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
-<span class="kw">use</span> <span class="ident">log</span>::{<span class="ident">debug</span>, <span class="ident">trace</span>};
 <span class="kw">use</span> <span class="ident">regalloc</span>::{<span class="ident">RealReg</span>, <span class="ident">Reg</span>, <span class="ident">RegClass</span>, <span class="ident">Set</span>, <span class="ident">SpillSlot</span>, <span class="ident">Writable</span>};
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 
-<span class="doccomment">/// A location for an argument or return value.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ABIArg</span> {
-    <span class="doccomment">/// In a real register (or set of registers).</span>
-    <span class="ident">Reg</span>(
-        <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span>,
-        <span class="ident">ir::Type</span>,
-        <span class="ident">ir::ArgumentExtension</span>,
-        <span class="ident">ir::ArgumentPurpose</span>,
-    ),
+<span class="doccomment">/// A location for (part of) an argument or return value. These &quot;storage slots&quot;</span>
+<span class="doccomment">/// are specified for each register-sized part of an argument.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ABIArgSlot</span> {
+    <span class="doccomment">/// In a real register.</span>
+    <span class="ident">Reg</span> {
+        <span class="doccomment">/// Register that holds this arg.</span>
+        <span class="ident">reg</span>: <span class="ident">RealReg</span>,
+        <span class="doccomment">/// Value type of this arg.</span>
+        <span class="ident">ty</span>: <span class="ident">ir::Type</span>,
+        <span class="doccomment">/// Should this arg be zero- or sign-extended?</span>
+        <span class="ident">extension</span>: <span class="ident">ir::ArgumentExtension</span>,
+    },
     <span class="doccomment">/// Arguments only: on stack, at given offset from SP at entry.</span>
-    <span class="ident">Stack</span>(<span class="ident">i64</span>, <span class="ident">ir::Type</span>, <span class="ident">ir::ArgumentExtension</span>, <span class="ident">ir::ArgumentPurpose</span>),
+    <span class="ident">Stack</span> {
+        <span class="doccomment">/// Offset of this arg relative to the base of stack args.</span>
+        <span class="ident">offset</span>: <span class="ident">i64</span>,
+        <span class="doccomment">/// Value type of this arg.</span>
+        <span class="ident">ty</span>: <span class="ident">ir::Type</span>,
+        <span class="doccomment">/// Should this arg be zero- or sign-extended?</span>
+        <span class="ident">extension</span>: <span class="ident">ir::ArgumentExtension</span>,
+    },
+}
+
+<span class="doccomment">/// An ABIArg is composed of one or more parts. This allows for a CLIF-level</span>
+<span class="doccomment">/// Value to be passed with its parts in more than one location at the ABI</span>
+<span class="doccomment">/// level. For example, a 128-bit integer may be passed in two 64-bit registers,</span>
+<span class="doccomment">/// or even a 64-bit register and a 64-bit stack slot, on a 64-bit machine. The</span>
+<span class="doccomment">/// number of &quot;parts&quot; should correspond to the number of registers used to store</span>
+<span class="doccomment">/// this type according to the machine backend.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// As an invariant, the `purpose` for every part must match. As a further</span>
+<span class="doccomment">/// invariant, a `StructArg` part cannot appear with any other part.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ABIArg</span> {
+    <span class="doccomment">/// Storage slots (registers or stack locations) for each part of the</span>
+    <span class="doccomment">/// argument value. The number of slots must equal the number of register</span>
+    <span class="doccomment">/// parts used to store a value of this type.</span>
+    <span class="ident">Slots</span> {
+        <span class="doccomment">/// Slots, one per register part.</span>
+        <span class="ident">slots</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ABIArgSlot</span><span class="op">&gt;</span>,
+        <span class="doccomment">/// Purpose of this arg.</span>
+        <span class="ident">purpose</span>: <span class="ident">ir::ArgumentPurpose</span>,
+    },
+    <span class="doccomment">/// Structure argument. We reserve stack space for it, but the CLIF-level</span>
+    <span class="doccomment">/// semantics are a little weird: the value passed to the call instruction,</span>
+    <span class="doccomment">/// and received in the corresponding block param, is a *pointer*. On the</span>
+    <span class="doccomment">/// caller side, we memcpy the data from the passed-in pointer to the stack</span>
+    <span class="doccomment">/// area; on the callee side, we compute a pointer to this stack area and</span>
+    <span class="doccomment">/// provide that as the argument&#39;s value.</span>
+    <span class="ident">StructArg</span> {
+        <span class="doccomment">/// Offset of this arg relative to base of stack args.</span>
+        <span class="ident">offset</span>: <span class="ident">i64</span>,
+        <span class="doccomment">/// Size of this arg on the stack.</span>
+        <span class="ident">size</span>: <span class="ident">u64</span>,
+        <span class="doccomment">/// Purpose of this arg.</span>
+        <span class="ident">purpose</span>: <span class="ident">ir::ArgumentPurpose</span>,
+    },
 }
 
 <span class="kw">impl</span> <span class="ident">ABIArg</span> {
     <span class="doccomment">/// Get the purpose of this arg.</span>
-    <span class="kw">fn</span> <span class="ident">get_purpose</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::ArgumentPurpose</span> {
+    <span class="kw">fn</span> <span class="ident">get_purpose</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::ArgumentPurpose</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ABIArg::Reg</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">purpose</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">purpose</span>,
-            <span class="ident">ABIArg::Stack</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">purpose</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">purpose</span>,
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="ident">purpose</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">purpose</span>,
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::StructArg</span> { <span class="ident">purpose</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">purpose</span>,
+        }
+    }
+
+    <span class="doccomment">/// Is this a StructArg?</span>
+    <span class="kw">fn</span> <span class="ident">is_struct_arg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::StructArg</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create an ABIArg from one register.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reg</span>(
+        <span class="ident">reg</span>: <span class="ident">RealReg</span>,
+        <span class="ident">ty</span>: <span class="ident">ir::Type</span>,
+        <span class="ident">extension</span>: <span class="ident">ir::ArgumentExtension</span>,
+        <span class="ident">purpose</span>: <span class="ident">ir::ArgumentPurpose</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ABIArg</span> {
+        <span class="ident">ABIArg::Slots</span> {
+            <span class="ident">slots</span>: <span class="macro">vec!</span>[<span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, <span class="ident">ty</span>, <span class="ident">extension</span> }],
+            <span class="ident">purpose</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create an ABIArg from one stack slot.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stack</span>(
+        <span class="ident">offset</span>: <span class="ident">i64</span>,
+        <span class="ident">ty</span>: <span class="ident">ir::Type</span>,
+        <span class="ident">extension</span>: <span class="ident">ir::ArgumentExtension</span>,
+        <span class="ident">purpose</span>: <span class="ident">ir::ArgumentPurpose</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ABIArg</span> {
+        <span class="ident">ABIArg::Slots</span> {
+            <span class="ident">slots</span>: <span class="macro">vec!</span>[<span class="ident">ABIArgSlot::Stack</span> {
+                <span class="ident">offset</span>,
+                <span class="ident">ty</span>,
+                <span class="ident">extension</span>,
+            }],
+            <span class="ident">purpose</span>,
         }
     }
 }
@@ -1750,6 +2098,7 @@
     <span class="doccomment">/// index of the extra synthetic arg that was added.</span>
     <span class="kw">fn</span> <span class="ident">compute_arg_locs</span>(
         <span class="ident">call_conv</span>: <span class="ident">isa::CallConv</span>,
+        <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>,
         <span class="ident">params</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::AbiParam</span>],
         <span class="ident">args_or_rets</span>: <span class="ident">ArgsOrRets</span>,
         <span class="ident">add_ret_area_ptr</span>: <span class="ident">bool</span>,
@@ -1829,31 +2178,53 @@
     <span class="doccomment">/// Generate a meta-instruction that adjusts the nominal SP offset.</span>
     <span class="kw">fn</span> <span class="ident">gen_nominal_sp_adj</span>(<span class="ident">amount</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span>;
 
+    <span class="doccomment">/// Generates extra unwind instructions for a new frame  for this</span>
+    <span class="doccomment">/// architecture, whether the frame has a prologue sequence or not.</span>
+    <span class="kw">fn</span> <span class="ident">gen_debug_frame_info</span>(<span class="ident">_flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
+        <span class="comment">// By default, generates nothing.</span>
+        <span class="macro">smallvec!</span>[]
+    }
+
     <span class="doccomment">/// Generate the usual frame-setup sequence for this architecture: e.g.,</span>
     <span class="doccomment">/// `push rbp / mov rbp, rsp` on x86-64, or `stp fp, lr, [sp, #-16]!` on</span>
     <span class="doccomment">/// AArch64.</span>
-    <span class="kw">fn</span> <span class="ident">gen_prologue_frame_setup</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_prologue_frame_setup</span>(<span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate the usual frame-restore sequence for this architecture.</span>
-    <span class="kw">fn</span> <span class="ident">gen_epilogue_frame_restore</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">gen_epilogue_frame_restore</span>(<span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Generate a probestack call.</span>
     <span class="kw">fn</span> <span class="ident">gen_probestack</span>(<span class="ident">_frame_size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span>;
 
-    <span class="doccomment">/// Generate a clobber-save sequence. This takes the list of *all* registers</span>
-    <span class="doccomment">/// written/modified by the function body. The implementation here is</span>
-    <span class="doccomment">/// responsible for determining which of these are callee-saved according to</span>
-    <span class="doccomment">/// the ABI. It should return a sequence of instructions that &quot;push&quot; or</span>
-    <span class="doccomment">/// otherwise save these values to the stack. The sequence of instructions</span>
-    <span class="doccomment">/// should adjust the stack pointer downward, and should align as necessary</span>
-    <span class="doccomment">/// according to ABI requirements.</span>
+    <span class="doccomment">/// Get all clobbered registers that are callee-saved according to the ABI; the result</span>
+    <span class="doccomment">/// contains the registers in a sorted order.</span>
+    <span class="kw">fn</span> <span class="ident">get_clobbered_callee_saves</span>(
+        <span class="ident">call_conv</span>: <span class="ident">isa::CallConv</span>,
+        <span class="ident">regs</span>: <span class="kw-2">&amp;</span><span class="ident">Set</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Determine whether it is necessary to generate the usual frame-setup</span>
+    <span class="doccomment">/// sequence (refer to gen_prologue_frame_setup()).</span>
+    <span class="kw">fn</span> <span class="ident">is_frame_setup_needed</span>(
+        <span class="ident">is_leaf</span>: <span class="ident">bool</span>,
+        <span class="ident">stack_args_size</span>: <span class="ident">u32</span>,
+        <span class="ident">num_clobbered_callee_saves</span>: <span class="ident">usize</span>,
+        <span class="ident">fixed_frame_storage_size</span>: <span class="ident">u32</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+
+    <span class="doccomment">/// Generate a clobber-save sequence. The implementation here should return</span>
+    <span class="doccomment">/// a sequence of instructions that &quot;push&quot; or otherwise save to the stack all</span>
+    <span class="doccomment">/// registers written/modified by the function body that are callee-saved.</span>
+    <span class="doccomment">/// The sequence of instructions should adjust the stack pointer downward,</span>
+    <span class="doccomment">/// and should align as necessary according to ABI requirements.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns stack bytes used as well as instructions. Does not adjust</span>
     <span class="doccomment">/// nominal SP offset; caller will do that.</span>
     <span class="kw">fn</span> <span class="ident">gen_clobber_save</span>(
         <span class="ident">call_conv</span>: <span class="ident">isa::CallConv</span>,
+        <span class="ident">setup_frame</span>: <span class="ident">bool</span>,
         <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>,
-        <span class="ident">clobbers</span>: <span class="kw-2">&amp;</span><span class="ident">Set</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">clobbered_callee_saves</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">fixed_frame_storage_size</span>: <span class="ident">u32</span>,
         <span class="ident">outgoing_args_size</span>: <span class="ident">u32</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u64</span>, <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident"><span class="self">Self</span>::I</span>; <span class="number">16</span>]<span class="op">&gt;</span>);
@@ -1881,6 +2252,16 @@
         <span class="ident">callee_conv</span>: <span class="ident">isa::CallConv</span>,
         <span class="ident">callee_conv</span>: <span class="ident">isa::CallConv</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[(<span class="ident">InstIsSafepoint</span>, <span class="ident"><span class="self">Self</span>::I</span>); <span class="number">2</span>]<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Generate a memcpy invocation. Used to set up struct args. May clobber</span>
+    <span class="doccomment">/// caller-save registers; we only memcpy before we start to set up args for</span>
+    <span class="doccomment">/// a call.</span>
+    <span class="kw">fn</span> <span class="ident">gen_memcpy</span>(
+        <span class="ident">call_conv</span>: <span class="ident">isa::CallConv</span>,
+        <span class="ident">dst</span>: <span class="ident">Reg</span>,
+        <span class="ident">src</span>: <span class="ident">Reg</span>,
+        <span class="ident">size</span>: <span class="ident">usize</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident"><span class="self">Self</span>::I</span>; <span class="number">8</span>]<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Get the number of spillslots required for the given register-class and</span>
     <span class="doccomment">/// type.</span>
@@ -1926,11 +2307,15 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ABISig</span> {
-    <span class="kw">fn</span> <span class="ident">from_func_sig</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">ABISig</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from_func_sig</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span>(
+        <span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>,
+        <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">ABISig</span><span class="op">&gt;</span> {
         <span class="comment">// Compute args and retvals from signature. Handle retvals first,</span>
         <span class="comment">// because we may need to add a return-area arg to the args.</span>
         <span class="kw">let</span> (<span class="ident">rets</span>, <span class="ident">stack_ret_space</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">M::compute_arg_locs</span>(
             <span class="ident">sig</span>.<span class="ident">call_conv</span>,
+            <span class="ident">flags</span>,
             <span class="kw-2">&amp;</span><span class="ident">sig</span>.<span class="ident">returns</span>,
             <span class="ident">ArgsOrRets::Rets</span>,
             <span class="comment">/* extra ret-area ptr = */</span> <span class="bool-val">false</span>,
@@ -1938,12 +2323,13 @@
         <span class="kw">let</span> <span class="ident">need_stack_return_area</span> <span class="op">=</span> <span class="ident">stack_ret_space</span> <span class="op">&gt;</span> <span class="number">0</span>;
         <span class="kw">let</span> (<span class="ident">args</span>, <span class="ident">stack_arg_space</span>, <span class="ident">stack_ret_arg</span>) <span class="op">=</span> <span class="ident">M::compute_arg_locs</span>(
             <span class="ident">sig</span>.<span class="ident">call_conv</span>,
+            <span class="ident">flags</span>,
             <span class="kw-2">&amp;</span><span class="ident">sig</span>.<span class="ident">params</span>,
             <span class="ident">ArgsOrRets::Args</span>,
             <span class="ident">need_stack_return_area</span>,
         )<span class="question-mark">?</span>;
 
-        <span class="macro">trace!</span>(
+        <span class="macro">log::trace!</span>(
             <span class="string">&quot;ABISig: sig {:?} =&gt; args = {:?} rets = {:?} arg stack = {} ret stack = {} stack_ret_arg = {:?}&quot;</span>,
             <span class="ident">sig</span>,
             <span class="ident">args</span>,
@@ -1966,10 +2352,12 @@
 
 <span class="doccomment">/// ABI object for a function body.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ABICalleeImpl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// CLIF-level signature, possibly normalized.</span>
+    <span class="ident">ir_sig</span>: <span class="ident">ir::Signature</span>,
     <span class="doccomment">/// Signature: arg and retval regs.</span>
     <span class="ident">sig</span>: <span class="ident">ABISig</span>,
     <span class="doccomment">/// Offsets to each stackslot.</span>
-    <span class="ident">stackslots</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">stackslots</span>: <span class="ident">PrimaryMap</span><span class="op">&lt;</span><span class="ident">StackSlot</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Total stack size of all stackslots.</span>
     <span class="ident">stackslots_size</span>: <span class="ident">u32</span>,
     <span class="doccomment">/// Stack size to be reserved for outgoing arguments.</span>
@@ -2010,6 +2398,8 @@
     <span class="doccomment">/// Are we to invoke the probestack function in the prologue? If so,</span>
     <span class="doccomment">/// what is the minimum size at which we must invoke it?</span>
     <span class="ident">probestack_min_frame</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Whether it is necessary to generate the usual frame-setup sequence.</span>
+    <span class="ident">setup_frame</span>: <span class="ident">bool</span>,
 
     <span class="ident">_mach</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 }
@@ -2020,18 +2410,22 @@
     <span class="ident">purpose</span>: <span class="ident">ir::ArgumentPurpose</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">signature</span>.<span class="ident">special_param_index</span>(<span class="ident">purpose</span>)<span class="question-mark">?</span>;
-    <span class="kw">match</span> <span class="ident">abi</span>.<span class="ident">args</span>[<span class="ident">idx</span>] {
-        <span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, ..) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">regs</span>.<span class="ident">only_reg</span>().<span class="ident">unwrap</span>().<span class="ident">to_reg</span>()),
-        <span class="ident">ABIArg::Stack</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+    <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">abi</span>.<span class="ident">args</span>[<span class="ident">idx</span>] {
+        <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">slots</span>[<span class="number">0</span>] {
+            <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        },
+        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span> <span class="ident">ABICalleeImpl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a new body ABI instance.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Function</span>, <span class="ident">flags</span>: <span class="ident">settings::Flags</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="macro">debug!</span>(<span class="string">&quot;ABI: func signature {:?}&quot;</span>, <span class="ident">f</span>.<span class="ident">signature</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;ABI: func signature {:?}&quot;</span>, <span class="ident">f</span>.<span class="ident">signature</span>);
 
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ABISig::from_func_sig</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">signature</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">ir_sig</span> <span class="op">=</span> <span class="ident">ensure_struct_return_ptr_is_returned</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">signature</span>);
+        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ABISig::from_func_sig</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">ir_sig</span>, <span class="kw-2">&amp;</span><span class="ident">flags</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">call_conv</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">signature</span>.<span class="ident">call_conv</span>;
         <span class="comment">// Only these calling conventions are supported.</span>
@@ -2039,14 +2433,18 @@
             <span class="ident">call_conv</span> <span class="op">=</span><span class="op">=</span> <span class="ident">isa::CallConv::SystemV</span>
                 <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span> <span class="op">=</span><span class="op">=</span> <span class="ident">isa::CallConv::Fast</span>
                 <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span> <span class="op">=</span><span class="op">=</span> <span class="ident">isa::CallConv::Cold</span>
-                <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>(),
+                <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>()
+                <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span>.<span class="ident">extends_windows_fastcall</span>()
+                <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span> <span class="op">=</span><span class="op">=</span> <span class="ident">isa::CallConv::AppleAarch64</span>
+                <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span> <span class="op">=</span><span class="op">=</span> <span class="ident">isa::CallConv::WasmtimeSystemV</span>
+                <span class="op">|</span><span class="op">|</span> <span class="ident">call_conv</span> <span class="op">=</span><span class="op">=</span> <span class="ident">isa::CallConv::WasmtimeAppleAarch64</span>,
             <span class="string">&quot;Unsupported calling convention: {:?}&quot;</span>,
             <span class="ident">call_conv</span>
         );
 
         <span class="comment">// Compute stackslot locations and total stackslot size.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack_offset</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stackslots</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stackslots</span> <span class="op">=</span> <span class="ident">PrimaryMap::new</span>();
         <span class="kw">for</span> (<span class="ident">stackslot</span>, <span class="ident">data</span>) <span class="kw">in</span> <span class="ident">f</span>.<span class="ident">stack_slots</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="ident">stack_offset</span>;
             <span class="ident">stack_offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">size</span>;
@@ -2078,6 +2476,7 @@
         };
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">ir_sig</span>,
             <span class="ident">sig</span>,
             <span class="ident">stackslots</span>,
             <span class="ident">stackslots_size</span>: <span class="ident">stack_offset</span>,
@@ -2092,6 +2491,7 @@
             <span class="ident">is_leaf</span>: <span class="ident">f</span>.<span class="ident">is_leaf</span>(),
             <span class="ident">stack_limit</span>,
             <span class="ident">probestack_min_frame</span>,
+            <span class="ident">setup_frame</span>: <span class="bool-val">true</span>,
             <span class="ident">_mach</span>: <span class="ident">PhantomData</span>,
         })
     }
@@ -2237,19 +2637,6 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">gen_move_multi</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span>(
-    <span class="ident">dst</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">src</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
-    <span class="ident">ty</span>: <span class="ident">Type</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident">M::I</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
-    <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">tys</span>) <span class="op">=</span> <span class="ident">M::I::rc_for_type</span>(<span class="ident">ty</span>).<span class="ident">unwrap</span>();
-    <span class="kw">for</span> ((<span class="kw-2">&amp;</span><span class="ident">dst</span>, <span class="kw-2">&amp;</span><span class="ident">src</span>), <span class="kw-2">&amp;</span><span class="ident">ty</span>) <span class="kw">in</span> <span class="ident">dst</span>.<span class="ident">regs</span>().<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">src</span>.<span class="ident">regs</span>().<span class="ident">iter</span>()).<span class="ident">zip</span>(<span class="ident">tys</span>.<span class="ident">iter</span>()) {
-        <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_move</span>(<span class="ident">dst</span>, <span class="ident">src</span>, <span class="ident">ty</span>));
-    }
-    <span class="ident">ret</span>
-}
-
 <span class="kw">fn</span> <span class="ident">gen_load_stack_multi</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span>(
     <span class="ident">from</span>: <span class="ident">StackAMode</span>,
     <span class="ident">dst</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -2282,24 +2669,29 @@
     <span class="ident">ret</span>
 }
 
-<span class="kw">fn</span> <span class="ident">gen_store_base_offset_multi</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span>(
-    <span class="ident">base</span>: <span class="ident">Reg</span>,
-    <span class="kw-2">mut</span> <span class="ident">offset</span>: <span class="ident">i32</span>,
-    <span class="ident">src</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
-    <span class="ident">ty</span>: <span class="ident">Type</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident">M::I</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
-    <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">tys</span>) <span class="op">=</span> <span class="ident">M::I::rc_for_type</span>(<span class="ident">ty</span>).<span class="ident">unwrap</span>();
-    <span class="comment">// N.B.: registers are given in the `ValueRegs` in target endian order.</span>
-    <span class="kw">for</span> (<span class="kw-2">&amp;</span><span class="ident">src</span>, <span class="kw-2">&amp;</span><span class="ident">ty</span>) <span class="kw">in</span> <span class="ident">src</span>.<span class="ident">regs</span>().<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">tys</span>.<span class="ident">iter</span>()) {
-        <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_store_base_offset</span>(<span class="ident">base</span>, <span class="ident">offset</span>, <span class="ident">src</span>, <span class="ident">ty</span>));
-        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">ty</span>.<span class="ident">bytes</span>() <span class="kw">as</span> <span class="ident">i32</span>;
+<span class="kw">fn</span> <span class="ident">ensure_struct_return_ptr_is_returned</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Signature</span> {
+    <span class="kw">let</span> <span class="ident">params_structret</span> <span class="op">=</span> <span class="ident">sig</span>
+        .<span class="ident">params</span>
+        .<span class="ident">iter</span>()
+        .<span class="ident">find</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">purpose</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentPurpose::StructReturn</span>);
+    <span class="kw">let</span> <span class="ident">rets_have_structret</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">returns</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span>
+        <span class="op">&amp;&amp;</span> <span class="ident">sig</span>
+            .<span class="ident">returns</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">any</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> <span class="ident">arg</span>.<span class="ident">purpose</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentPurpose::StructReturn</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">clone</span>();
+    <span class="kw">if</span> <span class="ident">params_structret</span>.<span class="ident">is_some</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">rets_have_structret</span> {
+        <span class="ident">sig</span>.<span class="ident">returns</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">params_structret</span>.<span class="ident">unwrap</span>().<span class="ident">clone</span>());
     }
-    <span class="ident">ret</span>
+    <span class="ident">sig</span>
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span> <span class="ident">ABICallee</span> <span class="kw">for</span> <span class="ident">ABICalleeImpl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">I</span> <span class="op">=</span> <span class="ident">M::I</span>;
+
+    <span class="kw">fn</span> <span class="ident">signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ir_sig</span>
+    }
 
     <span class="kw">fn</span> <span class="ident">temp_needed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_arg</span>.<span class="ident">is_some</span>() {
@@ -2332,10 +2724,12 @@
 
     <span class="kw">fn</span> <span class="ident">liveins</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Set</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">set</span>: <span class="ident">Set</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Set::empty</span>();
-        <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">arg</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, ..) <span class="op">=</span> <span class="ident">arg</span> {
-                <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">r</span> <span class="kw">in</span> <span class="ident">regs</span>.<span class="ident">regs</span>() {
-                    <span class="ident">set</span>.<span class="ident">insert</span>(<span class="ident">r</span>);
+        <span class="kw">for</span> <span class="ident">arg</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span> <span class="ident">arg</span> {
+                <span class="kw">for</span> <span class="ident">slot</span> <span class="kw">in</span> <span class="ident">slots</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, .. } <span class="op">=</span> <span class="ident">slot</span> {
+                        <span class="ident">set</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">reg</span>);
+                    }
                 }
             }
         }
@@ -2344,10 +2738,12 @@
 
     <span class="kw">fn</span> <span class="ident">liveouts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Set</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">set</span>: <span class="ident">Set</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Set::empty</span>();
-        <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ret</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">rets</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, ..) <span class="op">=</span> <span class="ident">ret</span> {
-                <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">r</span> <span class="kw">in</span> <span class="ident">regs</span>.<span class="ident">regs</span>() {
-                    <span class="ident">set</span>.<span class="ident">insert</span>(<span class="ident">r</span>);
+        <span class="kw">for</span> <span class="ident">ret</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">rets</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span> <span class="ident">ret</span> {
+                <span class="kw">for</span> <span class="ident">slot</span> <span class="kw">in</span> <span class="ident">slots</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, .. } <span class="op">=</span> <span class="ident">slot</span> {
+                        <span class="ident">set</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">reg</span>);
+                    }
                 }
             }
         }
@@ -2366,23 +2762,52 @@
         <span class="self">self</span>.<span class="ident">stackslots</span>.<span class="ident">len</span>()
     }
 
+    <span class="kw">fn</span> <span class="ident">stackslot_offsets</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">PrimaryMap</span><span class="op">&lt;</span><span class="ident">StackSlot</span>, <span class="ident">u32</span><span class="op">&gt;</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">stackslots</span>
+    }
+
     <span class="kw">fn</span> <span class="ident">gen_copy_arg_to_regs</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">idx</span>: <span class="ident">usize</span>,
         <span class="ident">into_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">insts</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span>[<span class="ident">idx</span>] {
-            <span class="comment">// Extension mode doesn&#39;t matter (we&#39;re copying out, not in; we</span>
-            <span class="comment">// ignore high bits by convention).</span>
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, <span class="ident">ty</span>, ..) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">gen_move_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">into_regs</span>, <span class="ident">regs</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">to_reg</span>()), <span class="ident">ty</span>)
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">assert_eq!</span>(<span class="ident">into_regs</span>.<span class="ident">len</span>(), <span class="ident">slots</span>.<span class="ident">len</span>());
+                <span class="kw">for</span> (<span class="ident">slot</span>, <span class="ident">into_reg</span>) <span class="kw">in</span> <span class="ident">slots</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">into_regs</span>.<span class="ident">regs</span>().<span class="ident">iter</span>()) {
+                    <span class="kw">match</span> <span class="ident">slot</span> {
+                        <span class="comment">// Extension mode doesn&#39;t matter (we&#39;re copying out, not in; we</span>
+                        <span class="comment">// ignore high bits by convention).</span>
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, <span class="ident">ty</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="ident">insts</span>.<span class="ident">push</span>(<span class="ident">M::gen_move</span>(<span class="kw-2">*</span><span class="ident">into_reg</span>, <span class="ident">reg</span>.<span class="ident">to_reg</span>(), <span class="ident">ty</span>));
+                        }
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Stack</span> { <span class="ident">offset</span>, <span class="ident">ty</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="ident">insts</span>.<span class="ident">push</span>(<span class="ident">M::gen_load_stack</span>(
+                                <span class="ident">StackAMode::FPOffset</span>(
+                                    <span class="ident">M::fp_to_arg_offset</span>(<span class="self">self</span>.<span class="ident">call_conv</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>) <span class="op">+</span> <span class="ident">offset</span>,
+                                    <span class="ident">ty</span>,
+                                ),
+                                <span class="kw-2">*</span><span class="ident">into_reg</span>,
+                                <span class="ident">ty</span>,
+                            ));
+                        }
+                    }
+                }
             }
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Stack</span>(<span class="ident">off</span>, <span class="ident">ty</span>, ..) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">gen_load_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(
-                <span class="ident">StackAMode::FPOffset</span>(<span class="ident">M::fp_to_arg_offset</span>(<span class="self">self</span>.<span class="ident">call_conv</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>) <span class="op">+</span> <span class="ident">off</span>, <span class="ident">ty</span>),
-                <span class="ident">into_regs</span>,
-                <span class="ident">ty</span>,
-            ),
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::StructArg</span> { <span class="ident">offset</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">into_reg</span> <span class="op">=</span> <span class="ident">into_regs</span>.<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
+                <span class="ident">insts</span>.<span class="ident">push</span>(<span class="ident">M::gen_get_stack_addr</span>(
+                    <span class="ident">StackAMode::FPOffset</span>(
+                        <span class="ident">M::fp_to_arg_offset</span>(<span class="self">self</span>.<span class="ident">call_conv</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>) <span class="op">+</span> <span class="ident">offset</span>,
+                        <span class="ident">I8</span>,
+                    ),
+                    <span class="ident">into_reg</span>,
+                    <span class="ident">I8</span>,
+                ));
+            }
         }
+        <span class="ident">insts</span>
     }
 
     <span class="kw">fn</span> <span class="ident">arg_is_needed_in_body</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
@@ -2403,74 +2828,83 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
         <span class="kw">let</span> <span class="ident">word_bits</span> <span class="op">=</span> <span class="ident">M::word_bits</span>() <span class="kw">as</span> <span class="ident">u8</span>;
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">rets</span>[<span class="ident">idx</span>] {
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, <span class="ident">ty</span>, <span class="ident">ext</span>, ..) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">from_bits</span> <span class="op">=</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>;
-                <span class="kw">let</span> <span class="ident">dest_regs</span> <span class="op">=</span> <span class="ident">writable_value_regs</span>(<span class="ident">regs</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">to_reg</span>()));
-                <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">ext</span>);
-                <span class="kw">match</span> (<span class="ident">ext</span>, <span class="ident">from_bits</span>) {
-                    (<span class="ident">ArgumentExtension::Uext</span>, <span class="ident">n</span>) <span class="op">|</span> (<span class="ident">ArgumentExtension::Sext</span>, <span class="ident">n</span>)
-                        <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span> <span class="ident">word_bits</span> <span class="op">=</span><span class="op">&gt;</span>
-                    {
-                        <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="ident">ext</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentExtension::Sext</span>;
-                        <span class="kw">let</span> <span class="ident">dest_reg</span> <span class="op">=</span> <span class="ident">dest_regs</span>
-                            .<span class="ident">only_reg</span>()
-                            .<span class="ident">expect</span>(<span class="string">&quot;extension only possible from one-reg value&quot;</span>);
-                        <span class="kw">let</span> <span class="ident">from_reg</span> <span class="op">=</span> <span class="ident">from_regs</span>
-                            .<span class="ident">only_reg</span>()
-                            .<span class="ident">expect</span>(<span class="string">&quot;extension only possible from one-reg value&quot;</span>);
-                        <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_extend</span>(
-                            <span class="ident">dest_reg</span>,
-                            <span class="ident">from_reg</span>.<span class="ident">to_reg</span>(),
-                            <span class="ident">signed</span>,
-                            <span class="ident">from_bits</span>,
-                            <span class="comment">/* to_bits = */</span> <span class="ident">word_bits</span>,
-                        ));
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">assert_eq!</span>(<span class="ident">from_regs</span>.<span class="ident">len</span>(), <span class="ident">slots</span>.<span class="ident">len</span>());
+                <span class="kw">for</span> (<span class="ident">slot</span>, <span class="ident">from_reg</span>) <span class="kw">in</span> <span class="ident">slots</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">from_regs</span>.<span class="ident">regs</span>().<span class="ident">iter</span>()) {
+                    <span class="kw">match</span> <span class="ident">slot</span> {
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> {
+                            <span class="ident">reg</span>, <span class="ident">ty</span>, <span class="ident">extension</span>, ..
+                        } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">from_bits</span> <span class="op">=</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+                            <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">extension</span>);
+                            <span class="kw">match</span> (<span class="ident">ext</span>, <span class="ident">from_bits</span>) {
+                                (<span class="ident">ArgumentExtension::Uext</span>, <span class="ident">n</span>) <span class="op">|</span> (<span class="ident">ArgumentExtension::Sext</span>, <span class="ident">n</span>)
+                                    <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span> <span class="ident">word_bits</span> <span class="op">=</span><span class="op">&gt;</span>
+                                {
+                                    <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="ident">ext</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentExtension::Sext</span>;
+                                    <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_extend</span>(
+                                        <span class="ident">Writable::from_reg</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()),
+                                        <span class="ident">from_reg</span>.<span class="ident">to_reg</span>(),
+                                        <span class="ident">signed</span>,
+                                        <span class="ident">from_bits</span>,
+                                        <span class="comment">/* to_bits = */</span> <span class="ident">word_bits</span>,
+                                    ));
+                                }
+                                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                    <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_move</span>(
+                                        <span class="ident">Writable::from_reg</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()),
+                                        <span class="ident">from_reg</span>.<span class="ident">to_reg</span>(),
+                                        <span class="ident">ty</span>,
+                                    ));
+                                }
+                            };
+                        }
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Stack</span> {
+                            <span class="ident">offset</span>,
+                            <span class="ident">ty</span>,
+                            <span class="ident">extension</span>,
+                            ..
+                        } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>;
+                            <span class="kw">let</span> <span class="ident">from_bits</span> <span class="op">=</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+                            <span class="comment">// A machine ABI implementation should ensure that stack frames</span>
+                            <span class="comment">// have &quot;reasonable&quot; size. All current ABIs for machinst</span>
+                            <span class="comment">// backends (aarch64 and x64) enforce a 128MB limit.</span>
+                            <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="ident">i32::try_from</span>(<span class="ident">offset</span>).<span class="ident">expect</span>(
+                                <span class="string">&quot;Argument stack offset greater than 2GB; should hit impl limit first&quot;</span>,
+                                );
+                            <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">extension</span>);
+                            <span class="comment">// Trash the from_reg; it should be its last use.</span>
+                            <span class="kw">match</span> (<span class="ident">ext</span>, <span class="ident">from_bits</span>) {
+                                (<span class="ident">ArgumentExtension::Uext</span>, <span class="ident">n</span>) <span class="op">|</span> (<span class="ident">ArgumentExtension::Sext</span>, <span class="ident">n</span>)
+                                    <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span> <span class="ident">word_bits</span> <span class="op">=</span><span class="op">&gt;</span>
+                                {
+                                    <span class="macro">assert_eq!</span>(<span class="ident">M::word_reg_class</span>(), <span class="ident">from_reg</span>.<span class="ident">to_reg</span>().<span class="ident">get_class</span>());
+                                    <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="ident">ext</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentExtension::Sext</span>;
+                                    <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_extend</span>(
+                                        <span class="ident">Writable::from_reg</span>(<span class="ident">from_reg</span>.<span class="ident">to_reg</span>()),
+                                        <span class="ident">from_reg</span>.<span class="ident">to_reg</span>(),
+                                        <span class="ident">signed</span>,
+                                        <span class="ident">from_bits</span>,
+                                        <span class="comment">/* to_bits = */</span> <span class="ident">word_bits</span>,
+                                    ));
+                                    <span class="comment">// Store the extended version.</span>
+                                    <span class="ident">ty</span> <span class="op">=</span> <span class="ident">M::word_type</span>();
+                                }
+                                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                            };
+                            <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_store_base_offset</span>(
+                                <span class="self">self</span>.<span class="ident">ret_area_ptr</span>.<span class="ident">unwrap</span>().<span class="ident">to_reg</span>(),
+                                <span class="ident">off</span>,
+                                <span class="ident">from_reg</span>.<span class="ident">to_reg</span>(),
+                                <span class="ident">ty</span>,
+                            ));
+                        }
                     }
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ret</span>.<span class="ident">extend</span>(
-                        <span class="ident">gen_move_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">dest_regs</span>, <span class="ident">non_writable_value_regs</span>(<span class="ident">from_regs</span>), <span class="ident">ty</span>)
-                            .<span class="ident">into_iter</span>(),
-                    ),
-                };
+                }
             }
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Stack</span>(<span class="ident">off</span>, <span class="kw-2">mut</span> <span class="ident">ty</span>, <span class="ident">ext</span>, ..) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">from_bits</span> <span class="op">=</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>;
-                <span class="comment">// A machine ABI implementation should ensure that stack frames</span>
-                <span class="comment">// have &quot;reasonable&quot; size. All current ABIs for machinst</span>
-                <span class="comment">// backends (aarch64 and x64) enforce a 128MB limit.</span>
-                <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="ident">i32::try_from</span>(<span class="ident">off</span>)
-                    .<span class="ident">expect</span>(<span class="string">&quot;Argument stack offset greater than 2GB; should hit impl limit first&quot;</span>);
-                <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">ext</span>);
-                <span class="comment">// Trash the from_reg; it should be its last use.</span>
-                <span class="kw">match</span> (<span class="ident">ext</span>, <span class="ident">from_bits</span>) {
-                    (<span class="ident">ArgumentExtension::Uext</span>, <span class="ident">n</span>) <span class="op">|</span> (<span class="ident">ArgumentExtension::Sext</span>, <span class="ident">n</span>)
-                        <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span> <span class="ident">word_bits</span> <span class="op">=</span><span class="op">&gt;</span>
-                    {
-                        <span class="kw">let</span> <span class="ident">from_reg</span> <span class="op">=</span> <span class="ident">from_regs</span>
-                            .<span class="ident">only_reg</span>()
-                            .<span class="ident">expect</span>(<span class="string">&quot;extension only possible from one-reg value&quot;</span>);
-                        <span class="macro">assert_eq!</span>(<span class="ident">M::word_reg_class</span>(), <span class="ident">from_reg</span>.<span class="ident">to_reg</span>().<span class="ident">get_class</span>());
-                        <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="ident">ext</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentExtension::Sext</span>;
-                        <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">M::gen_extend</span>(
-                            <span class="ident">from_reg</span>,
-                            <span class="ident">from_reg</span>.<span class="ident">to_reg</span>(),
-                            <span class="ident">signed</span>,
-                            <span class="ident">from_bits</span>,
-                            <span class="comment">/* to_bits = */</span> <span class="ident">word_bits</span>,
-                        ));
-                        <span class="comment">// Store the extended version.</span>
-                        <span class="ident">ty</span> <span class="op">=</span> <span class="ident">M::word_type</span>();
-                    }
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                };
-                <span class="ident">ret</span>.<span class="ident">extend</span>(
-                    <span class="ident">gen_store_base_offset_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(
-                        <span class="self">self</span>.<span class="ident">ret_area_ptr</span>.<span class="ident">unwrap</span>().<span class="ident">to_reg</span>(),
-                        <span class="ident">off</span>,
-                        <span class="ident">non_writable_value_regs</span>(<span class="ident">from_regs</span>),
-                        <span class="ident">ty</span>,
-                    )
-                    .<span class="ident">into_iter</span>(),
-                );
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::StructArg</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">panic!</span>(<span class="string">&quot;StructArg in return position is unsupported&quot;</span>);
             }
         }
         <span class="ident">ret</span>
@@ -2480,14 +2914,14 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_arg</span> {
             <span class="kw">let</span> <span class="ident">insts</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">gen_copy_arg_to_regs</span>(<span class="ident">i</span>, <span class="ident">ValueRegs::one</span>(<span class="self">self</span>.<span class="ident">ret_area_ptr</span>.<span class="ident">unwrap</span>()));
             <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="ident">insts</span>.<span class="ident">into_iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>();
-            <span class="macro">trace!</span>(
+            <span class="macro">log::trace!</span>(
                 <span class="string">&quot;gen_retval_area_setup: inst {:?}; ptr reg is {:?}&quot;</span>,
                 <span class="ident">inst</span>,
                 <span class="self">self</span>.<span class="ident">ret_area_ptr</span>.<span class="ident">unwrap</span>().<span class="ident">to_reg</span>()
             );
             <span class="prelude-val">Some</span>(<span class="ident">inst</span>)
         } <span class="kw">else</span> {
-            <span class="macro">trace!</span>(<span class="string">&quot;gen_retval_area_setup: not needed&quot;</span>);
+            <span class="macro">log::trace!</span>(<span class="string">&quot;gen_retval_area_setup: not needed&quot;</span>);
             <span class="prelude-val">None</span>
         }
     }
@@ -2508,43 +2942,11 @@
         <span class="self">self</span>.<span class="ident">clobbered</span> <span class="op">=</span> <span class="ident">clobbered</span>;
     }
 
-    <span class="doccomment">/// Load from a stackslot.</span>
-    <span class="kw">fn</span> <span class="ident">load_stackslot</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">slot</span>: <span class="ident">StackSlot</span>,
-        <span class="ident">offset</span>: <span class="ident">u32</span>,
-        <span class="ident">ty</span>: <span class="ident">Type</span>,
-        <span class="ident">into_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
-        <span class="comment">// Offset from beginning of stackslot area, which is at nominal SP (see</span>
-        <span class="comment">// [MemArg::NominalSPOffset] for more details on nominal SP tracking).</span>
-        <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="ident">i64</span>;
-        <span class="kw">let</span> <span class="ident">sp_off</span>: <span class="ident">i64</span> <span class="op">=</span> <span class="ident">stack_off</span> <span class="op">+</span> (<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span>);
-        <span class="macro">trace!</span>(<span class="string">&quot;load_stackslot: slot {} -&gt; sp_off {}&quot;</span>, <span class="ident">slot</span>, <span class="ident">sp_off</span>);
-        <span class="ident">gen_load_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">StackAMode::NominalSPOffset</span>(<span class="ident">sp_off</span>, <span class="ident">ty</span>), <span class="ident">into_regs</span>, <span class="ident">ty</span>)
-    }
-
-    <span class="doccomment">/// Store to a stackslot.</span>
-    <span class="kw">fn</span> <span class="ident">store_stackslot</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">slot</span>: <span class="ident">StackSlot</span>,
-        <span class="ident">offset</span>: <span class="ident">u32</span>,
-        <span class="ident">ty</span>: <span class="ident">Type</span>,
-        <span class="ident">from_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
-        <span class="comment">// Offset from beginning of stackslot area, which is at nominal SP (see</span>
-        <span class="comment">// [MemArg::NominalSPOffset] for more details on nominal SP tracking).</span>
-        <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="ident">i64</span>;
-        <span class="kw">let</span> <span class="ident">sp_off</span>: <span class="ident">i64</span> <span class="op">=</span> <span class="ident">stack_off</span> <span class="op">+</span> (<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span>);
-        <span class="macro">trace!</span>(<span class="string">&quot;store_stackslot: slot {} -&gt; sp_off {}&quot;</span>, <span class="ident">slot</span>, <span class="ident">sp_off</span>);
-        <span class="ident">gen_store_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">StackAMode::NominalSPOffset</span>(<span class="ident">sp_off</span>, <span class="ident">ty</span>), <span class="ident">from_regs</span>, <span class="ident">ty</span>)
-    }
-
     <span class="doccomment">/// Produce an instruction that computes a stackslot address.</span>
     <span class="kw">fn</span> <span class="ident">stackslot_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot</span>: <span class="ident">StackSlot</span>, <span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">into_reg</span>: <span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::I</span> {
         <span class="comment">// Offset from beginning of stackslot area, which is at nominal SP (see</span>
         <span class="comment">// [MemArg::NominalSPOffset] for more details on nominal SP tracking).</span>
-        <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="ident">i64</span>;
+        <span class="kw">let</span> <span class="ident">stack_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots</span>[<span class="ident">slot</span>] <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">sp_off</span>: <span class="ident">i64</span> <span class="op">=</span> <span class="ident">stack_off</span> <span class="op">+</span> (<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span>);
         <span class="ident">M::gen_get_stack_addr</span>(<span class="ident">StackAMode::NominalSPOffset</span>(<span class="ident">sp_off</span>, <span class="ident">I8</span>), <span class="ident">into_reg</span>, <span class="ident">I8</span>)
     }
@@ -2560,7 +2962,16 @@
         <span class="kw">let</span> <span class="ident">islot</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">spill_off</span> <span class="op">=</span> <span class="ident">islot</span> <span class="op">*</span> <span class="ident">M::word_bytes</span>() <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">sp_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots_size</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">+</span> <span class="ident">spill_off</span>;
-        <span class="macro">trace!</span>(<span class="string">&quot;load_spillslot: slot {:?} -&gt; sp_off {}&quot;</span>, <span class="ident">slot</span>, <span class="ident">sp_off</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;load_spillslot: slot {:?} -&gt; sp_off {}&quot;</span>, <span class="ident">slot</span>, <span class="ident">sp_off</span>);
+
+        <span class="comment">// Integer types smaller than word size have been spilled as words below,</span>
+        <span class="comment">// and therefore must be reloaded in the same type.</span>
+        <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_int</span>() <span class="op">&amp;&amp;</span> <span class="ident">ty</span>.<span class="ident">bytes</span>() <span class="op">&lt;</span> <span class="ident">M::word_bytes</span>() {
+            <span class="ident">M::word_type</span>()
+        } <span class="kw">else</span> {
+            <span class="ident">ty</span>
+        };
+
         <span class="ident">gen_load_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">StackAMode::NominalSPOffset</span>(<span class="ident">sp_off</span>, <span class="ident">ty</span>), <span class="ident">into_regs</span>, <span class="ident">ty</span>)
     }
 
@@ -2575,7 +2986,20 @@
         <span class="kw">let</span> <span class="ident">islot</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">spill_off</span> <span class="op">=</span> <span class="ident">islot</span> <span class="op">*</span> <span class="ident">M::word_bytes</span>() <span class="kw">as</span> <span class="ident">i64</span>;
         <span class="kw">let</span> <span class="ident">sp_off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots_size</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">+</span> <span class="ident">spill_off</span>;
-        <span class="macro">trace!</span>(<span class="string">&quot;store_spillslot: slot {:?} -&gt; sp_off {}&quot;</span>, <span class="ident">slot</span>, <span class="ident">sp_off</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;store_spillslot: slot {:?} -&gt; sp_off {}&quot;</span>, <span class="ident">slot</span>, <span class="ident">sp_off</span>);
+
+        <span class="comment">// When reloading from a spill slot, we might have lost information about real integer</span>
+        <span class="comment">// types. For instance, on the x64 backend, a zero-extension can become spurious and</span>
+        <span class="comment">// optimized into a move, causing vregs of types I32 and I64 to share the same coalescing</span>
+        <span class="comment">// equivalency class. As a matter of fact, such a value can be spilled as an I32 and later</span>
+        <span class="comment">// reloaded as an I64; to make sure the high bits are always defined, do a word-sized store</span>
+        <span class="comment">// all the time, in this case.</span>
+        <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_int</span>() <span class="op">&amp;&amp;</span> <span class="ident">ty</span>.<span class="ident">bytes</span>() <span class="op">&lt;</span> <span class="ident">M::word_bytes</span>() {
+            <span class="ident">M::word_type</span>()
+        } <span class="kw">else</span> {
+            <span class="ident">ty</span>
+        };
+
         <span class="ident">gen_store_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">StackAMode::NominalSPOffset</span>(<span class="ident">sp_off</span>, <span class="ident">ty</span>), <span class="ident">from_regs</span>, <span class="ident">ty</span>)
     }
 
@@ -2587,7 +3011,7 @@
         <span class="kw">let</span> <span class="ident">virtual_sp_offset</span> <span class="op">=</span> <span class="ident">M::get_virtual_sp_offset_from_state</span>(<span class="ident">state</span>);
         <span class="kw">let</span> <span class="ident">nominal_sp_to_fp</span> <span class="op">=</span> <span class="ident">M::get_nominal_sp_to_fp</span>(<span class="ident">state</span>);
         <span class="macro">assert!</span>(<span class="ident">virtual_sp_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0</span>);
-        <span class="macro">trace!</span>(
+        <span class="macro">log::trace!</span>(
             <span class="string">&quot;spillslots_to_stackmap: slots = {:?}, state = {:?}&quot;</span>,
             <span class="ident">slots</span>,
             <span class="ident">state</span>
@@ -2610,12 +3034,6 @@
     }
 
     <span class="kw">fn</span> <span class="ident">gen_prologue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallInstVec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">insts</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>() {
-            <span class="comment">// set up frame</span>
-            <span class="ident">insts</span>.<span class="ident">extend</span>(<span class="ident">M::gen_prologue_frame_setup</span>().<span class="ident">into_iter</span>());
-        }
-
         <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">M::word_bytes</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">total_stacksize</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stackslots_size</span> <span class="op">+</span> <span class="ident">bytes</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">spillslots</span>.<span class="ident">unwrap</span>() <span class="kw">as</span> <span class="ident">u32</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>() {
@@ -2627,8 +3045,25 @@
         }
         <span class="kw">let</span> <span class="ident">mask</span> <span class="op">=</span> <span class="ident">M::stack_align</span>(<span class="self">self</span>.<span class="ident">call_conv</span>) <span class="op">-</span> <span class="number">1</span>;
         <span class="kw">let</span> <span class="ident">total_stacksize</span> <span class="op">=</span> (<span class="ident">total_stacksize</span> <span class="op">+</span> <span class="ident">mask</span>) <span class="op">&amp;</span> <span class="op">!</span><span class="ident">mask</span>; <span class="comment">// 16-align the stack.</span>
+        <span class="kw">let</span> <span class="ident">clobbered_callee_saves</span> <span class="op">=</span> <span class="ident">M::get_clobbered_callee_saves</span>(<span class="self">self</span>.<span class="ident">call_conv</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">clobbered</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">insts</span> <span class="op">=</span> <span class="macro">smallvec!</span>[];
 
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>() {
+            <span class="self">self</span>.<span class="ident">fixed_frame_storage_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">total_stacksize</span>;
+            <span class="self">self</span>.<span class="ident">setup_frame</span> <span class="op">=</span> <span class="ident">M::is_frame_setup_needed</span>(
+                <span class="self">self</span>.<span class="ident">is_leaf</span>,
+                <span class="self">self</span>.<span class="ident">stack_args_size</span>(),
+                <span class="ident">clobbered_callee_saves</span>.<span class="ident">len</span>(),
+                <span class="self">self</span>.<span class="ident">fixed_frame_storage_size</span>,
+            );
+
+            <span class="ident">insts</span>.<span class="ident">extend</span>(<span class="ident">M::gen_debug_frame_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>).<span class="ident">into_iter</span>());
+
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">setup_frame</span> {
+                <span class="comment">// set up frame</span>
+                <span class="ident">insts</span>.<span class="ident">extend</span>(<span class="ident">M::gen_prologue_frame_setup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>).<span class="ident">into_iter</span>());
+            }
+
             <span class="comment">// Leaf functions with zero stack don&#39;t need a stack check if one&#39;s</span>
             <span class="comment">// specified, otherwise always insert the stack check.</span>
             <span class="kw">if</span> <span class="ident">total_stacksize</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_leaf</span> {
@@ -2642,37 +3077,31 @@
                     }
                 }
             }
-            <span class="kw">if</span> <span class="ident">total_stacksize</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                <span class="self">self</span>.<span class="ident">fixed_frame_storage_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">total_stacksize</span>;
-            }
         }
-
-        <span class="comment">// N.B.: &quot;nominal SP&quot;, which we use to refer to stackslots and</span>
-        <span class="comment">// spillslots, is defined to be equal to the stack pointer at this point</span>
-        <span class="comment">// in the prologue.</span>
-        <span class="comment">//</span>
-        <span class="comment">// If we push any clobbers below, we emit a virtual-SP adjustment</span>
-        <span class="comment">// meta-instruction so that the nominal SP references behave as if SP</span>
-        <span class="comment">// were still at this point. See documentation for</span>
-        <span class="comment">// [crate::machinst::abi_impl](this module) for more details on</span>
-        <span class="comment">// stackframe layout and nominal SP maintenance.</span>
 
         <span class="comment">// Save clobbered registers.</span>
         <span class="kw">let</span> (<span class="ident">clobber_size</span>, <span class="ident">clobber_insts</span>) <span class="op">=</span> <span class="ident">M::gen_clobber_save</span>(
             <span class="self">self</span>.<span class="ident">call_conv</span>,
+            <span class="self">self</span>.<span class="ident">setup_frame</span>,
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>,
-            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">clobbered</span>,
+            <span class="kw-2">&amp;</span><span class="ident">clobbered_callee_saves</span>,
             <span class="self">self</span>.<span class="ident">fixed_frame_storage_size</span>,
             <span class="self">self</span>.<span class="ident">outgoing_args_size</span>,
         );
         <span class="ident">insts</span>.<span class="ident">extend</span>(<span class="ident">clobber_insts</span>);
 
-        <span class="kw">let</span> <span class="ident">sp_adj</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">outgoing_args_size</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">clobber_size</span> <span class="kw">as</span> <span class="ident">i32</span>;
-        <span class="kw">if</span> <span class="ident">sp_adj</span> <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="ident">insts</span>.<span class="ident">push</span>(<span class="ident">M::gen_nominal_sp_adj</span>(<span class="ident">sp_adj</span>));
-        }
+        <span class="comment">// N.B.: &quot;nominal SP&quot;, which we use to refer to stackslots and</span>
+        <span class="comment">// spillslots, is defined to be equal to the stack pointer at this point</span>
+        <span class="comment">// in the prologue.</span>
+        <span class="comment">//</span>
+        <span class="comment">// If we push any further data onto the stack in the function</span>
+        <span class="comment">// body, we emit a virtual-SP adjustment meta-instruction so</span>
+        <span class="comment">// that the nominal SP references behave as if SP were still</span>
+        <span class="comment">// at this point. See documentation for</span>
+        <span class="comment">// [crate::machinst::abi_impl](this module) for more details</span>
+        <span class="comment">// on stackframe layout and nominal SP maintenance.</span>
 
-        <span class="self">self</span>.<span class="ident">total_frame_size</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">total_stacksize</span>);
+        <span class="self">self</span>.<span class="ident">total_frame_size</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">total_stacksize</span> <span class="op">+</span> <span class="ident">clobber_size</span> <span class="kw">as</span> <span class="ident">u32</span>);
         <span class="ident">insts</span>
     }
 
@@ -2695,11 +3124,14 @@
         <span class="comment">// offset for the rest of the body.</span>
 
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>() {
-            <span class="ident">insts</span>.<span class="ident">extend</span>(<span class="ident">M::gen_epilogue_frame_restore</span>());
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">setup_frame</span> {
+                <span class="ident">insts</span>.<span class="ident">extend</span>(<span class="ident">M::gen_epilogue_frame_restore</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>));
+            }
+
             <span class="ident">insts</span>.<span class="ident">push</span>(<span class="ident">M::gen_ret</span>());
         }
 
-        <span class="macro">debug!</span>(<span class="string">&quot;Epilogue: {:?}&quot;</span>, <span class="ident">insts</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;Epilogue: {:?}&quot;</span>, <span class="ident">insts</span>);
         <span class="ident">insts</span>
     }
 
@@ -2740,38 +3172,36 @@
         .<span class="ident">next</span>()
         .<span class="ident">unwrap</span>()
     }
-
-    <span class="kw">fn</span> <span class="ident">unwind_info_kind</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnwindInfoKind</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span> {
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unwind&quot;</span>)]</span>
-            <span class="ident">isa::CallConv::Fast</span> <span class="op">|</span> <span class="ident">isa::CallConv::Cold</span> <span class="op">|</span> <span class="ident">isa::CallConv::SystemV</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">UnwindInfoKind::SystemV</span>
-            }
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unwind&quot;</span>)]</span>
-            <span class="ident">isa::CallConv::WindowsFastcall</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UnwindInfoKind::Windows</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UnwindInfoKind::None</span>,
-        }
-    }
 }
 
 <span class="kw">fn</span> <span class="ident">abisig_to_uses_and_defs</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ABISig</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
     <span class="comment">// Compute uses: all arg regs.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">uses</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">for</span> <span class="ident">arg</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">sig</span>.<span class="ident">args</span> {
-        <span class="kw">match</span> <span class="ident">arg</span> {
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, ..) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">uses</span>.<span class="ident">extend</span>(<span class="ident">regs</span>.<span class="ident">regs</span>().<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">to_reg</span>())),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="kw">if</span> <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span> <span class="ident">arg</span> {
+            <span class="kw">for</span> <span class="ident">slot</span> <span class="kw">in</span> <span class="ident">slots</span> {
+                <span class="kw">match</span> <span class="ident">slot</span> {
+                    <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="ident">uses</span>.<span class="ident">push</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>());
+                    }
+                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                }
+            }
         }
     }
 
     <span class="comment">// Compute defs: all retval regs, and all caller-save (clobbered) regs.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">defs</span> <span class="op">=</span> <span class="ident">M::get_regs_clobbered_by_call</span>(<span class="ident">sig</span>.<span class="ident">call_conv</span>);
     <span class="kw">for</span> <span class="ident">ret</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">sig</span>.<span class="ident">rets</span> {
-        <span class="kw">match</span> <span class="ident">ret</span> {
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, ..) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">defs</span>.<span class="ident">extend</span>(<span class="ident">regs</span>.<span class="ident">regs</span>().<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">Writable::from_reg</span>(<span class="ident">r</span>.<span class="ident">to_reg</span>())))
+        <span class="kw">if</span> <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span> <span class="ident">ret</span> {
+            <span class="kw">for</span> <span class="ident">slot</span> <span class="kw">in</span> <span class="ident">slots</span> {
+                <span class="kw">match</span> <span class="ident">slot</span> {
+                    <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="ident">defs</span>.<span class="ident">push</span>(<span class="ident">Writable::from_reg</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()));
+                    }
+                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                }
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
         }
     }
 
@@ -2780,6 +3210,8 @@
 
 <span class="doccomment">/// ABI object for a callsite.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ABICallerImpl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// CLIF-level signature, possibly normalized.</span>
+    <span class="ident">ir_sig</span>: <span class="ident">ir::Signature</span>,
     <span class="doccomment">/// The called function&#39;s signature.</span>
     <span class="ident">sig</span>: <span class="ident">ABISig</span>,
     <span class="doccomment">/// All uses for the callsite, i.e., function args.</span>
@@ -2792,6 +3224,8 @@
     <span class="ident">opcode</span>: <span class="ident">ir::Opcode</span>,
     <span class="doccomment">/// Caller&#39;s calling convention.</span>
     <span class="ident">caller_conv</span>: <span class="ident">isa::CallConv</span>,
+    <span class="doccomment">/// The settings controlling this compilation.</span>
+    <span class="ident">flags</span>: <span class="ident">settings::Flags</span>,
 
     <span class="ident">_mach</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 }
@@ -2812,16 +3246,20 @@
         <span class="ident">extname</span>: <span class="kw-2">&amp;</span><span class="ident">ir::ExternalName</span>,
         <span class="ident">dist</span>: <span class="ident">RelocDistance</span>,
         <span class="ident">caller_conv</span>: <span class="ident">isa::CallConv</span>,
+        <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">ABICallerImpl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ABISig::from_func_sig</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">sig</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">ir_sig</span> <span class="op">=</span> <span class="ident">ensure_struct_return_ptr_is_returned</span>(<span class="ident">sig</span>);
+        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ABISig::from_func_sig</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">ir_sig</span>, <span class="ident">flags</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> (<span class="ident">uses</span>, <span class="ident">defs</span>) <span class="op">=</span> <span class="ident">abisig_to_uses_and_defs</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">ABICallerImpl</span> {
+            <span class="ident">ir_sig</span>,
             <span class="ident">sig</span>,
             <span class="ident">uses</span>,
             <span class="ident">defs</span>,
             <span class="ident">dest</span>: <span class="ident">CallDest::ExtName</span>(<span class="ident">extname</span>.<span class="ident">clone</span>(), <span class="ident">dist</span>),
             <span class="ident">opcode</span>: <span class="ident">ir::Opcode::Call</span>,
             <span class="ident">caller_conv</span>,
+            <span class="ident">flags</span>: <span class="ident">flags</span>.<span class="ident">clone</span>(),
             <span class="ident">_mach</span>: <span class="ident">PhantomData</span>,
         })
     }
@@ -2833,16 +3271,20 @@
         <span class="ident">ptr</span>: <span class="ident">Reg</span>,
         <span class="ident">opcode</span>: <span class="ident">ir::Opcode</span>,
         <span class="ident">caller_conv</span>: <span class="ident">isa::CallConv</span>,
+        <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">settings::Flags</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">ABICallerImpl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ABISig::from_func_sig</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">sig</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">ir_sig</span> <span class="op">=</span> <span class="ident">ensure_struct_return_ptr_is_returned</span>(<span class="ident">sig</span>);
+        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ABISig::from_func_sig</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">ir_sig</span>, <span class="ident">flags</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> (<span class="ident">uses</span>, <span class="ident">defs</span>) <span class="op">=</span> <span class="ident">abisig_to_uses_and_defs</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">ABICallerImpl</span> {
+            <span class="ident">ir_sig</span>,
             <span class="ident">sig</span>,
             <span class="ident">uses</span>,
             <span class="ident">defs</span>,
             <span class="ident">dest</span>: <span class="ident">CallDest::Reg</span>(<span class="ident">ptr</span>),
             <span class="ident">opcode</span>,
             <span class="ident">caller_conv</span>,
+            <span class="ident">flags</span>: <span class="ident">flags</span>.<span class="ident">clone</span>(),
             <span class="ident">_mach</span>: <span class="ident">PhantomData</span>,
         })
     }
@@ -2865,6 +3307,10 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ABIMachineSpec</span><span class="op">&gt;</span> <span class="ident">ABICaller</span> <span class="kw">for</span> <span class="ident">ABICallerImpl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">I</span> <span class="op">=</span> <span class="ident">M::I</span>;
+
+    <span class="kw">fn</span> <span class="ident">signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ir_sig</span>
+    }
 
     <span class="kw">fn</span> <span class="ident">num_args</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_ret_arg</span>.<span class="ident">is_some</span>() {
@@ -2898,64 +3344,112 @@
         <span class="kw">let</span> <span class="ident">word_rc</span> <span class="op">=</span> <span class="ident">M::word_reg_class</span>();
         <span class="kw">let</span> <span class="ident">word_bits</span> <span class="op">=</span> <span class="ident">M::word_bits</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span>[<span class="ident">idx</span>] {
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, <span class="ident">ty</span>, <span class="ident">ext</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">ext</span>);
-                <span class="kw">if</span> <span class="ident">ext</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ir::ArgumentExtension::None</span> <span class="op">&amp;&amp;</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="op">&lt;</span> <span class="ident">word_bits</span> {
-                    <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="ident">regs</span>.<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                    <span class="macro">assert_eq!</span>(<span class="ident">word_rc</span>, <span class="ident">reg</span>.<span class="ident">get_class</span>());
-                    <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ext</span> {
-                        <span class="ident">ir::ArgumentExtension::Uext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-                        <span class="ident">ir::ArgumentExtension::Sext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-                        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
-                    };
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_extend</span>(
-                        <span class="ident">Writable::from_reg</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()),
-                        <span class="ident">from_regs</span>.<span class="ident">only_reg</span>().<span class="ident">unwrap</span>(),
-                        <span class="ident">signed</span>,
-                        <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>,
-                        <span class="ident">word_bits</span> <span class="kw">as</span> <span class="ident">u8</span>,
-                    ));
-                } <span class="kw">else</span> {
-                    <span class="kw">for</span> <span class="ident">insn</span> <span class="kw">in</span> <span class="ident">gen_move_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(
-                        <span class="ident">writable_value_regs</span>(<span class="ident">regs</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">to_reg</span>())),
-                        <span class="ident">from_regs</span>,
-                        <span class="ident">ty</span>,
-                    ) {
-                        <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">insn</span>);
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">assert_eq!</span>(<span class="ident">from_regs</span>.<span class="ident">len</span>(), <span class="ident">slots</span>.<span class="ident">len</span>());
+                <span class="kw">for</span> (<span class="ident">slot</span>, <span class="ident">from_reg</span>) <span class="kw">in</span> <span class="ident">slots</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">from_regs</span>.<span class="ident">regs</span>().<span class="ident">iter</span>()) {
+                    <span class="kw">match</span> <span class="ident">slot</span> {
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> {
+                            <span class="ident">reg</span>, <span class="ident">ty</span>, <span class="ident">extension</span>, ..
+                        } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">extension</span>);
+                            <span class="kw">if</span> <span class="ident">ext</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ir::ArgumentExtension::None</span> <span class="op">&amp;&amp;</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="op">&lt;</span> <span class="ident">word_bits</span> {
+                                <span class="macro">assert_eq!</span>(<span class="ident">word_rc</span>, <span class="ident">reg</span>.<span class="ident">get_class</span>());
+                                <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ext</span> {
+                                    <span class="ident">ir::ArgumentExtension::Uext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                                    <span class="ident">ir::ArgumentExtension::Sext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+                                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                                };
+                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_extend</span>(
+                                    <span class="ident">Writable::from_reg</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()),
+                                    <span class="kw-2">*</span><span class="ident">from_reg</span>,
+                                    <span class="ident">signed</span>,
+                                    <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+                                    <span class="ident">word_bits</span> <span class="kw">as</span> <span class="ident">u8</span>,
+                                ));
+                            } <span class="kw">else</span> {
+                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_move</span>(
+                                    <span class="ident">Writable::from_reg</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>()),
+                                    <span class="kw-2">*</span><span class="ident">from_reg</span>,
+                                    <span class="ident">ty</span>,
+                                ));
+                            }
+                        }
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Stack</span> {
+                            <span class="ident">offset</span>,
+                            <span class="ident">ty</span>,
+                            <span class="ident">extension</span>,
+                            ..
+                        } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>;
+                            <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">extension</span>);
+                            <span class="kw">if</span> <span class="ident">ext</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ir::ArgumentExtension::None</span> <span class="op">&amp;&amp;</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="op">&lt;</span> <span class="ident">word_bits</span> {
+                                <span class="macro">assert_eq!</span>(<span class="ident">word_rc</span>, <span class="ident">from_reg</span>.<span class="ident">get_class</span>());
+                                <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ext</span> {
+                                    <span class="ident">ir::ArgumentExtension::Uext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                                    <span class="ident">ir::ArgumentExtension::Sext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+                                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                                };
+                                <span class="comment">// Extend in place in the source register. Our convention is to</span>
+                                <span class="comment">// treat high bits as undefined for values in registers, so this</span>
+                                <span class="comment">// is safe, even for an argument that is nominally read-only.</span>
+                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_extend</span>(
+                                    <span class="ident">Writable::from_reg</span>(<span class="kw-2">*</span><span class="ident">from_reg</span>),
+                                    <span class="kw-2">*</span><span class="ident">from_reg</span>,
+                                    <span class="ident">signed</span>,
+                                    <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+                                    <span class="ident">word_bits</span> <span class="kw">as</span> <span class="ident">u8</span>,
+                                ));
+                                <span class="comment">// Store the extended version.</span>
+                                <span class="ident">ty</span> <span class="op">=</span> <span class="ident">M::word_type</span>();
+                            }
+                            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_store_stack</span>(
+                                <span class="ident">StackAMode::SPOffset</span>(<span class="ident">offset</span>, <span class="ident">ty</span>),
+                                <span class="kw-2">*</span><span class="ident">from_reg</span>,
+                                <span class="ident">ty</span>,
+                            ));
+                        }
                     }
                 }
             }
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Stack</span>(<span class="ident">off</span>, <span class="kw-2">mut</span> <span class="ident">ty</span>, <span class="ident">ext</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">M::get_ext_mode</span>(<span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">ext</span>);
-                <span class="kw">if</span> <span class="ident">ext</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ir::ArgumentExtension::None</span> <span class="op">&amp;&amp;</span> <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="op">&lt;</span> <span class="ident">word_bits</span> {
-                    <span class="kw">let</span> <span class="ident">from_reg</span> <span class="op">=</span> <span class="ident">from_regs</span>
-                        .<span class="ident">only_reg</span>()
-                        .<span class="ident">expect</span>(<span class="string">&quot;only one reg for sub-word value width&quot;</span>);
-                    <span class="macro">assert_eq!</span>(<span class="ident">word_rc</span>, <span class="ident">from_reg</span>.<span class="ident">get_class</span>());
-                    <span class="kw">let</span> <span class="ident">signed</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ext</span> {
-                        <span class="ident">ir::ArgumentExtension::Uext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-                        <span class="ident">ir::ArgumentExtension::Sext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-                        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
-                    };
-                    <span class="comment">// Extend in place in the source register. Our convention is to</span>
-                    <span class="comment">// treat high bits as undefined for values in registers, so this</span>
-                    <span class="comment">// is safe, even for an argument that is nominally read-only.</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_extend</span>(
-                        <span class="ident">Writable::from_reg</span>(<span class="ident">from_reg</span>),
-                        <span class="ident">from_reg</span>,
-                        <span class="ident">signed</span>,
-                        <span class="ident">ty_bits</span>(<span class="ident">ty</span>) <span class="kw">as</span> <span class="ident">u8</span>,
-                        <span class="ident">word_bits</span> <span class="kw">as</span> <span class="ident">u8</span>,
-                    ));
-                    <span class="comment">// Store the extended version.</span>
-                    <span class="ident">ty</span> <span class="op">=</span> <span class="ident">M::word_type</span>();
-                }
-                <span class="kw">for</span> <span class="ident">insn</span> <span class="kw">in</span> <span class="ident">gen_store_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">StackAMode::SPOffset</span>(<span class="ident">off</span>, <span class="ident">ty</span>), <span class="ident">from_regs</span>, <span class="ident">ty</span>)
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::StructArg</span> { <span class="ident">offset</span>, <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">src_ptr</span> <span class="op">=</span> <span class="ident">from_regs</span>.<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">dst_ptr</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">M::word_type</span>()).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
+                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_get_stack_addr</span>(
+                    <span class="ident">StackAMode::SPOffset</span>(<span class="ident">offset</span>, <span class="ident">I8</span>),
+                    <span class="ident">dst_ptr</span>,
+                    <span class="ident">I8</span>,
+                ));
+                <span class="comment">// Emit a memcpy from `src_ptr` to `dst_ptr` of `size` bytes.</span>
+                <span class="comment">// N.B.: because we process StructArg params *first*, this is</span>
+                <span class="comment">// safe w.r.t. clobbers: we have not yet filled in any other</span>
+                <span class="comment">// arg regs.</span>
+                <span class="kw">let</span> <span class="ident">memcpy_call_conv</span> <span class="op">=</span> <span class="ident">isa::CallConv::for_libcall</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">flags</span>, <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">call_conv</span>);
+                <span class="kw">for</span> <span class="ident">insn</span> <span class="kw">in</span>
+                    <span class="ident">M::gen_memcpy</span>(<span class="ident">memcpy_call_conv</span>, <span class="ident">dst_ptr</span>.<span class="ident">to_reg</span>(), <span class="ident">src_ptr</span>, <span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>)
+                        .<span class="ident">into_iter</span>()
                 {
                     <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">insn</span>);
                 }
             }
         }
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_copy_to_arg_order</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">usize</span>; <span class="number">8</span>]<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">SmallVec::new</span>();
+        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">arg</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="comment">// Struct args.</span>
+            <span class="kw">if</span> <span class="ident">arg</span>.<span class="ident">is_struct_arg</span>() {
+                <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">i</span>);
+            }
+        }
+        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">arg</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">args</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="comment">// Non-struct args. Skip an appended return-area arg for multivalue</span>
+            <span class="comment">// returns, if any.</span>
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">arg</span>.<span class="ident">is_struct_arg</span>() <span class="op">&amp;&amp;</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">ir_sig</span>.<span class="ident">params</span>.<span class="ident">len</span>() {
+                <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">i</span>);
+            }
+        }
+        <span class="ident">ret</span>
     }
 
     <span class="kw">fn</span> <span class="ident">emit_copy_retval_to_regs</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">LowerCtx</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::I</span><span class="op">&gt;</span><span class="op">&gt;</span>(
@@ -2965,22 +3459,28 @@
         <span class="ident">into_regs</span>: <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">rets</span>[<span class="ident">idx</span>] {
-            <span class="comment">// Extension mode doesn&#39;t matter because we&#39;re copying out, not in,</span>
-            <span class="comment">// and we ignore high bits in our own registers by convention.</span>
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Reg</span>(<span class="ident">regs</span>, <span class="ident">ty</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">for</span> <span class="ident">insn</span> <span class="kw">in</span> <span class="ident">gen_move_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">into_regs</span>, <span class="ident">regs</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">to_reg</span>()), <span class="ident">ty</span>) {
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">insn</span>);
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Slots</span> { <span class="kw-2">ref</span> <span class="ident">slots</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">assert_eq!</span>(<span class="ident">into_regs</span>.<span class="ident">len</span>(), <span class="ident">slots</span>.<span class="ident">len</span>());
+                <span class="kw">for</span> (<span class="ident">slot</span>, <span class="ident">into_reg</span>) <span class="kw">in</span> <span class="ident">slots</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="ident">into_regs</span>.<span class="ident">regs</span>().<span class="ident">iter</span>()) {
+                    <span class="kw">match</span> <span class="ident">slot</span> {
+                        <span class="comment">// Extension mode doesn&#39;t matter because we&#39;re copying out, not in,</span>
+                        <span class="comment">// and we ignore high bits in our own registers by convention.</span>
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Reg</span> { <span class="ident">reg</span>, <span class="ident">ty</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_move</span>(<span class="kw-2">*</span><span class="ident">into_reg</span>, <span class="ident">reg</span>.<span class="ident">to_reg</span>(), <span class="ident">ty</span>));
+                        }
+                        <span class="kw-2">&amp;</span><span class="ident">ABIArgSlot::Stack</span> { <span class="ident">offset</span>, <span class="ident">ty</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">ret_area_base</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_arg_space</span>;
+                            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">M::gen_load_stack</span>(
+                                <span class="ident">StackAMode::SPOffset</span>(<span class="ident">offset</span> <span class="op">+</span> <span class="ident">ret_area_base</span>, <span class="ident">ty</span>),
+                                <span class="kw-2">*</span><span class="ident">into_reg</span>,
+                                <span class="ident">ty</span>,
+                            ));
+                        }
+                    }
                 }
             }
-            <span class="kw-2">&amp;</span><span class="ident">ABIArg::Stack</span>(<span class="ident">off</span>, <span class="ident">ty</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">ret_area_base</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sig</span>.<span class="ident">stack_arg_space</span>;
-                <span class="kw">for</span> <span class="ident">insn</span> <span class="kw">in</span> <span class="ident">gen_load_stack_multi</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(
-                    <span class="ident">StackAMode::SPOffset</span>(<span class="ident">off</span> <span class="op">+</span> <span class="ident">ret_area_base</span>, <span class="ident">ty</span>),
-                    <span class="ident">into_regs</span>,
-                    <span class="ident">ty</span>,
-                ) {
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">insn</span>);
-                }
+            <span class="kw-2">&amp;</span><span class="ident">ABIArg::StructArg</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">panic!</span>(<span class="string">&quot;StructArg not supported in return position&quot;</span>);
             }
         }
     }

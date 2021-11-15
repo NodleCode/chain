@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MemoryWrapper","Wasmi provides direct access to its memory using slices."]]});

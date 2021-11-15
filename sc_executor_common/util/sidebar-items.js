@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["DataSegmentsSnapshot","This is a snapshot of data segments specialzied for a particular instantiation."],["WasmModuleInfo","A bunch of information collected from a WebAssembly module."]]});
+initSidebarItems({"fn":[["checked_range","Construct a range from an offset to a data length after the offset. Returns None if the end of the range would exceed some maximum offset."]],"mod":[["wasmi","Safe wrapper over wasmi memory reference"]],"trait":[["MemoryTransfer","Provides safe memory access interface using an external buffer"]]});

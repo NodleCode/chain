@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RuntimeLogger","Runtime logger implementation - `log` crate backend."]]});

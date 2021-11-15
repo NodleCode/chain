@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;isa&#x2F;unwind&#x2F;systemv.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>systemv.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.77.0&#x2F;src&#x2F;isa&#x2F;unwind&#x2F;systemv.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>systemv.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -311,13 +311,175 @@
 <span id="311">311</span>
 <span id="312">312</span>
 <span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
 </pre><pre class="rust"><code><span class="doccomment">//! System V ABI unwind information.</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::binemit::CodeOffset</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::unwind::input</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInst</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::result</span>::{<span class="ident">CodegenError</span>, <span class="ident">CodegenResult</span>};
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">gimli::write</span>::{<span class="ident">Address</span>, <span class="ident">FrameDescriptionEntry</span>};
-<span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;enable-serde&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
@@ -326,14 +488,30 @@
 
 <span class="doccomment">/// Enumerate the errors possible in mapping Cranelift registers to their DWARF equivalent.</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RegisterMappingError</span> {
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to find bank for register info&quot;</span>)]</span>
     <span class="ident">MissingBank</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;register mapping is currently only implemented for x86_64&quot;</span>)]</span>
     <span class="ident">UnsupportedArchitecture</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unsupported register bank: {0}&quot;</span>)]</span>
     <span class="ident">UnsupportedRegisterBank</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>),
+}
+
+<span class="comment">// This is manually implementing Error and Display instead of using thiserror to reduce the amount</span>
+<span class="comment">// of dependencies used by Cranelift.</span>
+<span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">RegisterMappingError</span> {}
+
+<span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">RegisterMappingError</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">RegisterMappingError::MissingBank</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;unable to find bank for register info&quot;</span>),
+            <span class="ident">RegisterMappingError::UnsupportedArchitecture</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(
+                <span class="ident">f</span>,
+                <span class="string">&quot;register mapping is currently only implemented for x86_64&quot;</span>
+            ),
+            <span class="ident">RegisterMappingError::UnsupportedRegisterBank</span>(<span class="ident">bank</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;unsupported register bank: {}&quot;</span>, <span class="ident">bank</span>)
+            }
+        }
+    }
 }
 
 <span class="comment">// This mirrors gimli&#39;s CallFrameInstruction, but is serializable</span>
@@ -355,6 +533,11 @@
     <span class="ident">RememberState</span>,
     <span class="ident">RestoreState</span>,
     <span class="ident">ArgsSize</span>(<span class="ident">u32</span>),
+    <span class="doccomment">/// Enables or disables pointer authentication on aarch64 platforms post ARMv8.3.  This</span>
+    <span class="doccomment">/// particular item maps to gimli::ValExpression(RA_SIGN_STATE, lit0/lit1).</span>
+    <span class="ident">Aarch64SetPointerAuth</span> {
+        <span class="ident">return_addresses</span>: <span class="ident">bool</span>,
+    },
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">gimli::write::CallFrameInstruction</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CallFrameInstruction</span> {
@@ -386,7 +569,7 @@
 
 <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">gimli::write::CallFrameInstruction</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CallFrameInstruction</span> {
     <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">gimli::write::CallFrameInstruction</span> {
-        <span class="kw">use</span> <span class="ident">gimli</span>::{<span class="ident">write::CallFrameInstruction</span>, <span class="ident">Register</span>};
+        <span class="kw">use</span> <span class="ident">gimli</span>::{<span class="ident">write::CallFrameInstruction</span>, <span class="ident">write::Expression</span>, <span class="ident">Register</span>};
 
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Cfa</span>(<span class="ident">reg</span>, <span class="ident">offset</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallFrameInstruction::Cfa</span>(<span class="ident">Register</span>(<span class="ident">reg</span>), <span class="ident">offset</span>),
@@ -403,6 +586,21 @@
             <span class="ident"><span class="self">Self</span>::RememberState</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallFrameInstruction::RememberState</span>,
             <span class="ident"><span class="self">Self</span>::RestoreState</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallFrameInstruction::RestoreState</span>,
             <span class="ident"><span class="self">Self</span>::ArgsSize</span>(<span class="ident">size</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallFrameInstruction::ArgsSize</span>(<span class="ident">size</span>),
+            <span class="ident"><span class="self">Self</span>::Aarch64SetPointerAuth</span> { <span class="ident">return_addresses</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// To enable pointer authentication for return addresses in dwarf directives, we</span>
+                <span class="comment">// use a small dwarf expression that sets the value of the pseudo-register</span>
+                <span class="comment">// RA_SIGN_STATE (RA stands for return address) to 0 or 1. This behavior is</span>
+                <span class="comment">// documented in</span>
+                <span class="comment">// https://github.com/ARM-software/abi-aa/blob/master/aadwarf64/aadwarf64.rst#41dwarf-register-names.</span>
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">expr</span> <span class="op">=</span> <span class="ident">Expression::new</span>();
+                <span class="ident">expr</span>.<span class="ident">op</span>(<span class="kw">if</span> <span class="ident">return_addresses</span> {
+                    <span class="ident">gimli::DW_OP_lit1</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">gimli::DW_OP_lit0</span>
+                });
+                <span class="kw">const</span> <span class="ident">RA_SIGN_STATE</span>: <span class="ident">Register</span> <span class="op">=</span> <span class="ident">Register</span>(<span class="number">34</span>);
+                <span class="ident">CallFrameInstruction::ValExpression</span>(<span class="ident">RA_SIGN_STATE</span>, <span class="ident">expr</span>)
+            }
         }
     }
 }
@@ -413,6 +611,18 @@
     <span class="kw">fn</span> <span class="ident">map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">Reg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Register</span>, <span class="ident">RegisterMappingError</span><span class="op">&gt;</span>;
     <span class="doccomment">/// Gets stack pointer register.</span>
     <span class="kw">fn</span> <span class="ident">sp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Register</span>;
+    <span class="doccomment">/// Gets the frame pointer register, if any.</span>
+    <span class="kw">fn</span> <span class="ident">fp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Register</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
+    <span class="doccomment">/// Gets the link register, if any.</span>
+    <span class="kw">fn</span> <span class="ident">lr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Register</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
+    <span class="doccomment">/// What is the offset from saved FP to saved LR?</span>
+    <span class="kw">fn</span> <span class="ident">lr_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
 }
 
 <span class="doccomment">/// Represents unwind information for a single System V ABI function.</span>
@@ -425,7 +635,107 @@
     <span class="ident">len</span>: <span class="ident">u32</span>,
 }
 
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">create_unwind_info_from_insts</span><span class="op">&lt;</span><span class="ident">MR</span>: <span class="ident">RegisterMapper</span><span class="op">&lt;</span><span class="ident">regalloc::Reg</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="ident">insts</span>: <span class="kw-2">&amp;</span>[(<span class="ident">CodeOffset</span>, <span class="ident">UnwindInst</span>)],
+    <span class="ident">code_len</span>: <span class="ident">usize</span>,
+    <span class="ident">mr</span>: <span class="kw-2">&amp;</span><span class="ident">MR</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">UnwindInfo</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">instructions</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cfa_offset</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">clobber_offset_to_cfa</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="ident">instruction_offset</span>, <span class="kw-2">ref</span> <span class="ident">inst</span>) <span class="kw">in</span> <span class="ident">insts</span> {
+        <span class="kw">match</span> <span class="ident">inst</span> {
+            <span class="kw-2">&amp;</span><span class="ident">UnwindInst::PushFrameRegs</span> {
+                <span class="ident">offset_upward_to_caller_sp</span>,
+            } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// Define CFA in terms of current SP (SP changed and we haven&#39;t</span>
+                <span class="comment">// set FP yet).</span>
+                <span class="ident">instructions</span>.<span class="ident">push</span>((
+                    <span class="ident">instruction_offset</span>,
+                    <span class="ident">CallFrameInstruction::CfaOffset</span>(<span class="ident">offset_upward_to_caller_sp</span> <span class="kw">as</span> <span class="ident">i32</span>),
+                ));
+                <span class="comment">// Note that we saved the old FP value on the stack.  Use of this</span>
+                <span class="comment">// operation implies that the target defines a FP register.</span>
+                <span class="ident">instructions</span>.<span class="ident">push</span>((
+                    <span class="ident">instruction_offset</span>,
+                    <span class="ident">CallFrameInstruction::Offset</span>(
+                        <span class="ident">mr</span>.<span class="ident">fp</span>().<span class="ident">unwrap</span>(),
+                        <span class="op">-</span>(<span class="ident">offset_upward_to_caller_sp</span> <span class="kw">as</span> <span class="ident">i32</span>),
+                    ),
+                ));
+                <span class="comment">// If there is a link register on this architecture, note that</span>
+                <span class="comment">// we saved it as well.</span>
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">lr</span>) <span class="op">=</span> <span class="ident">mr</span>.<span class="ident">lr</span>() {
+                    <span class="ident">instructions</span>.<span class="ident">push</span>((
+                        <span class="ident">instruction_offset</span>,
+                        <span class="ident">CallFrameInstruction::Offset</span>(
+                            <span class="ident">lr</span>,
+                            <span class="op">-</span>(<span class="ident">offset_upward_to_caller_sp</span> <span class="kw">as</span> <span class="ident">i32</span>)
+                                <span class="op">+</span> <span class="ident">mr</span>.<span class="ident">lr_offset</span>().<span class="ident">expect</span>(<span class="string">&quot;LR offset not provided&quot;</span>) <span class="kw">as</span> <span class="ident">i32</span>,
+                        ),
+                    ));
+                }
+            }
+            <span class="kw-2">&amp;</span><span class="ident">UnwindInst::DefineNewFrame</span> {
+                <span class="ident">offset_upward_to_caller_sp</span>,
+                <span class="ident">offset_downward_to_clobbers</span>,
+            } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// Define CFA in terms of FP. Note that we assume it was already</span>
+                <span class="comment">// defined correctly in terms of the current SP, and FP has just</span>
+                <span class="comment">// been set to the current SP, so we do not need to change the</span>
+                <span class="comment">// offset, only the register.  (This is done only if the target</span>
+                <span class="comment">// defines a frame pointer register.)</span>
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">fp</span>) <span class="op">=</span> <span class="ident">mr</span>.<span class="ident">fp</span>() {
+                    <span class="ident">instructions</span>.<span class="ident">push</span>((<span class="ident">instruction_offset</span>, <span class="ident">CallFrameInstruction::CfaRegister</span>(<span class="ident">fp</span>)));
+                }
+                <span class="comment">// Record initial CFA offset.  This will be used with later</span>
+                <span class="comment">// StackAlloc calls if we do not have a frame pointer.</span>
+                <span class="ident">cfa_offset</span> <span class="op">=</span> <span class="ident">offset_upward_to_caller_sp</span>;
+                <span class="comment">// Record distance from CFA downward to clobber area so we can</span>
+                <span class="comment">// express clobber offsets later in terms of CFA.</span>
+                <span class="ident">clobber_offset_to_cfa</span> <span class="op">=</span> <span class="ident">offset_upward_to_caller_sp</span> <span class="op">+</span> <span class="ident">offset_downward_to_clobbers</span>;
+            }
+            <span class="kw-2">&amp;</span><span class="ident">UnwindInst::StackAlloc</span> { <span class="ident">size</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// If we do not use a frame pointer, we need to update the</span>
+                <span class="comment">// CFA offset whenever the stack pointer changes.</span>
+                <span class="kw">if</span> <span class="ident">mr</span>.<span class="ident">fp</span>().<span class="ident">is_none</span>() {
+                    <span class="ident">cfa_offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">size</span>;
+                    <span class="ident">instructions</span>.<span class="ident">push</span>((
+                        <span class="ident">instruction_offset</span>,
+                        <span class="ident">CallFrameInstruction::CfaOffset</span>(<span class="ident">cfa_offset</span> <span class="kw">as</span> <span class="ident">i32</span>),
+                    ));
+                }
+            }
+            <span class="kw-2">&amp;</span><span class="ident">UnwindInst::SaveReg</span> {
+                <span class="ident">clobber_offset</span>,
+                <span class="ident">reg</span>,
+            } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="ident">mr</span>
+                    .<span class="ident">map</span>(<span class="ident">reg</span>.<span class="ident">to_reg</span>())
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">CodegenError::RegisterMappingError</span>(<span class="ident">e</span>))<span class="question-mark">?</span>;
+                <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> (<span class="ident">clobber_offset</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">-</span> (<span class="ident">clobber_offset_to_cfa</span> <span class="kw">as</span> <span class="ident">i32</span>);
+                <span class="ident">instructions</span>.<span class="ident">push</span>((<span class="ident">instruction_offset</span>, <span class="ident">CallFrameInstruction::Offset</span>(<span class="ident">reg</span>, <span class="ident">off</span>)));
+            }
+            <span class="kw-2">&amp;</span><span class="ident">UnwindInst::Aarch64SetPointerAuth</span> { <span class="ident">return_addresses</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">instructions</span>.<span class="ident">push</span>((
+                    <span class="ident">instruction_offset</span>,
+                    <span class="ident">CallFrameInstruction::Aarch64SetPointerAuth</span> { <span class="ident">return_addresses</span> },
+                ));
+            }
+        }
+    }
+
+    <span class="prelude-val">Ok</span>(<span class="ident">UnwindInfo</span> {
+        <span class="ident">instructions</span>,
+        <span class="ident">len</span>: <span class="ident">code_len</span> <span class="kw">as</span> <span class="ident">u32</span>,
+    })
+}
+
 <span class="kw">impl</span> <span class="ident">UnwindInfo</span> {
+    <span class="comment">// TODO: remove `build()` below when old backend is removed. The new backend uses a simpler</span>
+    <span class="comment">// approach in `create_unwind_info_from_insts()` above.</span>
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">build</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">Reg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Copy</span><span class="op">&gt;</span>(
         <span class="ident">unwind</span>: <span class="ident">input::UnwindInfo</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
         <span class="ident">map_reg</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw">dyn</span> <span class="ident">RegisterMapper</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
@@ -471,6 +781,9 @@
                 <span class="ident">UnwindCode::RestoreState</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="ident">builder</span>.<span class="ident">restore_state</span>(<span class="kw-2">*</span><span class="ident">offset</span>);
                 }
+                <span class="ident">UnwindCode::Aarch64SetPointerAuth</span> { <span class="ident">return_addresses</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">builder</span>.<span class="ident">set_aarch64_pauth</span>(<span class="kw-2">*</span><span class="ident">offset</span>, <span class="kw-2">*</span><span class="ident">return_addresses</span>);
+                }
             }
         }
 
@@ -491,6 +804,8 @@
         <span class="ident">fde</span>
     }
 }
+
+<span class="comment">// TODO: delete the builder below when the old backend is removed.</span>
 
 <span class="kw">struct</span> <span class="ident">InstructionBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Reg</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Copy</span><span class="op">&gt;</span> {
     <span class="ident">sp_offset</span>: <span class="ident">i32</span>,
@@ -622,6 +937,13 @@
 
         <span class="self">self</span>.<span class="ident">instructions</span>
             .<span class="ident">push</span>((<span class="ident">offset</span>, <span class="ident">CallFrameInstruction::RestoreState</span>));
+    }
+
+    <span class="kw">fn</span> <span class="ident">set_aarch64_pauth</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">return_addresses</span>: <span class="ident">bool</span>) {
+        <span class="self">self</span>.<span class="ident">instructions</span>.<span class="ident">push</span>((
+            <span class="ident">offset</span>,
+            <span class="ident">CallFrameInstruction::Aarch64SetPointerAuth</span> { <span class="ident">return_addresses</span> },
+        ));
     }
 }
 </code></pre></div>

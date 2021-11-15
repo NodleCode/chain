@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["register_uncles_inherent_data_provider","Register uncles inherent data provider, if not registered already."]]});
+initSidebarItems({"enum":[["Error",""]],"fn":[["create_uncles_inherent_data_provider","Create a new [`sp_authorship::InherentDataProvider`] at the given block."]]});

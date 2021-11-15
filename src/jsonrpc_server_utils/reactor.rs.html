@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpc-server-utils-15.1.0&#x2F;src&#x2F;reactor.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>reactor.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpc_server_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpc-server-utils-18.0.0&#x2F;src&#x2F;reactor.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>reactor.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpc_server_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -157,6 +157,8 @@
 <span id="157">157</span>
 <span id="158">158</span>
 <span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Event Loop Executor</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Either spawns a new event loop, or re-uses provided one.</span>
@@ -165,15 +167,16 @@
 <span class="doccomment">//! that `tokio::runtime` can be multi-threaded.</span>
 
 <span class="kw">use</span> <span class="ident">std::io</span>;
-<span class="kw">use</span> <span class="ident">tokio</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures</span>::{<span class="self">self</span>, <span class="ident">Future</span>};
+<span class="kw">use</span> <span class="ident">tokio::runtime</span>;
+<span class="doccomment">/// Task executor for Tokio 0.2 runtime.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TaskExecutor</span> <span class="op">=</span> <span class="ident">tokio::runtime::Handle</span>;
 
 <span class="doccomment">/// Possibly uninitialized event loop executor.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">UninitializedExecutor</span> {
 	<span class="doccomment">/// Shared instance of executor.</span>
-	<span class="ident">Shared</span>(<span class="ident">tokio::runtime::TaskExecutor</span>),
+	<span class="ident">Shared</span>(<span class="ident">TaskExecutor</span>),
 	<span class="doccomment">/// Event Loop should be spawned by the transport.</span>
 	<span class="ident">Unspawned</span>,
 }
@@ -201,26 +204,18 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Executor</span> {
 	<span class="doccomment">/// Shared instance</span>
-	<span class="ident">Shared</span>(<span class="ident">tokio::runtime::TaskExecutor</span>),
+	<span class="ident">Shared</span>(<span class="ident">TaskExecutor</span>),
 	<span class="doccomment">/// Spawned Event Loop</span>
 	<span class="ident">Spawned</span>(<span class="ident">RpcEventLoop</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">Executor</span> {
 	<span class="doccomment">/// Get tokio executor associated with this event loop.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">tokio::runtime::TaskExecutor</span> {
-		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TaskExecutor</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
 			<span class="ident">Executor::Shared</span>(<span class="kw-2">ref</span> <span class="ident">executor</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">executor</span>.<span class="ident">clone</span>(),
 			<span class="ident">Executor::Spawned</span>(<span class="kw-2">ref</span> <span class="ident">eloop</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">eloop</span>.<span class="ident">executor</span>(),
 		}
-	}
-
-	<span class="doccomment">/// Spawn a future onto the Tokio runtime.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">future</span>: <span class="ident">F</span>)
-	<span class="kw">where</span>
-		<span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (), <span class="ident">Error</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-	{
-		<span class="self">self</span>.<span class="ident">executor</span>().<span class="ident">spawn</span>(<span class="ident">future</span>)
 	}
 
 	<span class="doccomment">/// Closes underlying event loop (if any!).</span>
@@ -241,9 +236,9 @@
 <span class="doccomment">/// A handle to running event loop. Dropping the handle will cause event loop to finish.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RpcEventLoop</span> {
-	<span class="ident">executor</span>: <span class="ident">tokio::runtime::TaskExecutor</span>,
-	<span class="ident">close</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">futures::Complete</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
-	<span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">tokio::runtime::Shutdown</span><span class="op">&gt;</span>,
+	<span class="ident">executor</span>: <span class="ident">TaskExecutor</span>,
+	<span class="ident">close</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">futures::channel::oneshot::Sender</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">runtime</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">runtime::Runtime</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">RpcEventLoop</span> {
@@ -260,36 +255,45 @@
 
 	<span class="doccomment">/// Spawns a new named thread with the `EventLoop`.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_name</span>(<span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> (<span class="ident">stop</span>, <span class="ident">stopped</span>) <span class="op">=</span> <span class="ident">futures::oneshot</span>();
+		<span class="kw">let</span> (<span class="ident">stop</span>, <span class="ident">stopped</span>) <span class="op">=</span> <span class="ident">futures::channel::oneshot::channel</span>();
 
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tb</span> <span class="op">=</span> <span class="ident">tokio::runtime::Builder::new</span>();
-		<span class="ident">tb</span>.<span class="ident">core_threads</span>(<span class="number">1</span>);
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tb</span> <span class="op">=</span> <span class="ident">runtime::Builder::new_multi_thread</span>();
+		<span class="ident">tb</span>.<span class="ident">worker_threads</span>(<span class="number">1</span>);
+		<span class="ident">tb</span>.<span class="ident">enable_all</span>();
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="ident">name</span> {
-			<span class="ident">tb</span>.<span class="ident">name_prefix</span>(<span class="ident">name</span>);
+			<span class="ident">tb</span>.<span class="ident">thread_name</span>(<span class="ident">name</span>);
 		}
 
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="ident">tb</span>.<span class="ident">build</span>()<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="ident">runtime</span>.<span class="ident">executor</span>();
-		<span class="kw">let</span> <span class="ident">terminate</span> <span class="op">=</span> <span class="ident">futures::empty</span>().<span class="ident">select</span>(<span class="ident">stopped</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ());
-		<span class="ident">runtime</span>.<span class="ident">spawn</span>(<span class="ident">terminate</span>);
-		<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">runtime</span>.<span class="ident">shutdown_on_idle</span>();
+		<span class="kw">let</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="ident">tb</span>.<span class="ident">build</span>()<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="ident">runtime</span>.<span class="ident">handle</span>().<span class="ident">to_owned</span>();
+
+		<span class="ident">runtime</span>.<span class="ident">spawn</span>(<span class="kw">async</span> {
+			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">stopped</span>.<span class="kw">await</span>;
+		});
 
 		<span class="prelude-val">Ok</span>(<span class="ident">RpcEventLoop</span> {
 			<span class="ident">executor</span>,
 			<span class="ident">close</span>: <span class="prelude-val">Some</span>(<span class="ident">stop</span>),
-			<span class="ident">handle</span>: <span class="prelude-val">Some</span>(<span class="ident">handle</span>),
+			<span class="ident">runtime</span>: <span class="prelude-val">Some</span>(<span class="ident">runtime</span>),
 		})
 	}
 
 	<span class="doccomment">/// Get executor for this event loop.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">tokio::runtime::TaskExecutor</span> {
-		<span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">clone</span>()
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">runtime::Handle</span> {
+		<span class="self">self</span>.<span class="ident">runtime</span>
+			.<span class="ident">as_ref</span>()
+			.<span class="ident">expect</span>(<span class="string">&quot;Runtime is only None if we&#39;re being dropped; qed&quot;</span>)
+			.<span class="ident">handle</span>()
+			.<span class="ident">clone</span>()
 	}
 
 	<span class="doccomment">/// Blocks current thread and waits until the event loop is finished.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
-		<span class="self">self</span>.<span class="ident">handle</span>.<span class="ident">take</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>.<span class="ident">wait</span>()
+		<span class="comment">// Dropping Tokio 0.2 runtime waits for all spawned tasks to terminate</span>
+		<span class="kw">let</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">runtime</span>.<span class="ident">take</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
+		<span class="ident">drop</span>(<span class="ident">runtime</span>);
+		<span class="prelude-val">Ok</span>(())
 	}
 
 	<span class="doccomment">/// Finishes this event loop.</span>

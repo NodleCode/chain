@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This module allows for inspection and instrumentation, i.e. modifying the module to alter it’s structure or behavior, of a wasm module."><meta name="keywords" content="rust, rustlang, rust-lang, runtime_blob"><title>sc_executor_common::runtime_blob - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sc_executor_common/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><h2 class="location">Module runtime_blob</h2><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><div id="sidebar-vars" data-name="runtime_blob" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">sc_executor_common</a>::<wbr><a class="mod" href="#">runtime_blob</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/sc_executor_common/runtime_blob/mod.rs.html#19-58" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module allows for inspection and instrumentation, i.e. modifying the module to alter it’s
+structure or behavior, of a wasm module.</p>
+<h2 id="instrumentation" class="section-header"><a href="#instrumentation">Instrumentation</a></h2>
+<p>In ideal world, there would be no instrumentation. However, in the real world the execution
+engines we use are somewhat limited in their APIs or abilities.</p>
+<p>To give you some examples:</p>
+<ul>
+<li>
+<p>wasmi allows reaching to non-exported mutable globals so that we could reset them. Wasmtime
+doesn’t support that.</p>
+<p>We need to reset the globals because when we
+execute the Substrate Runtime, we do not drop and create the instance anew, instead
+we restore some selected parts of the state.</p>
+</li>
+<li>
+<p>stack depth metering can be performed via instrumentation or deferred to the engine and say be
+added directly in machine code. Implementing this in machine code is rather cumbersome so
+instrumentation looks like a good solution.</p>
+<p>Stack depth metering is needed to make a wasm blob
+execution deterministic, which in turn is needed by the Parachain Validation Function in
+Polkadot.</p>
+</li>
+</ul>
+<h2 id="inspection" class="section-header"><a href="#inspection">Inspection</a></h2>
+<p>Inspection of a wasm module may be needed to extract some useful information, such as to extract
+data segment snapshot, which is helpful for quickly restoring the initial state of instances.
+Inspection can be also useful to prove that a wasm module possesses some properties, such as,
+is free of any floating point operations, which is a useful step towards making instances
+produced from such a module deterministic.</p>
+</div></details><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.DataSegmentsSnapshot.html" title="sc_executor_common::runtime_blob::DataSegmentsSnapshot struct">DataSegmentsSnapshot</a></div><div class="item-right docblock-short"><p>This is a snapshot of data segments specialzied for a particular instantiation.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.ExposedMutableGlobalsSet.html" title="sc_executor_common::runtime_blob::ExposedMutableGlobalsSet struct">ExposedMutableGlobalsSet</a></div><div class="item-right docblock-short"><p>A set of exposed mutable globals.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.GlobalsSnapshot.html" title="sc_executor_common::runtime_blob::GlobalsSnapshot struct">GlobalsSnapshot</a></div><div class="item-right docblock-short"><p>A snapshot of a global variables values. This snapshot can be later used for restoring the
+values to the preserved state.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.RuntimeBlob.html" title="sc_executor_common::runtime_blob::RuntimeBlob struct">RuntimeBlob</a></div><div class="item-right docblock-short"><p>A bunch of information collected from a WebAssembly module.</p>
+</div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.InstanceGlobals.html" title="sc_executor_common::runtime_blob::InstanceGlobals trait">InstanceGlobals</a></div><div class="item-right docblock-short"><p>An adapter for a wasm module instance that is focused on getting and setting globals.</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_executor_common" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script>
+</body></html>

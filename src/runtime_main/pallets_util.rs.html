@@ -113,20 +113,6 @@
 <span id="113">113</span>
 <span id="114">114</span>
 <span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -152,7 +138,7 @@
     <span class="ident">OriginCaller</span>, <span class="ident">RandomnessCollectiveFlip</span>, <span class="ident">Runtime</span>, <span class="ident">Timestamp</span>,
 };
 
-<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">parameter_types</span>, <span class="ident">weights::Weight</span>};
+<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">parameter_types</span>, <span class="ident">traits::Nothing</span>, <span class="ident">weights::Weight</span>};
 <span class="kw">use</span> <span class="ident">pallet_contracts::weights::WeightInfo</span>;
 <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>};
 <span class="kw">use</span> <span class="ident">sp_core::u32_trait</span>::{<span class="ident">_1</span>, <span class="ident">_2</span>};
@@ -181,7 +167,6 @@
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DepositFactor</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">constants::deposit</span>(<span class="number">0</span>, <span class="number">32</span>);
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxSignatories</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">100</span>;
 }
-
 <span class="kw">impl</span> <span class="ident">pallet_multisig::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
     <span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
     <span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
@@ -192,54 +177,41 @@
     <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_multisig::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
+<span class="kw">impl</span> <span class="ident">pallet_randomness_collective_flip::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {}
+
 <span class="macro">parameter_types!</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">TombstoneDeposit</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">constants::deposit</span>(
+    <span class="kw">pub</span> <span class="ident">ContractDeposit</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">constants::deposit</span>(
         <span class="number">1</span>,
-        <span class="ident">sp_std::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">pallet_contracts::ContractInfo</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">&lt;</span><span class="ident">pallet_contracts::Pallet</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contract_info_size</span>(),
     );
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DepositPerContract</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">TombstoneDeposit::get</span>();
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DepositPerStorageByte</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">constants::deposit</span>(<span class="number">0</span>, <span class="number">1</span>);
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DepositPerStorageItem</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">constants::deposit</span>(<span class="number">1</span>, <span class="number">0</span>);
-    <span class="kw">pub</span> <span class="ident">RentFraction</span>: <span class="ident">Perbill</span> <span class="op">=</span> <span class="ident">Perbill::from_rational_approximation</span>(<span class="number">1u32</span>, <span class="number">30</span> <span class="op">*</span> <span class="ident">constants::DAYS</span>);
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SurchargeReward</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">150</span> <span class="op">*</span> <span class="ident">constants::MILLICENTS</span>;
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SignedClaimHandicap</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span>;
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxDepth</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">32</span>;
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxValueSize</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">16</span> <span class="op">*</span> <span class="number">1024</span>;
+    <span class="comment">// The lazy deletion runs inside on_initialize.</span>
+    <span class="kw">pub</span> <span class="ident">DeletionWeightLimit</span>: <span class="ident">Weight</span> <span class="op">=</span> <span class="ident">constants::AVERAGE_ON_INITIALIZE_RATIO</span> <span class="op">*</span>
+        <span class="ident">constants::RuntimeBlockWeights::get</span>().<span class="ident">max_block</span>;
     <span class="comment">// The weight needed for decoding the queue should be less or equal than a fifth</span>
     <span class="comment">// of the overall weight dedicated to the lazy deletion.</span>
     <span class="kw">pub</span> <span class="ident">DeletionQueueDepth</span>: <span class="ident">u32</span> <span class="op">=</span> ((<span class="ident">DeletionWeightLimit::get</span>() <span class="op">/</span> (
             <span class="op">&lt;</span><span class="ident">Runtime</span> <span class="kw">as</span> <span class="ident">pallet_contracts::Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::on_initialize_per_queue_item</span>(<span class="number">1</span>) <span class="op">-</span>
             <span class="op">&lt;</span><span class="ident">Runtime</span> <span class="kw">as</span> <span class="ident">pallet_contracts::Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::on_initialize_per_queue_item</span>(<span class="number">0</span>)
         )) <span class="op">/</span> <span class="number">5</span>) <span class="kw">as</span> <span class="ident">u32</span>;
-    <span class="kw">pub</span> <span class="ident">MaxCodeSize</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">128</span> <span class="op">*</span> <span class="number">1024</span>;
-    <span class="comment">// The lazy deletion runs inside on_initialize.</span>
-    <span class="kw">pub</span> <span class="ident">DeletionWeightLimit</span>: <span class="ident">Weight</span> <span class="op">=</span> <span class="ident">constants::AVERAGE_ON_INITIALIZE_RATIO</span> <span class="op">*</span>
-        <span class="ident">constants::RuntimeBlockWeights::get</span>().<span class="ident">max_block</span>;
+    <span class="kw">pub</span> <span class="ident">Schedule</span>: <span class="ident">pallet_contracts::Schedule</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
 }
-
 <span class="kw">impl</span> <span class="ident">pallet_contracts::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
     <span class="kw">type</span> <span class="ident">Time</span> <span class="op">=</span> <span class="ident">Timestamp</span>;
     <span class="kw">type</span> <span class="ident">Randomness</span> <span class="op">=</span> <span class="ident">RandomnessCollectiveFlip</span>;
     <span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">Balances</span>;
     <span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
-    <span class="kw">type</span> <span class="ident">RentPayment</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">SignedClaimHandicap</span> <span class="op">=</span> <span class="ident">SignedClaimHandicap</span>;
-    <span class="kw">type</span> <span class="ident">TombstoneDeposit</span> <span class="op">=</span> <span class="ident">TombstoneDeposit</span>;
-    <span class="kw">type</span> <span class="ident">DepositPerContract</span> <span class="op">=</span> <span class="ident">DepositPerContract</span>;
-    <span class="kw">type</span> <span class="ident">DepositPerStorageByte</span> <span class="op">=</span> <span class="ident">DepositPerStorageByte</span>;
-    <span class="kw">type</span> <span class="ident">DepositPerStorageItem</span> <span class="op">=</span> <span class="ident">DepositPerStorageItem</span>;
-    <span class="kw">type</span> <span class="ident">RentFraction</span> <span class="op">=</span> <span class="ident">RentFraction</span>;
-    <span class="kw">type</span> <span class="ident">SurchargeReward</span> <span class="op">=</span> <span class="ident">SurchargeReward</span>;
-    <span class="kw">type</span> <span class="ident">MaxDepth</span> <span class="op">=</span> <span class="ident">MaxDepth</span>;
-    <span class="kw">type</span> <span class="ident">MaxValueSize</span> <span class="op">=</span> <span class="ident">MaxValueSize</span>;
-    <span class="kw">type</span> <span class="ident">WeightPrice</span> <span class="op">=</span> <span class="ident">pallet_transaction_payment::Module</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
+    <span class="kw">type</span> <span class="ident">CallFilter</span> <span class="op">=</span> <span class="ident">Nothing</span>;
+    <span class="kw">type</span> <span class="ident">ContractDeposit</span> <span class="op">=</span> <span class="ident">ContractDeposit</span>;
+    <span class="kw">type</span> <span class="ident">CallStack</span> <span class="op">=</span> [<span class="ident">pallet_contracts::Frame</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>; <span class="number">31</span>];
+    <span class="kw">type</span> <span class="ident">WeightPrice</span> <span class="op">=</span> <span class="ident">pallet_transaction_payment::Pallet</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_contracts::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">ChainExtension</span> <span class="op">=</span> ();
     <span class="kw">type</span> <span class="ident">DeletionQueueDepth</span> <span class="op">=</span> <span class="ident">DeletionQueueDepth</span>;
     <span class="kw">type</span> <span class="ident">DeletionWeightLimit</span> <span class="op">=</span> <span class="ident">DeletionWeightLimit</span>;
-    <span class="kw">type</span> <span class="ident">MaxCodeSize</span> <span class="op">=</span> <span class="ident">MaxCodeSize</span>;
+    <span class="kw">type</span> <span class="ident">Schedule</span> <span class="op">=</span> <span class="ident">Schedule</span>;
 }
-
 <span class="macro">parameter_types!</span> {
     <span class="kw">pub</span> <span class="ident">MaximumSchedulerWeight</span>: <span class="ident">Weight</span> <span class="op">=</span> <span class="ident">Perbill::from_percent</span>(<span class="number">80</span>) <span class="op">*</span>
         <span class="ident">constants::RuntimeBlockWeights::get</span>().<span class="ident">max_block</span>;

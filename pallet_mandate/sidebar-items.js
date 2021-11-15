@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Call","Dispatchable calls."],["Event","Events for this module."]],"struct":[["Module","The module declaration."]],"trait":[["Config","The module’s configuration trait."]]});
+initSidebarItems({"mod":[["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]]});

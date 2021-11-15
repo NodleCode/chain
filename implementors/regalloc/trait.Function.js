@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["cranelift_codegen"] = [{"text":"impl&lt;I:&nbsp;<a class=\"trait\" href=\"cranelift_codegen/machinst/vcode/trait.VCodeInst.html\" title=\"trait cranelift_codegen::machinst::vcode::VCodeInst\">VCodeInst</a>&gt; <a class=\"trait\" href=\"regalloc/trait.Function.html\" title=\"trait regalloc::Function\">Function</a> for <a class=\"struct\" href=\"cranelift_codegen/machinst/vcode/struct.VCode.html\" title=\"struct cranelift_codegen::machinst::vcode::VCode\">VCode</a>&lt;I&gt;","synthetic":false,"types":["cranelift_codegen::machinst::vcode::VCode"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

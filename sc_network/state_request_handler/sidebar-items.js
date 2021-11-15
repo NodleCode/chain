@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["generate_protocol_config","Generates a [`ProtocolConfig`] for the block request protocol, refusing incoming requests."]],"struct":[["StateRequestHandler","Handler for incoming block requests from a remote peer."]]});

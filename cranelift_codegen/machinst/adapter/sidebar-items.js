@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["TargetIsaAdapter","A wrapper around a `MachBackend` that provides a `TargetIsa` impl."]]});

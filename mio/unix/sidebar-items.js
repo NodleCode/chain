@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["EventedFd","Adapter for `RawFd` providing an `Evented` implementation."],["UnixReady","Unix specific extensions to `Ready`"]]});
+initSidebarItems({"mod":[["pipe","Unix pipe."]],"struct":[["SourceFd","Adapter for [`RawFd`] providing an `event::Source` implementation."]]});

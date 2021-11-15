@@ -1,0 +1,272 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Ping Tutorial - Getting started with rust-libp2p"><meta name="keywords" content="rust, rustlang, rust-lang, tutorial"><title>libp2p::tutorial - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="https:&#x2F;&#x2F;libp2p.io&#x2F;img&#x2F;favicon.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../libp2p/index.html'><div class='logo-container rust-logo'><img src='https:&#x2F;&#x2F;libp2p.io&#x2F;img&#x2F;logo_small.png' alt='logo'></div></a><h2 class="location">Module tutorial</h2><div class="sidebar-elems"><div id="sidebar-vars" data-name="tutorial" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">libp2p</a>::<wbr><a class="mod" href="#">tutorial</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/libp2p/tutorial.rs.html#21-348" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h1 id="ping-tutorial---getting-started-with-rust-libp2p" class="section-header"><a href="#ping-tutorial---getting-started-with-rust-libp2p">Ping Tutorial - Getting started with rust-libp2p</a></h1>
+<p>This tutorial aims to give newcomers a hands-on overview on how to use the
+Rust libp2p implementation. People new to Rust likely want to get started on
+<a href="https://www.rust-lang.org/">Rust</a> itself, before diving into all the
+networking fun. This library makes heavy use of asynchronous Rust. In case
+you are not familiar with these concepts the Rust
+<a href="https://rust-lang.github.io/async-book/">async-book</a> should prove useful.
+People new to libp2p might prefer to get a general overview at libp2p.io
+first, though libp2p knowledge is not required for this tutorial.</p>
+<p>We are going to build a small <code>ping</code> clone, sending a ping to a peer,
+expecting a pong as a response.</p>
+<h2 id="scaffolding" class="section-header"><a href="#scaffolding">Scaffolding</a></h2>
+<p>Let’s start off by</p>
+<ol>
+<li>
+<p>Creating a new crate: <code>cargo init rust-libp2p-tutorial</code></p>
+</li>
+<li>
+<p>Adding <code>libp2p</code> as well as <code>futures</code> as a dependency in the
+<code>Cargo.toml</code> file:</p>
+<div class="example-wrap"><pre class="language-yaml"><code>[package]
+    name = &quot;rust-libp2p-tutorial&quot;
+    version = &quot;0.1.0&quot;
+    authors = [&quot;Max Inden &lt;mail@max-inden.de&gt;&quot;]
+    edition = &quot;2018&quot;
+
+[dependencies]
+    libp2p = &quot;&lt;insert-current-version-here&gt;&quot;
+    futures = &quot;&lt;insert-current-version-here&gt;&quot;</code></pre></div></li>
+</ol>
+<h2 id="network-identity" class="section-header"><a href="#network-identity">Network identity</a></h2>
+<p>With all the scaffolding in place, we can dive into the libp2p specifics. At
+first we need to create a network identity for our local node in <code>fn main()</code>. Identities in libp2p are handled via a public and private key pair.
+Nodes identify each other via their <a href="../struct.PeerId.html"><code>PeerId</code></a> which is
+derived from the public key.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libp2p</span>::{<span class="ident">identity</span>, <span class="ident">PeerId</span>};
+<span class="kw">use</span> <span class="ident">std::error::Error</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">local_key</span> <span class="op">=</span> <span class="ident">identity::Keypair::generate_ed25519</span>();
+    <span class="kw">let</span> <span class="ident">local_peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from</span>(<span class="ident">local_key</span>.<span class="ident">public</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;Local peer id: {:?}&quot;</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>You can already run the code above via <code>cargo run</code> which should print a
+different <a href="../struct.PeerId.html"><code>PeerId</code></a> each time, given that we randomly
+generate the key pair.</p>
+<h2 id="transport" class="section-header"><a href="#transport">Transport</a></h2>
+<p>Next up we need to construct a transport. After all, we want to send some
+bytes from A to B. A transport in libp2p provides connection-oriented
+communication channels (e.g. TCP) as well as upgrades on top of those like
+authentication and encryption protocols. Technically, a libp2p transport is
+anything that implements the <a href="../trait.Transport.html"><code>Transport</code></a> trait.</p>
+<p>Instead of constructing a transport ourselves for this tutorial, we use the
+convenience function <a href="../fn.development_transport.html"><code>development_transport</code></a>
+that creates a TCP transport with <a href="../noise/index.html"><code>noise</code></a> for authenticated
+encryption.</p>
+<p>Furthermore, <a href="../fn.development_transport.html"><code>development_transport</code></a> builds a multiplexed transport,
+whereby multiple logical substreams can coexist on the same underlying (TCP)
+connection. For further details on substream multiplexing, take a look at
+<a href="../core/muxing/index.html" title="crate::core::muxing"><code>crate::core::muxing</code></a> and <a href="../yamux/index.html"><code>yamux</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
+<span class="kw">use</span> <span class="ident">libp2p</span>::{<span class="ident">identity</span>, <span class="ident">PeerId</span>};
+<span class="kw">use</span> <span class="ident">std::error::Error</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">local_key</span> <span class="op">=</span> <span class="ident">identity::Keypair::generate_ed25519</span>();
+    <span class="kw">let</span> <span class="ident">local_peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from</span>(<span class="ident">local_key</span>.<span class="ident">public</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;Local peer id: {:?}&quot;</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="kw">let</span> <span class="ident">transport</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="ident">libp2p::development_transport</span>(<span class="ident">local_key</span>))<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h2 id="network-behaviour" class="section-header"><a href="#network-behaviour">Network behaviour</a></h2>
+<p>Now it is time to look at another core trait of rust-libp2p - the
+<a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a>. While the previously introduced trait <a href="../trait.Transport.html"><code>Transport</code></a>
+defines <em>how</em> to send bytes on the network, a <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> defines
+<em>what</em> bytes to send on the network.</p>
+<p>To make this more concrete, let’s take a look at a simple implementation of
+the <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> trait - the <a href="../ping/struct.Ping.html"><code>Ping</code></a>
+<a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a>. As you might have guessed, similar to the good old
+<code>ping</code> network tool, libp2p <a href="../ping/struct.Ping.html"><code>Ping</code></a> sends a ping to a
+remote and expects to receive a pong in turn. The
+<a href="../ping/struct.Ping.html"><code>Ping</code></a> <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> does not care <em>how</em> the
+ping or pong messages are send on the network, whether they are sent via
+TCP, whether they are encrypted via <a href="../noise/index.html">noise</a> or just in
+<a href="../plaintext/index.html">plaintext</a>. It only cares about <em>what</em> messages are sent
+on the network.</p>
+<p>The two traits <a href="../trait.Transport.html"><code>Transport</code></a> and <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> allow us to cleanly
+separate <em>how</em> to send bytes from <em>what</em> bytes to send.</p>
+<p>With the above in mind, let’s extend our example, creating a
+<a href="../ping/struct.Ping.html"><code>Ping</code></a> <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> at the end:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
+<span class="kw">use</span> <span class="ident">libp2p</span>::{<span class="ident">identity</span>, <span class="ident">PeerId</span>};
+<span class="kw">use</span> <span class="ident">libp2p::ping</span>::{<span class="ident">Ping</span>, <span class="ident">PingConfig</span>};
+<span class="kw">use</span> <span class="ident">std::error::Error</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">local_key</span> <span class="op">=</span> <span class="ident">identity::Keypair::generate_ed25519</span>();
+    <span class="kw">let</span> <span class="ident">local_peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from</span>(<span class="ident">local_key</span>.<span class="ident">public</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;Local peer id: {:?}&quot;</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="kw">let</span> <span class="ident">transport</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="ident">libp2p::development_transport</span>(<span class="ident">local_key</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a ping network behaviour.</span>
+    <span class="comment">//</span>
+    <span class="comment">// For illustrative purposes, the ping protocol is configured to</span>
+    <span class="comment">// keep the connection alive, so a continuous sequence of pings</span>
+    <span class="comment">// can be observed.</span>
+    <span class="kw">let</span> <span class="ident">behaviour</span> <span class="op">=</span> <span class="ident">Ping::new</span>(<span class="ident">PingConfig::new</span>().<span class="ident">with_keep_alive</span>(<span class="bool-val">true</span>));
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h2 id="swarm" class="section-header"><a href="#swarm">Swarm</a></h2>
+<p>Now that we have a <a href="../trait.Transport.html"><code>Transport</code></a> and a <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a>, we need
+something that connects the two, allowing both to make progress. This job is
+carried out by a <a href="../type.Swarm.html"><code>Swarm</code></a>. Put simply, a <a href="../type.Swarm.html"><code>Swarm</code></a> drives both a
+<a href="../trait.Transport.html"><code>Transport</code></a> and a <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> forward, passing commands from the
+<a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a> to the <a href="../trait.Transport.html"><code>Transport</code></a> as well as events from the
+<a href="../trait.Transport.html"><code>Transport</code></a> to the <a href="../swarm/trait.NetworkBehaviour.html"><code>NetworkBehaviour</code></a>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
+<span class="kw">use</span> <span class="ident">libp2p</span>::{<span class="ident">identity</span>, <span class="ident">PeerId</span>};
+<span class="kw">use</span> <span class="ident">libp2p::ping</span>::{<span class="ident">Ping</span>, <span class="ident">PingConfig</span>};
+<span class="kw">use</span> <span class="ident">libp2p::swarm::Swarm</span>;
+<span class="kw">use</span> <span class="ident">std::error::Error</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">local_key</span> <span class="op">=</span> <span class="ident">identity::Keypair::generate_ed25519</span>();
+    <span class="kw">let</span> <span class="ident">local_peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from</span>(<span class="ident">local_key</span>.<span class="ident">public</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;Local peer id: {:?}&quot;</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="kw">let</span> <span class="ident">transport</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="ident">libp2p::development_transport</span>(<span class="ident">local_key</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a ping network behaviour.</span>
+    <span class="comment">//</span>
+    <span class="comment">// For illustrative purposes, the ping protocol is configured to</span>
+    <span class="comment">// keep the connection alive, so a continuous sequence of pings</span>
+    <span class="comment">// can be observed.</span>
+    <span class="kw">let</span> <span class="ident">behaviour</span> <span class="op">=</span> <span class="ident">Ping::new</span>(<span class="ident">PingConfig::new</span>().<span class="ident">with_keep_alive</span>(<span class="bool-val">true</span>));
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">swarm</span> <span class="op">=</span> <span class="ident">Swarm::new</span>(<span class="ident">transport</span>, <span class="ident">behaviour</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h2 id="multiaddr" class="section-header"><a href="#multiaddr">Multiaddr</a></h2>
+<p>With the <a href="../type.Swarm.html"><code>Swarm</code></a> in place, we are all set to listen for incoming
+connections. We only need to pass an address to the <a href="../type.Swarm.html"><code>Swarm</code></a>, just like for
+<a href="https://doc.rust-lang.org/1.56.1/std/net/tcp/struct.TcpListener.html#method.bind" title="std::net::TcpListener::bind"><code>std::net::TcpListener::bind</code></a>. But instead of passing an IP address, we
+pass a <a href="../struct.Multiaddr.html"><code>Multiaddr</code></a> which is yet another core concept of libp2p worth
+taking a look at.</p>
+<p>A <a href="../struct.Multiaddr.html"><code>Multiaddr</code></a> is a self-describing network address and protocol stack that
+is used to establish connections to peers. A good introduction to
+<a href="../struct.Multiaddr.html"><code>Multiaddr</code></a> can be found on https://docs.libp2p.io/concepts/addressing/
+and its specification repository https://github.com/multiformats/multiaddr.</p>
+<p>Let’s make our local node listen on all interfaces as well as a random port.
+In addition, if provided on the CLI, let’s instruct our local node to dial a
+remote peer.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
+<span class="kw">use</span> <span class="ident">libp2p</span>::{<span class="ident">identity</span>, <span class="ident">PeerId</span>};
+<span class="kw">use</span> <span class="ident">libp2p::ping</span>::{<span class="ident">Ping</span>, <span class="ident">PingConfig</span>};
+<span class="kw">use</span> <span class="ident">libp2p::swarm::Swarm</span>;
+<span class="kw">use</span> <span class="ident">std::error::Error</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">local_key</span> <span class="op">=</span> <span class="ident">identity::Keypair::generate_ed25519</span>();
+    <span class="kw">let</span> <span class="ident">local_peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from</span>(<span class="ident">local_key</span>.<span class="ident">public</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;Local peer id: {:?}&quot;</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="kw">let</span> <span class="ident">transport</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="ident">libp2p::development_transport</span>(<span class="ident">local_key</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a ping network behaviour.</span>
+    <span class="comment">//</span>
+    <span class="comment">// For illustrative purposes, the ping protocol is configured to</span>
+    <span class="comment">// keep the connection alive, so a continuous sequence of pings</span>
+    <span class="comment">// can be observed.</span>
+    <span class="kw">let</span> <span class="ident">behaviour</span> <span class="op">=</span> <span class="ident">Ping::new</span>(<span class="ident">PingConfig::new</span>().<span class="ident">with_keep_alive</span>(<span class="bool-val">true</span>));
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">swarm</span> <span class="op">=</span> <span class="ident">Swarm::new</span>(<span class="ident">transport</span>, <span class="ident">behaviour</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="comment">// Tell the swarm to listen on all interfaces and a random, OS-assigned</span>
+    <span class="comment">// port.</span>
+    <span class="ident">swarm</span>.<span class="ident">listen_on</span>(<span class="string">&quot;/ip4/0.0.0.0/tcp/0&quot;</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Dial the peer identified by the multi-address given as the second</span>
+    <span class="comment">// command-line argument, if any.</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addr</span>) <span class="op">=</span> <span class="ident">std::env::args</span>().<span class="ident">nth</span>(<span class="number">1</span>) {
+        <span class="kw">let</span> <span class="ident">remote</span> <span class="op">=</span> <span class="ident">addr</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>;
+        <span class="ident">swarm</span>.<span class="ident">dial_addr</span>(<span class="ident">remote</span>)<span class="question-mark">?</span>;
+        <span class="macro">println!</span>(<span class="string">&quot;Dialed {}&quot;</span>, <span class="ident">addr</span>)
+    }
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h2 id="continuously-polling-the-swarm" class="section-header"><a href="#continuously-polling-the-swarm">Continuously polling the Swarm</a></h2>
+<p>We have everything in place now. The last step is to drive the <a href="../type.Swarm.html"><code>Swarm</code></a> in
+a loop, allowing it to listen for incoming connections and establish an
+outgoing connection in case we specify an address on the CLI.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
+<span class="kw">use</span> <span class="ident">futures::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">libp2p::ping</span>::{<span class="ident">Ping</span>, <span class="ident">PingConfig</span>};
+<span class="kw">use</span> <span class="ident">libp2p::swarm</span>::{<span class="ident">Swarm</span>, <span class="ident">SwarmEvent</span>};
+<span class="kw">use</span> <span class="ident">libp2p</span>::{<span class="ident">identity</span>, <span class="ident">PeerId</span>};
+<span class="kw">use</span> <span class="ident">std::error::Error</span>;
+<span class="kw">use</span> <span class="ident">std::task::Poll</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">local_key</span> <span class="op">=</span> <span class="ident">identity::Keypair::generate_ed25519</span>();
+    <span class="kw">let</span> <span class="ident">local_peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from</span>(<span class="ident">local_key</span>.<span class="ident">public</span>());
+    <span class="macro">println!</span>(<span class="string">&quot;Local peer id: {:?}&quot;</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="kw">let</span> <span class="ident">transport</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="ident">libp2p::development_transport</span>(<span class="ident">local_key</span>))<span class="question-mark">?</span>;
+
+    <span class="comment">// Create a ping network behaviour.</span>
+    <span class="comment">//</span>
+    <span class="comment">// For illustrative purposes, the ping protocol is configured to</span>
+    <span class="comment">// keep the connection alive, so a continuous sequence of pings</span>
+    <span class="comment">// can be observed.</span>
+    <span class="kw">let</span> <span class="ident">behaviour</span> <span class="op">=</span> <span class="ident">Ping::new</span>(<span class="ident">PingConfig::new</span>().<span class="ident">with_keep_alive</span>(<span class="bool-val">true</span>));
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">swarm</span> <span class="op">=</span> <span class="ident">Swarm::new</span>(<span class="ident">transport</span>, <span class="ident">behaviour</span>, <span class="ident">local_peer_id</span>);
+
+    <span class="comment">// Tell the swarm to listen on all interfaces and a random, OS-assigned</span>
+    <span class="comment">// port.</span>
+    <span class="ident">swarm</span>.<span class="ident">listen_on</span>(<span class="string">&quot;/ip4/0.0.0.0/tcp/0&quot;</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Dial the peer identified by the multi-address given as the second</span>
+    <span class="comment">// command-line argument, if any.</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addr</span>) <span class="op">=</span> <span class="ident">std::env::args</span>().<span class="ident">nth</span>(<span class="number">1</span>) {
+        <span class="kw">let</span> <span class="ident">remote</span> <span class="op">=</span> <span class="ident">addr</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>;
+        <span class="ident">swarm</span>.<span class="ident">dial_addr</span>(<span class="ident">remote</span>)<span class="question-mark">?</span>;
+        <span class="macro">println!</span>(<span class="string">&quot;Dialed {}&quot;</span>, <span class="ident">addr</span>)
+    }
+
+    <span class="ident">block_on</span>(<span class="ident">future::poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="kw">loop</span> {
+        <span class="kw">match</span> <span class="ident">swarm</span>.<span class="ident">poll_next_unpin</span>(<span class="ident">cx</span>) {
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">event</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">SwarmEvent::NewListenAddr</span> { <span class="ident">address</span>, .. }<span class="op">=</span> <span class="ident">event</span> {
+                    <span class="macro">println!</span>(<span class="string">&quot;Listening on {:?}&quot;</span>, <span class="ident">address</span>);
+                }
+            },
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()),
+            <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Pending</span>
+        }
+    }));
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<h2 id="running-two-nodes" class="section-header"><a href="#running-two-nodes">Running two nodes</a></h2>
+<p>For convenience the example created above is also implemented in full in
+<code>examples/ping.rs</code>. Thus, you can either run the commands below from your
+own project created during the tutorial, or from the root of the rust-libp2p
+repository. Note that in the former case you need to ignore the <code>--example ping</code> argument.</p>
+<p>You need two terminals. In the first terminal window run:</p>
+<div class="example-wrap"><pre class="language-sh"><code>cargo run --example ping</code></pre></div>
+<p>It will print the PeerId and the listening address, e.g. <code>Listening on &quot;/ip4/127.0.0.1/tcp/24915&quot;</code></p>
+<p>In the second terminal window, start a new instance of the example with:</p>
+<div class="example-wrap"><pre class="language-sh"><code>cargo run --example ping -- /ip4/127.0.0.1/tcp/24915</code></pre></div>
+<p>Note: The <a href="../struct.Multiaddr.html"><code>Multiaddr</code></a> at the end being the <a href="../struct.Multiaddr.html"><code>Multiaddr</code></a> printed earlier
+in terminal window one.</p>
+<p>The two nodes will establish a connection and send each other ping and pong
+messages every 15 seconds.</p>
+</div></details></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libp2p" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script>
+</body></html>

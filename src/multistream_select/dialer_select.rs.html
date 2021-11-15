@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;multistream-select-0.10.2&#x2F;src&#x2F;dialer_select.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dialer_select.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../multistream_select/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;multistream-select-0.10.4&#x2F;src&#x2F;dialer_select.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dialer_select.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../multistream_select/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -402,16 +402,6 @@
 <span id="402">402</span>
 <span id="403">403</span>
 <span id="404">404</span>
-<span id="405">405</span>
-<span id="406">406</span>
-<span id="407">407</span>
-<span id="408">408</span>
-<span id="409">409</span>
-<span id="410">410</span>
-<span id="411">411</span>
-<span id="412">412</span>
-<span id="413">413</span>
-<span id="414">414</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 Parity Technologies (UK) Ltd.</span>
 <span class="comment">//</span>
 <span class="comment">// Permission is hereby granted, free of charge, to any person obtaining a</span>
@@ -434,11 +424,16 @@
 
 <span class="doccomment">//! Protocol negotiation strategies for the peer acting as the dialer.</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::protocol</span>::{<span class="ident">HeaderLine</span>, <span class="ident">Message</span>, <span class="ident">MessageIO</span>, <span class="ident">Protocol</span>, <span class="ident">ProtocolError</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Negotiated</span>, <span class="ident">NegotiationError</span>, <span class="ident">Version</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::protocol</span>::{<span class="ident">Protocol</span>, <span class="ident">ProtocolError</span>, <span class="ident">MessageIO</span>, <span class="ident">Message</span>, <span class="ident">HeaderLine</span>};
 
 <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">future::Either</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>};
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">convert::TryFrom</span> <span class="kw">as</span> <span class="kw">_</span>, <span class="ident">iter</span>, <span class="ident">mem</span>, <span class="ident">pin::Pin</span>, <span class="ident">task</span>::{<span class="ident">Context</span>, <span class="ident">Poll</span>}};
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">convert::TryFrom</span> <span class="kw">as</span> <span class="kw">_</span>,
+    <span class="ident">iter</span>, <span class="ident">mem</span>,
+    <span class="ident">pin::Pin</span>,
+    <span class="ident">task</span>::{<span class="ident">Context</span>, <span class="ident">Poll</span>},
+};
 
 <span class="doccomment">/// Returns a `Future` that negotiates a protocol on the given I/O stream</span>
 <span class="doccomment">/// for a peer acting as the _dialer_ (or _initiator_).</span>
@@ -462,17 +457,17 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dialer_select_proto</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>(
     <span class="ident">inner</span>: <span class="ident">R</span>,
     <span class="ident">protocols</span>: <span class="ident">I</span>,
-    <span class="ident">version</span>: <span class="ident">Version</span>
+    <span class="ident">version</span>: <span class="ident">Version</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DialerSelectFuture</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I::IntoIter</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
     <span class="ident">I</span>: <span class="ident">IntoIterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">protocols</span>.<span class="ident">into_iter</span>();
     <span class="comment">// We choose between the &quot;serial&quot; and &quot;parallel&quot; strategies based on the number of protocols.</span>
     <span class="kw">if</span> <span class="ident">iter</span>.<span class="ident">size_hint</span>().<span class="number">1</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">3</span>).<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>) {
-       <span class="ident">Either::Left</span>(<span class="ident">dialer_select_proto_serial</span>(<span class="ident">inner</span>, <span class="ident">iter</span>, <span class="ident">version</span>))
+        <span class="ident">Either::Left</span>(<span class="ident">dialer_select_proto_serial</span>(<span class="ident">inner</span>, <span class="ident">iter</span>, <span class="ident">version</span>))
     } <span class="kw">else</span> {
         <span class="ident">Either::Right</span>(<span class="ident">dialer_select_proto_parallel</span>(<span class="ident">inner</span>, <span class="ident">iter</span>, <span class="ident">version</span>))
     }
@@ -493,12 +488,12 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">dialer_select_proto_serial</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>(
     <span class="ident">inner</span>: <span class="ident">R</span>,
     <span class="ident">protocols</span>: <span class="ident">I</span>,
-    <span class="ident">version</span>: <span class="ident">Version</span>
+    <span class="ident">version</span>: <span class="ident">Version</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DialerSelectSeq</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I::IntoIter</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
     <span class="ident">I</span>: <span class="ident">IntoIterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">protocols</span> <span class="op">=</span> <span class="ident">protocols</span>.<span class="ident">into_iter</span>().<span class="ident">peekable</span>();
     <span class="ident">DialerSelectSeq</span> {
@@ -506,7 +501,7 @@
         <span class="ident">protocols</span>,
         <span class="ident">state</span>: <span class="ident">SeqState::SendHeader</span> {
             <span class="ident">io</span>: <span class="ident">MessageIO::new</span>(<span class="ident">inner</span>),
-        }
+        },
     }
 }
 
@@ -522,48 +517,39 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">dialer_select_proto_parallel</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>(
     <span class="ident">inner</span>: <span class="ident">R</span>,
     <span class="ident">protocols</span>: <span class="ident">I</span>,
-    <span class="ident">version</span>: <span class="ident">Version</span>
+    <span class="ident">version</span>: <span class="ident">Version</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DialerSelectPar</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I::IntoIter</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
     <span class="ident">I</span>: <span class="ident">IntoIterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">protocols</span> <span class="op">=</span> <span class="ident">protocols</span>.<span class="ident">into_iter</span>();
     <span class="ident">DialerSelectPar</span> {
         <span class="ident">version</span>,
         <span class="ident">protocols</span>,
         <span class="ident">state</span>: <span class="ident">ParState::SendHeader</span> {
-            <span class="ident">io</span>: <span class="ident">MessageIO::new</span>(<span class="ident">inner</span>)
-        }
+            <span class="ident">io</span>: <span class="ident">MessageIO::new</span>(<span class="ident">inner</span>),
+        },
     }
 }
 
 <span class="doccomment">/// A `Future` returned by [`dialer_select_proto_serial`] which negotiates</span>
 <span class="doccomment">/// a protocol iteratively by considering one protocol after the other.</span>
 <span class="attribute">#[<span class="ident">pin_project::pin_project</span>]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DialerSelectSeq</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
-    <span class="ident">I</span>: <span class="ident">Iterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
-{
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DialerSelectSeq</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&gt;</span> {
     <span class="comment">// TODO: It would be nice if eventually N = I::Item = Protocol.</span>
     <span class="ident">protocols</span>: <span class="ident">iter::Peekable</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>,
     <span class="ident">state</span>: <span class="ident">SeqState</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I::Item</span><span class="op">&gt;</span>,
     <span class="ident">version</span>: <span class="ident">Version</span>,
 }
 
-<span class="kw">enum</span> <span class="ident">SeqState</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
-    <span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
-{
-    <span class="ident">SendHeader</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, },
+<span class="kw">enum</span> <span class="ident">SeqState</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">N</span><span class="op">&gt;</span> {
+    <span class="ident">SendHeader</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> },
     <span class="ident">SendProtocol</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">protocol</span>: <span class="ident">N</span> },
     <span class="ident">FlushProtocol</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">protocol</span>: <span class="ident">N</span> },
     <span class="ident">AwaitProtocol</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">protocol</span>: <span class="ident">N</span> },
-    <span class="ident">Done</span>
+    <span class="ident">Done</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">DialerSelectSeq</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>
@@ -572,7 +558,7 @@
     <span class="comment">// It also makes the implementation considerably easier to write.</span>
     <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span>,
     <span class="ident">I</span>: <span class="ident">Iterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">I::Item</span>, <span class="ident">Negotiated</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>), <span class="ident">NegotiationError</span><span class="op">&gt;</span>;
 
@@ -583,11 +569,11 @@
             <span class="kw">match</span> <span class="ident">mem::replace</span>(<span class="ident">this</span>.<span class="ident">state</span>, <span class="ident">SeqState::Done</span>) {
                 <span class="ident">SeqState::SendHeader</span> { <span class="kw-2">mut</span> <span class="ident">io</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_ready</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
+                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {}
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">SeqState::SendHeader</span> { <span class="ident">io</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
+                        }
                     }
 
                     <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">HeaderLine::from</span>(<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">version</span>);
@@ -604,11 +590,11 @@
 
                 <span class="ident">SeqState::SendProtocol</span> { <span class="kw-2">mut</span> <span class="ident">io</span>, <span class="ident">protocol</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_ready</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
+                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {}
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">SeqState::SendProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
+                        }
                     }
 
                     <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">Protocol::try_from</span>(<span class="ident">protocol</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
@@ -630,7 +616,7 @@
                                 <span class="macro">log::debug!</span>(<span class="string">&quot;Dialer: Expecting proposed protocol: {}&quot;</span>, <span class="ident">p</span>);
                                 <span class="kw">let</span> <span class="ident">hl</span> <span class="op">=</span> <span class="ident">HeaderLine::from</span>(<span class="ident">Version::V1Lazy</span>);
                                 <span class="kw">let</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">Negotiated::expecting</span>(<span class="ident">io</span>.<span class="ident">into_reader</span>(), <span class="ident">p</span>, <span class="prelude-val">Some</span>(<span class="ident">hl</span>));
-                                <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>((<span class="ident">protocol</span>, <span class="ident">io</span>)))
+                                <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>((<span class="ident">protocol</span>, <span class="ident">io</span>)));
                             }
                         }
                     }
@@ -641,8 +627,8 @@
                         <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">SeqState::AwaitProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> },
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">SeqState::FlushProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
+                        }
                     }
                 }
 
@@ -651,7 +637,7 @@
                         <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">msg</span>,
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">SeqState::AwaitProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
                         }
                         <span class="comment">// Treat EOF error as [`NegotiationError::Failed`], not as</span>
                         <span class="comment">// [`NegotiationError::ProtocolError`], allowing dropping or closing an I/O</span>
@@ -669,8 +655,10 @@
                             <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>((<span class="ident">protocol</span>, <span class="ident">io</span>)));
                         }
                         <span class="ident">Message::NotAvailable</span> <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="macro">log::debug!</span>(<span class="string">&quot;Dialer: Received rejection of protocol: {}&quot;</span>,
-                                <span class="ident">String::from_utf8_lossy</span>(<span class="ident">protocol</span>.<span class="ident">as_ref</span>()));
+                            <span class="macro">log::debug!</span>(
+                                <span class="string">&quot;Dialer: Received rejection of protocol: {}&quot;</span>,
+                                <span class="ident">String::from_utf8_lossy</span>(<span class="ident">protocol</span>.<span class="ident">as_ref</span>())
+                            );
                             <span class="kw">let</span> <span class="ident">protocol</span> <span class="op">=</span> <span class="ident">this</span>.<span class="ident">protocols</span>.<span class="ident">next</span>().<span class="ident">ok_or</span>(<span class="ident">NegotiationError::Failed</span>)<span class="question-mark">?</span>;
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">SeqState::SendProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> }
                         }
@@ -678,7 +666,7 @@
                     }
                 }
 
-                <span class="ident">SeqState::Done</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;SeqState::poll called after completion&quot;</span>)
+                <span class="ident">SeqState::Done</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;SeqState::poll called after completion&quot;</span>),
             }
         }
     }
@@ -688,28 +676,19 @@
 <span class="doccomment">/// a protocol selectively by considering all supported protocols of the remote</span>
 <span class="doccomment">/// &quot;in parallel&quot;.</span>
 <span class="attribute">#[<span class="ident">pin_project::pin_project</span>]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DialerSelectPar</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
-    <span class="ident">I</span>: <span class="ident">Iterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
-{
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DialerSelectPar</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&gt;</span> {
     <span class="ident">protocols</span>: <span class="ident">I</span>,
     <span class="ident">state</span>: <span class="ident">ParState</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I::Item</span><span class="op">&gt;</span>,
     <span class="ident">version</span>: <span class="ident">Version</span>,
 }
 
-<span class="kw">enum</span> <span class="ident">ParState</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">N</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
-    <span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
-{
+<span class="kw">enum</span> <span class="ident">ParState</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">N</span><span class="op">&gt;</span> {
     <span class="ident">SendHeader</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> },
     <span class="ident">SendProtocolsRequest</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> },
     <span class="ident">Flush</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> },
     <span class="ident">RecvProtocols</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> },
     <span class="ident">SendProtocol</span> { <span class="ident">io</span>: <span class="ident">MessageIO</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">protocol</span>: <span class="ident">N</span> },
-    <span class="ident">Done</span>
+    <span class="ident">Done</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">DialerSelectPar</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">I</span><span class="op">&gt;</span>
@@ -718,7 +697,7 @@
     <span class="comment">// It also makes the implementation considerably easier to write.</span>
     <span class="ident">R</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span>,
     <span class="ident">I</span>: <span class="ident">Iterator</span>,
-    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+    <span class="ident">I::Item</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">I::Item</span>, <span class="ident">Negotiated</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>), <span class="ident">NegotiationError</span><span class="op">&gt;</span>;
 
@@ -729,11 +708,11 @@
             <span class="kw">match</span> <span class="ident">mem::replace</span>(<span class="ident">this</span>.<span class="ident">state</span>, <span class="ident">ParState::Done</span>) {
                 <span class="ident">ParState::SendHeader</span> { <span class="kw-2">mut</span> <span class="ident">io</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_ready</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
+                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {}
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::SendHeader</span> { <span class="ident">io</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
+                        }
                     }
 
                     <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">Message::Header</span>(<span class="ident">HeaderLine::from</span>(<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">version</span>));
@@ -746,11 +725,11 @@
 
                 <span class="ident">ParState::SendProtocolsRequest</span> { <span class="kw-2">mut</span> <span class="ident">io</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_ready</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
+                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {}
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::SendProtocolsRequest</span> { <span class="ident">io</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
+                        }
                     }
 
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">start_send</span>(<span class="ident">Message::ListProtocols</span>) {
@@ -761,22 +740,20 @@
                     <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::Flush</span> { <span class="ident">io</span> }
                 }
 
-                <span class="ident">ParState::Flush</span> { <span class="kw-2">mut</span> <span class="ident">io</span> } <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_flush</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::RecvProtocols</span> { <span class="ident">io</span> },
-                        <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::Flush</span> { <span class="ident">io</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                <span class="ident">ParState::Flush</span> { <span class="kw-2">mut</span> <span class="ident">io</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_flush</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
+                    <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::RecvProtocols</span> { <span class="ident">io</span> },
+                    <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::Flush</span> { <span class="ident">io</span> };
+                        <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
                     }
-                }
+                },
 
                 <span class="ident">ParState::RecvProtocols</span> { <span class="kw-2">mut</span> <span class="ident">io</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_next</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
                         <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">msg</span>,
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::RecvProtocols</span> { <span class="ident">io</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
                         }
                         <span class="comment">// Treat EOF error as [`NegotiationError::Failed`], not as</span>
                         <span class="comment">// [`NegotiationError::ProtocolError`], allowing dropping or closing an I/O</span>
@@ -789,12 +766,15 @@
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::RecvProtocols</span> { <span class="ident">io</span> }
                         }
                         <span class="ident">Message::Protocols</span>(<span class="ident">supported</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="kw">let</span> <span class="ident">protocol</span> <span class="op">=</span> <span class="ident">this</span>.<span class="ident">protocols</span>.<span class="ident">by_ref</span>()
-                                .<span class="ident">find</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">supported</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span>
-                                    <span class="ident">s</span>.<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">p</span>.<span class="ident">as_ref</span>()))
+                            <span class="kw">let</span> <span class="ident">protocol</span> <span class="op">=</span> <span class="ident">this</span>
+                                .<span class="ident">protocols</span>
+                                .<span class="ident">by_ref</span>()
+                                .<span class="ident">find</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">supported</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">p</span>.<span class="ident">as_ref</span>()))
                                 .<span class="ident">ok_or</span>(<span class="ident">NegotiationError::Failed</span>)<span class="question-mark">?</span>;
-                            <span class="macro">log::debug!</span>(<span class="string">&quot;Dialer: Found supported protocol: {}&quot;</span>,
-                                <span class="ident">String::from_utf8_lossy</span>(<span class="ident">protocol</span>.<span class="ident">as_ref</span>()));
+                            <span class="macro">log::debug!</span>(
+                                <span class="string">&quot;Dialer: Found supported protocol: {}&quot;</span>,
+                                <span class="ident">String::from_utf8_lossy</span>(<span class="ident">protocol</span>.<span class="ident">as_ref</span>())
+                            );
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::SendProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> };
                         }
                         <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">ProtocolError::InvalidMessage</span>.<span class="ident">into</span>())),
@@ -803,11 +783,11 @@
 
                 <span class="ident">ParState::SendProtocol</span> { <span class="kw-2">mut</span> <span class="ident">io</span>, <span class="ident">protocol</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>).<span class="ident">poll_ready</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
+                        <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {}
                         <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">ParState::SendProtocol</span> { <span class="ident">io</span>, <span class="ident">protocol</span> };
-                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>
-                        },
+                            <span class="kw">return</span> <span class="ident">Poll::Pending</span>;
+                        }
                     }
 
                     <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">Protocol::try_from</span>(<span class="ident">protocol</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
@@ -818,10 +798,10 @@
                     <span class="macro">log::debug!</span>(<span class="string">&quot;Dialer: Expecting proposed protocol: {}&quot;</span>, <span class="ident">p</span>);
                     <span class="kw">let</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">Negotiated::expecting</span>(<span class="ident">io</span>.<span class="ident">into_reader</span>(), <span class="ident">p</span>, <span class="prelude-val">None</span>);
 
-                    <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>((<span class="ident">protocol</span>, <span class="ident">io</span>)))
+                    <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>((<span class="ident">protocol</span>, <span class="ident">io</span>)));
                 }
 
-                <span class="ident">ParState::Done</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;ParState::poll called after completion&quot;</span>)
+                <span class="ident">ParState::Done</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;ParState::poll called after completion&quot;</span>),
             }
         }
     }

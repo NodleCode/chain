@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["SignedImbalance","Either a positive or a negative imbalance."]],"struct":[["SplitTwoWays","Split an unbalanced amount two ways between a common divisor."]],"trait":[["Imbalance","A trait for a not-quite Linear Type that tracks an imbalance."],["OnUnbalanced","Handler for when some currency “account” decreased in balance for some reason."]]});

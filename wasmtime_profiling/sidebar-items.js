@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["JitDumpAgent","Interface for driving the creation of jitdump files"],["NullProfilerAgent","Default agent for unsupported profiling build."],["VTuneAgent","Interface for driving vtune support"]],"trait":[["ProfilingAgent","Common interface for profiling tools."]]});

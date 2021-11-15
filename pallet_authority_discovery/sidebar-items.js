@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Call","Dispatchable calls."]],"struct":[["GenesisConfig","Genesis config for the module, allow to build genesis storage."],["Module",""]],"trait":[["Config","The module’s config trait."]]});
+initSidebarItems({"mod":[["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]]});

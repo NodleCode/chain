@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Call","Dispatchable calls."],["Event","Events for this module."]],"struct":[["Module",""]],"trait":[["Config","Offences trait"],["WeightInfo",""]],"type":[["DeferredOffenceOf","Type of data stored as a deferred offence"]]});
+initSidebarItems({"mod":[["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]],"trait":[["WeightInfo",""]]});

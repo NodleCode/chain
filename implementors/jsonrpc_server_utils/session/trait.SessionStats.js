@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sc_rpc_server"] = [{"text":"impl <a class=\"trait\" href=\"jsonrpc_server_utils/session/trait.SessionStats.html\" title=\"trait jsonrpc_server_utils::session::SessionStats\">SessionStats</a> for <a class=\"struct\" href=\"sc_rpc_server/struct.ServerMetrics.html\" title=\"struct sc_rpc_server::ServerMetrics\">ServerMetrics</a>","synthetic":false,"types":["sc_rpc_server::ServerMetrics"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

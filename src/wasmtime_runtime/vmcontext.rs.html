@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.22.0&#x2F;src&#x2F;vmcontext.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>vmcontext.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.30.0&#x2F;src&#x2F;vmcontext.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>vmcontext.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -735,12 +735,76 @@
 <span id="735">735</span>
 <span id="736">736</span>
 <span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
 </pre><pre class="rust"><code><span class="doccomment">//! This file declares `VMContext` and several related structs which contain</span>
 <span class="doccomment">//! fields that compiled wasm code accesses directly.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::externref::VMExternRef</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::instance::Instance</span>;
 <span class="kw">use</span> <span class="ident">std::any::Any</span>;
+<span class="kw">use</span> <span class="ident">std::cell::UnsafeCell</span>;
+<span class="kw">use</span> <span class="ident">std::marker</span>;
 <span class="kw">use</span> <span class="ident">std::ptr::NonNull</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering::SeqCst</span>};
 <span class="kw">use</span> <span class="ident">std::u32</span>;
@@ -756,6 +820,11 @@
     <span class="doccomment">/// A pointer to the `VMContext` that owns the function.</span>
     <span class="kw">pub</span> <span class="ident">vmctx</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,
 }
+
+<span class="comment">// Declare that this type is send/sync, it&#39;s the responsibility of users of</span>
+<span class="comment">// `VMFunctionImport` to uphold this guarantee.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">VMFunctionImport</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">VMFunctionImport</span> {}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test_vmfunction_import</span> {
@@ -813,6 +882,11 @@
     <span class="kw">pub</span> <span class="ident">vmctx</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,
 }
 
+<span class="comment">// Declare that this type is send/sync, it&#39;s the responsibility of users of</span>
+<span class="comment">// `VMTableImport` to uphold this guarantee.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">VMTableImport</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">VMTableImport</span> {}
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test_vmtable_import</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::VMTableImport</span>;
@@ -851,6 +925,11 @@
     <span class="kw">pub</span> <span class="ident">vmctx</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,
 }
 
+<span class="comment">// Declare that this type is send/sync, it&#39;s the responsibility of users of</span>
+<span class="comment">// `VMMemoryImport` to uphold this guarantee.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">VMMemoryImport</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">VMMemoryImport</span> {}
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test_vmmemory_import</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::VMMemoryImport</span>;
@@ -879,12 +958,21 @@
 
 <span class="doccomment">/// The fields compiled code needs to access to utilize a WebAssembly global</span>
 <span class="doccomment">/// variable imported from another instance.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Note that unlike with functions, tables, and memories, `VMGlobalImport`</span>
+<span class="doccomment">/// doesn&#39;t include a `vmctx` pointer. Globals are never resized, and don&#39;t</span>
+<span class="doccomment">/// require a `vmctx` pointer to access.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VMGlobalImport</span> {
     <span class="doccomment">/// A pointer to the imported global variable description.</span>
     <span class="kw">pub</span> <span class="ident">from</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMGlobalDefinition</span>,
 }
+
+<span class="comment">// Declare that this type is send/sync, it&#39;s the responsibility of users of</span>
+<span class="comment">// `VMGlobalImport` to uphold this guarantee.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">VMGlobalImport</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">VMGlobalImport</span> {}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test_vmglobal_import</span> {
@@ -995,7 +1083,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// TODO: Pack the globals more densely, rather than using the same size</span>
 <span class="doccomment">/// for every type.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>, <span class="ident">align</span>(<span class="number">16</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VMGlobalDefinition</span> {
     <span class="ident">storage</span>: [<span class="ident">u8</span>; <span class="number">16</span>],
@@ -1226,17 +1314,20 @@
 
 <span class="kw">impl</span> <span class="ident">VMSharedSignatureIndex</span> {
     <span class="doccomment">/// Create a new `VMSharedSignatureIndex`.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">value</span>)
     }
 
     <span class="doccomment">/// Returns the underlying bits of the index.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">VMSharedSignatureIndex</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">u32::MAX</span>)
     }
@@ -1256,6 +1347,9 @@
     <span class="kw">pub</span> <span class="ident">vmctx</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,
     <span class="comment">// If more elements are added here, remember to add offset_of tests below!</span>
 }
+
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">VMCallerCheckedAnyfunc</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">VMCallerCheckedAnyfunc</span> {}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test_vmcaller_checked_anyfunc</span> {
@@ -1306,12 +1400,6 @@
 
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory32_grow</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
             <span class="ident">wasmtime_memory32_grow</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::imported_memory32_grow</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
-            <span class="ident">wasmtime_imported_memory32_grow</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory32_size</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
-            <span class="ident">wasmtime_memory32_size</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::imported_memory32_size</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
-            <span class="ident">wasmtime_imported_memory32_size</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::table_copy</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_table_copy</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::table_grow_funcref</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
             <span class="ident">wasmtime_table_grow</span> <span class="kw">as</span> <span class="ident">usize</span>;
@@ -1321,8 +1409,6 @@
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::elem_drop</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_elem_drop</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory_copy</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_memory_copy</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory_fill</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_memory_fill</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::imported_memory_fill</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
-            <span class="ident">wasmtime_imported_memory_fill</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory_init</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_memory_init</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::data_drop</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_data_drop</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::drop_externref</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
@@ -1337,6 +1423,13 @@
             <span class="ident">wasmtime_table_fill</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::table_fill_funcref</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
             <span class="ident">wasmtime_table_fill</span> <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory_atomic_notify</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
+            <span class="ident">wasmtime_memory_atomic_notify</span> <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory_atomic_wait32</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
+            <span class="ident">wasmtime_memory_atomic_wait32</span> <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::memory_atomic_wait64</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span>
+            <span class="ident">wasmtime_memory_atomic_wait64</span> <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="ident">ptrs</span>[<span class="ident">BuiltinFunctionIndex::out_of_gas</span>().<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">wasmtime_out_of_gas</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
         <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">debug_assertions</span>) {
             <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">ptrs</span>.<span class="ident">len</span>() {
@@ -1383,8 +1476,7 @@
     }
 }
 
-<span class="doccomment">/// Structure used to control interrupting wasm code, currently with only one</span>
-<span class="doccomment">/// atomic flag internally used.</span>
+<span class="doccomment">/// Structure used to control interrupting wasm code.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VMInterrupts</span> {
@@ -1393,7 +1485,25 @@
     <span class="doccomment">/// This is used to control both stack overflow as well as interrupting wasm</span>
     <span class="doccomment">/// modules. For more information see `crates/environ/src/cranelift.rs`.</span>
     <span class="kw">pub</span> <span class="ident">stack_limit</span>: <span class="ident">AtomicUsize</span>,
+
+    <span class="doccomment">/// Indicator of how much fuel has been consumed and is remaining to</span>
+    <span class="doccomment">/// WebAssembly.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This field is typically negative and increments towards positive. Upon</span>
+    <span class="doccomment">/// turning positive a wasm trap will be generated. This field is only</span>
+    <span class="doccomment">/// modified if wasm is configured to consume fuel.</span>
+    <span class="kw">pub</span> <span class="ident">fuel_consumed</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>,
 }
+
+<span class="comment">// The `VMInterrupts` type is a pod-type with no destructor, and we only access</span>
+<span class="comment">// `stack_limit` from other threads, so add in these trait impls which are</span>
+<span class="comment">// otherwise not available due to the `fuel_consumed` variable in</span>
+<span class="comment">// `VMInterrupts`.</span>
+<span class="comment">//</span>
+<span class="comment">// Note that users of `fuel_consumed` understand that the unsafety encompasses</span>
+<span class="comment">// ensuring that it&#39;s only mutated/accessed from one thread dynamically.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">VMInterrupts</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">VMInterrupts</span> {}
 
 <span class="kw">impl</span> <span class="ident">VMInterrupts</span> {
     <span class="doccomment">/// Flag that an interrupt should occur</span>
@@ -1407,6 +1517,7 @@
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMInterrupts</span> {
         <span class="ident">VMInterrupts</span> {
             <span class="ident">stack_limit</span>: <span class="ident">AtomicUsize::new</span>(<span class="ident">usize::max_value</span>()),
+            <span class="ident">fuel_consumed</span>: <span class="ident">UnsafeCell::new</span>(<span class="number">0</span>),
         }
     }
 }
@@ -1436,11 +1547,19 @@
 <span class="doccomment">/// The struct here is empty, as the sizes of these fields are dynamic, and</span>
 <span class="doccomment">/// we can&#39;t describe them in Rust&#39;s type system. Sufficient memory is</span>
 <span class="doccomment">/// allocated at runtime.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// TODO: We could move the globals into the `vmctx` allocation too.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>, <span class="ident">align</span>(<span class="number">16</span>))]</span> <span class="comment">// align 16 since globals are aligned to that and contained inside</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VMContext</span> {}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VMContext</span> {
+    <span class="doccomment">/// There&#39;s some more discussion about this within `wasmtime/src/lib.rs` but</span>
+    <span class="doccomment">/// the idea is that we want to tell the compiler that this contains</span>
+    <span class="doccomment">/// pointers which transitively refers to itself, to suppress some</span>
+    <span class="doccomment">/// optimizations that might otherwise assume this doesn&#39;t exist.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The self-referential pointer we care about is the `*mut Store` pointer</span>
+    <span class="doccomment">/// early on in this context, which if you follow through enough levels of</span>
+    <span class="doccomment">/// nesting, eventually can refer back to this `VMContext`</span>
+    <span class="kw">pub</span> <span class="ident">_marker</span>: <span class="ident">marker::PhantomPinned</span>,
+}
 
 <span class="kw">impl</span> <span class="ident">VMContext</span> {
     <span class="doccomment">/// Return a mutable reference to the associated `Instance`.</span>
@@ -1454,6 +1573,11 @@
         <span class="kw-2">&amp;</span><span class="kw-2">*</span>((<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="self">Self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>).<span class="ident">offset</span>(<span class="op">-</span><span class="ident">Instance::vmctx_offset</span>()) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">Instance</span>)
     }
 
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">instance_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Instance</span> {
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span>((<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="self">Self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>).<span class="ident">offset</span>(<span class="op">-</span><span class="ident">Instance::vmctx_offset</span>()) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Instance</span>)
+    }
+
     <span class="doccomment">/// Return a reference to the host state associated with this `Instance`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Safety</span>
@@ -1465,7 +1589,7 @@
     }
 }
 
-<span class="doccomment">///</span>
+<span class="doccomment">/// Trampoline function pointer type.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VMTrampoline</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(
     <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,        <span class="comment">// callee vmctx</span>
     <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,        <span class="comment">// caller vmctx</span>

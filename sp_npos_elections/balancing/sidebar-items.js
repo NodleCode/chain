@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["balance","Balance the weight distribution of a given `voters` at most `iterations` times, or up until the point where the biggest difference created per iteration of all stakes is `tolerance`. If this is called with `tolerance = 0`, then exactly `iterations` rounds will be executed, except if no change has been made (`difference = 0`)."]]});

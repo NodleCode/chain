@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["dmatrix","Construct a dynamic matrix directly from data."],["dvector","Construct a dynamic column vector directly from data."],["matrix","Construct a fixed-size matrix directly from data."],["point","Construct a fixed-size point directly from data."],["vector","Construct a fixed-size column vector directly from data."]]});

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;sp-core-3.0.0&#x2F;src&#x2F;changes_trie.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>changes_trie.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sp_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;d76f399&#x2F;primitives&#x2F;core&#x2F;src&#x2F;changes_trie.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>changes_trie.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sp_core/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -304,6 +304,21 @@
 <span id="304">304</span>
 <span id="305">305</span>
 <span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
 
 <span class="comment">// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.</span>
@@ -323,14 +338,17 @@
 
 <span class="doccomment">//! Substrate changes trie configuration.</span>
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>};
-<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Encode</span>, <span class="ident">Decode</span>};
+<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
 <span class="kw">use</span> <span class="ident">num_traits::Zero</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="doccomment">/// Substrate changes trie configuration.</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>), <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">parity_util_mem::MallocSizeOf</span>))]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Default</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+	<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>),
+	<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">parity_util_mem::MallocSizeOf</span>)
+)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Default</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ChangesTrieConfiguration</span> {
 	<span class="doccomment">/// Interval (in blocks) at which level1-digests are created. Digests are not</span>
 	<span class="doccomment">/// created when this is less or equal to 1.</span>
@@ -368,60 +386,62 @@
 	}
 
 	<span class="doccomment">/// Do we need to build digest at given block?</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_digest_build_required_at_block</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(
-		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		<span class="ident">zero</span>: <span class="ident">Number</span>,
-		<span class="ident">block</span>: <span class="ident">Number</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
-		<span class="kw">where</span>
-			<span class="ident">Number</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span>
-			<span class="ident">::sp_std::ops::Rem</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span>
-			<span class="ident">::sp_std::cmp::PartialOrd</span> <span class="op">+</span> <span class="ident">Zero</span>,
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_digest_build_required_at_block</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">zero</span>: <span class="ident">Number</span>, <span class="ident">block</span>: <span class="ident">Number</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
+	<span class="kw">where</span>
+		<span class="ident">Number</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">PartialEq</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Rem</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::cmp::PartialOrd</span>
+			<span class="op">+</span> <span class="ident">Zero</span>,
 	{
-		<span class="ident">block</span> <span class="op">&gt;</span> <span class="ident">zero</span>
-			<span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">is_digest_build_enabled</span>()
-			<span class="op">&amp;&amp;</span> ((<span class="ident">block</span> <span class="op">-</span> <span class="ident">zero</span>) <span class="op">%</span> <span class="self">self</span>.<span class="ident">digest_interval</span>.<span class="ident">into</span>()).<span class="ident">is_zero</span>()
+		<span class="ident">block</span> <span class="op">&gt;</span> <span class="ident">zero</span> <span class="op">&amp;&amp;</span>
+			<span class="self">self</span>.<span class="ident">is_digest_build_enabled</span>() <span class="op">&amp;&amp;</span>
+			((<span class="ident">block</span> <span class="op">-</span> <span class="ident">zero</span>) <span class="op">%</span> <span class="self">self</span>.<span class="ident">digest_interval</span>.<span class="ident">into</span>()).<span class="ident">is_zero</span>()
 	}
 
 	<span class="doccomment">/// Returns max digest interval. One if digests are not created at all.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_digest_interval</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_digest_build_enabled</span>() {
-			<span class="kw">return</span> <span class="number">1</span>;
+			<span class="kw">return</span> <span class="number">1</span>
 		}
 
 		<span class="comment">// we&#39;ll get &gt;1 loop iteration only when bad configuration parameters are selected</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">current_level</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">digest_levels</span>;
 		<span class="kw">loop</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">max_digest_interval</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">digest_interval</span>.<span class="ident">checked_pow</span>(<span class="ident">current_level</span>) {
-				<span class="kw">return</span> <span class="ident">max_digest_interval</span>;
+				<span class="kw">return</span> <span class="ident">max_digest_interval</span>
 			}
 
-			<span class="ident">current_level</span> <span class="op">=</span> <span class="ident">current_level</span> <span class="op">-</span> <span class="number">1</span>;
+			<span class="ident">current_level</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
 		}
 	}
 
 	<span class="doccomment">/// Returns max level digest block number that has been created at block &lt;= passed block number.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns None if digests are not created at all.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prev_max_level_digest_block</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(
-		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		<span class="ident">zero</span>: <span class="ident">Number</span>,
-		<span class="ident">block</span>: <span class="ident">Number</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>
-		<span class="kw">where</span>
-			<span class="ident">Number</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span>
-			<span class="ident">::sp_std::ops::Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span>
-			<span class="ident">::sp_std::ops::Div</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">::sp_std::ops::Mul</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Zero</span>,
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prev_max_level_digest_block</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">zero</span>: <span class="ident">Number</span>, <span class="ident">block</span>: <span class="ident">Number</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">Number</span>: <span class="ident">Clone</span>
+			<span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">PartialOrd</span>
+			<span class="op">+</span> <span class="ident">PartialEq</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Div</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">Zero</span>,
 	{
 		<span class="kw">if</span> <span class="ident">block</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">zero</span> {
-			<span class="kw">return</span> <span class="prelude-val">None</span>;
+			<span class="kw">return</span> <span class="prelude-val">None</span>
 		}
 
-		<span class="kw">let</span> (<span class="ident">next_begin</span>, <span class="ident">next_end</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_max_level_digest_range</span>(<span class="ident">zero</span>.<span class="ident">clone</span>(), <span class="ident">block</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
+		<span class="kw">let</span> (<span class="ident">next_begin</span>, <span class="ident">next_end</span>) <span class="op">=</span>
+			<span class="self">self</span>.<span class="ident">next_max_level_digest_range</span>(<span class="ident">zero</span>.<span class="ident">clone</span>(), <span class="ident">block</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 
 		<span class="comment">// if &#39;next&#39; digest includes our block, then it is a also a previous digest</span>
 		<span class="kw">if</span> <span class="ident">next_end</span> <span class="op">=</span><span class="op">=</span> <span class="ident">block</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>)
 		}
 
 		<span class="comment">// if previous digest ends at zero block, then there are no previous digest</span>
@@ -442,13 +462,18 @@
 		<span class="ident">zero</span>: <span class="ident">Number</span>,
 		<span class="kw-2">mut</span> <span class="ident">block</span>: <span class="ident">Number</span>,
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Number</span>, <span class="ident">Number</span>)<span class="op">&gt;</span>
-		<span class="kw">where</span>
-			<span class="ident">Number</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span>
-			<span class="ident">::sp_std::ops::Add</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span>
-			<span class="ident">::sp_std::ops::Div</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">::sp_std::ops::Mul</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span>,
+	<span class="kw">where</span>
+		<span class="ident">Number</span>: <span class="ident">Clone</span>
+			<span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">PartialOrd</span>
+			<span class="op">+</span> <span class="ident">PartialEq</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Add</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Div</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Mul</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>,
 	{
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_digest_build_enabled</span>() {
-			<span class="kw">return</span> <span class="prelude-val">None</span>;
+			<span class="kw">return</span> <span class="prelude-val">None</span>
 		}
 
 		<span class="kw">if</span> <span class="ident">block</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">zero</span> {
@@ -458,7 +483,7 @@
 		<span class="kw">let</span> <span class="ident">max_digest_interval</span>: <span class="ident">Number</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">max_digest_interval</span>().<span class="ident">into</span>();
 		<span class="kw">let</span> <span class="ident">max_digests_since_zero</span> <span class="op">=</span> (<span class="ident">block</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">zero</span>.<span class="ident">clone</span>()) <span class="op">/</span> <span class="ident">max_digest_interval</span>.<span class="ident">clone</span>();
 		<span class="kw">if</span> <span class="ident">max_digests_since_zero</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>.<span class="ident">into</span>() {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">zero</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="number">1</span>.<span class="ident">into</span>(), <span class="ident">zero</span> <span class="op">+</span> <span class="ident">max_digest_interval</span>));
+			<span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">zero</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="number">1</span>.<span class="ident">into</span>(), <span class="ident">zero</span> <span class="op">+</span> <span class="ident">max_digest_interval</span>))
 		}
 		<span class="kw">let</span> <span class="ident">last_max_digest_block</span> <span class="op">=</span> <span class="ident">zero</span> <span class="op">+</span> <span class="ident">max_digests_since_zero</span> <span class="op">*</span> <span class="ident">max_digest_interval</span>.<span class="ident">clone</span>();
 		<span class="prelude-val">Some</span>(<span class="kw">if</span> <span class="ident">block</span> <span class="op">=</span><span class="op">=</span> <span class="ident">last_max_digest_block</span> {
@@ -475,14 +500,22 @@
 	<span class="doccomment">///  digest interval (in blocks)</span>
 	<span class="doccomment">///  step between blocks we&#39;re interested in when digest is built</span>
 	<span class="doccomment">/// )</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">digest_level_at_block</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">zero</span>: <span class="ident">Number</span>, <span class="ident">block</span>: <span class="ident">Number</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>)<span class="op">&gt;</span>
-		<span class="kw">where</span>
-			<span class="ident">Number</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span>
-			<span class="ident">::sp_std::ops::Rem</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="ident">Number</span><span class="op">&gt;</span> <span class="op">+</span>
-			<span class="ident">::sp_std::cmp::PartialOrd</span> <span class="op">+</span> <span class="ident">Zero</span>,
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">digest_level_at_block</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(
+		<span class="kw-2">&amp;</span><span class="self">self</span>,
+		<span class="ident">zero</span>: <span class="ident">Number</span>,
+		<span class="ident">block</span>: <span class="ident">Number</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>)<span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">Number</span>: <span class="ident">Clone</span>
+			<span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">PartialEq</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Rem</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::ops::Sub</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Number</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">::sp_std::cmp::PartialOrd</span>
+			<span class="op">+</span> <span class="ident">Zero</span>,
 	{
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_digest_build_required_at_block</span>(<span class="ident">zero</span>.<span class="ident">clone</span>(), <span class="ident">block</span>.<span class="ident">clone</span>()) {
-			<span class="kw">return</span> <span class="prelude-val">None</span>;
+			<span class="kw">return</span> <span class="prelude-val">None</span>
 		}
 
 		<span class="kw">let</span> <span class="ident">relative_block</span> <span class="op">=</span> <span class="ident">block</span> <span class="op">-</span> <span class="ident">zero</span>;
@@ -491,21 +524,18 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">digest_step</span> <span class="op">=</span> <span class="number">1u32</span>;
 		<span class="kw">while</span> <span class="ident">current_level</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">digest_levels</span> {
 			<span class="kw">let</span> <span class="ident">new_digest_interval</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">digest_interval</span>.<span class="ident">checked_mul</span>(<span class="self">self</span>.<span class="ident">digest_interval</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">new_digest_interval</span>) <span class="kw">if</span> (<span class="ident">relative_block</span>.<span class="ident">clone</span>() <span class="op">%</span> <span class="ident">new_digest_interval</span>.<span class="ident">into</span>()).<span class="ident">is_zero</span>()
-					<span class="op">=</span><span class="op">&gt;</span> <span class="ident">new_digest_interval</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">new_digest_interval</span>)
+					<span class="kw">if</span> (<span class="ident">relative_block</span>.<span class="ident">clone</span>() <span class="op">%</span> <span class="ident">new_digest_interval</span>.<span class="ident">into</span>()).<span class="ident">is_zero</span>() <span class="op">=</span><span class="op">&gt;</span>
+					<span class="ident">new_digest_interval</span>,
 				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
 			};
 
 			<span class="ident">digest_step</span> <span class="op">=</span> <span class="ident">digest_interval</span>;
 			<span class="ident">digest_interval</span> <span class="op">=</span> <span class="ident">new_digest_interval</span>;
-			<span class="ident">current_level</span> <span class="op">=</span> <span class="ident">current_level</span> <span class="op">+</span> <span class="number">1</span>;
+			<span class="ident">current_level</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 		}
 
-		<span class="prelude-val">Some</span>((
-			<span class="ident">current_level</span>,
-			<span class="ident">digest_interval</span>,
-			<span class="ident">digest_step</span>,
-		))
+		<span class="prelude-val">Some</span>((<span class="ident">current_level</span>, <span class="ident">digest_interval</span>, <span class="ident">digest_step</span>))
 	}
 }
 
@@ -514,10 +544,7 @@
 	<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ChangesTrieConfiguration</span>;
 
 	<span class="kw">fn</span> <span class="ident">config</span>(<span class="ident">interval</span>: <span class="ident">u32</span>, <span class="ident">levels</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChangesTrieConfiguration</span> {
-		<span class="ident">ChangesTrieConfiguration</span> {
-			<span class="ident">digest_interval</span>: <span class="ident">interval</span>,
-			<span class="ident">digest_levels</span>: <span class="ident">levels</span>,
-		}
+		<span class="ident">ChangesTrieConfiguration</span> { <span class="ident">digest_interval</span>: <span class="ident">interval</span>, <span class="ident">digest_levels</span>: <span class="ident">levels</span> }
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -532,7 +559,7 @@
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">is_digest_build_required_at_block_works</span>() {
 		<span class="kw">fn</span> <span class="ident">test_with_zero</span>(<span class="ident">zero</span>: <span class="ident">u64</span>) {
-			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">is_digest_build_required_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">0u64</span>));
+			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">is_digest_build_required_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span>));
 			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">is_digest_build_required_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">1u64</span>));
 			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">is_digest_build_required_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">2u64</span>));
 			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">is_digest_build_required_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">4u64</span>));
@@ -555,13 +582,16 @@
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">digest_level_at_block_works</span>() {
 		<span class="kw">fn</span> <span class="ident">test_with_zero</span>(<span class="ident">zero</span>: <span class="ident">u64</span>) {
-			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">0u64</span>), <span class="prelude-val">None</span>);
+			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span>), <span class="prelude-val">None</span>);
 			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">7u64</span>), <span class="prelude-val">None</span>);
 			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">63u64</span>), <span class="prelude-val">None</span>);
 			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">8u64</span>), <span class="prelude-val">Some</span>((<span class="number">1</span>, <span class="number">8</span>, <span class="number">1</span>)));
 			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">64u64</span>), <span class="prelude-val">Some</span>((<span class="number">2</span>, <span class="number">64</span>, <span class="number">8</span>)));
 			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">512u64</span>), <span class="prelude-val">Some</span>((<span class="number">3</span>, <span class="number">512</span>, <span class="number">64</span>)));
-			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">4096u64</span>), <span class="prelude-val">Some</span>((<span class="number">4</span>, <span class="number">4096</span>, <span class="number">512</span>)));
+			<span class="macro">assert_eq!</span>(
+				<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">4096u64</span>),
+				<span class="prelude-val">Some</span>((<span class="number">4</span>, <span class="number">4096</span>, <span class="number">512</span>))
+			);
 			<span class="macro">assert_eq!</span>(<span class="ident">config</span>(<span class="number">8</span>, <span class="number">4</span>).<span class="ident">digest_level_at_block</span>(<span class="ident">zero</span>, <span class="ident">zero</span> <span class="op">+</span> <span class="number">4112u64</span>), <span class="prelude-val">Some</span>((<span class="number">1</span>, <span class="number">8</span>, <span class="number">1</span>)));
 		}
 

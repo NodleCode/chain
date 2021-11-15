@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;sp-state-machine-0.9.0&#x2F;src&#x2F;changes_trie&#x2F;storage.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>storage.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../sp_state_machine/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;d76f399&#x2F;primitives&#x2F;state-machine&#x2F;src&#x2F;changes_trie&#x2F;storage.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>storage.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../sp_state_machine/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -211,6 +211,7 @@
 <span id="211">211</span>
 <span id="212">212</span>
 <span id="213">213</span>
+<span id="214">214</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
 
 <span class="comment">// Copyright (C) 2017-2021 Parity Technologies (UK) Ltd.</span>
@@ -230,22 +231,21 @@
 
 <span class="doccomment">//! Changes trie storage utilities.</span>
 
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashSet</span>, <span class="ident">HashMap</span>};
-<span class="kw">use</span> <span class="ident">hash_db</span>::{<span class="ident">Hasher</span>, <span class="ident">Prefix</span>, <span class="ident">EMPTY_PREFIX</span>};
-<span class="kw">use</span> <span class="ident">sp_core::storage::PrefixedStorageKey</span>;
-<span class="kw">use</span> <span class="ident">sp_trie::DBValue</span>;
-<span class="kw">use</span> <span class="ident">sp_trie::MemoryDB</span>;
-<span class="kw">use</span> <span class="ident">parking_lot::RwLock</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
-	<span class="ident">StorageKey</span>,
+	<span class="ident">changes_trie</span>::{<span class="ident">AnchorBlockId</span>, <span class="ident">BlockNumber</span>, <span class="ident">BuildCache</span>, <span class="ident">RootsStorage</span>, <span class="ident">Storage</span>},
 	<span class="ident">trie_backend_essence::TrieBackendStorage</span>,
-	<span class="ident">changes_trie</span>::{<span class="ident">BuildCache</span>, <span class="ident">RootsStorage</span>, <span class="ident">Storage</span>, <span class="ident">AnchorBlockId</span>, <span class="ident">BlockNumber</span>},
+	<span class="ident">StorageKey</span>,
 };
+<span class="kw">use</span> <span class="ident">hash_db</span>::{<span class="ident">Hasher</span>, <span class="ident">Prefix</span>, <span class="ident">EMPTY_PREFIX</span>};
+<span class="kw">use</span> <span class="ident">parking_lot::RwLock</span>;
+<span class="kw">use</span> <span class="ident">sp_core::storage::PrefixedStorageKey</span>;
+<span class="kw">use</span> <span class="ident">sp_trie</span>::{<span class="ident">DBValue</span>, <span class="ident">MemoryDB</span>};
+<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::backend::insert_into_memory_db</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::changes_trie::input</span>::{<span class="ident">InputPair</span>, <span class="ident">ChildIndex</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::changes_trie::input</span>::{<span class="ident">ChildIndex</span>, <span class="ident">InputPair</span>};
 
 <span class="doccomment">/// In-memory implementation of changes trie storage.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">InMemoryStorage</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span>, <span class="ident">Number</span>: <span class="ident">BlockNumber</span><span class="op">&gt;</span> {
@@ -268,10 +268,7 @@
 	<span class="doccomment">/// Creates storage from given in-memory database.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_db</span>(<span class="ident">mdb</span>: <span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
 		<span class="self">Self</span> {
-			<span class="ident">data</span>: <span class="ident">RwLock::new</span>(<span class="ident">InMemoryStorageData</span> {
-				<span class="ident">roots</span>: <span class="ident">BTreeMap::new</span>(),
-				<span class="ident">mdb</span>,
-			}),
+			<span class="ident">data</span>: <span class="ident">RwLock::new</span>(<span class="ident">InMemoryStorageData</span> { <span class="ident">roots</span>: <span class="ident">BTreeMap::new</span>(), <span class="ident">mdb</span> }),
 			<span class="ident">cache</span>: <span class="ident">BuildCache::new</span>(),
 		}
 	}
@@ -285,7 +282,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_proof</span>(<span class="ident">proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
 		<span class="kw">use</span> <span class="ident">hash_db::HashDB</span>;
 
- 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proof_db</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="ident">::default</span>();
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proof_db</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="ident">::default</span>();
 		<span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="ident">proof</span> {
 			<span class="ident">proof_db</span>.<span class="ident">insert</span>(<span class="ident">EMPTY_PREFIX</span>, <span class="kw-2">&amp;</span><span class="ident">item</span>);
 		}
@@ -317,7 +314,8 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">roots</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
 		<span class="kw">for</span> (<span class="ident">storage_key</span>, <span class="ident">child_input</span>) <span class="kw">in</span> <span class="ident">children_inputs</span> {
 			<span class="kw">for</span> (<span class="ident">block</span>, <span class="ident">pairs</span>) <span class="kw">in</span> <span class="ident">child_input</span> {
-				<span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">H</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb</span>, <span class="ident">pairs</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="ident">Into::into</span>));
+				<span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span>
+					<span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">H</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb</span>, <span class="ident">pairs</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="ident">Into::into</span>));
 
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">root</span>) <span class="op">=</span> <span class="ident">root</span> {
 					<span class="kw">let</span> <span class="ident">ix</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ix</span>) <span class="op">=</span> <span class="ident">top_inputs</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">block</span>) {
@@ -342,17 +340,14 @@
 		}
 
 		<span class="ident">InMemoryStorage</span> {
-			<span class="ident">data</span>: <span class="ident">RwLock::new</span>(<span class="ident">InMemoryStorageData</span> {
-				<span class="ident">roots</span>,
-				<span class="ident">mdb</span>,
-			}),
+			<span class="ident">data</span>: <span class="ident">RwLock::new</span>(<span class="ident">InMemoryStorageData</span> { <span class="ident">roots</span>, <span class="ident">mdb</span> }),
 			<span class="ident">cache</span>: <span class="ident">BuildCache::new</span>(),
 		}
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-		<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">write</span>().<span class="ident">mdb</span> <span class="op">=</span> <span class="ident">MemoryDB::default</span>();	<span class="comment">// use new to be more correct</span>
+		<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">write</span>().<span class="ident">mdb</span> <span class="op">=</span> <span class="ident">MemoryDB::default</span>(); <span class="comment">// use new to be more correct</span>
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -378,13 +373,20 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span>, <span class="ident">Number</span>: <span class="ident">BlockNumber</span><span class="op">&gt;</span> <span class="ident">RootsStorage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">InMemoryStorage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> {
 	<span class="kw">fn</span> <span class="ident">build_anchor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">parent_hash</span>: <span class="ident">H::Out</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
-		<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">read</span>().<span class="ident">roots</span>.<span class="ident">iter</span>()
+		<span class="self">self</span>.<span class="ident">data</span>
+			.<span class="ident">read</span>()
+			.<span class="ident">roots</span>
+			.<span class="ident">iter</span>()
 			.<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">v</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="ident">parent_hash</span>)
 			.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">AnchorBlockId</span> { <span class="ident">hash</span>: <span class="ident">parent_hash</span>, <span class="ident">number</span>: <span class="ident">k</span>.<span class="ident">clone</span>() })
 			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Can&#39;t find associated number for block {:?}&quot;</span>, <span class="ident">parent_hash</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_anchor_block</span>: <span class="kw-2">&amp;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>, <span class="ident">block</span>: <span class="ident">Number</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">H::Out</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">root</span>(
+		<span class="kw-2">&amp;</span><span class="self">self</span>,
+		<span class="ident">_anchor_block</span>: <span class="kw-2">&amp;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>,
+		<span class="ident">block</span>: <span class="ident">Number</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">H::Out</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">read</span>().<span class="ident">roots</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">block</span>).<span class="ident">cloned</span>())
 	}
 }
@@ -414,9 +416,9 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> <span class="ident">TrieBackendStorage</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TrieBackendAdapter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>
-	<span class="kw">where</span>
-		<span class="ident">Number</span>: <span class="ident">BlockNumber</span>,
-		<span class="ident">H</span>: <span class="ident">Hasher</span>,
+<span class="kw">where</span>
+	<span class="ident">Number</span>: <span class="ident">BlockNumber</span>,
+	<span class="ident">H</span>: <span class="ident">Hasher</span>,
 {
 	<span class="kw">type</span> <span class="ident">Overlay</span> <span class="op">=</span> <span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>;
 

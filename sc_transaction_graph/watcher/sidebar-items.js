@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Sender","Sender part of the watcher. Exposed only for testing purposes."],["Watcher","Extrinsic watcher."]]});

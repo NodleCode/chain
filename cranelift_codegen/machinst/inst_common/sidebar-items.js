@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["AtomicRmwOp","Atomic memory update operations.  As of 21 Aug 2020 these are used for the aarch64 and x64 targets."]]});

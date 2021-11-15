@@ -1,0 +1,228 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;d76f399&#x2F;client&#x2F;executor&#x2F;common&#x2F;src&#x2F;runtime_blob&#x2F;globals_snapshot.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>globals_snapshot.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../sc_executor_common/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+</pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
+
+<span class="comment">// Copyright (C) 2020-2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0</span>
+
+<span class="comment">// This program is free software: you can redistribute it and/or modify</span>
+<span class="comment">// it under the terms of the GNU General Public License as published by</span>
+<span class="comment">// the Free Software Foundation, either version 3 of the License, or</span>
+<span class="comment">// (at your option) any later version.</span>
+
+<span class="comment">// This program is distributed in the hope that it will be useful,</span>
+<span class="comment">// but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="comment">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="comment">// GNU General Public License for more details.</span>
+
+<span class="comment">// You should have received a copy of the GNU General Public License</span>
+<span class="comment">// along with this program. If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::RuntimeBlob</span>;
+
+<span class="doccomment">/// Saved value of particular exported global.</span>
+<span class="kw">struct</span> <span class="ident">SavedValue</span><span class="op">&lt;</span><span class="ident">Global</span><span class="op">&gt;</span> {
+	<span class="doccomment">/// The handle of this global which can be used to refer to this global.</span>
+	<span class="ident">handle</span>: <span class="ident">Global</span>,
+	<span class="doccomment">/// The global value that was observed during the snapshot creation.</span>
+	<span class="ident">value</span>: <span class="ident">sp_wasm_interface::Value</span>,
+}
+
+<span class="doccomment">/// An adapter for a wasm module instance that is focused on getting and setting globals.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">InstanceGlobals</span> {
+	<span class="doccomment">/// A handle to a global which can be used to get or set a global variable. This is supposed to</span>
+	<span class="doccomment">/// be a lightweight handle, like an index or an Rc-like smart-pointer, which is cheap to clone.</span>
+	<span class="kw">type</span> <span class="ident">Global</span>: <span class="ident">Clone</span>;
+	<span class="doccomment">/// Get a handle to a global by it&#39;s export name.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The requested export is must exist in the exported list, and it should be a mutable global.</span>
+	<span class="kw">fn</span> <span class="ident">get_global</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">export_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Global</span>;
+	<span class="doccomment">/// Get the current value of the global.</span>
+	<span class="kw">fn</span> <span class="ident">get_global_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">global</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Global</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_wasm_interface::Value</span>;
+	<span class="doccomment">/// Update the current value of the global.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The global behind the handle is guaranteed to be mutable and the value to be the same type</span>
+	<span class="doccomment">/// as the global.</span>
+	<span class="kw">fn</span> <span class="ident">set_global_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">global</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Global</span>, <span class="ident">value</span>: <span class="ident">sp_wasm_interface::Value</span>);
+}
+
+<span class="doccomment">/// A set of exposed mutable globals.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is set of globals required to create a [`GlobalsSnapshot`] and that are collected from</span>
+<span class="doccomment">/// a runtime blob that was instrumented by</span>
+<span class="doccomment">/// [`RuntimeBlob::expose_mutable_globals`](super::RuntimeBlob::expose_mutable_globals`).</span>
+
+<span class="doccomment">/// If the code wasn&#39;t instrumented then it would be empty and snapshot would do nothing.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ExposedMutableGlobalsSet</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>);
+
+<span class="kw">impl</span> <span class="ident">ExposedMutableGlobalsSet</span> {
+	<span class="doccomment">/// Collect the set from the given runtime blob. See the struct documentation for details.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">collect</span>(<span class="ident">runtime_blob</span>: <span class="kw-2">&amp;</span><span class="ident">RuntimeBlob</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">let</span> <span class="ident">global_names</span> <span class="op">=</span>
+			<span class="ident">runtime_blob</span>.<span class="ident">exported_internal_global_names</span>().<span class="ident">map</span>(<span class="ident">ToOwned::to_owned</span>).<span class="ident">collect</span>();
+		<span class="self">Self</span>(<span class="ident">global_names</span>)
+	}
+}
+
+<span class="doccomment">/// A snapshot of a global variables values. This snapshot can be later used for restoring the</span>
+<span class="doccomment">/// values to the preserved state.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Technically, a snapshot stores only values of mutable global variables. This is because</span>
+<span class="doccomment">/// immutable global variables always have the same values.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// We take it from an instance rather from a module because the start function could potentially</span>
+<span class="doccomment">/// change any of the mutable global values.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GlobalsSnapshot</span><span class="op">&lt;</span><span class="ident">Global</span><span class="op">&gt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SavedValue</span><span class="op">&lt;</span><span class="ident">Global</span><span class="op">&gt;</span><span class="op">&gt;</span>);
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Global</span><span class="op">&gt;</span> <span class="ident">GlobalsSnapshot</span><span class="op">&lt;</span><span class="ident">Global</span><span class="op">&gt;</span> {
+	<span class="doccomment">/// Take a snapshot of global variables for a given instance.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// # Panics</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This function panics if the instance doesn&#39;t correspond to the module from which the</span>
+	<span class="doccomment">/// [`ExposedMutableGlobalsSet`] was collected.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span><span class="op">&lt;</span><span class="ident">Instance</span><span class="op">&gt;</span>(
+		<span class="ident">mutable_globals</span>: <span class="kw-2">&amp;</span><span class="ident">ExposedMutableGlobalsSet</span>,
+		<span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Instance</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+	<span class="kw">where</span>
+		<span class="ident">Instance</span>: <span class="ident">InstanceGlobals</span><span class="op">&lt;</span><span class="ident">Global</span> <span class="op">=</span> <span class="ident">Global</span><span class="op">&gt;</span>,
+	{
+		<span class="kw">let</span> <span class="ident">global_names</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">mutable_globals</span>.<span class="number">0</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">saved_values</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">global_names</span>.<span class="ident">len</span>());
+
+		<span class="kw">for</span> <span class="ident">global_name</span> <span class="kw">in</span> <span class="ident">global_names</span> {
+			<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">instance</span>.<span class="ident">get_global</span>(<span class="ident">global_name</span>);
+			<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">instance</span>.<span class="ident">get_global_value</span>(<span class="kw-2">&amp;</span><span class="ident">handle</span>);
+			<span class="ident">saved_values</span>.<span class="ident">push</span>(<span class="ident">SavedValue</span> { <span class="ident">handle</span>, <span class="ident">value</span> });
+		}
+
+		<span class="self">Self</span>(<span class="ident">saved_values</span>)
+	}
+
+	<span class="doccomment">/// Apply the snapshot to the given instance.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This instance must be the same that was used for creation of this snapshot.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply</span><span class="op">&lt;</span><span class="ident">Instance</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Instance</span>)
+	<span class="kw">where</span>
+		<span class="ident">Instance</span>: <span class="ident">InstanceGlobals</span><span class="op">&lt;</span><span class="ident">Global</span> <span class="op">=</span> <span class="ident">Global</span><span class="op">&gt;</span>,
+	{
+		<span class="kw">for</span> <span class="ident">saved_value</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span> {
+			<span class="ident">instance</span>.<span class="ident">set_global_value</span>(<span class="kw-2">&amp;</span><span class="ident">saved_value</span>.<span class="ident">handle</span>, <span class="ident">saved_value</span>.<span class="ident">value</span>);
+		}
+	}
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="sc_executor_common" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
+</body></html>

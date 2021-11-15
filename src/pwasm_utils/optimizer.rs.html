@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;pwasm-utils-0.16.0&#x2F;src&#x2F;optimizer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>optimizer.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pwasm_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;pwasm-utils-0.18.2&#x2F;src&#x2F;optimizer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>optimizer.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pwasm_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -661,16 +661,158 @@
 <span id="661">661</span>
 <span id="662">662</span>
 <span id="663">663</span>
-</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">features</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std::collections</span>::{<span class="ident">HashSet</span> <span class="kw">as</span> <span class="ident">Set</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">features</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std::collections</span>::{<span class="ident">BTreeSet</span> <span class="kw">as</span> <span class="ident">Set</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std::vec::Vec</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std::mem</span>;
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+</pre><pre class="rust"><code><span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">features</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std::collections::BTreeSet</span> <span class="kw">as</span> <span class="ident">Set</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">features</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std::collections::HashSet</span> <span class="kw">as</span> <span class="ident">Set</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::std</span>::{<span class="ident">mem</span>, <span class="ident">vec::Vec</span>};
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::symbols</span>::{<span class="ident">expand_symbols</span>, <span class="ident">push_code_symbols</span>, <span class="ident">resolve_function</span>, <span class="ident">Symbol</span>};
+<span class="kw">use</span> <span class="ident">log::trace</span>;
 <span class="kw">use</span> <span class="ident">parity_wasm::elements</span>;
-
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::symbols</span>::{<span class="ident">Symbol</span>, <span class="ident">expand_symbols</span>, <span class="ident">push_code_symbols</span>, <span class="ident">resolve_function</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
@@ -689,28 +831,32 @@
 
 	<span class="comment">// try to parse name section</span>
 	<span class="kw">let</span> <span class="ident">module_temp</span> <span class="op">=</span> <span class="ident">mem::take</span>(<span class="ident">module</span>);
-	<span class="kw">let</span> <span class="ident">module_temp</span> <span class="op">=</span> <span class="ident">module_temp</span>
-		.<span class="ident">parse_names</span>()
-		.<span class="ident">unwrap_or_else</span>(<span class="op">|</span>(<span class="ident">_err</span>, <span class="ident">module</span>)<span class="op">|</span> <span class="ident">module</span>);
+	<span class="kw">let</span> <span class="ident">module_temp</span> <span class="op">=</span> <span class="ident">module_temp</span>.<span class="ident">parse_names</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span>(<span class="ident">_err</span>, <span class="ident">module</span>)<span class="op">|</span> <span class="ident">module</span>);
 	<span class="kw-2">*</span><span class="ident">module</span> <span class="op">=</span> <span class="ident">module_temp</span>;
 
 	<span class="comment">// Algo starts from the top, listing all items that should stay</span>
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stay</span> <span class="op">=</span> <span class="ident">Set::new</span>();
-	<span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">entry</span>) <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">export_section</span>().<span class="ident">ok_or</span>(<span class="ident">Error::NoExportSection</span>)<span class="question-mark">?</span>.<span class="ident">entries</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+	<span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">entry</span>) <span class="kw">in</span> <span class="ident">module</span>
+		.<span class="ident">export_section</span>()
+		.<span class="ident">ok_or</span>(<span class="ident">Error::NoExportSection</span>)<span class="question-mark">?</span>
+		.<span class="ident">entries</span>()
+		.<span class="ident">iter</span>()
+		.<span class="ident">enumerate</span>()
+	{
 		<span class="kw">if</span> <span class="ident">used_exports</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span> <span class="op">=</span><span class="op">=</span> <span class="ident">entry</span>.<span class="ident">field</span>()) {
 			<span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">Symbol::Export</span>(<span class="ident">index</span>));
 		}
 	}
 
 	<span class="comment">// If there is start function in module, it should stary</span>
-	<span class="ident">module</span>.<span class="ident">start_section</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ss</span><span class="op">|</span> <span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">resolve_function</span>(<span class="kw-2">&amp;</span><span class="ident">module</span>, <span class="ident">ss</span>)));
+	<span class="ident">module</span>.<span class="ident">start_section</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ss</span><span class="op">|</span> <span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">resolve_function</span>(<span class="ident">module</span>, <span class="ident">ss</span>)));
 
 	<span class="comment">// All symbols used in data/element segments are also should be preserved</span>
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">init_symbols</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 	<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">data_section</span>) <span class="op">=</span> <span class="ident">module</span>.<span class="ident">data_section</span>() {
 		<span class="kw">for</span> <span class="ident">segment</span> <span class="kw">in</span> <span class="ident">data_section</span>.<span class="ident">entries</span>() {
 			<span class="ident">push_code_symbols</span>(
-				<span class="kw-2">&amp;</span><span class="ident">module</span>,
+				<span class="ident">module</span>,
 				<span class="ident">segment</span>
 					.<span class="ident">offset</span>()
 					.<span class="ident">as_ref</span>()
@@ -723,20 +869,22 @@
 	<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">elements_section</span>) <span class="op">=</span> <span class="ident">module</span>.<span class="ident">elements_section</span>() {
 		<span class="kw">for</span> <span class="ident">segment</span> <span class="kw">in</span> <span class="ident">elements_section</span>.<span class="ident">entries</span>() {
 			<span class="ident">push_code_symbols</span>(
-				<span class="kw-2">&amp;</span><span class="ident">module</span>,
+				<span class="ident">module</span>,
 				<span class="ident">segment</span>
 					.<span class="ident">offset</span>()
 					.<span class="ident">as_ref</span>()
 					.<span class="ident">expect</span>(<span class="string">&quot;parity-wasm is compiled without bulk-memory operations&quot;</span>)
 					.<span class="ident">code</span>(),
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">init_symbols</span>
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">init_symbols</span>,
 			);
 			<span class="kw">for</span> <span class="ident">func_index</span> <span class="kw">in</span> <span class="ident">segment</span>.<span class="ident">members</span>() {
-				<span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">resolve_function</span>(<span class="kw-2">&amp;</span><span class="ident">module</span>, <span class="kw-2">*</span><span class="ident">func_index</span>));
+				<span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">resolve_function</span>(<span class="ident">module</span>, <span class="kw-2">*</span><span class="ident">func_index</span>));
 			}
 		}
 	}
-	<span class="kw">for</span> <span class="ident">symbol</span> <span class="kw">in</span> <span class="ident">init_symbols</span>.<span class="ident">drain</span>(..) { <span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">symbol</span>); }
+	<span class="kw">for</span> <span class="ident">symbol</span> <span class="kw">in</span> <span class="ident">init_symbols</span>.<span class="ident">drain</span>(..) {
+		<span class="ident">stay</span>.<span class="ident">insert</span>(<span class="ident">symbol</span>);
+	}
 
 	<span class="comment">// Call function which will traverse the list recursively, filling stay with all symbols</span>
 	<span class="comment">// that are already used by those which already there</span>
@@ -757,7 +905,9 @@
 
 	{
 		<span class="kw">loop</span> {
-			<span class="kw">if</span> <span class="ident">type_section</span>(<span class="ident">module</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">section</span><span class="op">|</span> <span class="ident">section</span>.<span class="ident">types_mut</span>().<span class="ident">len</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> { <span class="kw">break</span>; }
+			<span class="kw">if</span> <span class="ident">type_section</span>(<span class="ident">module</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">section</span><span class="op">|</span> <span class="ident">section</span>.<span class="ident">types_mut</span>().<span class="ident">len</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> {
+				<span class="kw">break</span>
+			}
 
 			<span class="kw">if</span> <span class="ident">stay</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">Symbol::Type</span>(<span class="ident">old_index</span>)) {
 				<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -788,7 +938,12 @@
 					} <span class="kw">else</span> {
 						<span class="ident">remove</span> <span class="op">=</span> <span class="bool-val">true</span>;
 						<span class="ident">eliminated_funcs</span>.<span class="ident">push</span>(<span class="ident">top_funcs</span>);
-						<span class="macro">trace!</span>(<span class="string">&quot;Eliminated import({}) func({}, {})&quot;</span>, <span class="ident">old_index</span>, <span class="ident">top_funcs</span>, <span class="ident">imports</span>.<span class="ident">entries</span>()[<span class="ident">index</span>].<span class="ident">field</span>());
+						<span class="macro">trace!</span>(
+							<span class="string">&quot;Eliminated import({}) func({}, {})&quot;</span>,
+							<span class="ident">old_index</span>,
+							<span class="ident">top_funcs</span>,
+							<span class="ident">imports</span>.<span class="ident">entries</span>()[<span class="ident">index</span>].<span class="ident">field</span>()
+						);
 					}
 					<span class="ident">top_funcs</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				},
@@ -798,13 +953,18 @@
 					} <span class="kw">else</span> {
 						<span class="ident">remove</span> <span class="op">=</span> <span class="bool-val">true</span>;
 						<span class="ident">eliminated_globals</span>.<span class="ident">push</span>(<span class="ident">top_globals</span>);
-						<span class="macro">trace!</span>(<span class="string">&quot;Eliminated import({}) global({}, {})&quot;</span>, <span class="ident">old_index</span>, <span class="ident">top_globals</span>, <span class="ident">imports</span>.<span class="ident">entries</span>()[<span class="ident">index</span>].<span class="ident">field</span>());
+						<span class="macro">trace!</span>(
+							<span class="string">&quot;Eliminated import({}) global({}, {})&quot;</span>,
+							<span class="ident">old_index</span>,
+							<span class="ident">top_globals</span>,
+							<span class="ident">imports</span>.<span class="ident">entries</span>()[<span class="ident">index</span>].<span class="ident">field</span>()
+						);
 					}
 					<span class="ident">top_globals</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				},
 				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-				}
+				},
 			}
 			<span class="kw">if</span> <span class="ident">remove</span> {
 				<span class="ident">imports</span>.<span class="ident">entries_mut</span>().<span class="ident">remove</span>(<span class="ident">index</span>);
@@ -812,7 +972,9 @@
 
 			<span class="ident">old_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="kw">if</span> <span class="ident">index</span> <span class="op">=</span><span class="op">=</span> <span class="ident">imports</span>.<span class="ident">entries</span>().<span class="ident">len</span>() { <span class="kw">break</span>; }
+			<span class="kw">if</span> <span class="ident">index</span> <span class="op">=</span><span class="op">=</span> <span class="ident">imports</span>.<span class="ident">entries</span>().<span class="ident">len</span>() {
+				<span class="kw">break</span>
+			}
 		}
 	}
 
@@ -822,7 +984,9 @@
 		<span class="ident">old_index</span> <span class="op">=</span> <span class="number">0</span>;
 
 		<span class="kw">loop</span> {
-			<span class="kw">if</span> <span class="ident">globals</span>.<span class="ident">entries_mut</span>().<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> { <span class="kw">break</span>; }
+			<span class="kw">if</span> <span class="ident">globals</span>.<span class="ident">entries_mut</span>().<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> {
+				<span class="kw">break</span>
+			}
 			<span class="kw">if</span> <span class="ident">stay</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">Symbol::Global</span>(<span class="ident">old_index</span>)) {
 				<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 			} <span class="kw">else</span> {
@@ -840,11 +1004,18 @@
 		<span class="ident">old_index</span> <span class="op">=</span> <span class="number">0</span>;
 
 		<span class="kw">loop</span> {
-			<span class="kw">if</span> <span class="ident">function_section</span>(<span class="ident">module</span>).<span class="ident">expect</span>(<span class="string">&quot;Functons section to exist&quot;</span>).<span class="ident">entries_mut</span>().<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> { <span class="kw">break</span>; }
+			<span class="kw">if</span> <span class="ident">function_section</span>(<span class="ident">module</span>).<span class="ident">expect</span>(<span class="string">&quot;Functons section to exist&quot;</span>).<span class="ident">entries_mut</span>().<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span>
+				<span class="ident">index</span>
+			{
+				<span class="kw">break</span>
+			}
 			<span class="kw">if</span> <span class="ident">stay</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">Symbol::Function</span>(<span class="ident">old_index</span>)) {
 				<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 			} <span class="kw">else</span> {
-				<span class="ident">function_section</span>(<span class="ident">module</span>).<span class="ident">expect</span>(<span class="string">&quot;Functons section to exist&quot;</span>).<span class="ident">entries_mut</span>().<span class="ident">remove</span>(<span class="ident">index</span>);
+				<span class="ident">function_section</span>(<span class="ident">module</span>)
+					.<span class="ident">expect</span>(<span class="string">&quot;Functons section to exist&quot;</span>)
+					.<span class="ident">entries_mut</span>()
+					.<span class="ident">remove</span>(<span class="ident">index</span>);
 				<span class="ident">code_section</span>(<span class="ident">module</span>).<span class="ident">expect</span>(<span class="string">&quot;Code section to exist&quot;</span>).<span class="ident">bodies_mut</span>().<span class="ident">remove</span>(<span class="ident">index</span>);
 
 				<span class="ident">eliminated_funcs</span>.<span class="ident">push</span>(<span class="ident">top_funcs</span> <span class="op">+</span> <span class="ident">old_index</span>);
@@ -862,18 +1033,27 @@
 		<span class="ident">old_index</span> <span class="op">=</span> <span class="number">0</span>;
 
 		<span class="kw">loop</span> {
-			<span class="kw">if</span> <span class="ident">exports</span>.<span class="ident">entries_mut</span>().<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> { <span class="kw">break</span>; }
+			<span class="kw">if</span> <span class="ident">exports</span>.<span class="ident">entries_mut</span>().<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> {
+				<span class="kw">break</span>
+			}
 			<span class="kw">if</span> <span class="ident">stay</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">Symbol::Export</span>(<span class="ident">old_index</span>)) {
 				<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 			} <span class="kw">else</span> {
-				<span class="macro">trace!</span>(<span class="string">&quot;Eliminated export({}, {})&quot;</span>, <span class="ident">old_index</span>, <span class="ident">exports</span>.<span class="ident">entries_mut</span>()[<span class="ident">index</span>].<span class="ident">field</span>());
+				<span class="macro">trace!</span>(
+					<span class="string">&quot;Eliminated export({}, {})&quot;</span>,
+					<span class="ident">old_index</span>,
+					<span class="ident">exports</span>.<span class="ident">entries_mut</span>()[<span class="ident">index</span>].<span class="ident">field</span>()
+				);
 				<span class="ident">exports</span>.<span class="ident">entries_mut</span>().<span class="ident">remove</span>(<span class="ident">index</span>);
 			}
 			<span class="ident">old_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 		}
 	}
 
-	<span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_globals</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">eliminated_funcs</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">eliminated_types</span>.<span class="ident">is_empty</span>() {
+	<span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_globals</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span>
+		<span class="op">!</span><span class="ident">eliminated_funcs</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span>
+		<span class="op">!</span><span class="ident">eliminated_types</span>.<span class="ident">is_empty</span>()
+	{
 		<span class="comment">// Finaly, rewire all calls, globals references and types to the new indices</span>
 		<span class="comment">//   (only if there is anything to do)</span>
 		<span class="comment">// When sorting primitives sorting unstable is faster without any difference in result.</span>
@@ -884,57 +1064,78 @@
 		<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 			<span class="kw">match</span> <span class="ident">section</span> {
 				<span class="ident">elements::Section::Start</span>(<span class="ident">func_index</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_funcs</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span> {
-					<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">func_index</span>).<span class="ident">count</span>();
+					<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span>
+						<span class="ident">eliminated_funcs</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">func_index</span>).<span class="ident">count</span>();
 					<span class="kw-2">*</span><span class="ident">func_index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 				},
-				<span class="ident">elements::Section::Function</span>(<span class="ident">function_section</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_types</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">elements::Section::Function</span>(<span class="ident">function_section</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_types</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span>
 					<span class="kw">for</span> <span class="ident">func_signature</span> <span class="kw">in</span> <span class="ident">function_section</span>.<span class="ident">entries_mut</span>() {
-						<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_types</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="ident">func_signature</span>.<span class="ident">type_ref</span>()).<span class="ident">count</span>();
+						<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_types</span>
+							.<span class="ident">iter</span>()
+							.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="ident">func_signature</span>.<span class="ident">type_ref</span>())
+							.<span class="ident">count</span>();
 						<span class="kw-2">*</span><span class="ident">func_signature</span>.<span class="ident">type_ref_mut</span>() <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
-					}
-				},
+					},
 				<span class="ident">elements::Section::Import</span>(<span class="ident">import_section</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_types</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="kw">for</span> <span class="ident">import_entry</span> <span class="kw">in</span> <span class="ident">import_section</span>.<span class="ident">entries_mut</span>() {
-						<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::External::Function</span>(<span class="ident">type_ref</span>) <span class="op">=</span> <span class="ident">import_entry</span>.<span class="ident">external_mut</span>() {
-							<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_types</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">type_ref</span>).<span class="ident">count</span>();
+						<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::External::Function</span>(<span class="ident">type_ref</span>) <span class="op">=</span> <span class="ident">import_entry</span>.<span class="ident">external_mut</span>()
+						{
+							<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_types</span>
+								.<span class="ident">iter</span>()
+								.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">type_ref</span>)
+								.<span class="ident">count</span>();
 							<span class="kw-2">*</span><span class="ident">type_ref</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 						}
 					}
 				},
-				<span class="ident">elements::Section::Code</span>(<span class="ident">code_section</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_globals</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">eliminated_funcs</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">elements::Section::Code</span>(<span class="ident">code_section</span>)
+					<span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_globals</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">eliminated_funcs</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span>
+				{
 					<span class="kw">for</span> <span class="ident">func_body</span> <span class="kw">in</span> <span class="ident">code_section</span>.<span class="ident">bodies_mut</span>() {
 						<span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_funcs</span>.<span class="ident">is_empty</span>() {
 							<span class="ident">update_call_index</span>(<span class="ident">func_body</span>.<span class="ident">code_mut</span>(), <span class="kw-2">&amp;</span><span class="ident">eliminated_funcs</span>);
 						}
 						<span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_globals</span>.<span class="ident">is_empty</span>() {
-							<span class="ident">update_global_index</span>(<span class="ident">func_body</span>.<span class="ident">code_mut</span>().<span class="ident">elements_mut</span>(), <span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>)
+							<span class="ident">update_global_index</span>(
+								<span class="ident">func_body</span>.<span class="ident">code_mut</span>().<span class="ident">elements_mut</span>(),
+								<span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>,
+							)
 						}
 						<span class="kw">if</span> <span class="op">!</span><span class="ident">eliminated_types</span>.<span class="ident">is_empty</span>() {
 							<span class="ident">update_type_index</span>(<span class="ident">func_body</span>.<span class="ident">code_mut</span>(), <span class="kw-2">&amp;</span><span class="ident">eliminated_types</span>)
 						}
 					}
-				},
+				}
 				<span class="ident">elements::Section::Export</span>(<span class="ident">export_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="kw">for</span> <span class="ident">export</span> <span class="kw">in</span> <span class="ident">export_section</span>.<span class="ident">entries_mut</span>() {
 						<span class="kw">match</span> <span class="ident">export</span>.<span class="ident">internal_mut</span>() {
 							<span class="ident">elements::Internal::Function</span>(<span class="ident">func_index</span>) <span class="op">=</span><span class="op">&gt;</span> {
-								<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">func_index</span>).<span class="ident">count</span>();
+								<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>
+									.<span class="ident">iter</span>()
+									.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">func_index</span>)
+									.<span class="ident">count</span>();
 								<span class="kw-2">*</span><span class="ident">func_index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 							},
 							<span class="ident">elements::Internal::Global</span>(<span class="ident">global_index</span>) <span class="op">=</span><span class="op">&gt;</span> {
-								<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_globals</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">global_index</span>).<span class="ident">count</span>();
+								<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_globals</span>
+									.<span class="ident">iter</span>()
+									.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">global_index</span>)
+									.<span class="ident">count</span>();
 								<span class="kw-2">*</span><span class="ident">global_index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 							},
-							<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+							<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
 						}
 					}
 				},
 				<span class="ident">elements::Section::Global</span>(<span class="ident">global_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="kw">for</span> <span class="ident">global_entry</span> <span class="kw">in</span> <span class="ident">global_section</span>.<span class="ident">entries_mut</span>() {
-						<span class="ident">update_global_index</span>(<span class="ident">global_entry</span>.<span class="ident">init_expr_mut</span>().<span class="ident">code_mut</span>(), <span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>)
+						<span class="ident">update_global_index</span>(
+							<span class="ident">global_entry</span>.<span class="ident">init_expr_mut</span>().<span class="ident">code_mut</span>(),
+							<span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>,
+						)
 					}
 				},
-				<span class="ident">elements::Section::Data</span>(<span class="ident">data_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">elements::Section::Data</span>(<span class="ident">data_section</span>) <span class="op">=</span><span class="op">&gt;</span>
 					<span class="kw">for</span> <span class="ident">segment</span> <span class="kw">in</span> <span class="ident">data_section</span>.<span class="ident">entries_mut</span>() {
 						<span class="ident">update_global_index</span>(
 							<span class="ident">segment</span>
@@ -944,21 +1145,23 @@
 								.<span class="ident">code_mut</span>(),
 							<span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>,
 						)
-					}
-				},
+					},
 				<span class="ident">elements::Section::Element</span>(<span class="ident">elements_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="kw">for</span> <span class="ident">segment</span> <span class="kw">in</span> <span class="ident">elements_section</span>.<span class="ident">entries_mut</span>() {
 						<span class="ident">update_global_index</span>(
 							<span class="ident">segment</span>
-							.<span class="ident">offset_mut</span>()
-							.<span class="ident">as_mut</span>()
-							.<span class="ident">expect</span>(<span class="string">&quot;parity-wasm is compiled without bulk-memory operations&quot;</span>)
-							.<span class="ident">code_mut</span>(),
-							<span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>
+								.<span class="ident">offset_mut</span>()
+								.<span class="ident">as_mut</span>()
+								.<span class="ident">expect</span>(<span class="string">&quot;parity-wasm is compiled without bulk-memory operations&quot;</span>)
+								.<span class="ident">code_mut</span>(),
+							<span class="kw-2">&amp;</span><span class="ident">eliminated_globals</span>,
 						);
 						<span class="comment">// update all indirect call addresses initial values</span>
 						<span class="kw">for</span> <span class="ident">func_index</span> <span class="kw">in</span> <span class="ident">segment</span>.<span class="ident">members_mut</span>() {
-							<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">func_index</span>).<span class="ident">count</span>();
+							<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>
+								.<span class="ident">iter</span>()
+								.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">func_index</span>)
+								.<span class="ident">count</span>();
 							<span class="kw-2">*</span><span class="ident">func_index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 						}
 					}
@@ -969,10 +1172,16 @@
 						<span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">eliminated_funcs</span> {
 							<span class="ident">func_name_map</span>.<span class="ident">remove</span>(<span class="kw-2">*</span><span class="ident">index</span> <span class="kw">as</span> <span class="ident">u32</span>);
 						}
-						<span class="kw">let</span> <span class="ident">updated_map</span> <span class="op">=</span> <span class="ident">func_name_map</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">value</span>)<span class="op">|</span> {
-							<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="ident">index</span>).<span class="ident">count</span>() <span class="kw">as</span> <span class="ident">u32</span>;
-							(<span class="ident">index</span> <span class="op">-</span> <span class="ident">totalle</span>, <span class="ident">value</span>)
-						}).<span class="ident">collect</span>();
+						<span class="kw">let</span> <span class="ident">updated_map</span> <span class="op">=</span> <span class="ident">func_name_map</span>
+							.<span class="ident">into_iter</span>()
+							.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">value</span>)<span class="op">|</span> {
+								<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>
+									.<span class="ident">iter</span>()
+									.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="ident">index</span>)
+									.<span class="ident">count</span>() <span class="kw">as</span> <span class="ident">u32</span>;
+								(<span class="ident">index</span> <span class="op">-</span> <span class="ident">totalle</span>, <span class="ident">value</span>)
+							})
+							.<span class="ident">collect</span>();
 						<span class="kw-2">*</span><span class="ident">func_name</span>.<span class="ident">names_mut</span>() <span class="op">=</span> <span class="ident">updated_map</span>;
 					}
 
@@ -981,27 +1190,38 @@
 						<span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">eliminated_funcs</span> {
 							<span class="ident">local_names_map</span>.<span class="ident">remove</span>(<span class="kw-2">*</span><span class="ident">index</span> <span class="kw">as</span> <span class="ident">u32</span>);
 						}
-						<span class="kw">let</span> <span class="ident">updated_map</span> <span class="op">=</span> <span class="ident">local_names_map</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">value</span>)<span class="op">|</span> {
-							<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="ident">index</span>).<span class="ident">count</span>() <span class="kw">as</span> <span class="ident">u32</span>;
-							(<span class="ident">index</span> <span class="op">-</span> <span class="ident">totalle</span>, <span class="ident">value</span>)
-						}).<span class="ident">collect</span>();
+						<span class="kw">let</span> <span class="ident">updated_map</span> <span class="op">=</span> <span class="ident">local_names_map</span>
+							.<span class="ident">into_iter</span>()
+							.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">value</span>)<span class="op">|</span> {
+								<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_funcs</span>
+									.<span class="ident">iter</span>()
+									.<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="ident">index</span>)
+									.<span class="ident">count</span>() <span class="kw">as</span> <span class="ident">u32</span>;
+								(<span class="ident">index</span> <span class="op">-</span> <span class="ident">totalle</span>, <span class="ident">value</span>)
+							})
+							.<span class="ident">collect</span>();
 						<span class="kw-2">*</span><span class="ident">local_name</span>.<span class="ident">local_names_mut</span>() <span class="op">=</span> <span class="ident">updated_map</span>;
 					}
-				}
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> { }
+				},
+				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
 			}
 		}
 	}
 
+	<span class="comment">// Also drop all custom sections</span>
+	<span class="ident">module</span>
+		.<span class="ident">sections_mut</span>()
+		.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">section</span><span class="op">|</span> <span class="op">!</span><span class="macro">matches!</span>(<span class="ident">section</span>, <span class="ident">elements::Section::Custom</span>(<span class="kw">_</span>)));
+
 	<span class="prelude-val">Ok</span>(())
 }
-
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_call_index</span>(<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Instructions</span>, <span class="ident">eliminated_indices</span>: <span class="kw-2">&amp;</span>[<span class="ident">usize</span>]) {
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 	<span class="kw">for</span> <span class="ident">instruction</span> <span class="kw">in</span> <span class="ident">instructions</span>.<span class="ident">elements_mut</span>().<span class="ident">iter_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Call</span>(<span class="ident">call_index</span>) <span class="op">=</span> <span class="ident">instruction</span> {
-			<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_indices</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">call_index</span>).<span class="ident">count</span>();
+			<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span>
+				<span class="ident">eliminated_indices</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">call_index</span>).<span class="ident">count</span>();
 			<span class="macro">trace!</span>(<span class="string">&quot;rewired call {} -&gt; call {}&quot;</span>, <span class="kw-2">*</span><span class="ident">call_index</span>, <span class="kw-2">*</span><span class="ident">call_index</span> <span class="op">-</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>);
 			<span class="kw-2">*</span><span class="ident">call_index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 		}
@@ -1009,16 +1229,20 @@
 }
 
 <span class="doccomment">/// Updates global references considering the _ordered_ list of eliminated indices</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_global_index</span>(<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">elements::Instruction</span><span class="op">&gt;</span>, <span class="ident">eliminated_indices</span>: <span class="kw-2">&amp;</span>[<span class="ident">usize</span>]) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_global_index</span>(
+	<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">elements::Instruction</span><span class="op">&gt;</span>,
+	<span class="ident">eliminated_indices</span>: <span class="kw-2">&amp;</span>[<span class="ident">usize</span>],
+) {
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 	<span class="kw">for</span> <span class="ident">instruction</span> <span class="kw">in</span> <span class="ident">instructions</span>.<span class="ident">iter_mut</span>() {
 		<span class="kw">match</span> <span class="ident">instruction</span> {
 			<span class="ident">GetGlobal</span>(<span class="ident">index</span>) <span class="op">|</span> <span class="ident">SetGlobal</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> {
-				<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_indices</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">index</span>).<span class="ident">count</span>();
+				<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span>
+					<span class="ident">eliminated_indices</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">index</span>).<span class="ident">count</span>();
 				<span class="macro">trace!</span>(<span class="string">&quot;rewired global {} -&gt; global {}&quot;</span>, <span class="kw-2">*</span><span class="ident">index</span>, <span class="kw-2">*</span><span class="ident">index</span> <span class="op">-</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>);
 				<span class="kw-2">*</span><span class="ident">index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> { },
+			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
 		}
 	}
 }
@@ -1028,62 +1252,67 @@
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 	<span class="kw">for</span> <span class="ident">instruction</span> <span class="kw">in</span> <span class="ident">instructions</span>.<span class="ident">elements_mut</span>().<span class="ident">iter_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">CallIndirect</span>(<span class="ident">call_index</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">instruction</span> {
-			<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span> <span class="ident">eliminated_indices</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">call_index</span>).<span class="ident">count</span>();
-			<span class="macro">trace!</span>(<span class="string">&quot;rewired call_indrect {} -&gt; call_indirect {}&quot;</span>, <span class="kw-2">*</span><span class="ident">call_index</span>, <span class="kw-2">*</span><span class="ident">call_index</span> <span class="op">-</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>);
+			<span class="kw">let</span> <span class="ident">totalle</span> <span class="op">=</span>
+				<span class="ident">eliminated_indices</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">call_index</span>).<span class="ident">count</span>();
+			<span class="macro">trace!</span>(
+				<span class="string">&quot;rewired call_indrect {} -&gt; call_indirect {}&quot;</span>,
+				<span class="kw-2">*</span><span class="ident">call_index</span>,
+				<span class="kw-2">*</span><span class="ident">call_index</span> <span class="op">-</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>
+			);
 			<span class="kw-2">*</span><span class="ident">call_index</span> <span class="op">-</span><span class="op">=</span> <span class="ident">totalle</span> <span class="kw">as</span> <span class="ident">u32</span>;
 		}
 	}
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import_section</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::ImportSection</span><span class="op">&gt;</span> {
-   <span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
+	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Section::Import</span>(<span class="ident">sect</span>) <span class="op">=</span> <span class="ident">section</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>)
 		}
 	}
 	<span class="prelude-val">None</span>
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">global_section</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::GlobalSection</span><span class="op">&gt;</span> {
-   <span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
+	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Section::Global</span>(<span class="ident">sect</span>) <span class="op">=</span> <span class="ident">section</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>)
 		}
 	}
 	<span class="prelude-val">None</span>
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">function_section</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::FunctionSection</span><span class="op">&gt;</span> {
-   <span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
+	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Section::Function</span>(<span class="ident">sect</span>) <span class="op">=</span> <span class="ident">section</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>)
 		}
 	}
 	<span class="prelude-val">None</span>
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code_section</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::CodeSection</span><span class="op">&gt;</span> {
-   <span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
+	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Section::Code</span>(<span class="ident">sect</span>) <span class="op">=</span> <span class="ident">section</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>)
 		}
 	}
 	<span class="prelude-val">None</span>
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">export_section</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::ExportSection</span><span class="op">&gt;</span> {
-   <span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
+	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Section::Export</span>(<span class="ident">sect</span>) <span class="op">=</span> <span class="ident">section</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>)
 		}
 	}
 	<span class="prelude-val">None</span>
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">type_section</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::TypeSection</span><span class="op">&gt;</span> {
-   <span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
+	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Section::Type</span>(<span class="ident">sect</span>) <span class="op">=</span> <span class="ident">section</span> {
-			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>);
+			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">sect</span>)
 		}
 	}
 	<span class="prelude-val">None</span>
@@ -1092,8 +1321,8 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
 
-	<span class="kw">use</span> <span class="ident">parity_wasm</span>::{<span class="ident">builder</span>, <span class="ident">elements</span>};
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">parity_wasm</span>::{<span class="ident">builder</span>, <span class="ident">elements</span>};
 
 	<span class="doccomment">/// @spec 0</span>
 	<span class="doccomment">/// Optimizer presumes that export section exists and contains</span>
@@ -1117,22 +1346,34 @@
 	<span class="kw">fn</span> <span class="ident">minimal</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">builder::module</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>()
-					.<span class="ident">param</span>().<span class="ident">i32</span>()
-					.<span class="ident">param</span>().<span class="ident">i32</span>()
-					.<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">0</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">0</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_random&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">1</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_random&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">1</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">build</span>();
-		<span class="macro">assert_eq!</span>(<span class="ident">module</span>.<span class="ident">export_section</span>().<span class="ident">expect</span>(<span class="string">&quot;export section to be generated&quot;</span>).<span class="ident">entries</span>().<span class="ident">len</span>(), <span class="number">2</span>);
+		<span class="macro">assert_eq!</span>(
+			<span class="ident">module</span>.<span class="ident">export_section</span>().<span class="ident">expect</span>(<span class="string">&quot;export section to be generated&quot;</span>).<span class="ident">entries</span>().<span class="ident">len</span>(),
+			<span class="number">2</span>
+		);
 
 		<span class="ident">optimize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">module</span>, <span class="macro">vec!</span>[<span class="string">&quot;_call&quot;</span>]).<span class="ident">expect</span>(<span class="string">&quot;optimizer to succeed&quot;</span>);
 
@@ -1144,7 +1385,11 @@
 
 		<span class="macro">assert_eq!</span>(
 			<span class="number">1</span>,
-			<span class="ident">module</span>.<span class="ident">function_section</span>().<span class="ident">expect</span>(<span class="string">&quot;functions section to be generated&quot;</span>).<span class="ident">entries</span>().<span class="ident">len</span>(),
+			<span class="ident">module</span>
+				.<span class="ident">function_section</span>()
+				.<span class="ident">expect</span>(<span class="string">&quot;functions section to be generated&quot;</span>)
+				.<span class="ident">entries</span>()
+				.<span class="ident">len</span>(),
 			<span class="string">&quot;There should 2 (two) functions in the optimized module&quot;</span>
 		);
 	}
@@ -1157,22 +1402,26 @@
 	<span class="kw">fn</span> <span class="ident">globals</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">builder::module</span>()
 			.<span class="ident">global</span>()
-				.<span class="ident">value_type</span>().<span class="ident">i32</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">value_type</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">body</span>()
-					.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(
-						<span class="macro">vec!</span>[
-							<span class="ident">elements::Instruction::GetGlobal</span>(<span class="number">0</span>),
-							<span class="ident">elements::Instruction::End</span>
-						]
-					))
-					.<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">body</span>()
+			.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(<span class="macro">vec!</span>[
+				<span class="ident">elements::Instruction::GetGlobal</span>(<span class="number">0</span>),
+				<span class="ident">elements::Instruction::End</span>,
+			]))
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">0</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">0</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">build</span>();
 
 		<span class="ident">optimize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">module</span>, <span class="macro">vec!</span>[<span class="string">&quot;_call&quot;</span>]).<span class="ident">expect</span>(<span class="string">&quot;optimizer to succeed&quot;</span>);
@@ -1193,28 +1442,34 @@
 	<span class="kw">fn</span> <span class="ident">globals_2</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">builder::module</span>()
 			.<span class="ident">global</span>()
-				.<span class="ident">value_type</span>().<span class="ident">i32</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">value_type</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">global</span>()
-				.<span class="ident">value_type</span>().<span class="ident">i64</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">value_type</span>()
+			.<span class="ident">i64</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">global</span>()
-				.<span class="ident">value_type</span>().<span class="ident">f32</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">value_type</span>()
+			.<span class="ident">f32</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">body</span>()
-					.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(
-						<span class="macro">vec!</span>[
-							<span class="ident">elements::Instruction::GetGlobal</span>(<span class="number">1</span>),
-							<span class="ident">elements::Instruction::End</span>
-						]
-					))
-					.<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">body</span>()
+			.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(<span class="macro">vec!</span>[
+				<span class="ident">elements::Instruction::GetGlobal</span>(<span class="number">1</span>),
+				<span class="ident">elements::Instruction::End</span>,
+			]))
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">0</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">0</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">build</span>();
 
 		<span class="ident">optimize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">module</span>, <span class="macro">vec!</span>[<span class="string">&quot;_call&quot;</span>]).<span class="ident">expect</span>(<span class="string">&quot;optimizer to succeed&quot;</span>);
@@ -1235,30 +1490,40 @@
 	<span class="kw">fn</span> <span class="ident">call_ref</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">builder::module</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">body</span>()
-					.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(
-						<span class="macro">vec!</span>[
-							<span class="ident">elements::Instruction::Call</span>(<span class="number">1</span>),
-							<span class="ident">elements::Instruction::End</span>
-						]
-					))
-					.<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">body</span>()
+			.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(<span class="macro">vec!</span>[
+				<span class="ident">elements::Instruction::Call</span>(<span class="number">1</span>),
+				<span class="ident">elements::Instruction::End</span>,
+			]))
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>()
-					.<span class="ident">param</span>().<span class="ident">i32</span>()
-					.<span class="ident">param</span>().<span class="ident">i32</span>()
-					.<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">0</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">0</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_random&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">1</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_random&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">1</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">build</span>();
-		<span class="macro">assert_eq!</span>(<span class="ident">module</span>.<span class="ident">export_section</span>().<span class="ident">expect</span>(<span class="string">&quot;export section to be generated&quot;</span>).<span class="ident">entries</span>().<span class="ident">len</span>(), <span class="number">2</span>);
+		<span class="macro">assert_eq!</span>(
+			<span class="ident">module</span>.<span class="ident">export_section</span>().<span class="ident">expect</span>(<span class="string">&quot;export section to be generated&quot;</span>).<span class="ident">entries</span>().<span class="ident">len</span>(),
+			<span class="number">2</span>
+		);
 
 		<span class="ident">optimize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">module</span>, <span class="macro">vec!</span>[<span class="string">&quot;_call&quot;</span>]).<span class="ident">expect</span>(<span class="string">&quot;optimizer to succeed&quot;</span>);
 
@@ -1270,7 +1535,11 @@
 
 		<span class="macro">assert_eq!</span>(
 			<span class="number">2</span>,
-			<span class="ident">module</span>.<span class="ident">function_section</span>().<span class="ident">expect</span>(<span class="string">&quot;functions section to be generated&quot;</span>).<span class="ident">entries</span>().<span class="ident">len</span>(),
+			<span class="ident">module</span>
+				.<span class="ident">function_section</span>()
+				.<span class="ident">expect</span>(<span class="string">&quot;functions section to be generated&quot;</span>)
+				.<span class="ident">entries</span>()
+				.<span class="ident">len</span>(),
 			<span class="string">&quot;There should 2 (two) functions in the optimized module&quot;</span>
 		);
 	}
@@ -1282,25 +1551,40 @@
 	<span class="kw">fn</span> <span class="ident">call_indirect</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">builder::module</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">function</span>()
-				.<span class="ident">signature</span>().<span class="ident">param</span>().<span class="ident">i32</span>().<span class="ident">build</span>()
-				.<span class="ident">body</span>()
-					.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(
-						<span class="macro">vec!</span>[
-							<span class="ident">elements::Instruction::CallIndirect</span>(<span class="number">1</span>, <span class="number">0</span>),
-							<span class="ident">elements::Instruction::End</span>
-						]
-					))
-					.<span class="ident">build</span>()
-				.<span class="ident">build</span>()
+			.<span class="ident">signature</span>()
+			.<span class="ident">param</span>()
+			.<span class="ident">i32</span>()
+			.<span class="ident">build</span>()
+			.<span class="ident">body</span>()
+			.<span class="ident">with_instructions</span>(<span class="ident">elements::Instructions::new</span>(<span class="macro">vec!</span>[
+				<span class="ident">elements::Instruction::CallIndirect</span>(<span class="number">1</span>, <span class="number">0</span>),
+				<span class="ident">elements::Instruction::End</span>,
+			]))
+			.<span class="ident">build</span>()
+			.<span class="ident">build</span>()
 			.<span class="ident">export</span>()
-				.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
-				.<span class="ident">internal</span>().<span class="ident">func</span>(<span class="number">2</span>).<span class="ident">build</span>()
+			.<span class="ident">field</span>(<span class="string">&quot;_call&quot;</span>)
+			.<span class="ident">internal</span>()
+			.<span class="ident">func</span>(<span class="number">2</span>)
+			.<span class="ident">build</span>()
 			.<span class="ident">build</span>();
 
 		<span class="ident">optimize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">module</span>, <span class="macro">vec!</span>[<span class="string">&quot;_call&quot;</span>]).<span class="ident">expect</span>(<span class="string">&quot;optimizer to succeed&quot;</span>);
@@ -1311,7 +1595,10 @@
 			<span class="string">&quot;There should 2 (two) types left in the module, 1 for indirect call and one for _call&quot;</span>
 		);
 
-		<span class="kw">let</span> <span class="ident">indirect_opcode</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">module</span>.<span class="ident">code_section</span>().<span class="ident">expect</span>(<span class="string">&quot;code section to be generated&quot;</span>).<span class="ident">bodies</span>()[<span class="number">0</span>].<span class="ident">code</span>().<span class="ident">elements</span>()[<span class="number">0</span>];
+		<span class="kw">let</span> <span class="ident">indirect_opcode</span> <span class="op">=</span>
+			<span class="kw-2">&amp;</span><span class="ident">module</span>.<span class="ident">code_section</span>().<span class="ident">expect</span>(<span class="string">&quot;code section to be generated&quot;</span>).<span class="ident">bodies</span>()[<span class="number">0</span>]
+				.<span class="ident">code</span>()
+				.<span class="ident">elements</span>()[<span class="number">0</span>];
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="ident">indirect_opcode</span> {
 			<span class="ident">elements::Instruction::CallIndirect</span>(<span class="number">0</span>, <span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> {},
 			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
@@ -1319,10 +1606,9 @@
 					<span class="string">&quot;Expected call_indirect to use index 0 after optimization, since previois 0th was eliminated, but got {:?}&quot;</span>,
 					<span class="ident">indirect_opcode</span>
 				);
-			}
+			},
 		}
 	}
-
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pwasm_utils" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

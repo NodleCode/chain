@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["rust_2015","The 2015 version of the core prelude."],["rust_2018","The 2018 version of the core prelude."],["rust_2021","The 2021 version of the core prelude."],["v1","The first version of the core prelude."]]});

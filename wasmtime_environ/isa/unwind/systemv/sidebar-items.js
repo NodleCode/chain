@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["RegisterMappingError","Enumerate the errors possible in mapping Cranelift registers to their DWARF equivalent."]],"struct":[["UnwindInfo","Represents unwind information for a single System V ABI function."]]});

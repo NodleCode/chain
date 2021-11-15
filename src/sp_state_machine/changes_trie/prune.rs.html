@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;sp-state-machine-0.9.0&#x2F;src&#x2F;changes_trie&#x2F;prune.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>prune.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../sp_state_machine/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;d76f399&#x2F;primitives&#x2F;state-machine&#x2F;src&#x2F;changes_trie&#x2F;prune.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>prune.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../sp_state_machine/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -187,6 +187,21 @@
 <span id="187">187</span>
 <span id="188">188</span>
 <span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
 
 <span class="comment">// Copyright (C) 2017-2021 Parity Technologies (UK) Ltd.</span>
@@ -206,16 +221,20 @@
 
 <span class="doccomment">//! Changes trie pruning-related functions.</span>
 
+<span class="kw">use</span> <span class="kw">crate</span>::{
+	<span class="ident">changes_trie</span>::{
+		<span class="ident">input</span>::{<span class="ident">ChildIndex</span>, <span class="ident">InputKey</span>},
+		<span class="ident">storage::TrieBackendAdapter</span>,
+		<span class="ident">AnchorBlockId</span>, <span class="ident">BlockNumber</span>, <span class="ident">Storage</span>,
+	},
+	<span class="ident">proving_backend::ProvingBackendRecorder</span>,
+	<span class="ident">trie_backend_essence::TrieBackendEssence</span>,
+};
+<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Codec</span>, <span class="ident">Decode</span>};
 <span class="kw">use</span> <span class="ident">hash_db::Hasher</span>;
-<span class="kw">use</span> <span class="ident">sp_trie::Recorder</span>;
 <span class="kw">use</span> <span class="ident">log::warn</span>;
 <span class="kw">use</span> <span class="ident">num_traits::One</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::proving_backend::ProvingBackendRecorder</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::trie_backend_essence::TrieBackendEssence</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::changes_trie</span>::{<span class="ident">AnchorBlockId</span>, <span class="ident">Storage</span>, <span class="ident">BlockNumber</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::changes_trie::storage::TrieBackendAdapter</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::changes_trie::input</span>::{<span class="ident">ChildIndex</span>, <span class="ident">InputKey</span>};
-<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Codec</span>};
+<span class="kw">use</span> <span class="ident">sp_trie::Recorder</span>;
 
 <span class="doccomment">/// Prune obsolete changes tries. Pruning happens at the same block, where highest</span>
 <span class="doccomment">/// level digest is created. Pruning guarantees to save changes tries for last</span>
@@ -227,12 +246,14 @@
 	<span class="ident">last</span>: <span class="ident">Number</span>,
 	<span class="ident">current_block</span>: <span class="kw-2">&amp;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>,
 	<span class="kw-2">mut</span> <span class="ident">remove_trie_node</span>: <span class="ident">F</span>,
-) <span class="kw">where</span> <span class="ident">H::Out</span>: <span class="ident">Codec</span> {
+) <span class="kw">where</span>
+	<span class="ident">H::Out</span>: <span class="ident">Codec</span>,
+{
 	<span class="comment">// delete changes trie for every block in range</span>
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">first</span>;
 	<span class="kw">loop</span> {
 		<span class="kw">if</span> <span class="ident">block</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">last</span>.<span class="ident">clone</span>() <span class="op">+</span> <span class="ident">One::one</span>() {
-			<span class="kw">break</span>;
+			<span class="kw">break</span>
 		}
 
 		<span class="kw">let</span> <span class="ident">prev_block</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">clone</span>();
@@ -245,7 +266,7 @@
 			<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
 				<span class="comment">// try to delete other tries</span>
 				<span class="macro">warn!</span>(<span class="ident">target</span>: <span class="string">&quot;trie&quot;</span>, <span class="string">&quot;Failed to read changes trie root from DB: {}&quot;</span>, <span class="ident">error</span>);
-				<span class="kw">continue</span>;
+				<span class="kw">continue</span>
 			},
 		};
 		<span class="kw">let</span> <span class="ident">children_roots</span> <span class="op">=</span> {
@@ -255,9 +276,9 @@
 			);
 			<span class="kw">let</span> <span class="ident">child_prefix</span> <span class="op">=</span> <span class="ident">ChildIndex::key_neutral_prefix</span>(<span class="ident">block</span>.<span class="ident">clone</span>());
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">children_roots</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-			<span class="ident">trie_storage</span>.<span class="ident">for_key_values_with_prefix</span>(<span class="kw-2">&amp;</span><span class="ident">child_prefix</span>, <span class="op">|</span><span class="ident">key</span>, <span class="ident">value</span><span class="op">|</span> {
-				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">InputKey::ChildIndex</span>::<span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(<span class="ident">_trie_key</span>)) <span class="op">=</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">key</span>[..]) {
-					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">value</span>[..]) {
+			<span class="ident">trie_storage</span>.<span class="ident">for_key_values_with_prefix</span>(<span class="kw-2">&amp;</span><span class="ident">child_prefix</span>, <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">key</span>, <span class="kw-2">mut</span> <span class="ident">value</span><span class="op">|</span> {
+				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">InputKey::ChildIndex</span>::<span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>(<span class="ident">_trie_key</span>)) <span class="op">=</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">key</span>) {
+					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">value</span>) {
 						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">trie_root</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">H</span> <span class="kw">as</span> <span class="ident">Hasher</span><span class="op">&gt;</span><span class="ident">::Out::default</span>();
 						<span class="ident">trie_root</span>.<span class="ident">as_mut</span>().<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>[..]);
 						<span class="ident">children_roots</span>.<span class="ident">push</span>(<span class="ident">trie_root</span>);
@@ -280,8 +301,9 @@
 	<span class="ident">storage</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>,
 	<span class="ident">root</span>: <span class="ident">H::Out</span>,
 	<span class="ident">remove_trie_node</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">F</span>,
-) <span class="kw">where</span> <span class="ident">H::Out</span>: <span class="ident">Codec</span> {
-
+) <span class="kw">where</span>
+	<span class="ident">H::Out</span>: <span class="ident">Codec</span>,
+{
 	<span class="comment">// enumerate all changes trie&#39; keys, recording all nodes that have been &#39;touched&#39;</span>
 	<span class="comment">// (effectively - all changes trie nodes)</span>
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proof_recorder</span>: <span class="ident">Recorder</span><span class="op">&lt;</span><span class="ident">H::Out</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
@@ -302,14 +324,13 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-	<span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
-	<span class="kw">use</span> <span class="ident">sp_trie::MemoryDB</span>;
-	<span class="kw">use</span> <span class="ident">sp_core::H256</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::backend::insert_into_memory_db</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::changes_trie::storage::InMemoryStorage</span>;
-	<span class="kw">use</span> <span class="ident">codec::Encode</span>;
-	<span class="kw">use</span> <span class="ident">sp_runtime::traits::BlakeTwo256</span>;
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">backend::insert_into_memory_db</span>, <span class="ident">changes_trie::storage::InMemoryStorage</span>};
+	<span class="kw">use</span> <span class="ident">codec::Encode</span>;
+	<span class="kw">use</span> <span class="ident">sp_core::H256</span>;
+	<span class="kw">use</span> <span class="ident">sp_runtime::traits::BlakeTwo256</span>;
+	<span class="kw">use</span> <span class="ident">sp_trie::MemoryDB</span>;
+	<span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 
 	<span class="kw">fn</span> <span class="ident">prune_by_collect</span>(
 		<span class="ident">storage</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
@@ -319,8 +340,9 @@
 	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">H256</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pruned_trie_nodes</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
 		<span class="kw">let</span> <span class="ident">anchor</span> <span class="op">=</span> <span class="ident">AnchorBlockId</span> { <span class="ident">hash</span>: <span class="ident">Default::default</span>(), <span class="ident">number</span>: <span class="ident">current_block</span> };
-		<span class="ident">prune</span>(<span class="ident">storage</span>, <span class="ident">first</span>, <span class="ident">last</span>, <span class="kw-2">&amp;</span><span class="ident">anchor</span>,
-			<span class="op">|</span><span class="ident">node</span><span class="op">|</span> { <span class="ident">pruned_trie_nodes</span>.<span class="ident">insert</span>(<span class="ident">node</span>); });
+		<span class="ident">prune</span>(<span class="ident">storage</span>, <span class="ident">first</span>, <span class="ident">last</span>, <span class="kw-2">&amp;</span><span class="ident">anchor</span>, <span class="op">|</span><span class="ident">node</span><span class="op">|</span> {
+			<span class="ident">pruned_trie_nodes</span>.<span class="ident">insert</span>(<span class="ident">node</span>);
+		});
 		<span class="ident">pruned_trie_nodes</span>
 	}
 
@@ -328,28 +350,36 @@
 	<span class="kw">fn</span> <span class="ident">prune_works</span>() {
 		<span class="kw">fn</span> <span class="ident">prepare_storage</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">InMemoryStorage</span><span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="ident">u64</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">sp_core::storage::ChildInfo::new_default</span>(<span class="kw-2">&amp;</span><span class="string">b&quot;1&quot;</span>[..]);
-			<span class="kw">let</span> <span class="ident">child_key</span> <span class="op">=</span> <span class="ident">ChildIndex</span> { <span class="ident">block</span>: <span class="number">67u64</span>, <span class="ident">storage_key</span>: <span class="ident">child_info</span>.<span class="ident">prefixed_storage_key</span>() }.<span class="ident">encode</span>();
+			<span class="kw">let</span> <span class="ident">child_key</span> <span class="op">=</span>
+				<span class="ident">ChildIndex</span> { <span class="ident">block</span>: <span class="number">67u64</span>, <span class="ident">storage_key</span>: <span class="ident">child_info</span>.<span class="ident">prefixed_storage_key</span>() }
+					.<span class="ident">encode</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mdb1</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span><span class="ident">::default</span>();
-			<span class="kw">let</span> <span class="ident">root1</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb1</span>, <span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">10</span>], <span class="macro">vec!</span>[<span class="number">20</span>])]).<span class="ident">unwrap</span>();
+			<span class="kw">let</span> <span class="ident">root1</span> <span class="op">=</span>
+				<span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb1</span>, <span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">10</span>], <span class="macro">vec!</span>[<span class="number">20</span>])])
+					.<span class="ident">unwrap</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mdb2</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span><span class="ident">::default</span>();
 			<span class="kw">let</span> <span class="ident">root2</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb2</span>,
 				<span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">11</span>], <span class="macro">vec!</span>[<span class="number">21</span>]), (<span class="macro">vec!</span>[<span class="number">12</span>], <span class="macro">vec!</span>[<span class="number">22</span>])],
-			).<span class="ident">unwrap</span>();
+			)
+			.<span class="ident">unwrap</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mdb3</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span><span class="ident">::default</span>();
-			<span class="kw">let</span> <span class="ident">ch_root3</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb3</span>, <span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">110</span>], <span class="macro">vec!</span>[<span class="number">120</span>])]).<span class="ident">unwrap</span>();
-			<span class="kw">let</span> <span class="ident">root3</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb3</span>, <span class="macro">vec!</span>[
-				(<span class="macro">vec!</span>[<span class="number">13</span>], <span class="macro">vec!</span>[<span class="number">23</span>]),
-				(<span class="macro">vec!</span>[<span class="number">14</span>], <span class="macro">vec!</span>[<span class="number">24</span>]),
-				(<span class="ident">child_key</span>, <span class="ident">ch_root3</span>.<span class="ident">as_ref</span>().<span class="ident">encode</span>()),
-			]).<span class="ident">unwrap</span>();
+			<span class="kw">let</span> <span class="ident">ch_root3</span> <span class="op">=</span>
+				<span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb3</span>, <span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">110</span>], <span class="macro">vec!</span>[<span class="number">120</span>])])
+					.<span class="ident">unwrap</span>();
+			<span class="kw">let</span> <span class="ident">root3</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(
+				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb3</span>,
+				<span class="macro">vec!</span>[
+					(<span class="macro">vec!</span>[<span class="number">13</span>], <span class="macro">vec!</span>[<span class="number">23</span>]),
+					(<span class="macro">vec!</span>[<span class="number">14</span>], <span class="macro">vec!</span>[<span class="number">24</span>]),
+					(<span class="ident">child_key</span>, <span class="ident">ch_root3</span>.<span class="ident">as_ref</span>().<span class="ident">encode</span>()),
+				],
+			)
+			.<span class="ident">unwrap</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mdb4</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span><span class="ident">::default</span>();
-			<span class="kw">let</span> <span class="ident">root4</span> <span class="op">=</span> <span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(
-				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb4</span>,
-				<span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">15</span>], <span class="macro">vec!</span>[<span class="number">25</span>])],
-			).<span class="ident">unwrap</span>();
+			<span class="kw">let</span> <span class="ident">root4</span> <span class="op">=</span>
+				<span class="ident">insert_into_memory_db</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb4</span>, <span class="macro">vec!</span>[(<span class="macro">vec!</span>[<span class="number">15</span>], <span class="macro">vec!</span>[<span class="number">25</span>])])
+					.<span class="ident">unwrap</span>();
 			<span class="kw">let</span> <span class="ident">storage</span> <span class="op">=</span> <span class="ident">InMemoryStorage::new</span>();
 			<span class="ident">storage</span>.<span class="ident">insert</span>(<span class="number">65</span>, <span class="ident">root1</span>, <span class="ident">mdb1</span>);
 			<span class="ident">storage</span>.<span class="ident">insert</span>(<span class="number">66</span>, <span class="ident">root2</span>, <span class="ident">mdb2</span>);

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-0.22.0&#x2F;src&#x2F;types&#x2F;matching.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>matching.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../wasmtime/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-0.30.0&#x2F;src&#x2F;types&#x2F;matching.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>matching.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../wasmtime/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -193,98 +193,486 @@
 <span id="193">193</span>
 <span id="194">194</span>
 <span id="195">195</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Store</span>;
-<span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
-<span class="kw">use</span> <span class="ident">wasmtime_environ::wasm</span>::{
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::instance::InstanceData</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::linker::Definition</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::store::StoreOpaque</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">signatures::SignatureCollection</span>, <span class="ident">Engine</span>, <span class="ident">Extern</span>};
+<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="ident">wasmtime_environ</span>::{
     <span class="ident">EntityType</span>, <span class="ident">Global</span>, <span class="ident">InstanceTypeIndex</span>, <span class="ident">Memory</span>, <span class="ident">ModuleTypeIndex</span>, <span class="ident">SignatureIndex</span>, <span class="ident">Table</span>,
+    <span class="ident">WasmFuncType</span>, <span class="ident">WasmType</span>,
 };
 <span class="kw">use</span> <span class="ident">wasmtime_jit::TypeTables</span>;
+<span class="kw">use</span> <span class="ident">wasmtime_runtime::VMSharedSignatureIndex</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MatchCx</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">signatures</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SignatureCollection</span>,
     <span class="kw">pub</span> <span class="ident">types</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">TypeTables</span>,
-    <span class="kw">pub</span> <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Store</span>,
+    <span class="kw">pub</span> <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StoreOpaque</span>,
+    <span class="kw">pub</span> <span class="ident">engine</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Engine</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">MatchCx</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Global</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Global</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">global_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">wasmtime_ty</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Global</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Global</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">global_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">wasmtime_ty</span>(<span class="self">self</span>.<span class="ident">store</span>.<span class="ident">store_data</span>()))
     }
 
-    <span class="kw">fn</span> <span class="ident">global_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Global</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Global</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">expected</span>.<span class="ident">ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">ty</span>
-            <span class="op">&amp;&amp;</span> <span class="ident">expected</span>.<span class="ident">wasm_ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">wasm_ty</span>
-            <span class="op">&amp;&amp;</span> <span class="ident">expected</span>.<span class="ident">mutability</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">mutability</span>
+    <span class="kw">fn</span> <span class="ident">global_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Global</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Global</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="ident">match_ty</span>(<span class="ident">expected</span>.<span class="ident">wasm_ty</span>, <span class="ident">actual</span>.<span class="ident">wasm_ty</span>, <span class="string">&quot;global&quot;</span>)<span class="question-mark">?</span>;
+        <span class="ident">match_bool</span>(
+            <span class="ident">expected</span>.<span class="ident">mutability</span>,
+            <span class="ident">actual</span>.<span class="ident">mutability</span>,
+            <span class="string">&quot;global&quot;</span>,
+            <span class="string">&quot;mutable&quot;</span>,
+            <span class="string">&quot;immutable&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Table</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Table</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">table_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">wasmtime_ty</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Table</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Table</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">table_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">wasmtime_ty</span>(<span class="self">self</span>.<span class="ident">store</span>.<span class="ident">store_data</span>()))
     }
 
-    <span class="kw">fn</span> <span class="ident">table_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Table</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Table</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">expected</span>.<span class="ident">wasm_ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">wasm_ty</span>
-            <span class="op">&amp;&amp;</span> <span class="ident">expected</span>.<span class="ident">ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">ty</span>
-            <span class="op">&amp;&amp;</span> <span class="ident">expected</span>.<span class="ident">minimum</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">minimum</span>
-            <span class="op">&amp;&amp;</span> <span class="kw">match</span> <span class="ident">expected</span>.<span class="ident">maximum</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span>.<span class="ident">maximum</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">expected</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">actual</span>,
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-                },
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            }
+    <span class="kw">fn</span> <span class="ident">table_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Table</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Table</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="ident">match_ty</span>(<span class="ident">expected</span>.<span class="ident">wasm_ty</span>, <span class="ident">actual</span>.<span class="ident">wasm_ty</span>, <span class="string">&quot;table&quot;</span>)<span class="question-mark">?</span>;
+        <span class="ident">match_limits</span>(
+            <span class="ident">expected</span>.<span class="ident">minimum</span>.<span class="ident">into</span>(),
+            <span class="ident">expected</span>.<span class="ident">maximum</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">into</span>()),
+            <span class="ident">actual</span>.<span class="ident">minimum</span>.<span class="ident">into</span>(),
+            <span class="ident">actual</span>.<span class="ident">maximum</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">into</span>()),
+            <span class="string">&quot;table&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Memory</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Memory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">memory_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">wasmtime_ty</span>())
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Memory</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Memory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">memory_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">wasmtime_ty</span>(<span class="self">self</span>.<span class="ident">store</span>.<span class="ident">store_data</span>()))
     }
 
-    <span class="kw">fn</span> <span class="ident">memory_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Memory</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Memory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">expected</span>.<span class="ident">shared</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">shared</span>
-            <span class="op">&amp;&amp;</span> <span class="ident">expected</span>.<span class="ident">minimum</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">actual</span>.<span class="ident">minimum</span>
-            <span class="op">&amp;&amp;</span> <span class="kw">match</span> <span class="ident">expected</span>.<span class="ident">maximum</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span>.<span class="ident">maximum</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">expected</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">actual</span>,
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-                },
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            }
+    <span class="kw">fn</span> <span class="ident">memory_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Memory</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Memory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="ident">match_bool</span>(
+            <span class="ident">expected</span>.<span class="ident">shared</span>,
+            <span class="ident">actual</span>.<span class="ident">shared</span>,
+            <span class="string">&quot;memory&quot;</span>,
+            <span class="string">&quot;shared&quot;</span>,
+            <span class="string">&quot;non-shared&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="ident">match_bool</span>(
+            <span class="ident">expected</span>.<span class="ident">memory64</span>,
+            <span class="ident">actual</span>.<span class="ident">memory64</span>,
+            <span class="string">&quot;memory&quot;</span>,
+            <span class="string">&quot;64-bit&quot;</span>,
+            <span class="string">&quot;32-bit&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="ident">match_limits</span>(
+            <span class="ident">expected</span>.<span class="ident">minimum</span>,
+            <span class="ident">expected</span>.<span class="ident">maximum</span>,
+            <span class="ident">actual</span>.<span class="ident">minimum</span>,
+            <span class="ident">actual</span>.<span class="ident">maximum</span>,
+            <span class="string">&quot;memory&quot;</span>,
+        )<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="ident">SignatureIndex</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Func</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="self">self</span>
-            .<span class="ident">store</span>
-            .<span class="ident">signatures</span>()
-            .<span class="ident">borrow</span>()
-            .<span class="ident">lookup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">types</span>.<span class="ident">wasm_signatures</span>[<span class="ident">expected</span>])
-        {
-            <span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">actual</span>.<span class="ident">sig_index</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">idx</span>,
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="ident">SignatureIndex</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Func</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">vmshared_signature_index</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">sig_index</span>(<span class="self">self</span>.<span class="ident">store</span>.<span class="ident">store_data</span>()))
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">host_func</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">expected</span>: <span class="ident">SignatureIndex</span>,
+        <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::func::HostFunc</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">vmshared_signature_index</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">sig_index</span>())
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmshared_signature_index</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">expected</span>: <span class="ident">SignatureIndex</span>,
+        <span class="ident">actual</span>: <span class="ident">VMSharedSignatureIndex</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">matches</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">signatures</span>.<span class="ident">shared_signature</span>(<span class="ident">expected</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">actual</span> <span class="op">=</span><span class="op">=</span> <span class="ident">idx</span>,
             <span class="comment">// If our expected signature isn&#39;t registered, then there&#39;s no way</span>
             <span class="comment">// that `actual` can match it.</span>
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        };
+        <span class="kw">if</span> <span class="ident">matches</span> {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
+        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;function types incompatible&quot;</span>;
+        <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">types</span>.<span class="ident">wasm_signatures</span>[<span class="ident">expected</span>];
+        <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">engine</span>.<span class="ident">signatures</span>().<span class="ident">lookup_type</span>(<span class="ident">actual</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ty</span>,
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>, <span class="string">&quot;all signatures should be registered&quot;</span>);
+                <span class="macro">bail!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">msg</span>);
+            }
+        };
+
+        <span class="kw">let</span> <span class="ident">render</span> <span class="op">=</span> <span class="op">|</span><span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">WasmFuncType</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">ty</span>
+                .<span class="ident">params</span>()
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>())
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
+            <span class="kw">let</span> <span class="ident">returns</span> <span class="op">=</span> <span class="ident">ty</span>
+                .<span class="ident">returns</span>()
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>())
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
+            <span class="macro">format!</span>(<span class="string">&quot;`({}) -&gt; ({})`&quot;</span>, <span class="ident">params</span>, <span class="ident">returns</span>)
+        };
+        <span class="macro">bail!</span>(
+            <span class="string">&quot;{}: expected func of type {}, found func of type {}&quot;</span>,
+            <span class="ident">msg</span>,
+            <span class="ident">render</span>(<span class="ident">expected</span>),
+            <span class="ident">render</span>(<span class="kw-2">&amp;</span><span class="ident">actual</span>)
+        )
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">instance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="ident">InstanceTypeIndex</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Instance</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">actual</span>.<span class="ident">handle</span>.<span class="ident">module</span>();
-        <span class="self">self</span>.<span class="ident">exports_match</span>(
-            <span class="ident">expected</span>,
-            <span class="ident">actual</span>
-                .<span class="ident">handle</span>
-                .<span class="ident">host_state</span>()
-                .<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TypeTables</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-                .<span class="ident">unwrap</span>(),
-            <span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">module</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">module</span>.<span class="ident">type_of</span>(<span class="kw-2">*</span><span class="ident">idx</span>)),
-        )
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">instance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="ident">InstanceTypeIndex</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Instance</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">expected</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">types</span>.<span class="ident">instance_signatures</span>[<span class="ident">expected</span>].<span class="ident">exports</span>.<span class="ident">iter</span>() {
+            <span class="kw">match</span> <span class="ident">actual</span>.<span class="ident">data</span>(<span class="self">self</span>.<span class="ident">store</span>.<span class="ident">store_data</span>()) {
+                <span class="ident">InstanceData::Synthetic</span>(<span class="ident">names</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">names</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+                    <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="self">self</span>.<span class="ident">extern_</span>(<span class="ident">expected</span>, <span class="ident">item</span>)
+                            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;instance export {:?} incompatible&quot;</span>, <span class="ident">name</span>))<span class="question-mark">?</span>;
+                    }
+                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;instance type missing export {:?}&quot;</span>, <span class="ident">name</span>),
+                },
+                <span class="ident">InstanceData::Instantiated</span> {
+                    <span class="ident">id</span>,
+                    <span class="ident">types</span>,
+                    <span class="ident">signatures</span>,
+                    ..
+                } <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">store</span>.<span class="ident">instance</span>(<span class="kw-2">*</span><span class="ident">id</span>).<span class="ident">module</span>();
+                    <span class="kw">match</span> <span class="ident">module</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+                        <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">actual_ty</span> <span class="op">=</span> <span class="ident">module</span>.<span class="ident">type_of</span>(<span class="kw-2">*</span><span class="ident">index</span>);
+                            <span class="self">self</span>.<span class="ident">extern_ty_matches</span>(<span class="ident">expected</span>, <span class="kw-2">&amp;</span><span class="ident">actual_ty</span>, <span class="ident">signatures</span>, <span class="ident">types</span>)
+                                .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
+                                    <span class="macro">format!</span>(<span class="string">&quot;instance export {:?} incompatible&quot;</span>, <span class="ident">name</span>)
+                                })<span class="question-mark">?</span>;
+                        }
+                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;instance type missing export {:?}&quot;</span>, <span class="ident">name</span>),
+                    }
+
+                    <span class="comment">// let</span>
+                }
+            }
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Validates that the type signature of `actual` matches the `expected`</span>
     <span class="doccomment">/// module type signature.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">module</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="ident">ModuleTypeIndex</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">module</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="ident">ModuleTypeIndex</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// This should only ever be invoked with module linking, and this is an</span>
+        <span class="comment">// early check that our `field` assertion below should always work as</span>
+        <span class="comment">// well.</span>
+        <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">engine</span>.<span class="ident">config</span>().<span class="ident">features</span>.<span class="ident">module_linking</span>);
+
         <span class="kw">let</span> <span class="ident">expected_sig</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">types</span>.<span class="ident">module_signatures</span>[<span class="ident">expected</span>];
         <span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">actual</span>.<span class="ident">compiled_module</span>().<span class="ident">module</span>();
-        <span class="self">self</span>.<span class="ident">imports_match</span>(<span class="ident">expected</span>, <span class="ident">actual</span>.<span class="ident">types</span>(), <span class="ident">module</span>.<span class="ident">imports</span>())
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">exports_match</span>(<span class="ident">expected_sig</span>.<span class="ident">exports</span>, <span class="ident">actual</span>.<span class="ident">types</span>(), <span class="op">|</span><span class="ident">name</span><span class="op">|</span> {
-                <span class="ident">module</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">module</span>.<span class="ident">type_of</span>(<span class="kw-2">*</span><span class="ident">idx</span>))
-            })
+        <span class="self">self</span>.<span class="ident">imports_match</span>(
+            <span class="ident">expected</span>,
+            <span class="ident">actual</span>.<span class="ident">signatures</span>(),
+            <span class="ident">actual</span>.<span class="ident">types</span>(),
+            <span class="ident">module</span>.<span class="ident">imports</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">field</span>, <span class="ident">ty</span>)<span class="op">|</span> {
+                <span class="macro">assert!</span>(<span class="ident">field</span>.<span class="ident">is_none</span>()); <span class="comment">// should be true if module linking is enabled</span>
+                (<span class="ident">name</span>, <span class="ident">ty</span>)
+            }),
+        )<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">exports_match</span>(
+            <span class="ident">expected_sig</span>.<span class="ident">exports</span>,
+            <span class="ident">actual</span>.<span class="ident">signatures</span>(),
+            <span class="ident">actual</span>.<span class="ident">types</span>(),
+            <span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">module</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">module</span>.<span class="ident">type_of</span>(<span class="kw-2">*</span><span class="ident">idx</span>)),
+        )<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Validates that the `actual_imports` list of module imports matches the</span>
@@ -294,20 +682,29 @@
     <span class="kw">fn</span> <span class="ident">imports_match</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">expected</span>: <span class="ident">ModuleTypeIndex</span>,
+        <span class="ident">actual_signatures</span>: <span class="kw-2">&amp;</span><span class="ident">SignatureCollection</span>,
         <span class="ident">actual_types</span>: <span class="kw-2">&amp;</span><span class="ident">TypeTables</span>,
-        <span class="kw-2">mut</span> <span class="ident">actual_imports</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">EntityType</span>)<span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">actual_imports</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">EntityType</span>)<span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Imports match if all of the actual imports are satisfied by the</span>
+        <span class="comment">// expected set of imports. Note that we&#39;re reversing the order of the</span>
+        <span class="comment">// subtytpe matching here too.</span>
         <span class="kw">let</span> <span class="ident">expected_sig</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">types</span>.<span class="ident">module_signatures</span>[<span class="ident">expected</span>];
-        <span class="kw">for</span> (<span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">expected</span>) <span class="kw">in</span> <span class="ident">expected_sig</span>.<span class="ident">imports</span>.<span class="ident">iter</span>() {
-            <span class="kw">let</span> (<span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">ty</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">actual_imports</span>.<span class="ident">next</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
+        <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">actual_ty</span>) <span class="kw">in</span> <span class="ident">actual_imports</span> {
+            <span class="kw">let</span> <span class="ident">expected_ty</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">expected_sig</span>.<span class="ident">imports</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+                <span class="prelude-val">Some</span>(<span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ty</span>,
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected type doesn&#39;t import {:?}&quot;</span>, <span class="ident">name</span>),
             };
-            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">extern_ty_matches</span>(<span class="ident">expected</span>, <span class="kw-2">&amp;</span><span class="ident">ty</span>, <span class="ident">actual_types</span>) {
-                <span class="kw">return</span> <span class="bool-val">false</span>;
+            <span class="ident">MatchCx</span> {
+                <span class="ident">signatures</span>: <span class="ident">actual_signatures</span>,
+                <span class="ident">types</span>: <span class="ident">actual_types</span>,
+                <span class="ident">store</span>: <span class="self">self</span>.<span class="ident">store</span>,
+                <span class="ident">engine</span>: <span class="self">self</span>.<span class="ident">engine</span>,
             }
+            .<span class="ident">extern_ty_matches</span>(<span class="kw-2">&amp;</span><span class="ident">actual_ty</span>, <span class="ident">expected_ty</span>, <span class="self">self</span>.<span class="ident">signatures</span>, <span class="self">self</span>.<span class="ident">types</span>)
+            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;module import {:?} incompatible&quot;</span>, <span class="ident">name</span>))<span class="question-mark">?</span>;
         }
-        <span class="ident">actual_imports</span>.<span class="ident">next</span>().<span class="ident">is_none</span>()
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Validates that all exports in `expected` are defined by `lookup` within</span>
@@ -315,18 +712,22 @@
     <span class="kw">fn</span> <span class="ident">exports_match</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">expected</span>: <span class="ident">InstanceTypeIndex</span>,
+        <span class="ident">actual_signatures</span>: <span class="kw-2">&amp;</span><span class="ident">SignatureCollection</span>,
         <span class="ident">actual_types</span>: <span class="kw-2">&amp;</span><span class="ident">TypeTables</span>,
         <span class="ident">lookup</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EntityType</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// The `expected` type must be a subset of `actual`, meaning that all</span>
         <span class="comment">// names in `expected` must be present in `actual`. Note that we do</span>
         <span class="comment">// name-based lookup here instead of index-based lookup.</span>
-        <span class="self">self</span>.<span class="ident">types</span>.<span class="ident">instance_signatures</span>[<span class="ident">expected</span>].<span class="ident">exports</span>.<span class="ident">iter</span>().<span class="ident">all</span>(
-            <span class="op">|</span>(<span class="ident">name</span>, <span class="ident">expected</span>)<span class="op">|</span> <span class="kw">match</span> <span class="ident">lookup</span>(<span class="ident">name</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">extern_ty_matches</span>(<span class="ident">expected</span>, <span class="kw-2">&amp;</span><span class="ident">ty</span>, <span class="ident">actual_types</span>),
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-            },
-        )
+        <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">expected</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">types</span>.<span class="ident">instance_signatures</span>[<span class="ident">expected</span>].<span class="ident">exports</span>.<span class="ident">iter</span>() {
+            <span class="kw">match</span> <span class="ident">lookup</span>(<span class="ident">name</span>) {
+                <span class="prelude-val">Some</span>(<span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
+                    .<span class="ident">extern_ty_matches</span>(<span class="ident">expected</span>, <span class="kw-2">&amp;</span><span class="ident">ty</span>, <span class="ident">actual_signatures</span>, <span class="ident">actual_types</span>)
+                    .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;export {:?} incompatible&quot;</span>, <span class="ident">name</span>))<span class="question-mark">?</span>,
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;failed to find export {:?}&quot;</span>, <span class="ident">name</span>),
+            }
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Validates that the `expected` entity matches the `actual_ty` defined</span>
@@ -335,35 +736,51 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">EntityType</span>,
         <span class="ident">actual_ty</span>: <span class="kw-2">&amp;</span><span class="ident">EntityType</span>,
+        <span class="ident">actual_signatures</span>: <span class="kw-2">&amp;</span><span class="ident">SignatureCollection</span>,
         <span class="ident">actual_types</span>: <span class="kw-2">&amp;</span><span class="ident">TypeTables</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">actual_desc</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">actual_ty</span> {
+            <span class="ident">EntityType::Global</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;global&quot;</span>,
+            <span class="ident">EntityType::Module</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;module&quot;</span>,
+            <span class="ident">EntityType::Memory</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;memory&quot;</span>,
+            <span class="ident">EntityType::Tag</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;tag&quot;</span>,
+            <span class="ident">EntityType::Instance</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;instance&quot;</span>,
+            <span class="ident">EntityType::Table</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;table&quot;</span>,
+            <span class="ident">EntityType::Function</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;function&quot;</span>,
+        };
         <span class="kw">match</span> <span class="ident">expected</span> {
             <span class="ident">EntityType::Global</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual_ty</span> {
                 <span class="ident">EntityType::Global</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">global_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected global, but found {}&quot;</span>, <span class="ident">actual_desc</span>),
             },
             <span class="ident">EntityType::Table</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual_ty</span> {
                 <span class="ident">EntityType::Table</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">table_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected table, but found {}&quot;</span>, <span class="ident">actual_desc</span>),
             },
             <span class="ident">EntityType::Memory</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual_ty</span> {
                 <span class="ident">EntityType::Memory</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">memory_ty</span>(<span class="ident">expected</span>, <span class="ident">actual</span>),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected memory, but found {}&quot;</span>, <span class="ident">actual_desc</span>),
             },
             <span class="ident">EntityType::Function</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">actual_ty</span> {
                 <span class="ident">EntityType::Function</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="self">self</span>.<span class="ident">types</span>.<span class="ident">wasm_signatures</span>[<span class="kw-2">*</span><span class="ident">expected</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">actual_types</span>.<span class="ident">wasm_signatures</span>[<span class="ident">actual</span>]
+                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">types</span>.<span class="ident">wasm_signatures</span>[<span class="kw-2">*</span><span class="ident">expected</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">actual_types</span>.<span class="ident">wasm_signatures</span>[<span class="ident">actual</span>]
+                    {
+                        <span class="prelude-val">Ok</span>(())
+                    } <span class="kw">else</span> {
+                        <span class="macro">bail!</span>(<span class="string">&quot;function types incompatible&quot;</span>)
+                    }
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected function, but found {}&quot;</span>, <span class="ident">actual_desc</span>),
             },
             <span class="ident">EntityType::Instance</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual_ty</span> {
                 <span class="ident">EntityType::Instance</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">actual_types</span>.<span class="ident">instance_signatures</span>[<span class="kw-2">*</span><span class="ident">actual</span>];
-                    <span class="self">self</span>.<span class="ident">exports_match</span>(<span class="kw-2">*</span><span class="ident">expected</span>, <span class="ident">actual_types</span>, <span class="op">|</span><span class="ident">name</span><span class="op">|</span> {
+                    <span class="self">self</span>.<span class="ident">exports_match</span>(<span class="kw-2">*</span><span class="ident">expected</span>, <span class="ident">actual_signatures</span>, <span class="ident">actual_types</span>, <span class="op">|</span><span class="ident">name</span><span class="op">|</span> {
                         <span class="ident">sig</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">cloned</span>()
-                    })
+                    })<span class="question-mark">?</span>;
+                    <span class="prelude-val">Ok</span>(())
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected instance, but found {}&quot;</span>, <span class="ident">actual_desc</span>),
             },
             <span class="ident">EntityType::Module</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual_ty</span> {
                 <span class="ident">EntityType::Module</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -374,18 +791,159 @@
 
                     <span class="self">self</span>.<span class="ident">imports_match</span>(
                         <span class="kw-2">*</span><span class="ident">expected</span>,
+                        <span class="ident">actual_signatures</span>,
                         <span class="ident">actual_types</span>,
-                        <span class="ident">actual_module_sig</span>.<span class="ident">imports</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">module</span>, <span class="ident">field</span>, <span class="ident">ty</span>)<span class="op">|</span> {
-                            (<span class="ident">module</span>.<span class="ident">as_str</span>(), <span class="ident">field</span>.<span class="ident">as_deref</span>(), <span class="ident">ty</span>.<span class="ident">clone</span>())
-                        }),
-                    ) <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">exports_match</span>(<span class="ident">expected_module_sig</span>.<span class="ident">exports</span>, <span class="ident">actual_types</span>, <span class="op">|</span><span class="ident">name</span><span class="op">|</span> {
-                        <span class="ident">actual_instance_sig</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">cloned</span>()
-                    })
+                        <span class="ident">actual_module_sig</span>
+                            .<span class="ident">imports</span>
+                            .<span class="ident">iter</span>()
+                            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">module</span>, <span class="ident">ty</span>)<span class="op">|</span> (<span class="ident">module</span>.<span class="ident">as_str</span>(), <span class="ident">ty</span>.<span class="ident">clone</span>())),
+                    )<span class="question-mark">?</span>;
+                    <span class="self">self</span>.<span class="ident">exports_match</span>(
+                        <span class="ident">expected_module_sig</span>.<span class="ident">exports</span>,
+                        <span class="ident">actual_signatures</span>,
+                        <span class="ident">actual_types</span>,
+                        <span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">actual_instance_sig</span>.<span class="ident">exports</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">cloned</span>(),
+                    )<span class="question-mark">?</span>;
+                    <span class="prelude-val">Ok</span>(())
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected module, but found {}&quot;</span>, <span class="ident">actual_desc</span>),
             },
-            <span class="ident">EntityType::Event</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+            <span class="ident">EntityType::Tag</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
         }
+    }
+
+    <span class="doccomment">/// Validates that the `expected` type matches the type of `actual`</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extern_</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">EntityType</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident">expected</span> {
+            <span class="ident">EntityType::Global</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span> {
+                <span class="ident">Extern::Global</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">global</span>(<span class="ident">expected</span>, <span class="ident">actual</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected global, but found {}&quot;</span>, <span class="ident">actual</span>.<span class="ident">desc</span>()),
+            },
+            <span class="ident">EntityType::Table</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span> {
+                <span class="ident">Extern::Table</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">table</span>(<span class="ident">expected</span>, <span class="ident">actual</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected table, but found {}&quot;</span>, <span class="ident">actual</span>.<span class="ident">desc</span>()),
+            },
+            <span class="ident">EntityType::Memory</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span> {
+                <span class="ident">Extern::Memory</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">memory</span>(<span class="ident">expected</span>, <span class="ident">actual</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected memory, but found {}&quot;</span>, <span class="ident">actual</span>.<span class="ident">desc</span>()),
+            },
+            <span class="ident">EntityType::Function</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span> {
+                <span class="ident">Extern::Func</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">func</span>(<span class="kw-2">*</span><span class="ident">expected</span>, <span class="ident">actual</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected func, but found {}&quot;</span>, <span class="ident">actual</span>.<span class="ident">desc</span>()),
+            },
+            <span class="ident">EntityType::Instance</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span> {
+                <span class="ident">Extern::Instance</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">instance</span>(<span class="kw-2">*</span><span class="ident">expected</span>, <span class="ident">actual</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected instance, but found {}&quot;</span>, <span class="ident">actual</span>.<span class="ident">desc</span>()),
+            },
+            <span class="ident">EntityType::Module</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual</span> {
+                <span class="ident">Extern::Module</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">module</span>(<span class="kw-2">*</span><span class="ident">expected</span>, <span class="ident">actual</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected module, but found {}&quot;</span>, <span class="ident">actual</span>.<span class="ident">desc</span>()),
+            },
+            <span class="ident">EntityType::Tag</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+        }
+    }
+
+    <span class="doccomment">/// Validates that the `expected` type matches the type of `actual`</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">EntityType</span>, <span class="ident">actual</span>: <span class="kw-2">&amp;</span><span class="ident">Definition</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident">actual</span> {
+            <span class="ident">Definition::Extern</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">extern_</span>(<span class="ident">expected</span>, <span class="ident">e</span>),
+            <span class="ident">Definition::HostFunc</span>(<span class="ident">f</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">expected</span> {
+                <span class="ident">EntityType::Function</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">host_func</span>(<span class="kw-2">*</span><span class="ident">expected</span>, <span class="ident">f</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected {}, but found func&quot;</span>, <span class="ident">entity_desc</span>(<span class="ident">expected</span>)),
+            },
+            <span class="ident">Definition::Instance</span>(<span class="ident">items</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">expected</span> {
+                <span class="ident">EntityType::Instance</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">expected</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">types</span>.<span class="ident">instance_signatures</span>[<span class="kw-2">*</span><span class="ident">expected</span>].<span class="ident">exports</span>.<span class="ident">iter</span>()
+                    {
+                        <span class="kw">match</span> <span class="ident">items</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+                            <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="self">self</span>.<span class="ident">definition</span>(<span class="ident">expected</span>, <span class="ident">item</span>).<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
+                                    <span class="macro">format!</span>(<span class="string">&quot;instance export {:?} incompatible&quot;</span>, <span class="ident">name</span>)
+                                })<span class="question-mark">?</span>;
+                            }
+                            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;instance type missing export {:?}&quot;</span>, <span class="ident">name</span>),
+                        }
+                    }
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;expected {}, but found instance&quot;</span>, <span class="ident">entity_desc</span>(<span class="ident">expected</span>)),
+            },
+        }
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">match_ty</span>(<span class="ident">expected</span>: <span class="ident">WasmType</span>, <span class="ident">actual</span>: <span class="ident">WasmType</span>, <span class="ident">desc</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">expected</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span> {
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+    }
+    <span class="macro">bail!</span>(
+        <span class="string">&quot;{} types incompatible: expected {0} of type `{}`, found {0} of type `{}`&quot;</span>,
+        <span class="ident">desc</span>,
+        <span class="ident">expected</span>,
+        <span class="ident">actual</span>,
+    )
+}
+
+<span class="kw">fn</span> <span class="ident">match_bool</span>(
+    <span class="ident">expected</span>: <span class="ident">bool</span>,
+    <span class="ident">actual</span>: <span class="ident">bool</span>,
+    <span class="ident">desc</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="ident">if_true</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="ident">if_false</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">expected</span> <span class="op">=</span><span class="op">=</span> <span class="ident">actual</span> {
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+    }
+    <span class="macro">bail!</span>(
+        <span class="string">&quot;{} types incompatible: expected {} {0}, found {} {0}&quot;</span>,
+        <span class="ident">desc</span>,
+        <span class="kw">if</span> <span class="ident">expected</span> { <span class="ident">if_true</span> } <span class="kw">else</span> { <span class="ident">if_false</span> },
+        <span class="kw">if</span> <span class="ident">actual</span> { <span class="ident">if_true</span> } <span class="kw">else</span> { <span class="ident">if_false</span> },
+    )
+}
+
+<span class="kw">fn</span> <span class="ident">match_limits</span>(
+    <span class="ident">expected_min</span>: <span class="ident">u64</span>,
+    <span class="ident">expected_max</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="ident">actual_min</span>: <span class="ident">u64</span>,
+    <span class="ident">actual_max</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="ident">desc</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">expected_min</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">actual_min</span>
+        <span class="op">&amp;&amp;</span> <span class="kw">match</span> <span class="ident">expected_max</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">expected</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">actual_max</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">actual</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">expected</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">actual</span>,
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            },
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+        }
+    {
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+    }
+    <span class="kw">let</span> <span class="ident">limits</span> <span class="op">=</span> <span class="op">|</span><span class="ident">min</span>: <span class="ident">u64</span>, <span class="ident">max</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">|</span> {
+        <span class="macro">format!</span>(
+            <span class="string">&quot;min: {}, max: {}&quot;</span>,
+            <span class="ident">min</span>,
+            <span class="ident">max</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">unwrap_or</span>(<span class="ident">String::from</span>(<span class="string">&quot;none&quot;</span>))
+        )
+    };
+    <span class="macro">bail!</span>(
+        <span class="string">&quot;{} types incompatible: expected {0} limits ({}) doesn&#39;t match provided {0} limits ({})&quot;</span>,
+        <span class="ident">desc</span>,
+        <span class="ident">limits</span>(<span class="ident">expected_min</span>, <span class="ident">expected_max</span>),
+        <span class="ident">limits</span>(<span class="ident">actual_min</span>, <span class="ident">actual_max</span>)
+    )
+}
+
+<span class="kw">fn</span> <span class="ident">entity_desc</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">EntityType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">match</span> <span class="ident">ty</span> {
+        <span class="ident">EntityType::Global</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;global&quot;</span>,
+        <span class="ident">EntityType::Table</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;table&quot;</span>,
+        <span class="ident">EntityType::Memory</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;memory&quot;</span>,
+        <span class="ident">EntityType::Function</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;func&quot;</span>,
+        <span class="ident">EntityType::Instance</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;instance&quot;</span>,
+        <span class="ident">EntityType::Module</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;module&quot;</span>,
+        <span class="ident">EntityType::Tag</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;tag&quot;</span>,
     }
 }
 </code></pre></div>

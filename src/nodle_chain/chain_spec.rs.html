@@ -365,18 +365,6 @@
 <span id="365">365</span>
 <span id="366">366</span>
 <span id="367">367</span>
-<span id="368">368</span>
-<span id="369">369</span>
-<span id="370">370</span>
-<span id="371">371</span>
-<span id="372">372</span>
-<span id="373">373</span>
-<span id="374">374</span>
-<span id="375">375</span>
-<span id="376">376</span>
-<span id="377">377</span>
-<span id="378">378</span>
-<span id="379">379</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -399,14 +387,14 @@
 <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span>, <span class="ident">Signature</span>};
 <span class="kw">use</span> <span class="ident">runtime_main</span>::{
     <span class="ident">constants</span>::<span class="kw-2">*</span>, <span class="ident">wasm_binary_unwrap</span>, <span class="ident">AuthorityDiscoveryConfig</span>, <span class="ident">BabeConfig</span>, <span class="ident">BalancesConfig</span>,
-    <span class="ident">ContractsConfig</span>, <span class="ident">FinancialMembershipConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">GrandpaConfig</span>, <span class="ident">ImOnlineConfig</span>,
-    <span class="ident">RootMembershipConfig</span>, <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SystemConfig</span>, <span class="ident">TechnicalMembershipConfig</span>,
-    <span class="ident">ValidatorsSetConfig</span>, <span class="ident">VestingConfig</span>,
+    <span class="ident">FinancialMembershipConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">GrandpaConfig</span>, <span class="ident">ImOnlineConfig</span>, <span class="ident">RootMembershipConfig</span>,
+    <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SystemConfig</span>, <span class="ident">TechnicalMembershipConfig</span>, <span class="ident">ValidatorsSetConfig</span>,
+    <span class="ident">VestingConfig</span>,
 };
+<span class="kw">use</span> <span class="ident">sc_chain_spec::Properties</span>;
 <span class="kw">use</span> <span class="ident">sc_service::ChainType</span>;
 <span class="kw">use</span> <span class="ident">serde_json::json</span>;
 <span class="kw">use</span> <span class="ident">sp_authority_discovery::AuthorityId</span> <span class="kw">as</span> <span class="ident">AuthorityDiscoveryId</span>;
-<span class="kw">use</span> <span class="ident">sp_chain_spec::Properties</span>;
 <span class="kw">use</span> <span class="ident">sp_consensus_babe::AuthorityId</span> <span class="kw">as</span> <span class="ident">BabeId</span>;
 <span class="kw">use</span> <span class="ident">sp_core</span>::{<span class="ident">sr25519</span>, <span class="ident">Pair</span>, <span class="ident">Public</span>};
 <span class="kw">use</span> <span class="ident">sp_finality_grandpa::AuthorityId</span> <span class="kw">as</span> <span class="ident">GrandpaId</span>;
@@ -521,11 +509,11 @@
 
     <span class="ident">GenesisConfig</span> {
         <span class="comment">// Core</span>
-        <span class="ident">frame_system</span>: <span class="prelude-val">Some</span>(<span class="ident">SystemConfig</span> {
+        <span class="ident">system</span>: <span class="ident">SystemConfig</span> {
             <span class="ident">code</span>: <span class="ident">wasm_binary_unwrap</span>().<span class="ident">to_vec</span>(),
             <span class="ident">changes_trie_config</span>: <span class="ident">Default::default</span>(),
-        }),
-        <span class="ident">pallet_balances</span>: <span class="prelude-val">Some</span>(<span class="ident">BalancesConfig</span> {
+        },
+        <span class="ident">balances</span>: <span class="ident">BalancesConfig</span> {
             <span class="ident">balances</span>: <span class="ident">endowed_accounts</span>
                 .<span class="ident">iter</span>()
                 .<span class="ident">cloned</span>()
@@ -550,17 +538,12 @@
 
                     <span class="ident">acc</span>
                 }),
-        }),
-        <span class="ident">pallet_grants</span>: <span class="prelude-val">Some</span>(<span class="ident">VestingConfig</span> {
+        },
+        <span class="ident">vesting</span>: <span class="ident">VestingConfig</span> {
             <span class="ident">vesting</span>: <span class="ident">vested_grants</span>,
-        }),
-        <span class="ident">pallet_contracts</span>: <span class="prelude-val">Some</span>(<span class="ident">ContractsConfig</span> {
-            <span class="ident">current_schedule</span>: <span class="ident">pallet_contracts::Schedule</span> {
-                ..<span class="ident">Default::default</span>()
-            },
-        }),
+        },
         <span class="comment">// Consensus</span>
-        <span class="ident">pallet_session</span>: <span class="prelude-val">Some</span>(<span class="ident">SessionConfig</span> {
+        <span class="ident">session</span>: <span class="ident">SessionConfig</span> {
             <span class="ident">keys</span>: <span class="ident">initial_authorities</span>
                 .<span class="ident">iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
@@ -571,56 +554,49 @@
                     )
                 })
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-        }),
-        <span class="ident">pallet_babe</span>: <span class="prelude-val">Some</span>(<span class="ident">BabeConfig</span> {
+        },
+        <span class="ident">babe</span>: <span class="ident">BabeConfig</span> {
             <span class="ident">authorities</span>: <span class="macro">vec!</span>[],
-        }),
-        <span class="ident">pallet_im_online</span>: <span class="prelude-val">Some</span>(<span class="ident">ImOnlineConfig</span> { <span class="ident">keys</span>: <span class="macro">vec!</span>[] }),
-        <span class="ident">pallet_authority_discovery</span>: <span class="prelude-val">Some</span>(<span class="ident">AuthorityDiscoveryConfig</span> { <span class="ident">keys</span>: <span class="macro">vec!</span>[] }),
-        <span class="ident">pallet_grandpa</span>: <span class="prelude-val">Some</span>(<span class="ident">GrandpaConfig</span> {
+            <span class="ident">epoch_config</span>: <span class="prelude-val">Some</span>(<span class="ident">runtime_main::constants::BABE_GENESIS_EPOCH_CONFIG</span>),
+        },
+        <span class="ident">im_online</span>: <span class="ident">ImOnlineConfig</span> { <span class="ident">keys</span>: <span class="macro">vec!</span>[] },
+        <span class="ident">authority_discovery</span>: <span class="ident">AuthorityDiscoveryConfig</span> { <span class="ident">keys</span>: <span class="macro">vec!</span>[] },
+        <span class="ident">grandpa</span>: <span class="ident">GrandpaConfig</span> {
             <span class="ident">authorities</span>: <span class="macro">vec!</span>[],
-        }),
-        <span class="comment">// pallet_nodle_staking: Some(NodleStakingConfig {</span>
-        <span class="comment">//     stakers: initial_authorities</span>
-        <span class="comment">//         .iter()</span>
-        <span class="comment">//         .map(|x| (x.0.clone(), None, STASH))</span>
-        <span class="comment">//         .collect(),</span>
-        <span class="comment">//     invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),</span>
-        <span class="comment">//     ..Default::default()</span>
-        <span class="comment">// }),</span>
-        <span class="ident">pallet_membership_Instance2</span>: <span class="prelude-val">Some</span>(<span class="ident">ValidatorsSetConfig</span> {
+        },
+        <span class="ident">validators_set</span>: <span class="ident">ValidatorsSetConfig</span> {
             <span class="ident">members</span>: <span class="ident">initial_authorities</span>
                 .<span class="ident">iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">clone</span>())
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
             <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
-        }),
+        },
 
         <span class="comment">// Governance</span>
         <span class="comment">// Technical Committee</span>
-        <span class="ident">pallet_collective_Instance2</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
-        <span class="ident">pallet_membership_Instance1</span>: <span class="prelude-val">Some</span>(<span class="ident">TechnicalMembershipConfig</span> {
+        <span class="ident">technical_committee</span>: <span class="ident">Default::default</span>(),
+        <span class="ident">technical_membership</span>: <span class="ident">TechnicalMembershipConfig</span> {
             <span class="ident">members</span>: <span class="ident">roots</span>.<span class="ident">clone</span>(),
             <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
-        }),
+        },
         <span class="comment">// Financial Committee</span>
-        <span class="ident">pallet_collective_Instance3</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
-        <span class="ident">pallet_membership_Instance3</span>: <span class="prelude-val">Some</span>(<span class="ident">FinancialMembershipConfig</span> {
+        <span class="ident">financial_committee</span>: <span class="ident">Default::default</span>(),
+        <span class="ident">financial_membership</span>: <span class="ident">FinancialMembershipConfig</span> {
             <span class="ident">members</span>: <span class="ident">roots</span>.<span class="ident">clone</span>(),
             <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
-        }),
-        <span class="ident">pallet_reserve_Instance1</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
-        <span class="ident">pallet_reserve_Instance2</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
-        <span class="ident">pallet_reserve_Instance3</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
+        },
+        <span class="ident">company_reserve</span>: <span class="ident">Default::default</span>(),
+        <span class="ident">international_reserve</span>: <span class="ident">Default::default</span>(),
+        <span class="ident">usa_reserve</span>: <span class="ident">Default::default</span>(),
         <span class="comment">// Root Committee</span>
-        <span class="ident">pallet_collective_Instance4</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
-        <span class="ident">pallet_membership_Instance4</span>: <span class="prelude-val">Some</span>(<span class="ident">RootMembershipConfig</span> {
+        <span class="ident">root_committee</span>: <span class="ident">Default::default</span>(),
+        <span class="ident">root_membership</span>: <span class="ident">RootMembershipConfig</span> {
             <span class="ident">members</span>: <span class="ident">roots</span>.<span class="ident">clone</span>(),
             <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
-        }),
+        },
 
         <span class="comment">// Allocations</span>
-        <span class="ident">pallet_membership_Instance5</span>: <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()),
+        <span class="ident">allocations_oracles</span>: <span class="ident">Default::default</span>(),
     }
 }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpc-ipc-server-15.1.0&#x2F;src&#x2F;server.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>server.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpc_ipc_server/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpc-ipc-server-18.0.0&#x2F;src&#x2F;server.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>server.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpc_ipc_server/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -640,26 +640,23 @@
 <span id="640">640</span>
 <span id="641">641</span>
 <span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::future::Future</span>;
+<span class="kw">use</span> <span class="ident">std::pin::Pin</span>;
+<span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
+<span class="kw">use</span> <span class="ident">std::task</span>::{<span class="ident">Context</span>, <span class="ident">Poll</span>};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc::futures::sync</span>::{<span class="ident">mpsc</span>, <span class="ident">oneshot</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc::futures</span>::{<span class="ident">future</span>, <span class="ident">Future</span>, <span class="ident">Sink</span>, <span class="ident">Stream</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc</span>::{<span class="ident">middleware</span>, <span class="ident">FutureResult</span>, <span class="ident">MetaIoHandler</span>, <span class="ident">Metadata</span>, <span class="ident">Middleware</span>};
-<span class="kw">use</span> <span class="ident">tokio_service</span>::{<span class="self">self</span>, <span class="ident">Service</span> <span class="kw">as</span> <span class="ident">TokioService</span>};
-
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::server_utils</span>::{
-	<span class="ident">codecs</span>, <span class="ident">reactor</span>, <span class="ident">session</span>,
-	<span class="ident">tokio</span>::{<span class="ident">reactor::Handle</span>, <span class="ident">runtime::TaskExecutor</span>},
-	<span class="ident">tokio_codec::Framed</span>,
-};
-<span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
-
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc::futures::channel::mpsc</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc</span>::{<span class="ident">middleware</span>, <span class="ident">MetaIoHandler</span>, <span class="ident">Metadata</span>, <span class="ident">Middleware</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::meta</span>::{<span class="ident">MetaExtractor</span>, <span class="ident">NoopExtractor</span>, <span class="ident">RequestContext</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::select_with_weak::SelectWithWeakExt</span>;
+<span class="kw">use</span> <span class="ident">futures::channel::oneshot</span>;
+<span class="kw">use</span> <span class="ident">futures::StreamExt</span>;
 <span class="kw">use</span> <span class="ident">parity_tokio_ipc::Endpoint</span>;
+<span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
+<span class="kw">use</span> <span class="ident">tower_service::Service</span> <span class="kw">as</span> <span class="kw">_</span>;
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::server_utils</span>::{<span class="ident">codecs</span>, <span class="ident">reactor</span>, <span class="ident">reactor::TaskExecutor</span>, <span class="ident">session</span>, <span class="ident">tokio_util</span>};
+
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">parity_tokio_ipc::SecurityAttributes</span>;
 
 <span class="doccomment">/// IPC server session</span>
@@ -675,17 +672,24 @@
 	}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">tokio_service::Service</span> <span class="kw">for</span> <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span> {
-	<span class="kw">type</span> <span class="ident">Request</span> <span class="op">=</span> <span class="ident">String</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">tower_service::Service</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+	<span class="ident">S::Future</span>: <span class="ident">Unpin</span>,
+	<span class="ident">S::CallFuture</span>: <span class="ident">Unpin</span>,
+{
 	<span class="kw">type</span> <span class="ident">Response</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>;
-
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
 
-	<span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">FutureResult</span><span class="op">&lt;</span><span class="ident">S::Future</span>, <span class="ident">S::CallFuture</span><span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Response</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident"><span class="self">Self</span>::Request</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(()))
+	}
+
+	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">req</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+		<span class="kw">use</span> <span class="ident">futures::FutureExt</span>;
 		<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;ipc&quot;</span>, <span class="string">&quot;Received request: {}&quot;</span>, <span class="ident">req</span>);
-		<span class="self">self</span>.<span class="ident">handler</span>.<span class="ident">handle_request</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>, <span class="self">self</span>.<span class="ident">meta</span>.<span class="ident">clone</span>())
+		<span class="ident">Box::pin</span>(<span class="self">self</span>.<span class="ident">handler</span>.<span class="ident">handle_request</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>, <span class="self">self</span>.<span class="ident">meta</span>.<span class="ident">clone</span>()).<span class="ident">map</span>(<span class="prelude-val">Ok</span>))
 	}
 }
 
@@ -695,14 +699,17 @@
 	<span class="ident">meta_extractor</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MetaExtractor</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">session_stats</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">session::SessionStats</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">executor</span>: <span class="ident">reactor::UninitializedExecutor</span>,
-	<span class="ident">reactor</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
 	<span class="ident">incoming_separator</span>: <span class="ident">codecs::Separator</span>,
 	<span class="ident">outgoing_separator</span>: <span class="ident">codecs::Separator</span>,
 	<span class="ident">security_attributes</span>: <span class="ident">SecurityAttributes</span>,
 	<span class="ident">client_buffer_size</span>: <span class="ident">usize</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span> <span class="op">+</span> <span class="ident">Default</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span> <span class="op">+</span> <span class="ident">Default</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+	<span class="ident">S::Future</span>: <span class="ident">Unpin</span>,
+	<span class="ident">S::CallFuture</span>: <span class="ident">Unpin</span>,
+{
 	<span class="doccomment">/// Creates new IPC server build given the `IoHandler`.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">io_handler</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
@@ -712,7 +719,11 @@
 	}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+	<span class="ident">S::Future</span>: <span class="ident">Unpin</span>,
+	<span class="ident">S::CallFuture</span>: <span class="ident">Unpin</span>,
+{
 	<span class="doccomment">/// Creates new IPC server build given the `IoHandler` and metadata extractor.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_meta_extractor</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">io_handler</span>: <span class="ident">T</span>, <span class="ident">extractor</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
@@ -724,7 +735,6 @@
 			<span class="ident">meta_extractor</span>: <span class="ident">Arc::new</span>(<span class="ident">extractor</span>),
 			<span class="ident">session_stats</span>: <span class="prelude-val">None</span>,
 			<span class="ident">executor</span>: <span class="ident">reactor::UninitializedExecutor::Unspawned</span>,
-			<span class="ident">reactor</span>: <span class="prelude-val">None</span>,
 			<span class="ident">incoming_separator</span>: <span class="ident">codecs::Separator::Empty</span>,
 			<span class="ident">outgoing_separator</span>: <span class="ident">codecs::Separator::default</span>(),
 			<span class="ident">security_attributes</span>: <span class="ident">SecurityAttributes::empty</span>(),
@@ -735,12 +745,6 @@
 	<span class="doccomment">/// Sets shared different event loop executor.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_loop_executor</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">executor</span>: <span class="ident">TaskExecutor</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">executor</span> <span class="op">=</span> <span class="ident">reactor::UninitializedExecutor::Shared</span>(<span class="ident">executor</span>);
-		<span class="self">self</span>
-	}
-
-	<span class="doccomment">/// Sets different event loop I/O reactor.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_loop_reactor</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reactor</span>: <span class="ident">Handle</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-		<span class="self">self</span>.<span class="ident">reactor</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">reactor</span>);
 		<span class="self">self</span>
 	}
 
@@ -781,7 +785,6 @@
 	<span class="doccomment">/// Creates a new server from the given endpoint.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">Server</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">initialize</span>()<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">reactor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reactor</span>;
 		<span class="kw">let</span> <span class="ident">rpc_handler</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handler</span>;
 		<span class="kw">let</span> <span class="ident">endpoint_addr</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">to_owned</span>();
 		<span class="kw">let</span> <span class="ident">meta_extractor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">meta_extractor</span>;
@@ -789,12 +792,13 @@
 		<span class="kw">let</span> <span class="ident">incoming_separator</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">incoming_separator</span>;
 		<span class="kw">let</span> <span class="ident">outgoing_separator</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">outgoing_separator</span>;
 		<span class="kw">let</span> (<span class="ident">stop_signal</span>, <span class="ident">stop_receiver</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
-		<span class="kw">let</span> (<span class="ident">start_signal</span>, <span class="ident">start_receiver</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
-		<span class="kw">let</span> (<span class="ident">wait_signal</span>, <span class="ident">wait_receiver</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
+		<span class="comment">// NOTE: These channels are only waited upon in synchronous fashion</span>
+		<span class="kw">let</span> (<span class="ident">start_signal</span>, <span class="ident">start_receiver</span>) <span class="op">=</span> <span class="ident">std::sync::mpsc::channel</span>();
+		<span class="kw">let</span> (<span class="ident">wait_signal</span>, <span class="ident">wait_receiver</span>) <span class="op">=</span> <span class="ident">std::sync::mpsc::channel</span>();
 		<span class="kw">let</span> <span class="ident">security_attributes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">security_attributes</span>;
 		<span class="kw">let</span> <span class="ident">client_buffer_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client_buffer_size</span>;
 
-		<span class="ident">executor</span>.<span class="ident">spawn</span>(<span class="ident">future::lazy</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+		<span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">endpoint</span> <span class="op">=</span> <span class="ident">Endpoint::new</span>(<span class="ident">endpoint_addr</span>);
 			<span class="ident">endpoint</span>.<span class="ident">set_security_attributes</span>(<span class="ident">security_attributes</span>);
 
@@ -805,27 +809,21 @@
 				}
 			}
 
-			<span class="comment">// Make sure to construct Handle::default() inside Tokio runtime</span>
-			<span class="kw">let</span> <span class="ident">reactor</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">windows</span>) {
-				<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
-				<span class="ident">reactor</span>.<span class="ident">unwrap_or_else</span>(<span class="ident">Handle::current</span>)
-			} <span class="kw">else</span> {
-				<span class="ident">reactor</span>.<span class="ident">unwrap_or_else</span>(<span class="ident">Handle::default</span>)
-			};
-
-			<span class="kw">let</span> <span class="ident">connections</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">endpoint</span>.<span class="ident">incoming</span>(<span class="kw-2">&amp;</span><span class="ident">reactor</span>) {
+			<span class="kw">let</span> <span class="ident">endpoint_addr</span> <span class="op">=</span> <span class="ident">endpoint</span>.<span class="ident">path</span>().<span class="ident">to_owned</span>();
+			<span class="kw">let</span> <span class="ident">connections</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">endpoint</span>.<span class="ident">incoming</span>() {
 				<span class="prelude-val">Ok</span>(<span class="ident">connections</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">connections</span>,
 				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
 					<span class="ident">start_signal</span>
 						.<span class="ident">send</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>))
 						.<span class="ident">expect</span>(<span class="string">&quot;Cannot fail since receiver never dropped before receiving&quot;</span>);
-					<span class="kw">return</span> <span class="ident">future::Either::A</span>(<span class="ident">future::ok</span>(()));
+					<span class="kw">return</span>;
 				}
 			};
 
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">id</span> <span class="op">=</span> <span class="number">0u64</span>;
 
-			<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">connections</span>.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">io_stream</span>, <span class="ident">remote_id</span>)<span class="op">|</span> {
+			<span class="kw">use</span> <span class="ident">futures::TryStreamExt</span>;
+			<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">connections</span>.<span class="ident">map_ok</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">io_stream</span><span class="op">|</span> {
 				<span class="ident">id</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>);
 				<span class="kw">let</span> <span class="ident">session_id</span> <span class="op">=</span> <span class="ident">id</span>;
 				<span class="kw">let</span> <span class="ident">session_stats</span> <span class="op">=</span> <span class="ident">session_stats</span>.<span class="ident">clone</span>();
@@ -834,66 +832,58 @@
 					<span class="ident">stats</span>.<span class="ident">open_session</span>(<span class="ident">session_id</span>)
 				}
 
-				<span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="number">16</span>);
+				<span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">mpsc::unbounded</span>();
 				<span class="kw">let</span> <span class="ident">meta</span> <span class="op">=</span> <span class="ident">meta_extractor</span>.<span class="ident">extract</span>(<span class="kw-2">&amp;</span><span class="ident">RequestContext</span> {
-					<span class="ident">endpoint_addr</span>: <span class="kw-2">&amp;</span><span class="ident">remote_id</span>,
+					<span class="ident">endpoint_addr</span>: <span class="ident">endpoint_addr</span>.<span class="ident">as_ref</span>(),
 					<span class="ident">session_id</span>,
 					<span class="ident">sender</span>,
 				});
-				<span class="kw">let</span> <span class="ident">service</span> <span class="op">=</span> <span class="ident">Service::new</span>(<span class="ident">rpc_handler</span>.<span class="ident">clone</span>(), <span class="ident">meta</span>);
-				<span class="kw">let</span> (<span class="ident">writer</span>, <span class="ident">reader</span>) <span class="op">=</span> <span class="ident">Framed::new</span>(
-					<span class="ident">io_stream</span>,
-					<span class="ident">codecs::StreamCodec::new</span>(<span class="ident">incoming_separator</span>.<span class="ident">clone</span>(), <span class="ident">outgoing_separator</span>.<span class="ident">clone</span>()),
-				)
-				.<span class="ident">split</span>();
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">service</span> <span class="op">=</span> <span class="ident">Service::new</span>(<span class="ident">rpc_handler</span>.<span class="ident">clone</span>(), <span class="ident">meta</span>);
+				<span class="kw">let</span> <span class="ident">codec</span> <span class="op">=</span> <span class="ident">codecs::StreamCodec::new</span>(<span class="ident">incoming_separator</span>.<span class="ident">clone</span>(), <span class="ident">outgoing_separator</span>.<span class="ident">clone</span>());
+				<span class="kw">let</span> <span class="ident">framed</span> <span class="op">=</span> <span class="ident">tokio_util::codec::Decoder::framed</span>(<span class="ident">codec</span>, <span class="ident">io_stream</span>);
+				<span class="kw">let</span> (<span class="ident">writer</span>, <span class="ident">reader</span>) <span class="op">=</span> <span class="ident">futures::StreamExt::split</span>(<span class="ident">framed</span>);
+
 				<span class="kw">let</span> <span class="ident">responses</span> <span class="op">=</span> <span class="ident">reader</span>
-					.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">req</span><span class="op">|</span> {
+					.<span class="ident">map_ok</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">req</span><span class="op">|</span> {
 						<span class="ident">service</span>
 							.<span class="ident">call</span>(<span class="ident">req</span>)
-							.<span class="ident">then</span>(<span class="op">|</span><span class="ident">result</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">result</span> {
-								<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">future::ok</span>(<span class="prelude-val">None</span>),
-								<span class="prelude-val">Ok</span>(<span class="ident">some_result</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">future::ok</span>(<span class="ident">some_result</span>),
-							})
-							.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span>: ()<span class="op">|</span> <span class="ident">std::io::ErrorKind::Other</span>.<span class="ident">into</span>())
+							<span class="comment">// Ignore service errors</span>
+							.<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">x</span>.<span class="ident">ok</span>().<span class="ident">flatten</span>()))
 					})
-					.<span class="ident">buffer_unordered</span>(<span class="ident">client_buffer_size</span>)
-					.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>)
+					.<span class="ident">try_buffer_unordered</span>(<span class="ident">client_buffer_size</span>)
+					<span class="comment">// Filter out previously ignored service errors as `None`s</span>
+					.<span class="ident">try_filter_map</span>(<span class="ident">futures::future::ok</span>)
 					<span class="comment">// we use `select_with_weak` here, instead of `select`, to close the stream</span>
 					<span class="comment">// as soon as the ipc pipe is closed</span>
-					.<span class="ident">select_with_weak</span>(<span class="ident">receiver</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-						<span class="macro">warn!</span>(<span class="ident">target</span>: <span class="string">&quot;ipc&quot;</span>, <span class="string">&quot;Notification error: {:?}&quot;</span>, <span class="ident">e</span>);
-						<span class="ident">std::io::ErrorKind::Other</span>.<span class="ident">into</span>()
-					}));
+					.<span class="ident">select_with_weak</span>(<span class="ident">receiver</span>.<span class="ident">map</span>(<span class="prelude-val">Ok</span>));
 
-				<span class="kw">let</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">writer</span>.<span class="ident">send_all</span>(<span class="ident">responses</span>).<span class="ident">then</span>(<span class="kw">move</span> <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
+				<span class="ident">responses</span>.<span class="ident">forward</span>(<span class="ident">writer</span>).<span class="ident">then</span>(<span class="kw">move</span> <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;ipc&quot;</span>, <span class="string">&quot;Peer: service finished&quot;</span>);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">stats</span>) <span class="op">=</span> <span class="ident">session_stats</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">stats</span>.<span class="ident">close_session</span>(<span class="ident">session_id</span>)
 					}
-					<span class="prelude-val">Ok</span>(())
-				});
 
-				<span class="ident">writer</span>
+					<span class="kw">async</span> { <span class="prelude-val">Ok</span>(()) }
+				})
 			});
 			<span class="ident">start_signal</span>
 				.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(()))
 				.<span class="ident">expect</span>(<span class="string">&quot;Cannot fail since receiver never dropped before receiving&quot;</span>);
+			<span class="kw">let</span> <span class="ident">stop</span> <span class="op">=</span> <span class="ident">stop_receiver</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">std::io::ErrorKind::Interrupted</span>);
+			<span class="kw">let</span> <span class="ident">stop</span> <span class="op">=</span> <span class="ident">Box::pin</span>(<span class="ident">stop</span>);
 
-			<span class="kw">let</span> <span class="ident">stop</span> <span class="op">=</span> <span class="ident">stop_receiver</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">std::io::ErrorKind::Interrupted</span>.<span class="ident">into</span>());
-			<span class="ident">future::Either::B</span>(
-				<span class="ident">server</span>
-					.<span class="ident">buffer_unordered</span>(<span class="number">1024</span>)
-					.<span class="ident">for_each</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">Ok</span>(()))
-					.<span class="ident">select</span>(<span class="ident">stop</span>)
-					.<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">server</span>)<span class="op">|</span> {
-						<span class="comment">// We drop the server first to prevent a situation where main thread terminates</span>
-						<span class="comment">// before the server is properly dropped (see #504 for more details)</span>
-						<span class="ident">drop</span>(<span class="ident">server</span>);
-						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">wait_signal</span>.<span class="ident">send</span>(());
-					})
-					.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
-			)
-		}));
+			<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">server</span>.<span class="ident">try_buffer_unordered</span>(<span class="number">1024</span>).<span class="ident">for_each</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="kw">async</span> {});
+
+			<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">futures::future::select</span>(<span class="ident">Box::pin</span>(<span class="ident">server</span>), <span class="ident">stop</span>).<span class="kw">await</span>;
+			<span class="comment">// We drop the server first to prevent a situation where main thread terminates</span>
+			<span class="comment">// before the server is properly dropped (see #504 for more details)</span>
+			<span class="ident">drop</span>(<span class="ident">result</span>);
+			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">wait_signal</span>.<span class="ident">send</span>(());
+		};
+
+		<span class="kw">use</span> <span class="ident">futures::FutureExt</span>;
+		<span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="ident">Box::pin</span>(<span class="ident">fut</span>.<span class="ident">map</span>(<span class="ident">drop</span>));
+		<span class="ident">executor</span>.<span class="ident">executor</span>().<span class="ident">spawn</span>(<span class="ident">fut</span>);
 
 		<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">InnerHandles</span> {
 			<span class="ident">executor</span>: <span class="prelude-val">Some</span>(<span class="ident">executor</span>),
@@ -901,7 +891,8 @@
 			<span class="ident">path</span>: <span class="ident">path</span>.<span class="ident">to_owned</span>(),
 		};
 
-		<span class="kw">match</span> <span class="ident">start_receiver</span>.<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;Message should always be sent&quot;</span>) {
+		<span class="kw">use</span> <span class="ident">futures::TryFutureExt</span>;
+		<span class="kw">match</span> <span class="ident">start_receiver</span>.<span class="ident">recv</span>().<span class="ident">expect</span>(<span class="string">&quot;Message should always be sent&quot;</span>) {
 			<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Server</span> {
 				<span class="ident">handles</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">handle</span>)),
 				<span class="ident">wait_handle</span>: <span class="prelude-val">Some</span>(<span class="ident">wait_receiver</span>),
@@ -915,7 +906,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Server</span> {
 	<span class="ident">handles</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">InnerHandles</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	<span class="ident">wait_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">oneshot::Receiver</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">wait_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std::sync::mpsc::Receiver</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Server</span> {
@@ -933,7 +924,9 @@
 
 	<span class="doccomment">/// Wait for the server to finish</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">mut</span> <span class="self">self</span>) {
-		<span class="self">self</span>.<span class="ident">wait_handle</span>.<span class="ident">take</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">wait_receiver</span><span class="op">|</span> <span class="ident">wait_receiver</span>.<span class="ident">wait</span>());
+		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">wait_receiver</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">wait_handle</span>.<span class="ident">take</span>() {
+			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">wait_receiver</span>.<span class="ident">recv</span>();
+		}
 	}
 }
 
@@ -975,29 +968,16 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">windows</span>))]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-	<span class="kw">use</span> <span class="ident">tokio_uds</span>;
+	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
-	<span class="kw">use</span> <span class="ident"><span class="self">self</span>::tokio_uds::UnixStream</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::SecurityAttributes</span>;
-	<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Server</span>, <span class="ident">ServerBuilder</span>};
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc::futures::sync</span>::{<span class="ident">mpsc</span>, <span class="ident">oneshot</span>};
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc::futures</span>::{<span class="ident">future</span>, <span class="ident">Future</span>, <span class="ident">Sink</span>, <span class="ident">Stream</span>};
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::jsonrpc</span>::{<span class="ident">MetaIoHandler</span>, <span class="ident">Value</span>};
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::meta</span>::{<span class="ident">MetaExtractor</span>, <span class="ident">NoopExtractor</span>, <span class="ident">RequestContext</span>};
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::server_utils::codecs</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::server_utils</span>::{
-		<span class="ident">tokio</span>::{<span class="self">self</span>, <span class="ident">timer::Delay</span>},
-		<span class="ident">tokio_codec::Decoder</span>,
-	};
-	<span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
-	<span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
+	<span class="kw">use</span> <span class="ident">jsonrpc_core::Value</span>;
+	<span class="kw">use</span> <span class="ident">std::os::unix::net::UnixStream</span>;
 	<span class="kw">use</span> <span class="ident">std::thread</span>;
-	<span class="kw">use</span> <span class="ident">std::time</span>;
-	<span class="kw">use</span> <span class="ident">std::time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
+	<span class="kw">use</span> <span class="ident">std::time</span>::{<span class="self">self</span>, <span class="ident">Duration</span>};
 
 	<span class="kw">fn</span> <span class="ident">server_builder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">MetaIoHandler</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span><span class="ident">::default</span>();
-		<span class="ident">io</span>.<span class="ident">add_method</span>(<span class="string">&quot;say_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="string">&quot;hello&quot;</span>.<span class="ident">to_string</span>())));
+		<span class="ident">io</span>.<span class="ident">add_sync_method</span>(<span class="string">&quot;say_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="string">&quot;hello&quot;</span>.<span class="ident">to_string</span>())));
 		<span class="ident">ServerBuilder::new</span>(<span class="ident">io</span>)
 	}
 
@@ -1008,17 +988,22 @@
 	}
 
 	<span class="kw">fn</span> <span class="ident">dummy_request_str</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-		<span class="kw">let</span> <span class="ident">stream_future</span> <span class="op">=</span> <span class="ident">UnixStream::connect</span>(<span class="ident">path</span>);
-		<span class="kw">let</span> <span class="ident">reply</span> <span class="op">=</span> <span class="ident">stream_future</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">stream</span><span class="op">|</span> {
-			<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">codecs::StreamCodec::stream_incoming</span>().<span class="ident">framed</span>(<span class="ident">stream</span>);
-			<span class="kw">let</span> <span class="ident">reply</span> <span class="op">=</span> <span class="ident">stream</span>
-				.<span class="ident">send</span>(<span class="ident">data</span>.<span class="ident">to_owned</span>())
-				.<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">stream</span><span class="op">|</span> <span class="ident">stream</span>.<span class="ident">into_future</span>().<span class="ident">map_err</span>(<span class="op">|</span>(<span class="ident">err</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">err</span>))
-				.<span class="ident">and_then</span>(<span class="op">|</span>(<span class="ident">reply</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">future::ok</span>(<span class="ident">reply</span>.<span class="ident">expect</span>(<span class="string">&quot;there should be one reply&quot;</span>)));
-			<span class="ident">reply</span>
-		});
+		<span class="kw">use</span> <span class="ident">futures::SinkExt</span>;
 
-		<span class="ident">reply</span>.<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;wait for reply&quot;</span>)
+		<span class="kw">let</span> <span class="ident">reply</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
+			<span class="kw">use</span> <span class="ident">tokio::net::UnixStream</span>;
+
+			<span class="kw">let</span> <span class="ident">stream</span>: <span class="ident">UnixStream</span> <span class="op">=</span> <span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+			<span class="kw">let</span> <span class="ident">codec</span> <span class="op">=</span> <span class="ident">codecs::StreamCodec::stream_incoming</span>();
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">tokio_util::codec::Decoder::framed</span>(<span class="ident">codec</span>, <span class="ident">stream</span>);
+			<span class="ident">stream</span>.<span class="ident">send</span>(<span class="ident">data</span>.<span class="ident">to_owned</span>()).<span class="kw">await</span><span class="question-mark">?</span>;
+			<span class="kw">let</span> (<span class="ident">reply</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">into_future</span>().<span class="kw">await</span>;
+
+			<span class="ident">reply</span>.<span class="ident">expect</span>(<span class="string">&quot;there should be one reply&quot;</span>)
+		};
+
+		<span class="kw">let</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">tokio::runtime::Runtime::new</span>().<span class="ident">unwrap</span>();
+		<span class="ident">rt</span>.<span class="ident">block_on</span>(<span class="ident">reply</span>).<span class="ident">expect</span>(<span class="string">&quot;wait for reply&quot;</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1026,7 +1011,7 @@
 		<span class="ident"><span class="kw">crate</span>::logger::init_log</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">MetaIoHandler</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span><span class="ident">::default</span>();
-		<span class="ident">io</span>.<span class="ident">add_method</span>(<span class="string">&quot;say_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="string">&quot;hello&quot;</span>.<span class="ident">to_string</span>())));
+		<span class="ident">io</span>.<span class="ident">add_sync_method</span>(<span class="string">&quot;say_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="string">&quot;hello&quot;</span>.<span class="ident">to_string</span>())));
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">ServerBuilder::new</span>(<span class="ident">io</span>);
 
 		<span class="kw">let</span> <span class="ident">_server</span> <span class="op">=</span> <span class="ident">server</span>
@@ -1040,7 +1025,7 @@
 		<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;/tmp/test-ipc-30000&quot;</span>;
 		<span class="kw">let</span> <span class="ident">_server</span> <span class="op">=</span> <span class="ident">run</span>(<span class="ident">path</span>);
 
-		<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;Socket should connect&quot;</span>);
+		<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">expect</span>(<span class="string">&quot;Socket should connect&quot;</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1048,7 +1033,7 @@
 		<span class="ident"><span class="kw">crate</span>::logger::init_log</span>();
 		<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;/tmp/test-ipc-40000&quot;</span>;
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">run</span>(<span class="ident">path</span>);
-		<span class="kw">let</span> (<span class="ident">stop_signal</span>, <span class="ident">stop_receiver</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
+		<span class="kw">let</span> (<span class="ident">stop_signal</span>, <span class="ident">stop_receiver</span>) <span class="op">=</span> <span class="ident">std::sync::mpsc::channel</span>();
 
 		<span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">dummy_request_str</span>(
@@ -1059,15 +1044,13 @@
 		});
 		<span class="ident">t</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
 
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">stop_receiver</span>
-			.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">result</span>: <span class="ident">String</span><span class="op">|</span> {
-				<span class="macro">assert_eq!</span>(
-					<span class="ident">result</span>, <span class="string">&quot;{\&quot;jsonrpc\&quot;:\&quot;2.0\&quot;,\&quot;result\&quot;:\&quot;hello\&quot;,\&quot;id\&quot;:1}&quot;</span>,
-					<span class="string">&quot;Response does not exactly match the expected response&quot;</span>,
-				);
-				<span class="ident">server</span>.<span class="ident">close</span>();
-			})
-			.<span class="ident">wait</span>();
+		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">stop_receiver</span>.<span class="ident">recv</span>().<span class="ident">unwrap</span>();
+
+		<span class="macro">assert_eq!</span>(
+			<span class="ident">result</span>, <span class="string">&quot;{\&quot;jsonrpc\&quot;:\&quot;2.0\&quot;,\&quot;result\&quot;:\&quot;hello\&quot;,\&quot;id\&quot;:1}&quot;</span>,
+			<span class="string">&quot;Response does not exactly match the expected response&quot;</span>,
+		);
+		<span class="ident">server</span>.<span class="ident">close</span>();
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1075,7 +1058,7 @@
 		<span class="ident"><span class="kw">crate</span>::logger::init_log</span>();
 		<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;/tmp/test-ipc-45000&quot;</span>;
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">run</span>(<span class="ident">path</span>);
-		<span class="kw">let</span> (<span class="ident">stop_signal</span>, <span class="ident">stop_receiver</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="number">400</span>);
+		<span class="kw">let</span> (<span class="ident">stop_signal</span>, <span class="ident">stop_receiver</span>) <span class="op">=</span> <span class="ident">futures::channel::mpsc::channel</span>(<span class="number">400</span>);
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handles</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">4</span> {
@@ -1096,16 +1079,20 @@
 			<span class="ident">handle</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
 		}
 
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">stop_receiver</span>
-			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">result</span><span class="op">|</span> {
-				<span class="macro">assert_eq!</span>(
-					<span class="ident">result</span>, <span class="string">&quot;{\&quot;jsonrpc\&quot;:\&quot;2.0\&quot;,\&quot;result\&quot;:\&quot;hello\&quot;,\&quot;id\&quot;:1}&quot;</span>,
-					<span class="string">&quot;Response does not exactly match the expected response&quot;</span>,
-				);
-			})
-			.<span class="ident">take</span>(<span class="number">400</span>)
-			.<span class="ident">collect</span>()
-			.<span class="ident">wait</span>();
+		<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+			<span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="ident">stop_receiver</span>
+				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">result</span><span class="op">|</span> {
+					<span class="macro">assert_eq!</span>(
+						<span class="ident">result</span>, <span class="string">&quot;{\&quot;jsonrpc\&quot;:\&quot;2.0\&quot;,\&quot;result\&quot;:\&quot;hello\&quot;,\&quot;id\&quot;:1}&quot;</span>,
+						<span class="string">&quot;Response does not exactly match the expected response&quot;</span>,
+					);
+				})
+				.<span class="ident">take</span>(<span class="number">400</span>)
+				.<span class="ident">for_each</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="kw">async</span> {});
+			<span class="ident">futures::executor::block_on</span>(<span class="ident">fut</span>);
+		})
+		.<span class="ident">join</span>()
+		.<span class="ident">unwrap</span>();
 		<span class="ident">server</span>.<span class="ident">close</span>();
 	}
 
@@ -1121,7 +1108,7 @@
 			<span class="string">&quot;There should be no socket file left&quot;</span>
 		);
 		<span class="macro">assert!</span>(
-			<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">wait</span>().<span class="ident">is_err</span>(),
+			<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">is_err</span>(),
 			<span class="string">&quot;Connection to the closed socket should fail&quot;</span>
 		);
 	}
@@ -1150,7 +1137,7 @@
 		<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;/tmp/test-ipc-60000&quot;</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">MetaIoHandler</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span><span class="ident">::default</span>();
-		<span class="ident">io</span>.<span class="ident">add_method</span>(<span class="string">&quot;say_huge_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="ident">huge_response_test_str</span>())));
+		<span class="ident">io</span>.<span class="ident">add_sync_method</span>(<span class="string">&quot;say_huge_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="ident">huge_response_test_str</span>())));
 		<span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ServerBuilder::new</span>(<span class="ident">io</span>);
 
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">start</span>(<span class="ident">path</span>).<span class="ident">expect</span>(<span class="string">&quot;Server must run with no issues&quot;</span>);
@@ -1166,16 +1153,19 @@
 		});
 		<span class="ident">t</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
 
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">stop_receiver</span>
-			.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">result</span>: <span class="ident">String</span><span class="op">|</span> {
+		<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+			<span class="ident">futures::executor::block_on</span>(<span class="kw">async</span> <span class="kw">move</span> {
+				<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">stop_receiver</span>.<span class="kw">await</span>.<span class="ident">unwrap</span>();
 				<span class="macro">assert_eq!</span>(
 					<span class="ident">result</span>,
 					<span class="ident">huge_response_test_json</span>(),
 					<span class="string">&quot;Response does not exactly match the expected response&quot;</span>,
 				);
 				<span class="ident">server</span>.<span class="ident">close</span>();
-			})
-			.<span class="ident">wait</span>();
+			});
+		})
+		.<span class="ident">join</span>()
+		.<span class="ident">unwrap</span>();
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1192,7 +1182,7 @@
 		}
 
 		<span class="kw">struct</span> <span class="ident">SessionEndExtractor</span> {
-			<span class="ident">drop_receivers</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">oneshot::Receiver</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+			<span class="ident">drop_receivers</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">futures::channel::mpsc::Sender</span><span class="op">&lt;</span><span class="ident">oneshot::Receiver</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		}
 
 		<span class="kw">impl</span> <span class="ident">MetaExtractor</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SessionEndMeta</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SessionEndExtractor</span> {
@@ -1208,7 +1198,7 @@
 
 		<span class="ident"><span class="kw">crate</span>::logger::init_log</span>();
 		<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="string">&quot;/tmp/test-ipc-30009&quot;</span>;
-		<span class="kw">let</span> (<span class="ident">signal</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="number">16</span>);
+		<span class="kw">let</span> (<span class="ident">signal</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">futures::channel::mpsc::channel</span>(<span class="number">16</span>);
 		<span class="kw">let</span> <span class="ident">session_metadata_extractor</span> <span class="op">=</span> <span class="ident">SessionEndExtractor</span> {
 			<span class="ident">drop_receivers</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">signal</span>)),
 		};
@@ -1217,15 +1207,17 @@
 		<span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ServerBuilder::with_meta_extractor</span>(<span class="ident">io</span>, <span class="ident">session_metadata_extractor</span>);
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">start</span>(<span class="ident">path</span>).<span class="ident">expect</span>(<span class="string">&quot;Server must run with no issues&quot;</span>);
 		{
-			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;Socket should connect&quot;</span>);
+			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">expect</span>(<span class="string">&quot;Socket should connect&quot;</span>);
 		}
 
-		<span class="ident">receiver</span>
-			.<span class="ident">into_future</span>()
-			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-			.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">drop_receiver</span><span class="op">|</span> <span class="ident">drop_receiver</span>.<span class="number">0</span>.<span class="ident">unwrap</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()))
-			.<span class="ident">wait</span>()
-			.<span class="ident">unwrap</span>();
+		<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+			<span class="ident">futures::executor::block_on</span>(<span class="kw">async</span> <span class="kw">move</span> {
+				<span class="kw">let</span> (<span class="ident">drop_receiver</span>, ..) <span class="op">=</span> <span class="ident">receiver</span>.<span class="ident">into_future</span>().<span class="kw">await</span>;
+				<span class="ident">drop_receiver</span>.<span class="ident">unwrap</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>();
+			});
+		})
+		.<span class="ident">join</span>()
+		.<span class="ident">unwrap</span>();
 		<span class="ident">server</span>.<span class="ident">close</span>();
 	}
 
@@ -1237,7 +1229,7 @@
 		<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">server</span>.<span class="ident">close_handle</span>();
 		<span class="ident">handle</span>.<span class="ident">close</span>();
 		<span class="macro">assert!</span>(
-			<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">wait</span>().<span class="ident">is_err</span>(),
+			<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">is_err</span>(),
 			<span class="string">&quot;Connection to the closed socket should fail&quot;</span>
 		);
 	}
@@ -1259,23 +1251,25 @@
 			<span class="ident">tx</span>.<span class="ident">send</span>(<span class="bool-val">true</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to report that the server has stopped&quot;</span>);
 		});
 
-		<span class="kw">let</span> <span class="ident">delay</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="ident">Instant::now</span>() <span class="op">+</span> <span class="ident">Duration::from_millis</span>(<span class="number">500</span>))
-			.<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">false</span>)
-			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">err</span>));
+		<span class="kw">let</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">tokio::runtime::Runtime::new</span>().<span class="ident">unwrap</span>();
+		<span class="ident">rt</span>.<span class="ident">block_on</span>(<span class="kw">async</span> <span class="kw">move</span> {
+			<span class="kw">let</span> <span class="ident">timeout</span> <span class="op">=</span> <span class="ident">tokio::time::sleep</span>(<span class="ident">Duration::from_millis</span>(<span class="number">500</span>));
+			<span class="macro">futures::pin_mut!</span>(<span class="ident">timeout</span>);
 
-		<span class="kw">let</span> <span class="ident">result_fut</span> <span class="op">=</span> <span class="ident">rx</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">select</span>(<span class="ident">delay</span>).<span class="ident">then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">result</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">result</span> {
-			<span class="prelude-val">Ok</span>((<span class="ident">result</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-				<span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="bool-val">true</span>, <span class="string">&quot;Wait timeout exceeded&quot;</span>);
-				<span class="macro">assert!</span>(
-					<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">wait</span>().<span class="ident">is_err</span>(),
-					<span class="string">&quot;Connection to the closed socket should fail&quot;</span>
-				);
-				<span class="prelude-val">Ok</span>(())
+			<span class="kw">match</span> <span class="ident">futures::future::select</span>(<span class="ident">rx</span>, <span class="ident">timeout</span>).<span class="kw">await</span> {
+				<span class="ident">futures::future::Either::Left</span>((<span class="ident">result</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">is_ok</span>(), <span class="string">&quot;Rx failed&quot;</span>);
+					<span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>), <span class="string">&quot;Wait timeout exceeded&quot;</span>);
+					<span class="macro">assert!</span>(
+						<span class="ident">UnixStream::connect</span>(<span class="ident">path</span>).<span class="ident">is_err</span>(),
+						<span class="string">&quot;Connection to the closed socket should fail&quot;</span>
+					);
+					<span class="prelude-val">Ok</span>(())
+				}
+				<span class="ident">futures::future::Either::Right</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;timed out&quot;</span>),
 			}
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
-		});
-
-		<span class="ident">tokio::run</span>(<span class="ident">result_fut</span>);
+		})
+		.<span class="ident">unwrap</span>();
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>

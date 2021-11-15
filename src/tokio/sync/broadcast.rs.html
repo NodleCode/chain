@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;tokio-0.2.25&#x2F;src&#x2F;sync&#x2F;broadcast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>broadcast.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../tokio/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;tokio-1.13.0&#x2F;src&#x2F;sync&#x2F;broadcast.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>broadcast.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../tokio/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1076,165 +1076,6 @@
 <span id="1076">1076</span>
 <span id="1077">1077</span>
 <span id="1078">1078</span>
-<span id="1079">1079</span>
-<span id="1080">1080</span>
-<span id="1081">1081</span>
-<span id="1082">1082</span>
-<span id="1083">1083</span>
-<span id="1084">1084</span>
-<span id="1085">1085</span>
-<span id="1086">1086</span>
-<span id="1087">1087</span>
-<span id="1088">1088</span>
-<span id="1089">1089</span>
-<span id="1090">1090</span>
-<span id="1091">1091</span>
-<span id="1092">1092</span>
-<span id="1093">1093</span>
-<span id="1094">1094</span>
-<span id="1095">1095</span>
-<span id="1096">1096</span>
-<span id="1097">1097</span>
-<span id="1098">1098</span>
-<span id="1099">1099</span>
-<span id="1100">1100</span>
-<span id="1101">1101</span>
-<span id="1102">1102</span>
-<span id="1103">1103</span>
-<span id="1104">1104</span>
-<span id="1105">1105</span>
-<span id="1106">1106</span>
-<span id="1107">1107</span>
-<span id="1108">1108</span>
-<span id="1109">1109</span>
-<span id="1110">1110</span>
-<span id="1111">1111</span>
-<span id="1112">1112</span>
-<span id="1113">1113</span>
-<span id="1114">1114</span>
-<span id="1115">1115</span>
-<span id="1116">1116</span>
-<span id="1117">1117</span>
-<span id="1118">1118</span>
-<span id="1119">1119</span>
-<span id="1120">1120</span>
-<span id="1121">1121</span>
-<span id="1122">1122</span>
-<span id="1123">1123</span>
-<span id="1124">1124</span>
-<span id="1125">1125</span>
-<span id="1126">1126</span>
-<span id="1127">1127</span>
-<span id="1128">1128</span>
-<span id="1129">1129</span>
-<span id="1130">1130</span>
-<span id="1131">1131</span>
-<span id="1132">1132</span>
-<span id="1133">1133</span>
-<span id="1134">1134</span>
-<span id="1135">1135</span>
-<span id="1136">1136</span>
-<span id="1137">1137</span>
-<span id="1138">1138</span>
-<span id="1139">1139</span>
-<span id="1140">1140</span>
-<span id="1141">1141</span>
-<span id="1142">1142</span>
-<span id="1143">1143</span>
-<span id="1144">1144</span>
-<span id="1145">1145</span>
-<span id="1146">1146</span>
-<span id="1147">1147</span>
-<span id="1148">1148</span>
-<span id="1149">1149</span>
-<span id="1150">1150</span>
-<span id="1151">1151</span>
-<span id="1152">1152</span>
-<span id="1153">1153</span>
-<span id="1154">1154</span>
-<span id="1155">1155</span>
-<span id="1156">1156</span>
-<span id="1157">1157</span>
-<span id="1158">1158</span>
-<span id="1159">1159</span>
-<span id="1160">1160</span>
-<span id="1161">1161</span>
-<span id="1162">1162</span>
-<span id="1163">1163</span>
-<span id="1164">1164</span>
-<span id="1165">1165</span>
-<span id="1166">1166</span>
-<span id="1167">1167</span>
-<span id="1168">1168</span>
-<span id="1169">1169</span>
-<span id="1170">1170</span>
-<span id="1171">1171</span>
-<span id="1172">1172</span>
-<span id="1173">1173</span>
-<span id="1174">1174</span>
-<span id="1175">1175</span>
-<span id="1176">1176</span>
-<span id="1177">1177</span>
-<span id="1178">1178</span>
-<span id="1179">1179</span>
-<span id="1180">1180</span>
-<span id="1181">1181</span>
-<span id="1182">1182</span>
-<span id="1183">1183</span>
-<span id="1184">1184</span>
-<span id="1185">1185</span>
-<span id="1186">1186</span>
-<span id="1187">1187</span>
-<span id="1188">1188</span>
-<span id="1189">1189</span>
-<span id="1190">1190</span>
-<span id="1191">1191</span>
-<span id="1192">1192</span>
-<span id="1193">1193</span>
-<span id="1194">1194</span>
-<span id="1195">1195</span>
-<span id="1196">1196</span>
-<span id="1197">1197</span>
-<span id="1198">1198</span>
-<span id="1199">1199</span>
-<span id="1200">1200</span>
-<span id="1201">1201</span>
-<span id="1202">1202</span>
-<span id="1203">1203</span>
-<span id="1204">1204</span>
-<span id="1205">1205</span>
-<span id="1206">1206</span>
-<span id="1207">1207</span>
-<span id="1208">1208</span>
-<span id="1209">1209</span>
-<span id="1210">1210</span>
-<span id="1211">1211</span>
-<span id="1212">1212</span>
-<span id="1213">1213</span>
-<span id="1214">1214</span>
-<span id="1215">1215</span>
-<span id="1216">1216</span>
-<span id="1217">1217</span>
-<span id="1218">1218</span>
-<span id="1219">1219</span>
-<span id="1220">1220</span>
-<span id="1221">1221</span>
-<span id="1222">1222</span>
-<span id="1223">1223</span>
-<span id="1224">1224</span>
-<span id="1225">1225</span>
-<span id="1226">1226</span>
-<span id="1227">1227</span>
-<span id="1228">1228</span>
-<span id="1229">1229</span>
-<span id="1230">1230</span>
-<span id="1231">1231</span>
-<span id="1232">1232</span>
-<span id="1233">1233</span>
-<span id="1234">1234</span>
-<span id="1235">1235</span>
-<span id="1236">1236</span>
-<span id="1237">1237</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A multi-producer, multi-consumer broadcast queue. Each sent value is seen by</span>
 <span class="doccomment">//! all consumers.</span>
 <span class="doccomment">//!</span>
@@ -1292,8 +1133,8 @@
 <span class="doccomment">//! [`Sender::subscribe`]: crate::sync::broadcast::Sender::subscribe</span>
 <span class="doccomment">//! [`Receiver`]: crate::sync::broadcast::Receiver</span>
 <span class="doccomment">//! [`channel`]: crate::sync::broadcast::channel</span>
-<span class="doccomment">//! [`RecvError::Lagged`]: crate::sync::broadcast::RecvError::Lagged</span>
-<span class="doccomment">//! [`RecvError::Closed`]: crate::sync::broadcast::RecvError::Closed</span>
+<span class="doccomment">//! [`RecvError::Lagged`]: crate::sync::broadcast::error::RecvError::Lagged</span>
+<span class="doccomment">//! [`RecvError::Closed`]: crate::sync::broadcast::error::RecvError::Closed</span>
 <span class="doccomment">//! [`recv`]: crate::sync::broadcast::Receiver::recv</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
@@ -1344,6 +1185,7 @@
 <span class="doccomment">//!     assert_eq!(20, rx.recv().await.unwrap());</span>
 <span class="doccomment">//!     assert_eq!(30, rx.recv().await.unwrap());</span>
 <span class="doccomment">//! }</span>
+<span class="doccomment">//! ```</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::loom::cell::UnsafeCell</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::loom::sync::atomic::AtomicUsize</span>;
@@ -1399,6 +1241,11 @@
 <span class="doccomment">/// Must not be used concurrently. Messages may be retrieved using</span>
 <span class="doccomment">/// [`recv`][Receiver::recv].</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// To turn this receiver into a `Stream`, you can use the [`BroadcastStream`]</span>
+<span class="doccomment">/// wrapper.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`BroadcastStream`]: https://docs.rs/tokio-stream/0.1/tokio_stream/wrappers/struct.BroadcastStream.html</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
@@ -1431,89 +1278,130 @@
 
     <span class="doccomment">/// Next position to read from</span>
     <span class="ident">next</span>: <span class="ident">u64</span>,
-
-    <span class="doccomment">/// Used to support the deprecated `poll_recv` fn</span>
-    <span class="ident">waiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">Waiter</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Error returned by [`Sender::send`][Sender::send].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// A **send** operation can only fail if there are no active receivers,</span>
-<span class="doccomment">/// implying that the message could never be received. The error contains the</span>
-<span class="doccomment">/// message being sent as a payload so it can be recovered.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SendError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="ident">T</span>);
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">error</span> {
+    <span class="doccomment">//! Broadcast error types</span>
 
-<span class="doccomment">/// An error returned from the [`recv`] function on a [`Receiver`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`recv`]: crate::sync::broadcast::Receiver::recv</span>
-<span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RecvError</span> {
-    <span class="doccomment">/// There are no more active senders implying no further messages will ever</span>
-    <span class="doccomment">/// be sent.</span>
-    <span class="ident">Closed</span>,
+    <span class="kw">use</span> <span class="ident">std::fmt</span>;
 
-    <span class="doccomment">/// The receiver lagged too far behind. Attempting to receive again will</span>
-    <span class="doccomment">/// return the oldest message still retained by the channel.</span>
+    <span class="doccomment">/// Error returned by from the [`send`] function on a [`Sender`].</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Includes the number of skipped messages.</span>
-    <span class="ident">Lagged</span>(<span class="ident">u64</span>),
-}
-
-<span class="doccomment">/// An error returned from the [`try_recv`] function on a [`Receiver`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`try_recv`]: crate::sync::broadcast::Receiver::try_recv</span>
-<span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TryRecvError</span> {
-    <span class="doccomment">/// The channel is currently empty. There are still active</span>
-    <span class="doccomment">/// [`Sender`][Sender] handles, so data may yet become available.</span>
-    <span class="ident">Empty</span>,
-
-    <span class="doccomment">/// There are no more active senders implying no further messages will ever</span>
-    <span class="doccomment">/// be sent.</span>
-    <span class="ident">Closed</span>,
-
-    <span class="doccomment">/// The receiver lagged too far behind and has been forcibly disconnected.</span>
-    <span class="doccomment">/// Attempting to receive again will return the oldest message still</span>
-    <span class="doccomment">/// retained by the channel.</span>
+    <span class="doccomment">/// A **send** operation can only fail if there are no active receivers,</span>
+    <span class="doccomment">/// implying that the message could never be received. The error contains the</span>
+    <span class="doccomment">/// message being sent as a payload so it can be recovered.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Includes the number of skipped messages.</span>
-    <span class="ident">Lagged</span>(<span class="ident">u64</span>),
+    <span class="doccomment">/// [`send`]: crate::sync::broadcast::Sender::send</span>
+    <span class="doccomment">/// [`Sender`]: crate::sync::broadcast::Sender</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SendError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="ident">T</span>);
+
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">SendError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+            <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel closed&quot;</span>)
+        }
+    }
+
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">fmt::Debug</span><span class="op">&gt;</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">SendError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+
+    <span class="doccomment">/// An error returned from the [`recv`] function on a [`Receiver`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [`recv`]: crate::sync::broadcast::Receiver::recv</span>
+    <span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RecvError</span> {
+        <span class="doccomment">/// There are no more active senders implying no further messages will ever</span>
+        <span class="doccomment">/// be sent.</span>
+        <span class="ident">Closed</span>,
+
+        <span class="doccomment">/// The receiver lagged too far behind. Attempting to receive again will</span>
+        <span class="doccomment">/// return the oldest message still retained by the channel.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Includes the number of skipped messages.</span>
+        <span class="ident">Lagged</span>(<span class="ident">u64</span>),
+    }
+
+    <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">RecvError</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+            <span class="kw">match</span> <span class="self">self</span> {
+                <span class="ident">RecvError::Closed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel closed&quot;</span>),
+                <span class="ident">RecvError::Lagged</span>(<span class="ident">amt</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel lagged by {}&quot;</span>, <span class="ident">amt</span>),
+            }
+        }
+    }
+
+    <span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">RecvError</span> {}
+
+    <span class="doccomment">/// An error returned from the [`try_recv`] function on a [`Receiver`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [`try_recv`]: crate::sync::broadcast::Receiver::try_recv</span>
+    <span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TryRecvError</span> {
+        <span class="doccomment">/// The channel is currently empty. There are still active</span>
+        <span class="doccomment">/// [`Sender`] handles, so data may yet become available.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// [`Sender`]: crate::sync::broadcast::Sender</span>
+        <span class="ident">Empty</span>,
+
+        <span class="doccomment">/// There are no more active senders implying no further messages will ever</span>
+        <span class="doccomment">/// be sent.</span>
+        <span class="ident">Closed</span>,
+
+        <span class="doccomment">/// The receiver lagged too far behind and has been forcibly disconnected.</span>
+        <span class="doccomment">/// Attempting to receive again will return the oldest message still</span>
+        <span class="doccomment">/// retained by the channel.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Includes the number of skipped messages.</span>
+        <span class="ident">Lagged</span>(<span class="ident">u64</span>),
+    }
+
+    <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">TryRecvError</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+            <span class="kw">match</span> <span class="self">self</span> {
+                <span class="ident">TryRecvError::Empty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel empty&quot;</span>),
+                <span class="ident">TryRecvError::Closed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel closed&quot;</span>),
+                <span class="ident">TryRecvError::Lagged</span>(<span class="ident">amt</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel lagged by {}&quot;</span>, <span class="ident">amt</span>),
+            }
+        }
+    }
+
+    <span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">TryRecvError</span> {}
 }
 
-<span class="doccomment">/// Data shared between senders and receivers</span>
+<span class="kw">use</span> <span class="ident"><span class="self">self</span>::error</span>::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// Data shared between senders and receivers.</span>
 <span class="kw">struct</span> <span class="ident">Shared</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// slots in the channel</span>
+    <span class="doccomment">/// slots in the channel.</span>
     <span class="ident">buffer</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>]<span class="op">&gt;</span>,
 
-    <span class="doccomment">/// Mask a position -&gt; index</span>
+    <span class="doccomment">/// Mask a position -&gt; index.</span>
     <span class="ident">mask</span>: <span class="ident">usize</span>,
 
     <span class="doccomment">/// Tail of the queue. Includes the rx wait list.</span>
     <span class="ident">tail</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Tail</span><span class="op">&gt;</span>,
 
-    <span class="doccomment">/// Number of outstanding Sender handles</span>
+    <span class="doccomment">/// Number of outstanding Sender handles.</span>
     <span class="ident">num_tx</span>: <span class="ident">AtomicUsize</span>,
 }
 
-<span class="doccomment">/// Next position to write a value</span>
+<span class="doccomment">/// Next position to write a value.</span>
 <span class="kw">struct</span> <span class="ident">Tail</span> {
-    <span class="doccomment">/// Next position to write to</span>
+    <span class="doccomment">/// Next position to write to.</span>
     <span class="ident">pos</span>: <span class="ident">u64</span>,
 
-    <span class="doccomment">/// Number of active receivers</span>
+    <span class="doccomment">/// Number of active receivers.</span>
     <span class="ident">rx_cnt</span>: <span class="ident">usize</span>,
 
-    <span class="doccomment">/// True if the channel is closed</span>
+    <span class="doccomment">/// True if the channel is closed.</span>
     <span class="ident">closed</span>: <span class="ident">bool</span>,
 
-    <span class="doccomment">/// Receivers waiting for a value</span>
-    <span class="ident">waiters</span>: <span class="ident">LinkedList</span><span class="op">&lt;</span><span class="ident">Waiter</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Receivers waiting for a value.</span>
+    <span class="ident">waiters</span>: <span class="ident">LinkedList</span><span class="op">&lt;</span><span class="ident">Waiter</span>, <span class="op">&lt;</span><span class="ident">Waiter</span> <span class="kw">as</span> <span class="ident">linked_list::Link</span><span class="op">&gt;</span><span class="ident">::Target</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Slot in the buffer</span>
+<span class="doccomment">/// Slot in the buffer.</span>
 <span class="kw">struct</span> <span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Remaining number of receivers that are expected to see this value.</span>
     <span class="doccomment">///</span>
@@ -1523,7 +1411,7 @@
     <span class="doccomment">/// acquired.</span>
     <span class="ident">rem</span>: <span class="ident">AtomicUsize</span>,
 
-    <span class="doccomment">/// Uniquely identifies the `send` stored in the slot</span>
+    <span class="doccomment">/// Uniquely identifies the `send` stored in the slot.</span>
     <span class="ident">pos</span>: <span class="ident">u64</span>,
 
     <span class="doccomment">/// True signals the channel is closed.</span>
@@ -1536,9 +1424,9 @@
     <span class="ident">val</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// An entry in the wait queue</span>
+<span class="doccomment">/// An entry in the wait queue.</span>
 <span class="kw">struct</span> <span class="ident">Waiter</span> {
-    <span class="doccomment">/// True if queued</span>
+    <span class="doccomment">/// True if queued.</span>
     <span class="ident">queued</span>: <span class="ident">bool</span>,
 
     <span class="doccomment">/// Task waiting on the broadcast channel.</span>
@@ -1555,39 +1443,17 @@
     <span class="ident">slot</span>: <span class="ident">RwLockReadGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// Receive a value future</span>
-<span class="kw">struct</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-{
-    <span class="doccomment">/// Receiver being waited on</span>
-    <span class="ident">receiver</span>: <span class="ident">R</span>,
+<span class="doccomment">/// Receive a value future.</span>
+<span class="kw">struct</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Receiver being waited on.</span>
+    <span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 
-    <span class="doccomment">/// Entry in the waiter `LinkedList`</span>
+    <span class="doccomment">/// Entry in the waiter `LinkedList`.</span>
     <span class="ident">waiter</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">Waiter</span><span class="op">&gt;</span>,
-
-    <span class="ident">_p</span>: <span class="ident">std::marker::PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// `AsMut&lt;T&gt;` is not implemented for `T` (coherence). Explicitly implementing</span>
-<span class="doccomment">/// `AsMut` for `Receiver` would be included in the public API of the receiver</span>
-<span class="doccomment">/// type. Instead, `Borrow` is used internally to bridge the gap.</span>
-<span class="kw">struct</span> <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">T</span>);
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Borrow</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>
-    }
-}
-
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span>, <span class="ident">T</span>: <span class="ident">Send</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span>, <span class="ident">T</span>: <span class="ident">Send</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Send</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Send</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {}
 
 <span class="doccomment">/// Max number of receivers. Reserve space to lock.</span>
 <span class="kw">const</span> <span class="ident">MAX_RECEIVERS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">usize::MAX</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">2</span>;
@@ -1610,8 +1476,8 @@
 <span class="doccomment">/// [`Sender::subscribe`]: crate::sync::broadcast::Sender::subscribe</span>
 <span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
 <span class="doccomment">/// [`recv`]: crate::sync::broadcast::Receiver::recv</span>
-<span class="doccomment">/// [`SendError`]: crate::sync::broadcast::SendError</span>
-<span class="doccomment">/// [`RecvError`]: crate::sync::broadcast::RecvError</span>
+<span class="doccomment">/// [`SendError`]: crate::sync::broadcast::error::SendError</span>
+<span class="doccomment">/// [`RecvError`]: crate::sync::broadcast::error::RecvError</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -1637,7 +1503,7 @@
 <span class="doccomment">///     tx.send(20).unwrap();</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">channel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">channel</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Clone</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
     <span class="macro">assert!</span>(<span class="ident">capacity</span> <span class="op">&gt;</span> <span class="number">0</span>, <span class="string">&quot;capacity is empty&quot;</span>);
     <span class="macro">assert!</span>(<span class="ident">capacity</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">usize::MAX</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">1</span>, <span class="string">&quot;requested capacity too large&quot;</span>);
 
@@ -1670,7 +1536,6 @@
     <span class="kw">let</span> <span class="ident">rx</span> <span class="op">=</span> <span class="ident">Receiver</span> {
         <span class="ident">shared</span>: <span class="ident">shared</span>.<span class="ident">clone</span>(),
         <span class="ident">next</span>: <span class="number">0</span>,
-        <span class="ident">waiter</span>: <span class="prelude-val">None</span>,
     };
 
     <span class="kw">let</span> <span class="ident">tx</span> <span class="op">=</span> <span class="ident">Sender</span> { <span class="ident">shared</span> };
@@ -1765,23 +1630,7 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subscribe</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">shared</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">clone</span>();
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
-
-        <span class="kw">if</span> <span class="ident">tail</span>.<span class="ident">rx_cnt</span> <span class="op">=</span><span class="op">=</span> <span class="ident">MAX_RECEIVERS</span> {
-            <span class="macro">panic!</span>(<span class="string">&quot;max receivers&quot;</span>);
-        }
-
-        <span class="ident">tail</span>.<span class="ident">rx_cnt</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">rx_cnt</span>.<span class="ident">checked_add</span>(<span class="number">1</span>).<span class="ident">expect</span>(<span class="string">&quot;overflow&quot;</span>);
-        <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">pos</span>;
-
-        <span class="ident">drop</span>(<span class="ident">tail</span>);
-
-        <span class="ident">Receiver</span> {
-            <span class="ident">shared</span>,
-            <span class="ident">next</span>,
-            <span class="ident">waiter</span>: <span class="prelude-val">None</span>,
-        }
+        <span class="ident">new_receiver</span>(<span class="ident">shared</span>)
     }
 
     <span class="doccomment">/// Returns the number of active receivers</span>
@@ -1821,12 +1670,12 @@
     <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">receiver_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="kw">let</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>();
         <span class="ident">tail</span>.<span class="ident">rx_cnt</span>
     }
 
     <span class="kw">fn</span> <span class="ident">send2</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">SendError</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>();
 
         <span class="kw">if</span> <span class="ident">tail</span>.<span class="ident">rx_cnt</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SendError</span>(<span class="ident">value</span>));
@@ -1869,6 +1718,22 @@
 
         <span class="prelude-val">Ok</span>(<span class="ident">rem</span>)
     }
+}
+
+<span class="kw">fn</span> <span class="ident">new_receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">shared</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Shared</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>();
+
+    <span class="kw">if</span> <span class="ident">tail</span>.<span class="ident">rx_cnt</span> <span class="op">=</span><span class="op">=</span> <span class="ident">MAX_RECEIVERS</span> {
+        <span class="macro">panic!</span>(<span class="string">&quot;max receivers&quot;</span>);
+    }
+
+    <span class="ident">tail</span>.<span class="ident">rx_cnt</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">rx_cnt</span>.<span class="ident">checked_add</span>(<span class="number">1</span>).<span class="ident">expect</span>(<span class="string">&quot;overflow&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">pos</span>;
+
+    <span class="ident">drop</span>(<span class="ident">tail</span>);
+
+    <span class="ident">Receiver</span> { <span class="ident">shared</span>, <span class="ident">next</span> }
 }
 
 <span class="kw">impl</span> <span class="ident">Tail</span> {
@@ -1932,7 +1797,7 @@
             <span class="comment">// the slot lock.</span>
             <span class="ident">drop</span>(<span class="ident">slot</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>();
 
             <span class="comment">// Acquire slot lock again</span>
             <span class="ident">slot</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">buffer</span>[<span class="ident">idx</span>].<span class="ident">read</span>().<span class="ident">unwrap</span>();
@@ -2021,107 +1886,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
-{
-    <span class="doccomment">/// Attempts to return a pending value on this receiver without awaiting.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This is useful for a flavor of &quot;optimistic check&quot; before deciding to</span>
-    <span class="doccomment">/// await on a receiver.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Compared with [`recv`], this function has three failure cases instead of one</span>
-    <span class="doccomment">/// (one for closed, one for an empty buffer, one for a lagging receiver).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// `Err(TryRecvError::Closed)` is returned when all `Sender` halves have</span>
-    <span class="doccomment">/// dropped, indicating that no further values can be sent on the channel.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If the [`Receiver`] handle falls behind, once the channel is full, newly</span>
-    <span class="doccomment">/// sent values will overwrite old values. At this point, a call to [`recv`]</span>
-    <span class="doccomment">/// will return with `Err(TryRecvError::Lagged)` and the [`Receiver`]&#39;s</span>
-    <span class="doccomment">/// internal cursor is updated to point to the oldest value still held by</span>
-    <span class="doccomment">/// the channel. A subsequent call to [`try_recv`] will return this value</span>
-    <span class="doccomment">/// **unless** it has been since overwritten. If there are no values to</span>
-    <span class="doccomment">/// receive, `Err(TryRecvError::Empty)` is returned.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// [`recv`]: crate::sync::broadcast::Receiver::recv</span>
-    <span class="doccomment">/// [`try_recv`]: crate::sync::broadcast::Receiver::try_recv</span>
-    <span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use tokio::sync::broadcast;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// #[tokio::main]</span>
-    <span class="doccomment">/// async fn main() {</span>
-    <span class="doccomment">///     let (tx, mut rx) = broadcast::channel(16);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     assert!(rx.try_recv().is_err());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     tx.send(10).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">///     let value = rx.try_recv().unwrap();</span>
-    <span class="doccomment">///     assert_eq!(10, value);</span>
-    <span class="doccomment">/// }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TryRecvError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">recv_ref</span>(<span class="prelude-val">None</span>)<span class="question-mark">?</span>;
-        <span class="ident">guard</span>.<span class="ident">clone_value</span>().<span class="ident">ok_or</span>(<span class="ident">TryRecvError::Closed</span>)
-    }
-
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.2.21&quot;</span>, <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;use async fn recv()&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">Poll</span>::{<span class="ident">Pending</span>, <span class="ident">Ready</span>};
-
-        <span class="comment">// The borrow checker prohibits calling `self.poll_ref` while passing in</span>
-        <span class="comment">// a mutable ref to a field (as it should). To work around this,</span>
-        <span class="comment">// `waiter` is first *removed* from `self` then `poll_recv` is called.</span>
-        <span class="comment">//</span>
-        <span class="comment">// However, for safety, we must ensure that `waiter` is **not** dropped.</span>
-        <span class="comment">// It could be contained in the intrusive linked list. The `Receiver`</span>
-        <span class="comment">// drop implementation handles cleanup.</span>
-        <span class="comment">//</span>
-        <span class="comment">// The guard pattern is used to ensure that, on return, even due to</span>
-        <span class="comment">// panic, the waiter node is replaced on `self`.</span>
-
-        <span class="kw">struct</span> <span class="ident">Guard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="ident">waiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">Waiter</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-            <span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-        }
-
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Guard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-            <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-                <span class="self">self</span>.<span class="ident">receiver</span>.<span class="ident">waiter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">waiter</span>.<span class="ident">take</span>();
-            }
-        }
-
-        <span class="kw">let</span> <span class="ident">waiter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">waiter</span>.<span class="ident">take</span>().<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">Box::pin</span>(<span class="ident">UnsafeCell::new</span>(<span class="ident">Waiter</span> {
-                <span class="ident">queued</span>: <span class="bool-val">false</span>,
-                <span class="ident">waker</span>: <span class="prelude-val">None</span>,
-                <span class="ident">pointers</span>: <span class="ident">linked_list::Pointers::new</span>(),
-                <span class="ident">_p</span>: <span class="ident">PhantomPinned</span>,
-            })))
-        });
-
-        <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="ident">Guard</span> {
-            <span class="ident">waiter</span>,
-            <span class="ident">receiver</span>: <span class="self">self</span>,
-        };
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">guard</span>
-            .<span class="ident">receiver</span>
-            .<span class="ident">recv_ref</span>(<span class="prelude-val">Some</span>((<span class="kw-2">&amp;</span><span class="ident">guard</span>.<span class="ident">waiter</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(), <span class="ident">cx</span>.<span class="ident">waker</span>())));
-
-        <span class="kw">match</span> <span class="ident">res</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">guard</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ready</span>(<span class="ident">guard</span>.<span class="ident">clone_value</span>().<span class="ident">ok_or</span>(<span class="ident">RecvError::Closed</span>)),
-            <span class="prelude-val">Err</span>(<span class="ident">TryRecvError::Closed</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">RecvError::Closed</span>)),
-            <span class="prelude-val">Err</span>(<span class="ident">TryRecvError::Lagged</span>(<span class="ident">n</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">RecvError::Lagged</span>(<span class="ident">n</span>))),
-            <span class="prelude-val">Err</span>(<span class="ident">TryRecvError::Empty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Pending</span>,
-        }
-    }
-
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Receives the next value for this receiver.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Each [`Receiver`] handle will receive a clone of all values sent</span>
@@ -2136,6 +1901,13 @@
     <span class="doccomment">/// internal cursor is updated to point to the oldest value still held by</span>
     <span class="doccomment">/// the channel. A subsequent call to [`recv`] will return this value</span>
     <span class="doccomment">/// **unless** it has been since overwritten.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Cancel safety</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This method is cancel safe. If `recv` is used as the event in a</span>
+    <span class="doccomment">/// [`tokio::select!`](crate::select) statement and some other branch</span>
+    <span class="doccomment">/// completes first, it is guaranteed that no messages were received on this</span>
+    <span class="doccomment">/// channel.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
     <span class="doccomment">/// [`recv`]: crate::sync::broadcast::Receiver::recv</span>
@@ -2186,60 +1958,68 @@
     <span class="doccomment">///     assert_eq!(20, rx.recv().await.unwrap());</span>
     <span class="doccomment">///     assert_eq!(30, rx.recv().await.unwrap());</span>
     <span class="doccomment">/// }</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="ident">Recv</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">Borrow</span>(<span class="self">self</span>));
+        <span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="ident">Recv::new</span>(<span class="self">self</span>);
         <span class="ident">fut</span>.<span class="kw">await</span>
     }
-}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;stream&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::stream::Stream</span> <span class="kw">for</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">Clone</span>,
-{
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span>;
-
-    <span class="kw">fn</span> <span class="ident">poll_next</span>(
-        <span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">std::pin::Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>,
-        <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
-        <span class="self">self</span>.<span class="ident">poll_recv</span>(<span class="ident">cx</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">v</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)),
-            <span class="ident">lag</span> @ <span class="prelude-val">Err</span>(<span class="ident">RecvError::Lagged</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">lag</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">RecvError::Closed</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-        })
+    <span class="doccomment">/// Attempts to return a pending value on this receiver without awaiting.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is useful for a flavor of &quot;optimistic check&quot; before deciding to</span>
+    <span class="doccomment">/// await on a receiver.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Compared with [`recv`], this function has three failure cases instead of two</span>
+    <span class="doccomment">/// (one for closed, one for an empty buffer, one for a lagging receiver).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// `Err(TryRecvError::Closed)` is returned when all `Sender` halves have</span>
+    <span class="doccomment">/// dropped, indicating that no further values can be sent on the channel.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the [`Receiver`] handle falls behind, once the channel is full, newly</span>
+    <span class="doccomment">/// sent values will overwrite old values. At this point, a call to [`recv`]</span>
+    <span class="doccomment">/// will return with `Err(TryRecvError::Lagged)` and the [`Receiver`]&#39;s</span>
+    <span class="doccomment">/// internal cursor is updated to point to the oldest value still held by</span>
+    <span class="doccomment">/// the channel. A subsequent call to [`try_recv`] will return this value</span>
+    <span class="doccomment">/// **unless** it has been since overwritten. If there are no values to</span>
+    <span class="doccomment">/// receive, `Err(TryRecvError::Empty)` is returned.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [`recv`]: crate::sync::broadcast::Receiver::recv</span>
+    <span class="doccomment">/// [`try_recv`]: crate::sync::broadcast::Receiver::try_recv</span>
+    <span class="doccomment">/// [`Receiver`]: crate::sync::broadcast::Receiver</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use tokio::sync::broadcast;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// #[tokio::main]</span>
+    <span class="doccomment">/// async fn main() {</span>
+    <span class="doccomment">///     let (tx, mut rx) = broadcast::channel(16);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">///     assert!(rx.try_recv().is_err());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">///     tx.send(10).unwrap();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">///     let value = rx.try_recv().unwrap();</span>
+    <span class="doccomment">///     assert_eq!(10, value);</span>
+    <span class="doccomment">/// }</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">TryRecvError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">recv_ref</span>(<span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+        <span class="ident">guard</span>.<span class="ident">clone_value</span>().<span class="ident">ok_or</span>(<span class="ident">TryRecvError::Closed</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
-
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">waiter</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">waiter</span> {
-            <span class="comment">// safety: tail lock is held</span>
-            <span class="kw">let</span> <span class="ident">queued</span> <span class="op">=</span> <span class="ident">waiter</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">ptr</span><span class="op">|</span> <span class="kw">unsafe</span> { (<span class="kw-2">*</span><span class="ident">ptr</span>).<span class="ident">queued</span> });
-
-            <span class="kw">if</span> <span class="ident">queued</span> {
-                <span class="comment">// Remove the node</span>
-                <span class="comment">//</span>
-                <span class="comment">// safety: tail lock is held and the wait node is verified to be in</span>
-                <span class="comment">// the list.</span>
-                <span class="kw">unsafe</span> {
-                    <span class="ident">waiter</span>.<span class="ident">with_mut</span>(<span class="op">|</span><span class="ident">ptr</span><span class="op">|</span> {
-                        <span class="ident">tail</span>.<span class="ident">waiters</span>.<span class="ident">remove</span>((<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">ptr</span>).<span class="ident">into</span>());
-                    });
-                }
-            }
-        }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>();
 
         <span class="ident">tail</span>.<span class="ident">rx_cnt</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
         <span class="kw">let</span> <span class="ident">until</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">pos</span>;
 
         <span class="ident">drop</span>(<span class="ident">tail</span>);
 
-        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">next</span> <span class="op">!</span><span class="op">=</span> <span class="ident">until</span> {
+        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">next</span> <span class="op">&lt;</span> <span class="ident">until</span> {
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">recv_ref</span>(<span class="prelude-val">None</span>) {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
                 <span class="comment">// The channel is closed</span>
@@ -2253,11 +2033,8 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-{
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">receiver</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Recv</span> {
             <span class="ident">receiver</span>,
             <span class="ident">waiter</span>: <span class="ident">UnsafeCell::new</span>(<span class="ident">Waiter</span> {
@@ -2266,7 +2043,6 @@
                 <span class="ident">pointers</span>: <span class="ident">linked_list::Pointers::new</span>(),
                 <span class="ident">_p</span>: <span class="ident">PhantomPinned</span>,
             }),
-            <span class="ident">_p</span>: <span class="ident">std::marker::PhantomData</span>,
         }
     }
 
@@ -2278,14 +2054,13 @@
             <span class="ident">is_unpin</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
             <span class="kw">let</span> <span class="ident">me</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_unchecked_mut</span>();
-            (<span class="ident">me</span>.<span class="ident">receiver</span>.<span class="ident">as_mut</span>(), <span class="kw-2">&amp;</span><span class="ident">me</span>.<span class="ident">waiter</span>)
+            (<span class="ident">me</span>.<span class="ident">receiver</span>, <span class="kw-2">&amp;</span><span class="ident">me</span>.<span class="ident">waiter</span>)
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">T</span>: <span class="ident">Clone</span>,
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span>;
@@ -2304,81 +2079,11 @@
     }
 }
 
-<span class="macro">cfg_stream!</span> {
-    <span class="kw">use</span> <span class="ident">futures_core::Stream</span>;
-
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="doccomment">/// Convert the receiver into a `Stream`.</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// The conversion allows using `Receiver` with APIs that require stream</span>
-        <span class="doccomment">/// values.</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// # Examples</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// ```</span>
-        <span class="doccomment">/// use tokio::stream::StreamExt;</span>
-        <span class="doccomment">/// use tokio::sync::broadcast;</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// #[tokio::main]</span>
-        <span class="doccomment">/// async fn main() {</span>
-        <span class="doccomment">///     let (tx, rx) = broadcast::channel(128);</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">///     tokio::spawn(async move {</span>
-        <span class="doccomment">///         for i in 0..10_i32 {</span>
-        <span class="doccomment">///             tx.send(i).unwrap();</span>
-        <span class="doccomment">///         }</span>
-        <span class="doccomment">///     });</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">///    // Streams must be pinned to iterate.</span>
-        <span class="doccomment">///     tokio::pin! {</span>
-        <span class="doccomment">///         let stream = rx</span>
-        <span class="doccomment">///             .into_stream()</span>
-        <span class="doccomment">///             .filter(Result::is_ok)</span>
-        <span class="doccomment">///             .map(Result::unwrap)</span>
-        <span class="doccomment">///             .filter(|v| v % 2 == 0)</span>
-        <span class="doccomment">///             .map(|v| v + 1);</span>
-        <span class="doccomment">///     }</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">///     while let Some(i) = stream.next().await {</span>
-        <span class="doccomment">///         println!(&quot;{}&quot;, i);</span>
-        <span class="doccomment">///     }</span>
-        <span class="doccomment">/// }</span>
-        <span class="doccomment">/// ```</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-            <span class="ident">Recv::new</span>(<span class="ident">Borrow</span>(<span class="self">self</span>))
-        }
-    }
-
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span>: <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Stream</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">T</span>: <span class="ident">Clone</span>,
-    {
-        <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RecvError</span><span class="op">&gt;</span>;
-
-        <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> (<span class="ident">receiver</span>, <span class="ident">waiter</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
-
-            <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">receiver</span>.<span class="ident">recv_ref</span>(<span class="prelude-val">Some</span>((<span class="ident">waiter</span>, <span class="ident">cx</span>.<span class="ident">waker</span>()))) {
-                <span class="prelude-val">Ok</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">TryRecvError::Empty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Pending</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">TryRecvError::Lagged</span>(<span class="ident">n</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">RecvError::Lagged</span>(<span class="ident">n</span>)))),
-                <span class="prelude-val">Err</span>(<span class="ident">TryRecvError::Closed</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
-            };
-
-            <span class="ident">Poll::Ready</span>(<span class="ident">guard</span>.<span class="ident">clone_value</span>().<span class="ident">map</span>(<span class="prelude-val">Ok</span>))
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-{
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">Recv</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="comment">// Acquire the tail lock. This is required for safety before accessing</span>
         <span class="comment">// the waiter node.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">receiver</span>.<span class="ident">as_mut</span>().<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tail</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">receiver</span>.<span class="ident">shared</span>.<span class="ident">tail</span>.<span class="ident">lock</span>();
 
         <span class="comment">// safety: tail lock is held</span>
         <span class="kw">let</span> <span class="ident">queued</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">waiter</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">ptr</span><span class="op">|</span> <span class="kw">unsafe</span> { (<span class="kw-2">*</span><span class="ident">ptr</span>).<span class="ident">queued</span> });
@@ -2447,29 +2152,6 @@
         }
     }
 }
-
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">RecvError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">RecvError::Closed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel closed&quot;</span>),
-            <span class="ident">RecvError::Lagged</span>(<span class="ident">amt</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel lagged by {}&quot;</span>, <span class="ident">amt</span>),
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">RecvError</span> {}
-
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">TryRecvError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">TryRecvError::Empty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel empty&quot;</span>),
-            <span class="ident">TryRecvError::Closed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel closed&quot;</span>),
-            <span class="ident">TryRecvError::Lagged</span>(<span class="ident">amt</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;channel lagged by {}&quot;</span>, <span class="ident">amt</span>),
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">TryRecvError</span> {}
 
 <span class="kw">fn</span> <span class="ident">is_unpin</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Unpin</span><span class="op">&gt;</span>() {}
 </code></pre></div>

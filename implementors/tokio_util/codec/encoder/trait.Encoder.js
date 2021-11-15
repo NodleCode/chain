@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["jsonrpc_server_utils"] = [{"text":"impl <a class=\"trait\" href=\"tokio_util/codec/encoder/trait.Encoder.html\" title=\"trait tokio_util::codec::encoder::Encoder\">Encoder</a>&lt;<a class=\"struct\" href=\"https://doc.rust-lang.org/1.56.1/alloc/string/struct.String.html\" title=\"struct alloc::string::String\">String</a>&gt; for <a class=\"struct\" href=\"jsonrpc_server_utils/codecs/struct.StreamCodec.html\" title=\"struct jsonrpc_server_utils::codecs::StreamCodec\">StreamCodec</a>","synthetic":false,"types":["jsonrpc_server_utils::stream_codec::StreamCodec"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

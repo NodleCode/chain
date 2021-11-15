@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.69.0&#x2F;src&#x2F;ir&#x2F;dfg.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dfg.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.77.0&#x2F;src&#x2F;ir&#x2F;dfg.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dfg.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1312,6 +1312,20 @@
 <span id="1312">1312</span>
 <span id="1313">1313</span>
 <span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Data flow graph tracking Instructions, Values, and blocks.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::entity</span>::{<span class="self">self</span>, <span class="ident">PrimaryMap</span>, <span class="ident">SecondaryMap</span>};
@@ -1321,8 +1335,8 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::instructions</span>::{<span class="ident">BranchInfo</span>, <span class="ident">CallInfo</span>, <span class="ident">InstructionData</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{<span class="ident">types</span>, <span class="ident">ConstantData</span>, <span class="ident">ConstantPool</span>, <span class="ident">Immediate</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
-    <span class="ident">Block</span>, <span class="ident">FuncRef</span>, <span class="ident">Inst</span>, <span class="ident">SigRef</span>, <span class="ident">Signature</span>, <span class="ident">Type</span>, <span class="ident">Value</span>, <span class="ident">ValueLabelAssignments</span>, <span class="ident">ValueList</span>,
-    <span class="ident">ValueListPool</span>,
+    <span class="ident">Block</span>, <span class="ident">FuncRef</span>, <span class="ident">Inst</span>, <span class="ident">SigRef</span>, <span class="ident">Signature</span>, <span class="ident">SourceLoc</span>, <span class="ident">Type</span>, <span class="ident">Value</span>, <span class="ident">ValueLabelAssignments</span>,
+    <span class="ident">ValueList</span>, <span class="ident">ValueListPool</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::TargetIsa</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::packed_option::ReservedValue</span>;
@@ -1335,6 +1349,9 @@
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Index</span>, <span class="ident">IndexMut</span>};
 <span class="kw">use</span> <span class="ident">core::u16</span>;
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;enable-serde&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+
 <span class="doccomment">/// A data flow graph defines all instructions and basic blocks in a function as well as</span>
 <span class="doccomment">/// the data flow dependencies between them. The DFG also tracks values which can be either</span>
 <span class="doccomment">/// instruction results or block parameters.</span>
@@ -1343,6 +1360,7 @@
 <span class="doccomment">/// `Layout` data structure which forms the other half of the function representation.</span>
 <span class="doccomment">///</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;enable-serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataFlowGraph</span> {
     <span class="doccomment">/// Data about all of the instructions in the function, including opcodes and operands.</span>
     <span class="doccomment">/// The instructions in this map are not in program order. That is tracked by `Layout`, along</span>
@@ -1461,6 +1479,14 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">collect_debug_info</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">values_labels</span>.<span class="ident">is_none</span>() {
             <span class="self">self</span>.<span class="ident">values_labels</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">HashMap::new</span>());
+        }
+    }
+
+    <span class="doccomment">/// Inserts a `ValueLabelAssignments::Alias` for `to_alias` if debug info</span>
+    <span class="doccomment">/// collection is enabled.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_value_label_alias</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">to_alias</span>: <span class="ident">Value</span>, <span class="ident">from</span>: <span class="ident">SourceLoc</span>, <span class="ident">value</span>: <span class="ident">Value</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">values_labels</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">values_labels</span>.<span class="ident">as_mut</span>() {
+            <span class="ident">values_labels</span>.<span class="ident">insert</span>(<span class="ident">to_alias</span>, <span class="ident">ir::ValueLabelAssignments::Alias</span> { <span class="ident">from</span>, <span class="ident">value</span> });
         }
     }
 }
@@ -1730,6 +1756,7 @@
 
 <span class="doccomment">/// Internal table storage for extended values.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;enable-serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
 <span class="kw">enum</span> <span class="ident">ValueData</span> {
     <span class="doccomment">/// Value is defined by an instruction.</span>
     <span class="ident">Inst</span> { <span class="ident">ty</span>: <span class="ident">Type</span>, <span class="ident">num</span>: <span class="ident">u16</span>, <span class="ident">inst</span>: <span class="ident">Inst</span> },
@@ -2249,6 +2276,7 @@
 <span class="doccomment">/// branches to this block must provide matching arguments, and the arguments to the entry block must</span>
 <span class="doccomment">/// match the function arguments.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;enable-serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
 <span class="kw">struct</span> <span class="ident">BlockData</span> {
     <span class="doccomment">/// List of parameters to this block.</span>
     <span class="ident">params</span>: <span class="ident">ValueList</span>,

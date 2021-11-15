@@ -1,104 +1,384 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-environ-0.22.0&#x2F;src&#x2F;address_map.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>address_map.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_environ/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
-<span id="2"> 2</span>
-<span id="3"> 3</span>
-<span id="4"> 4</span>
-<span id="5"> 5</span>
-<span id="6"> 6</span>
-<span id="7"> 7</span>
-<span id="8"> 8</span>
-<span id="9"> 9</span>
-<span id="10">10</span>
-<span id="11">11</span>
-<span id="12">12</span>
-<span id="13">13</span>
-<span id="14">14</span>
-<span id="15">15</span>
-<span id="16">16</span>
-<span id="17">17</span>
-<span id="18">18</span>
-<span id="19">19</span>
-<span id="20">20</span>
-<span id="21">21</span>
-<span id="22">22</span>
-<span id="23">23</span>
-<span id="24">24</span>
-<span id="25">25</span>
-<span id="26">26</span>
-<span id="27">27</span>
-<span id="28">28</span>
-<span id="29">29</span>
-<span id="30">30</span>
-<span id="31">31</span>
-<span id="32">32</span>
-<span id="33">33</span>
-<span id="34">34</span>
-<span id="35">35</span>
-<span id="36">36</span>
-<span id="37">37</span>
-<span id="38">38</span>
-<span id="39">39</span>
-<span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-environ-0.30.0&#x2F;src&#x2F;address_map.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>address_map.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_environ/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Data structures to provide transformation of the source</span>
 <span class="comment">// addresses of a WebAssembly module into the native code.</span>
 
-<span class="kw">use</span> <span class="ident">cranelift_codegen::ir</span>;
+<span class="kw">use</span> <span class="ident">object::write</span>::{<span class="ident">Object</span>, <span class="ident">StandardSegment</span>};
+<span class="kw">use</span> <span class="ident">object</span>::{<span class="ident">Bytes</span>, <span class="ident">LittleEndian</span>, <span class="ident">SectionKind</span>, <span class="ident">U32Bytes</span>};
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
+<span class="kw">use</span> <span class="ident">std::ops::Range</span>;
 
 <span class="doccomment">/// Single source location to generated address mapping.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">InstructionAddressMap</span> {
-    <span class="doccomment">/// Where in the source this instruction comes from.</span>
-    <span class="kw">pub</span> <span class="ident">srcloc</span>: <span class="ident">ir::SourceLoc</span>,
+    <span class="doccomment">/// Where in the source wasm binary this instruction comes from, specified</span>
+    <span class="doccomment">/// in an offset of bytes from the front of the file.</span>
+    <span class="kw">pub</span> <span class="ident">srcloc</span>: <span class="ident">FilePos</span>,
 
     <span class="doccomment">/// Offset from the start of the function&#39;s compiled code to where this</span>
     <span class="doccomment">/// instruction is located, or the region where it starts.</span>
     <span class="kw">pub</span> <span class="ident">code_offset</span>: <span class="ident">u32</span>,
 }
 
-<span class="doccomment">/// Function and its instructions addresses mappings.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FunctionAddressMap</span> {
-    <span class="doccomment">/// An array of data for the instructions in this function, indicating where</span>
-    <span class="doccomment">/// each instruction maps back to in the original function.</span>
+<span class="doccomment">/// A position within an original source file,</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This structure is used as a newtype wrapper around a 32-bit integer which</span>
+<span class="doccomment">/// represents an offset within a file where a wasm instruction or function is</span>
+<span class="doccomment">/// to be originally found.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FilePos</span>(<span class="ident">u32</span>);
+
+<span class="kw">impl</span> <span class="ident">FilePos</span> {
+    <span class="doccomment">/// Create a new file position with the given offset.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">pos</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FilePos</span> {
+        <span class="macro">assert!</span>(<span class="ident">pos</span> <span class="op">!</span><span class="op">=</span> <span class="ident">u32::MAX</span>);
+        <span class="ident">FilePos</span>(<span class="ident">pos</span>)
+    }
+
+    <span class="doccomment">/// Returns the offset that this offset was created with.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This array is sorted least-to-greatest by the `code_offset` field.</span>
-    <span class="doccomment">/// Additionally the span of each `InstructionAddressMap` is implicitly the</span>
-    <span class="doccomment">/// gap between it and the next item in the array.</span>
-    <span class="kw">pub</span> <span class="ident">instructions</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">InstructionAddressMap</span>]<span class="op">&gt;</span>,
-
-    <span class="doccomment">/// Function start source location (normally declaration).</span>
-    <span class="kw">pub</span> <span class="ident">start_srcloc</span>: <span class="ident">ir::SourceLoc</span>,
-
-    <span class="doccomment">/// Function end source location.</span>
-    <span class="kw">pub</span> <span class="ident">end_srcloc</span>: <span class="ident">ir::SourceLoc</span>,
-
-    <span class="doccomment">/// Generated function body offset if applicable, otherwise 0.</span>
-    <span class="kw">pub</span> <span class="ident">body_offset</span>: <span class="ident">usize</span>,
-
-    <span class="doccomment">/// Generated function body length.</span>
-    <span class="kw">pub</span> <span class="ident">body_len</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// Note that the `Default` implementation will return `None` here, whereas</span>
+    <span class="doccomment">/// positions created with `FilePos::new` will return `Some`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">file_offset</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">u32::MAX</span> {
+            <span class="prelude-val">None</span>
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0</span>)
+        }
+    }
 }
 
-<span class="doccomment">/// Memory definition offset in the VMContext structure.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ModuleMemoryOffset</span> {
-    <span class="doccomment">/// Not available.</span>
-    <span class="prelude-val">None</span>,
-    <span class="doccomment">/// Offset to the defined memory.</span>
-    <span class="ident">Defined</span>(<span class="ident">u32</span>),
-    <span class="doccomment">/// Offset to the imported memory.</span>
-    <span class="ident">Imported</span>(<span class="ident">u32</span>),
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">FilePos</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FilePos</span> {
+        <span class="ident">FilePos</span>(<span class="ident">u32::MAX</span>)
+    }
+}
+
+<span class="doccomment">/// Builder for the address map section of a wasmtime compilation image.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This builder is used to conveniently built the `ELF_WASMTIME_ADDRMAP`</span>
+<span class="doccomment">/// section by compilers, and provides utilities to directly insert the results</span>
+<span class="doccomment">/// into an `Object`.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AddressMapSection</span> {
+    <span class="ident">offsets</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">U32Bytes</span><span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">positions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">U32Bytes</span><span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">last_offset</span>: <span class="ident">u32</span>,
+}
+
+<span class="doccomment">/// A custom Wasmtime-specific section of our compilation image which stores</span>
+<span class="doccomment">/// mapping data from offsets in the image to offset in the original wasm</span>
+<span class="doccomment">/// binary.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This section has a custom binary encoding. Currently its encoding is:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * The section starts with a 32-bit little-endian integer. This integer is</span>
+<span class="doccomment">///   how many entries are in the following two arrays.</span>
+<span class="doccomment">/// * Next is an array with the previous count number of 32-bit little-endian</span>
+<span class="doccomment">///   integers. This array is a sorted list of relative offsets within the text</span>
+<span class="doccomment">///   section. This is intended to be a lookup array to perform a binary search</span>
+<span class="doccomment">///   on an offset within the text section on this array.</span>
+<span class="doccomment">/// * Finally there is another array, with the same count as before, also of</span>
+<span class="doccomment">///   32-bit little-endian integers. These integers map 1:1 with the previous</span>
+<span class="doccomment">///   array of offsets, and correspond to what the original offset was in the</span>
+<span class="doccomment">///   wasm file.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Decoding this section is intentionally simple, it only requires loading a</span>
+<span class="doccomment">/// 32-bit little-endian integer plus some bounds checks. Reading this section</span>
+<span class="doccomment">/// is done with the `lookup_file_pos` function below. Reading involves</span>
+<span class="doccomment">/// performing a binary search on the first array using the index found for the</span>
+<span class="doccomment">/// native code offset to index into the second array and find the wasm code</span>
+<span class="doccomment">/// offset.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// At this time this section has an alignment of 1, which means all reads of it</span>
+<span class="doccomment">/// are unaligned. Additionally at this time the 32-bit encodings chosen here</span>
+<span class="doccomment">/// mean that &gt;=4gb text sections are not supported.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ELF_WASMTIME_ADDRMAP</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;.wasmtime.addrmap&quot;</span>;
+
+<span class="kw">impl</span> <span class="ident">AddressMapSection</span> {
+    <span class="doccomment">/// Pushes a new set of instruction mapping information for a function added</span>
+    <span class="doccomment">/// in the exectuable.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The `func` argument here is the range of the function, relative to the</span>
+    <span class="doccomment">/// start of the text section in the executable. The `instrs` provided are</span>
+    <span class="doccomment">/// the descriptors for instructions in the function and their various</span>
+    <span class="doccomment">/// mappings back to original source positions.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is required to be called for `func` values that are strictly</span>
+    <span class="doccomment">/// increasing in addresses (e.g. as the object is built). Additionally the</span>
+    <span class="doccomment">/// `instrs` map must be sorted based on code offset in the native text</span>
+    <span class="doccomment">/// section.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">instrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">InstructionAddressMap</span>]) {
+        <span class="comment">// NB: for now this only supports &lt;=4GB text sections in object files.</span>
+        <span class="comment">// Alternative schemes will need to be created for &gt;32-bit offsets to</span>
+        <span class="comment">// avoid making this section overly large.</span>
+        <span class="kw">let</span> <span class="ident">func_start</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">func</span>.<span class="ident">start</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">func_end</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">func</span>.<span class="ident">end</span>).<span class="ident">unwrap</span>();
+
+        <span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">reserve</span>(<span class="ident">instrs</span>.<span class="ident">len</span>());
+        <span class="self">self</span>.<span class="ident">positions</span>.<span class="ident">reserve</span>(<span class="ident">instrs</span>.<span class="ident">len</span>());
+        <span class="kw">for</span> <span class="ident">map</span> <span class="kw">in</span> <span class="ident">instrs</span> {
+            <span class="comment">// Sanity-check to ensure that functions are pushed in-order, otherwise</span>
+            <span class="comment">// the `offsets` array won&#39;t be sorted which is our goal.</span>
+            <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">func_start</span> <span class="op">+</span> <span class="ident">map</span>.<span class="ident">code_offset</span>;
+            <span class="macro">assert!</span>(<span class="ident">pos</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">last_offset</span>);
+            <span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">push</span>(<span class="ident">U32Bytes::new</span>(<span class="ident">LittleEndian</span>, <span class="ident">pos</span>));
+            <span class="self">self</span>.<span class="ident">positions</span>
+                .<span class="ident">push</span>(<span class="ident">U32Bytes::new</span>(<span class="ident">LittleEndian</span>, <span class="ident">map</span>.<span class="ident">srcloc</span>.<span class="number">0</span>));
+            <span class="self">self</span>.<span class="ident">last_offset</span> <span class="op">=</span> <span class="ident">pos</span>;
+        }
+        <span class="self">self</span>.<span class="ident">last_offset</span> <span class="op">=</span> <span class="ident">func_end</span>;
+    }
+
+    <span class="doccomment">/// Finishes encoding this section into the `Object` provided.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append_to</span>(<span class="self">self</span>, <span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Object</span>) {
+        <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">obj</span>.<span class="ident">add_section</span>(
+            <span class="ident">obj</span>.<span class="ident">segment_name</span>(<span class="ident">StandardSegment::Data</span>).<span class="ident">to_vec</span>(),
+            <span class="ident">ELF_WASMTIME_ADDRMAP</span>.<span class="ident">as_bytes</span>().<span class="ident">to_vec</span>(),
+            <span class="ident">SectionKind::ReadOnlyData</span>,
+        );
+
+        <span class="comment">// NB: this matches the encoding expected by `lookup` below.</span>
+        <span class="kw">let</span> <span class="ident">amt</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">len</span>()).<span class="ident">unwrap</span>();
+        <span class="ident">obj</span>.<span class="ident">append_section_data</span>(<span class="ident">section</span>, <span class="kw-2">&amp;</span><span class="ident">amt</span>.<span class="ident">to_le_bytes</span>(), <span class="number">1</span>);
+        <span class="ident">obj</span>.<span class="ident">append_section_data</span>(<span class="ident">section</span>, <span class="ident">object::bytes_of_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">offsets</span>), <span class="number">1</span>);
+        <span class="ident">obj</span>.<span class="ident">append_section_data</span>(<span class="ident">section</span>, <span class="ident">object::bytes_of_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">positions</span>), <span class="number">1</span>);
+    }
+}
+
+<span class="doccomment">/// Lookup an `offset` within an encoded address map section, returning the</span>
+<span class="doccomment">/// original `FilePos` that corresponds to the offset, if found.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This function takes a `section` as its first argument which must have been</span>
+<span class="doccomment">/// created with `AddressMapSection` above. This is intended to be the raw</span>
+<span class="doccomment">/// `ELF_WASMTIME_ADDRMAP` section from the compilation artifact.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The `offset` provided is a relative offset from the start of the text</span>
+<span class="doccomment">/// section of the pc that is being looked up. If `offset` is out of range or</span>
+<span class="doccomment">/// doesn&#39;t correspond to anything in this file then `None` is returned.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lookup_file_pos</span>(<span class="ident">section</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FilePos</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">Bytes</span>(<span class="ident">section</span>);
+    <span class="comment">// NB: this matches the encoding written by `append_to` above.</span>
+    <span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">section</span>.<span class="ident">read</span>::<span class="op">&lt;</span><span class="ident">U32Bytes</span><span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">usize::try_from</span>(<span class="ident">count</span>.<span class="ident">get</span>(<span class="ident">LittleEndian</span>)).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+    <span class="kw">let</span> (<span class="ident">offsets</span>, <span class="ident">section</span>) <span class="op">=</span>
+        <span class="ident">object::slice_from_bytes</span>::<span class="op">&lt;</span><span class="ident">U32Bytes</span><span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">section</span>.<span class="number">0</span>, <span class="ident">count</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+    <span class="kw">let</span> (<span class="ident">positions</span>, <span class="ident">section</span>) <span class="op">=</span>
+        <span class="ident">object::slice_from_bytes</span>::<span class="op">&lt;</span><span class="ident">U32Bytes</span><span class="op">&lt;</span><span class="ident">LittleEndian</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">section</span>, <span class="ident">count</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+    <span class="macro">debug_assert!</span>(<span class="ident">section</span>.<span class="ident">is_empty</span>());
+
+    <span class="comment">// First perform a binary search on the `offsets` array. This is a sorted</span>
+    <span class="comment">// array of offsets within the text section, which is conveniently what our</span>
+    <span class="comment">// `offset` also is. Note that we are somewhat unlikely to find a precise</span>
+    <span class="comment">// match on the element in the array, so we&#39;re largely interested in which</span>
+    <span class="comment">// &quot;bucket&quot; the `offset` falls into.</span>
+    <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">offset</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">offsets</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">offset</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">get</span>(<span class="ident">LittleEndian</span>)) {
+        <span class="comment">// Exact hit!</span>
+        <span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
+
+        <span class="comment">// This *would* be at the first slot in the array, so no</span>
+        <span class="comment">// instructions cover `pc`.</span>
+        <span class="prelude-val">Err</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
+
+        <span class="comment">// This would be at the `nth` slot, so we&#39;re at the `n-1`th slot.</span>
+        <span class="prelude-val">Err</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>,
+    };
+
+    <span class="comment">// Using the `index` we found of which bucket `offset` corresponds to we can</span>
+    <span class="comment">// lookup the actual `FilePos` value in the `positions` array.</span>
+    <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">positions</span>.<span class="ident">get</span>(<span class="ident">index</span>)<span class="question-mark">?</span>;
+    <span class="prelude-val">Some</span>(<span class="ident">FilePos</span>(<span class="ident">pos</span>.<span class="ident">get</span>(<span class="ident">LittleEndian</span>)))
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="wasmtime_environ" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

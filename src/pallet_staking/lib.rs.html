@@ -2044,13 +2044,6 @@
 <span id="2044">2044</span>
 <span id="2045">2045</span>
 <span id="2046">2046</span>
-<span id="2047">2047</span>
-<span id="2048">2048</span>
-<span id="2049">2049</span>
-<span id="2050">2050</span>
-<span id="2051">2051</span>
-<span id="2052">2052</span>
-<span id="2053">2053</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -2074,10 +2067,11 @@
 
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>, <span class="ident">test</span>))]</span>
 <span class="kw">mod</span> <span class="ident">benchmarking</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">mock</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
@@ -2099,17 +2093,19 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::set::OrderedSet</span>;
+    <span class="kw">use</span> <span class="ident">frame_support::traits::OnRuntimeUpgrade</span>;
     <span class="kw">use</span> <span class="ident">frame_support</span>::{
         <span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>,
         <span class="ident">traits</span>::{
-            <span class="ident">Currency</span>, <span class="ident">ExistenceRequirement</span>, <span class="ident">Get</span>, <span class="ident">GetPalletVersion</span>, <span class="ident">Imbalance</span>, <span class="ident">LockIdentifier</span>,
-            <span class="ident">LockableCurrency</span>, <span class="ident">OnUnbalanced</span>, <span class="ident">PalletVersion</span>, <span class="ident">ValidatorRegistration</span>, <span class="ident">WithdrawReasons</span>,
+            <span class="ident">Currency</span>, <span class="ident">ExistenceRequirement</span>, <span class="ident">Get</span>, <span class="ident">Imbalance</span>, <span class="ident">LockIdentifier</span>, <span class="ident">LockableCurrency</span>,
+            <span class="ident">OnUnbalanced</span>, <span class="ident">ValidatorRegistration</span>, <span class="ident">WithdrawReasons</span>,
         },
+        <span class="ident">PalletId</span>,
     };
     <span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">sp_runtime</span>::{
         <span class="ident">traits</span>::{<span class="ident">AccountIdConversion</span>, <span class="ident">Saturating</span>, <span class="ident">Zero</span>},
-        <span class="ident">DispatchResult</span>, <span class="ident">ModuleId</span>, <span class="ident">Perbill</span>,
+        <span class="ident">DispatchResult</span>, <span class="ident">Perbill</span>,
     };
     <span class="kw">use</span> <span class="ident">sp_staking::SessionIndex</span>;
     <span class="kw">use</span> <span class="ident">sp_std</span>::{<span class="ident">convert::From</span>, <span class="ident">prelude</span>::<span class="kw-2">*</span>};
@@ -2176,7 +2172,7 @@
         <span class="kw">type</span> <span class="ident">ValidatorRegistration</span>: <span class="ident">ValidatorRegistration</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
         <span class="doccomment">/// This pallet&#39;s module id. Used to derivate a dedicated account id to store session</span>
         <span class="doccomment">/// rewards for validators and nominators in.</span>
-        <span class="kw">type</span> <span class="ident">PalletId</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">ModuleId</span><span class="op">&gt;</span>;
+        <span class="kw">type</span> <span class="ident">PalletId</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">PalletId</span><span class="op">&gt;</span>;
         <span class="doccomment">/// staking pallet Lock Identifier used for set_lock()</span>
         <span class="kw">type</span> <span class="ident">StakingLockId</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">LockIdentifier</span><span class="op">&gt;</span>;
         <span class="doccomment">/// Max number of unbond request supported by queue</span>
@@ -2189,28 +2185,24 @@
 
     <span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
     <span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
+    <span class="attribute">#[<span class="ident">pallet::storage_version</span>(<span class="ident">migrations::v1::STORAGE_VERSION</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
     <span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
+        <span class="kw">fn</span> <span class="ident">pre_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+            <span class="ident">migrations::v1::PoAToStaking</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::pre_upgrade</span>()
+        }
+
         <span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">frame_support::weights::Weight</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">weight</span> <span class="op">=</span> <span class="ident">Weight::from</span>(<span class="number">0u64</span>);
-
-            <span class="comment">// migrates our storage to pallet version 2.0.6</span>
-            <span class="kw">let</span> <span class="ident">version</span>: <span class="ident">PalletVersion</span> <span class="op">=</span>
-                <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::storage_version</span>().<span class="ident">unwrap_or</span>(<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::current_version</span>());
-
-            <span class="macro">log::info!</span>(
-                <span class="string">&quot;on_runtime_upgrade&gt;[{:#?}]=&gt; - Current Pallet Version-[{:#?}]&quot;</span>,
-                <span class="macro">line!</span>(),
-                <span class="ident">version</span>,
-            );
-
-            <span class="kw">if</span> <span class="ident">version</span>.<span class="ident">major</span> <span class="op">=</span><span class="op">=</span> <span class="number">2</span> <span class="op">&amp;&amp;</span> <span class="ident">version</span>.<span class="ident">minor</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="ident">weight</span> <span class="op">=</span> <span class="ident">migrations::poa_validators_migration</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>();
-            }
-
+            <span class="kw">let</span> <span class="ident">weight</span> <span class="op">=</span> <span class="ident">migrations::v1::PoAToStaking</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::on_runtime_upgrade</span>();
             <span class="ident">weight</span>
+        }
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
+        <span class="kw">fn</span> <span class="ident">post_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+            <span class="ident">migrations::v1::PoAToStaking</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::post_upgrade</span>()
         }
     }
 
@@ -3142,12 +3134,6 @@
 
     <span class="attribute">#[<span class="ident">pallet::event</span>]</span>
     <span class="attribute">#[<span class="ident">pallet::generate_deposit</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">deposit_event</span>)]</span>
-    <span class="attribute">#[<span class="ident">pallet::metadata</span>(
-		<span class="ident">T::AccountId</span> <span class="op">=</span> <span class="string">&quot;AccountId&quot;</span>,
-		<span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="string">&quot;Balance&quot;</span>,
-		<span class="ident">T::BlockNumber</span> <span class="op">=</span> <span class="string">&quot;BlockNumber&quot;</span>,
-		<span class="ident">StakingInvulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="string">&quot;StakingInvulnerables&quot;</span>
-	)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
         <span class="doccomment">/// Updated InVulnerable validator list \[validator_list\],</span>
         <span class="ident">NewInvulnerables</span>(<span class="ident">StakingInvulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>),
@@ -3805,7 +3791,7 @@
             <span class="comment">// let issuance = Self::compute_issuance(total_staked);</span>
             <span class="kw">let</span> <span class="ident">issuance</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::session_validator_reward</span>(<span class="ident">next</span>);
             <span class="kw">for</span> (<span class="ident">val</span>, <span class="ident">pts</span>) <span class="kw">in</span> <span class="op">&lt;</span><span class="ident">AwardedPts</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::iter_prefix</span>(<span class="ident">next</span>) {
-                <span class="kw">let</span> <span class="ident">pct_due</span> <span class="op">=</span> <span class="ident">Perbill::from_rational_approximation</span>(<span class="ident">pts</span>, <span class="ident">total</span>);
+                <span class="kw">let</span> <span class="ident">pct_due</span> <span class="op">=</span> <span class="ident">Perbill::from_rational</span>(<span class="ident">pts</span>, <span class="ident">total</span>);
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">amt_due</span> <span class="op">=</span> <span class="ident">pct_due</span> <span class="op">*</span> <span class="ident">issuance</span>;
 
                 <span class="macro">log::trace!</span>(
@@ -3836,7 +3822,7 @@
                     <span class="ident">mint</span>(<span class="ident">amt_due</span>, <span class="ident">val</span>.<span class="ident">clone</span>());
                     <span class="macro">log::trace!</span>(<span class="string">&quot;pay_stakers:[{:#?}] - L3 Solo Mode&quot;</span>, <span class="macro">line!</span>());
                 } <span class="kw">else</span> {
-                    <span class="kw">let</span> <span class="ident">val_pct</span> <span class="op">=</span> <span class="ident">Perbill::from_rational_approximation</span>(<span class="ident">state</span>.<span class="ident">bond</span>, <span class="ident">state</span>.<span class="ident">total</span>);
+                    <span class="kw">let</span> <span class="ident">val_pct</span> <span class="op">=</span> <span class="ident">Perbill::from_rational</span>(<span class="ident">state</span>.<span class="ident">bond</span>, <span class="ident">state</span>.<span class="ident">total</span>);
                     <span class="kw">let</span> <span class="ident">commission</span> <span class="op">=</span> <span class="ident">validator_fee</span> <span class="op">*</span> <span class="ident">amt_due</span>;
                     <span class="kw">let</span> <span class="ident">val_due</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">commission</span> <span class="op">&gt;</span> <span class="ident">T::Currency::minimum_balance</span>() {
                         <span class="ident">amt_due</span> <span class="op">=</span> <span class="ident">amt_due</span>.<span class="ident">saturating_sub</span>(<span class="ident">commission</span>);
@@ -3857,7 +3843,7 @@
                     <span class="ident">mint</span>(<span class="ident">val_due</span>, <span class="ident">val</span>.<span class="ident">clone</span>());
                     <span class="comment">// pay nominators due portion</span>
                     <span class="kw">for</span> <span class="ident">Bond</span> { <span class="ident">owner</span>, <span class="ident">amount</span> } <span class="kw">in</span> <span class="ident">state</span>.<span class="ident">nominators</span> {
-                        <span class="kw">let</span> <span class="ident">percent</span> <span class="op">=</span> <span class="ident">Perbill::from_rational_approximation</span>(<span class="ident">amount</span>, <span class="ident">state</span>.<span class="ident">total</span>);
+                        <span class="kw">let</span> <span class="ident">percent</span> <span class="op">=</span> <span class="ident">Perbill::from_rational</span>(<span class="ident">amount</span>, <span class="ident">state</span>.<span class="ident">total</span>);
                         <span class="kw">let</span> <span class="ident">due</span> <span class="op">=</span> <span class="ident">percent</span> <span class="op">*</span> <span class="ident">amt_due</span>;
                         <span class="ident">mint</span>(<span class="ident">due</span>, <span class="ident">owner</span>);
                     }
@@ -4067,9 +4053,9 @@
             );
 
             <span class="op">&lt;</span><span class="ident">Staked</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">session_idx</span>);
-            <span class="op">&lt;</span><span class="ident">AtStake</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove_prefix</span>(<span class="ident">session_idx</span>);
+            <span class="op">&lt;</span><span class="ident">AtStake</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove_prefix</span>(<span class="ident">session_idx</span>, <span class="prelude-val">None</span>);
             <span class="op">&lt;</span><span class="ident">Points</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">session_idx</span>);
-            <span class="op">&lt;</span><span class="ident">AwardedPts</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove_prefix</span>(<span class="ident">session_idx</span>);
+            <span class="op">&lt;</span><span class="ident">AwardedPts</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove_prefix</span>(<span class="ident">session_idx</span>, <span class="prelude-val">None</span>);
             <span class="op">&lt;</span><span class="ident">SessionValidatorReward</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">session_idx</span>);
             <span class="op">&lt;</span><span class="ident">UnappliedSlashes</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">session_idx</span>);
             <span class="ident">slashing::clear_session_metadata</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">session_idx</span>);

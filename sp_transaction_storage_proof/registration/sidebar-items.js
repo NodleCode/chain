@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["build_proof","Build a proof for a given source of randomness and indexed transactions."],["new_data_provider","Create a new inherent data provider instance for a given parent block hash."]]});

@@ -201,6 +201,14 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -223,6 +231,7 @@
 
 <span class="kw">use</span> <span class="ident">pallet_root_of_trust_rpc</span>::{<span class="ident">RootOfTrust</span>, <span class="ident">RootOfTrustApi</span>, <span class="ident">RootOfTrustRuntimeApi</span>};
 <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">Block</span>, <span class="ident">BlockNumber</span>, <span class="ident">CertificateId</span>, <span class="ident">Hash</span>, <span class="ident">Index</span>};
+<span class="kw">use</span> <span class="ident">sc_client_api::AuxStore</span>;
 <span class="kw">use</span> <span class="ident">sc_consensus_babe</span>::{<span class="ident">Config</span>, <span class="ident">Epoch</span>};
 <span class="kw">use</span> <span class="ident">sc_consensus_babe_rpc::BabeRpcHandler</span>;
 <span class="kw">use</span> <span class="ident">sc_consensus_epochs::SharedEpochChanges</span>;
@@ -232,13 +241,13 @@
 <span class="kw">use</span> <span class="ident">sc_finality_grandpa_rpc::GrandpaRpcHandler</span>;
 <span class="kw">use</span> <span class="ident">sc_rpc::SubscriptionTaskExecutor</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sc_rpc_api::DenyUnsafe</span>;
+<span class="kw">use</span> <span class="ident">sc_transaction_pool_api::TransactionPool</span>;
 <span class="kw">use</span> <span class="ident">sp_api::ProvideRuntimeApi</span>;
 <span class="kw">use</span> <span class="ident">sp_block_builder::BlockBuilder</span>;
 <span class="kw">use</span> <span class="ident">sp_blockchain</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">BlockChainError</span>, <span class="ident">HeaderBackend</span>, <span class="ident">HeaderMetadata</span>};
 <span class="kw">use</span> <span class="ident">sp_consensus::SelectChain</span>;
 <span class="kw">use</span> <span class="ident">sp_consensus_babe::BabeApi</span>;
 <span class="kw">use</span> <span class="ident">sp_keystore::SyncCryptoStorePtr</span>;
-<span class="kw">use</span> <span class="ident">sp_transaction_pool::TransactionPool</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
 <span class="doccomment">/// Light client extra dependencies.</span>
@@ -285,6 +294,8 @@
     <span class="kw">pub</span> <span class="ident">pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The SelectChain Strategy</span>
     <span class="kw">pub</span> <span class="ident">select_chain</span>: <span class="ident">SC</span>,
+    <span class="doccomment">/// A copy of the chain spec.</span>
+    <span class="kw">pub</span> <span class="ident">chain_spec</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">sc_chain_spec::ChainSpec</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Whether to deny unsafe calls</span>
     <span class="kw">pub</span> <span class="ident">deny_unsafe</span>: <span class="ident">DenyUnsafe</span>,
     <span class="doccomment">/// BABE specific dependencies.</span>
@@ -299,13 +310,17 @@
 <span class="doccomment">/// Instantiate all Full RPC extensions.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_full</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span>, <span class="ident">SC</span>, <span class="ident">B</span><span class="op">&gt;</span>(
     <span class="ident">deps</span>: <span class="ident">FullDeps</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span>, <span class="ident">SC</span>, <span class="ident">B</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">jsonrpc_core::IoHandler</span><span class="op">&lt;</span><span class="ident">sc_rpc_api::Metadata</span><span class="op">&gt;</span>
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">jsonrpc_core::IoHandler</span><span class="op">&lt;</span><span class="ident">sc_rpc_api::Metadata</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-    <span class="ident">C</span>: <span class="ident">HeaderBackend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">HeaderMetadata</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">BlockChainError</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">C</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">C</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>
+        <span class="op">+</span> <span class="ident">HeaderBackend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>
+        <span class="op">+</span> <span class="ident">AuxStore</span>
+        <span class="op">+</span> <span class="ident">HeaderMetadata</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">BlockChainError</span><span class="op">&gt;</span>
+        <span class="op">+</span> <span class="ident">Sync</span>
+        <span class="op">+</span> <span class="ident">Send</span>
+        <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="ident">C::Api</span>: <span class="ident">substrate_frame_rpc_system::AccountNonceApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">AccountId</span>, <span class="ident">Index</span><span class="op">&gt;</span>,
-    <span class="ident">C::Api</span>: <span class="ident">pallet_contracts_rpc::ContractsRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span><span class="op">&gt;</span>,
+    <span class="ident">C::Api</span>: <span class="ident">pallet_contracts_rpc::ContractsRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span>, <span class="ident">Hash</span><span class="op">&gt;</span>,
     <span class="ident">C::Api</span>: <span class="ident">RootOfTrustRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">CertificateId</span><span class="op">&gt;</span>,
     <span class="ident">C::Api</span>: <span class="ident">pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Balance</span><span class="op">&gt;</span>,
     <span class="ident">C::Api</span>: <span class="ident">BabeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
@@ -324,6 +339,7 @@
         <span class="ident">client</span>,
         <span class="ident">pool</span>,
         <span class="ident">select_chain</span>,
+        <span class="ident">chain_spec</span>: <span class="kw">_</span>,
         <span class="ident">deny_unsafe</span>,
         <span class="ident">babe</span>,
         <span class="ident">grandpa</span>,
@@ -368,7 +384,7 @@
     ));
     <span class="ident">io</span>.<span class="ident">extend_with</span>(<span class="ident">sc_finality_grandpa_rpc::GrandpaApi::to_delegate</span>(
         <span class="ident">GrandpaRpcHandler::new</span>(
-            <span class="ident">shared_authority_set</span>,
+            <span class="ident">shared_authority_set</span>.<span class="ident">clone</span>(),
             <span class="ident">shared_voter_state</span>,
             <span class="ident">justification_stream</span>,
             <span class="ident">subscription_executor</span>,
@@ -377,7 +393,7 @@
     ));
     <span class="ident">io</span>.<span class="ident">extend_with</span>(<span class="ident">RootOfTrustApi::to_delegate</span>(<span class="ident">RootOfTrust::new</span>(<span class="ident">client</span>)));
 
-    <span class="ident">io</span>
+    <span class="prelude-val">Ok</span>(<span class="ident">io</span>)
 }
 
 <span class="doccomment">/// Instantiate all Light RPC extensions.</span>

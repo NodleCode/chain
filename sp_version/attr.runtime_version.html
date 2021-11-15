@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="An attribute that accepts a version declaration of a runtime and generates a custom wasm section with the equivalent contents."><meta name="keywords" content="rust, rustlang, rust-lang, runtime_version"><title>runtime_version in sp_version - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc attr"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../sp_version/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><h2 class="location">Other items in<br><a href="index.html">sp_version</a></h2><div id="sidebar-vars" data-name="runtime_version" data-ty="attr" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Attribute Macro <a href="index.html">sp_version</a>::<wbr><a class="attr" href="#">runtime_version</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/sp_version_proc_macro/lib.rs.html#30" title="goto source code">[src]</a></span></h1><pre class="rust attr"><code>#[runtime_version]</code></pre><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>An attribute that accepts a version declaration of a runtime and generates a custom wasm
+section with the equivalent contents.</p>
+<p>The custom section allows to read the version of the runtime without having to execute any
+code. Instead, the generated custom section can be relatively easily parsed from the wasm
+binary. The identifier of the custom section is “runtime_version”.</p>
+<p>A shortcoming of this macro is that it is unable to embed information regarding supported
+APIs. This is supported by the <code>construct_runtime!</code> macro.</p>
+<h1 id="usage" class="section-header"><a href="#usage">Usage</a></h1>
+<p>This macro accepts a const item like the following:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">sp_version</span>::{<span class="ident">create_runtime_str</span>, <span class="ident">RuntimeVersion</span>};
+
+<span class="attribute">#[<span class="ident">sp_version::runtime_version</span>]</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VERSION</span>: <span class="ident">RuntimeVersion</span> <span class="op">=</span> <span class="ident">RuntimeVersion</span> {
+	<span class="ident">spec_name</span>: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;test&quot;</span>),
+	<span class="ident">impl_name</span>: <span class="macro">create_runtime_str!</span>(<span class="string">&quot;test&quot;</span>),
+	<span class="ident">authoring_version</span>: <span class="number">10</span>,
+	<span class="ident">spec_version</span>: <span class="number">265</span>,
+	<span class="ident">impl_version</span>: <span class="number">1</span>,
+	<span class="ident">apis</span>: <span class="ident">RUNTIME_API_VERSIONS</span>,
+	<span class="ident">transaction_version</span>: <span class="number">2</span>,
+};
+</code></pre></div>
+<p>It will pass it through and add code required for emitting a custom section. The
+information that will go into the custom section is parsed from the item declaration. Due
+to that, the macro is somewhat rigid in terms of the code it accepts. There are the
+following considerations:</p>
+<ul>
+<li>
+<p>The <code>spec_name</code> and <code>impl_name</code> must be set by a macro-like expression. The name of the
+macro doesn’t matter though.</p>
+</li>
+<li>
+<p><code>authoring_version</code>, <code>spec_version</code>, <code>impl_version</code> and <code>transaction_version</code> must be set
+by a literal. Literal must be an integer. No other expressions are allowed there. In
+particular, you can’t supply a constant variable.</p>
+</li>
+<li>
+<p><code>apis</code> doesn’t have any specific constraints. This is because this information doesn’t
+get into the custom section and is not parsed.</p>
+</li>
+</ul>
+<h1 id="compilation-target--std-feature" class="section-header"><a href="#compilation-target--std-feature">Compilation Target &amp; “std” feature</a></h1>
+<p>This macro assumes it will be used within a runtime. By convention, a runtime crate defines
+a feature named “std”. This feature is enabled when the runtime is compiled to native code
+and disabled when it is compiled to the wasm code.</p>
+<p>The custom section can only be emitted while compiling to wasm. In order to detect the
+compilation target we use the “std” feature. This macro will emit the custom section only
+if the “std” feature is <strong>not</strong> enabled.</p>
+<p>Including this macro in the context where there is no “std” feature and the code is not
+compiled to wasm can lead to cryptic linking errors.</p>
+</div></details></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="sp_version" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>

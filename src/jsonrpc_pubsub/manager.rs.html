@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpc-pubsub-15.1.0&#x2F;src&#x2F;manager.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>manager.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpc_pubsub/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpc-pubsub-18.0.0&#x2F;src&#x2F;manager.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>manager.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpc_pubsub/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -368,11 +368,6 @@
 <span id="368">368</span>
 <span id="369">369</span>
 <span id="370">370</span>
-<span id="371">371</span>
-<span id="372">372</span>
-<span id="373">373</span>
-<span id="374">374</span>
-<span id="375">375</span>
 </pre><pre class="rust"><code><span class="doccomment">//! The SubscriptionManager used to manage subscription based RPCs.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The manager provides four main things in terms of functionality:</span>
@@ -396,8 +391,8 @@
 	<span class="ident">Arc</span>,
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures::sync::oneshot</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures</span>::{<span class="ident">future</span> <span class="kw">as</span> <span class="ident">future01</span>, <span class="ident">Future</span> <span class="kw">as</span> <span class="ident">Future01</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures::channel::oneshot</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures</span>::{<span class="self">self</span>, <span class="ident">task</span>, <span class="ident">Future</span>, <span class="ident">FutureExt</span>, <span class="ident">TryFutureExt</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
 	<span class="ident">typed</span>::{<span class="ident">Sink</span>, <span class="ident">Subscriber</span>},
 	<span class="ident">SubscriptionId</span>,
@@ -408,8 +403,8 @@
 <span class="kw">use</span> <span class="ident">rand::distributions::Alphanumeric</span>;
 <span class="kw">use</span> <span class="ident">rand</span>::{<span class="ident">thread_rng</span>, <span class="ident">Rng</span>};
 
-<span class="doccomment">/// Alias for an implementation of `futures::future::Executor`.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TaskExecutor</span> <span class="op">=</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">future01::Executor</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future01</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (), <span class="ident">Error</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Cloneable `Spawn` handle.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TaskExecutor</span> <span class="op">=</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">futures::task::Spawn</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>;
 
 <span class="kw">type</span> <span class="ident">ActiveSubscriptions</span> <span class="op">=</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">SubscriptionId</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
@@ -545,23 +540,28 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Second parameter is a function that converts Subscriber Sink into a Future.</span>
 	<span class="doccomment">/// This future will be driven to completion by the underlying event loop</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span>, <span class="ident">G</span>, <span class="ident">R</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">into_future</span>: <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubscriptionId</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span>, <span class="ident">G</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">subscriber</span>: <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">into_future</span>: <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubscriptionId</span>
 	<span class="kw">where</span>
-		<span class="ident">G</span>: <span class="ident">FnOnce</span>(<span class="ident">Sink</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>,
-		<span class="ident">R</span>: <span class="ident">future01::IntoFuture</span><span class="op">&lt;</span><span class="ident">Future</span> <span class="op">=</span> <span class="ident">F</span>, <span class="ident">Item</span> <span class="op">=</span> (), <span class="ident">Error</span> <span class="op">=</span> ()<span class="op">&gt;</span>,
-		<span class="ident">F</span>: <span class="ident">future01::Future</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (), <span class="ident">Error</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+		<span class="ident">G</span>: <span class="ident">FnOnce</span>(<span class="ident">Sink</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">F</span>,
+		<span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 	{
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">id_provider</span>.<span class="ident">next_id</span>();
 		<span class="kw">let</span> <span class="ident">subscription_id</span>: <span class="ident">SubscriptionId</span> <span class="op">=</span> <span class="ident">id</span>.<span class="ident">into</span>();
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">sink</span>) <span class="op">=</span> <span class="ident">subscriber</span>.<span class="ident">assign_id</span>(<span class="ident">subscription_id</span>.<span class="ident">clone</span>()) {
 			<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
-			<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">into_future</span>(<span class="ident">sink</span>)
-				.<span class="ident">into_future</span>()
-				.<span class="ident">select</span>(<span class="ident">rx</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">warn!</span>(<span class="string">&quot;Error timing out: {:?}&quot;</span>, <span class="ident">e</span>)))
-				.<span class="ident">then</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">Ok</span>(()));
+			<span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">into_future</span>(<span class="ident">sink</span>).<span class="ident">fuse</span>();
+			<span class="kw">let</span> <span class="ident">rx</span> <span class="op">=</span> <span class="ident">rx</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">warn!</span>(<span class="string">&quot;Error timing out: {:?}&quot;</span>, <span class="ident">e</span>)).<span class="ident">fuse</span>();
+			<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
+				<span class="macro">futures::pin_mut!</span>(<span class="ident">f</span>);
+				<span class="macro">futures::pin_mut!</span>(<span class="ident">rx</span>);
+				<span class="macro">futures::select!</span> {
+					<span class="ident">a</span> <span class="op">=</span> <span class="ident">f</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
+					<span class="kw">_</span> <span class="op">=</span> <span class="ident">rx</span> <span class="op">=</span><span class="op">&gt;</span> (),
+				}
+			};
 
 			<span class="self">self</span>.<span class="ident">active_subscriptions</span>.<span class="ident">lock</span>().<span class="ident">insert</span>(<span class="ident">subscription_id</span>.<span class="ident">clone</span>(), <span class="ident">tx</span>);
-			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">execute</span>(<span class="ident">Box::new</span>(<span class="ident">future</span>)).<span class="ident">is_err</span>() {
+			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">spawn_obj</span>(<span class="ident">task::FutureObj::new</span>(<span class="ident">Box::pin</span>(<span class="ident">future</span>))).<span class="ident">is_err</span>() {
 				<span class="macro">error!</span>(<span class="string">&quot;Failed to spawn RPC subscription task&quot;</span>);
 			}
 		}
@@ -597,11 +597,8 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::typed::Subscriber</span>;
-	<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">compat::Future01CompatExt</span>, <span class="ident">executor</span>, <span class="ident">FutureExt</span>};
-	<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">stream</span>, <span class="ident">StreamExt</span>, <span class="ident">TryStreamExt</span>};
-
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures::sink::Sink</span> <span class="kw">as</span> <span class="ident">Sink01</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::core::futures::stream::Stream</span> <span class="kw">as</span> <span class="ident">Stream01</span>;
+	<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">executor</span>, <span class="ident">stream</span>};
+	<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">FutureExt</span>, <span class="ident">StreamExt</span>};
 
 	<span class="comment">// Executor shared by all tests.</span>
 	<span class="comment">//</span>
@@ -613,12 +610,13 @@
 	}
 
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TestTaskExecutor</span>;
-	<span class="kw">type</span> <span class="ident">Boxed01Future01</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">future01::Future</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (), <span class="ident">Error</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>;
+	<span class="kw">impl</span> <span class="ident">task::Spawn</span> <span class="kw">for</span> <span class="ident">TestTaskExecutor</span> {
+		<span class="kw">fn</span> <span class="ident">spawn_obj</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">future</span>: <span class="ident">task::FutureObj</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, ()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">task::SpawnError</span><span class="op">&gt;</span> {
+			<span class="ident">EXECUTOR</span>.<span class="ident">spawn_obj</span>(<span class="ident">future</span>)
+		}
 
-	<span class="kw">impl</span> <span class="ident">future01::Executor</span><span class="op">&lt;</span><span class="ident">Boxed01Future01</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TestTaskExecutor</span> {
-		<span class="kw">fn</span> <span class="ident">execute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">future</span>: <span class="ident">Boxed01Future01</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">future01::ExecuteError</span><span class="op">&lt;</span><span class="ident">Boxed01Future01</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-			<span class="ident">EXECUTOR</span>.<span class="ident">spawn_ok</span>(<span class="ident">future</span>.<span class="ident">compat</span>().<span class="ident">map</span>(<span class="ident">drop</span>));
-			<span class="prelude-val">Ok</span>(())
+		<span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">task::SpawnError</span><span class="op">&gt;</span> {
+			<span class="ident">EXECUTOR</span>.<span class="ident">status</span>()
 		}
 	}
 
@@ -671,13 +669,9 @@
 	<span class="kw">fn</span> <span class="ident">new_subscription_manager_defaults_to_random_string_provider</span>() {
 		<span class="kw">let</span> <span class="ident">manager</span> <span class="op">=</span> <span class="ident">SubscriptionManager::new</span>(<span class="ident">Arc::new</span>(<span class="ident">TestTaskExecutor</span>));
 		<span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">Subscriber</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new_test</span>(<span class="string">&quot;test_subTest&quot;</span>).<span class="number">0</span>;
-		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream::iter</span>(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="number">1</span>)]).<span class="ident">compat</span>();
+		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream::iter</span>(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="number">1</span>))]);
 
-		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-			<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">res</span>));
-
-			<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">send_all</span>(<span class="ident">stream</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-		});
+		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> <span class="ident">stream</span>.<span class="ident">forward</span>(<span class="ident">sink</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()));
 
 		<span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">id</span>, <span class="ident">SubscriptionId::String</span>(<span class="kw">_</span>)))
 	}
@@ -688,13 +682,9 @@
 		<span class="kw">let</span> <span class="ident">manager</span> <span class="op">=</span> <span class="ident">SubscriptionManager::with_id_provider</span>(<span class="ident">id_provider</span>, <span class="ident">Arc::new</span>(<span class="ident">TestTaskExecutor</span>));
 
 		<span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">Subscriber</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new_test</span>(<span class="string">&quot;test_subTest&quot;</span>).<span class="number">0</span>;
-		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream::iter</span>(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="number">1</span>)]).<span class="ident">compat</span>();
+		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream::iter</span>(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="number">1</span>))]);
 
-		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-			<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">res</span>));
-
-			<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">send_all</span>(<span class="ident">stream</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-		});
+		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> <span class="ident">stream</span>.<span class="ident">forward</span>(<span class="ident">sink</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()));
 
 		<span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">id</span>, <span class="ident">SubscriptionId::Number</span>(<span class="kw">_</span>)))
 	}
@@ -705,13 +695,9 @@
 		<span class="kw">let</span> <span class="ident">manager</span> <span class="op">=</span> <span class="ident">SubscriptionManager::with_id_provider</span>(<span class="ident">id_provider</span>, <span class="ident">Arc::new</span>(<span class="ident">TestTaskExecutor</span>));
 
 		<span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">Subscriber</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="ident">::new_test</span>(<span class="string">&quot;test_subTest&quot;</span>).<span class="number">0</span>;
-		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream::iter</span>(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="number">1</span>)]).<span class="ident">compat</span>();
+		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream::iter</span>(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="number">1</span>))]);
 
-		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-			<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">res</span>));
-
-			<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">send_all</span>(<span class="ident">stream</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
-		});
+		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> <span class="ident">stream</span>.<span class="ident">forward</span>(<span class="ident">sink</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()));
 
 		<span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">id</span>, <span class="ident">SubscriptionId::String</span>(<span class="kw">_</span>)))
 	}
@@ -725,12 +711,9 @@
 
 		<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">futures::channel::mpsc::channel</span>(<span class="number">8</span>);
 		<span class="ident">tx</span>.<span class="ident">start_send</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">rx</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(<span class="ident">v</span>)).<span class="ident">compat</span>();
-
-		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
-			<span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">res</span>));
-
-			<span class="ident">sink</span>.<span class="ident">sink_map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">send_all</span>(<span class="ident">stream</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
+		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">add</span>(<span class="ident">subscriber</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">sink</span><span class="op">|</span> {
+			<span class="kw">let</span> <span class="ident">rx</span> <span class="op">=</span> <span class="ident">rx</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)));
+			<span class="ident">rx</span>.<span class="ident">forward</span>(<span class="ident">sink</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 		});
 
 		<span class="kw">let</span> <span class="ident">is_cancelled</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">cancel</span>(<span class="ident">id</span>);
@@ -746,6 +729,13 @@
 		<span class="kw">let</span> <span class="ident">is_not_cancelled</span> <span class="op">=</span> <span class="op">!</span><span class="ident">is_cancelled</span>;
 
 		<span class="macro">assert!</span>(<span class="ident">is_not_cancelled</span>);
+	}
+
+	<span class="attribute">#[<span class="ident">test</span>]</span>
+	<span class="kw">fn</span> <span class="ident">is_send_sync</span>() {
+		<span class="kw">fn</span> <span class="ident">send_sync</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>() {}
+
+		<span class="ident">send_sync</span>::<span class="op">&lt;</span><span class="ident">SubscriptionManager</span><span class="op">&gt;</span>();
 	}
 }
 </code></pre></div>

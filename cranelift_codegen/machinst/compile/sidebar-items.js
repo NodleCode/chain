@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["compile","Compile the given function down to VCode with allocated registers, ready for binary emission."]]});

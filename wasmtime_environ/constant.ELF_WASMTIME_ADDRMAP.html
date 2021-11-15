@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A custom Wasmtime-specific section of our compilation image which stores mapping data from offsets in the image to offset in the original wasm binary."><meta name="keywords" content="rust, rustlang, rust-lang, ELF_WASMTIME_ADDRMAP"><title>ELF_WASMTIME_ADDRMAP in wasmtime_environ - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc constant"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../wasmtime_environ/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><h2 class="location">Other items in<br><a href="index.html">wasmtime_environ</a></h2><div id="sidebar-vars" data-name="ELF_WASMTIME_ADDRMAP" data-ty="constant" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Constant <a href="index.html">wasmtime_environ</a>::<wbr><a class="constant" href="#">ELF_WASMTIME_ADDRMAP</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/wasmtime_environ/address_map.rs.html#95" title="goto source code">[src]</a></span></h1><pre class="rust const"><code>pub const ELF_WASMTIME_ADDRMAP: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.56.1/std/primitive.str.html">str</a> = &quot;.wasmtime.addrmap&quot;;</code></pre><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A custom Wasmtime-specific section of our compilation image which stores
+mapping data from offsets in the image to offset in the original wasm
+binary.</p>
+<p>This section has a custom binary encoding. Currently its encoding is:</p>
+<ul>
+<li>The section starts with a 32-bit little-endian integer. This integer is
+how many entries are in the following two arrays.</li>
+<li>Next is an array with the previous count number of 32-bit little-endian
+integers. This array is a sorted list of relative offsets within the text
+section. This is intended to be a lookup array to perform a binary search
+on an offset within the text section on this array.</li>
+<li>Finally there is another array, with the same count as before, also of
+32-bit little-endian integers. These integers map 1:1 with the previous
+array of offsets, and correspond to what the original offset was in the
+wasm file.</li>
+</ul>
+<p>Decoding this section is intentionally simple, it only requires loading a
+32-bit little-endian integer plus some bounds checks. Reading this section
+is done with the <code>lookup_file_pos</code> function below. Reading involves
+performing a binary search on the first array using the index found for the
+native code offset to index into the second array and find the wasm code
+offset.</p>
+<p>At this time this section has an alignment of 1, which means all reads of it
+are unaligned. Additionally at this time the 32-bit encodings chosen here
+mean that &gt;=4gb text sections are not supported.</p>
+</div></details></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="wasmtime_environ" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>
