@@ -83,13 +83,11 @@ pub fn run() -> Result<()> {
 
     match &cli.subcommand {
         None => {
-            let run_staking_runtime = cli.run.runtime.is_staking_runtime();
             let runner = cli.create_runner(&cli.run.base)?;
             runner.run_node_until_exit(|config| async move {
                 match config.role {
-                    Role::Light => service::build_light(config, run_staking_runtime),
-                    _ => service::build_full(config, run_staking_runtime)
-                        .map(|full| full.task_manager),
+                    Role::Light => service::build_light(config),
+                    _ => service::build_full(config).map(|full| full.task_manager),
                 }
                 .map_err(sc_cli::Error::Service)
             })

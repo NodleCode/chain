@@ -965,11 +965,8 @@ impl<C> NewFullBase<C> {
     }
 }
 
-pub fn build_full(
-    config: Configuration,
-    run_staking_runtime: bool,
-) -> Result<NewFullBase<Client>, ServiceError> {
-    if run_staking_runtime {
+pub fn build_full(config: Configuration) -> Result<NewFullBase<Client>, ServiceError> {
+    if config.chain_spec.is_staking_runtime() {
         return new_full_base::<staking_runtime::RuntimeApi, StakingExecutorDispatch>(config)
             .map(|full| full.with_client(Client::StakingRT));
     } else {
@@ -1211,11 +1208,8 @@ where
     ))
 }
 
-pub fn build_light(
-    config: Configuration,
-    is_staking_runtime: bool,
-) -> Result<TaskManager, ServiceError> {
-    if is_staking_runtime {
+pub fn build_light(config: Configuration) -> Result<TaskManager, ServiceError> {
+    if config.chain_spec.is_staking_runtime() {
         new_light_base::<staking_runtime::RuntimeApi, StakingExecutorDispatch>(config)
             .map(|(task_manager, _, _, _, _)| task_manager)
     } else {
