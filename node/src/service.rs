@@ -98,6 +98,24 @@ pub type FullGrandpaBlockImport<RuntimeApi, ExecutorDispatch> =
 pub type TransactionPool<RuntimeApi, ExecutorDispatch> =
     sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, ExecutorDispatch>>;
 
+/// Can be called for a `Configuration` to check what node it belongs to.
+pub trait IdentifyVariant {
+    /// Returns if this is a configuration for the `Main` node.
+    fn is_main_runtime(&self) -> bool;
+
+    /// Returns if this is a configuration for the `Staking` node.
+    fn is_staking_runtime(&self) -> bool;
+}
+
+impl IdentifyVariant for Box<dyn ChainSpec> {
+    fn is_main_runtime(&self) -> bool {
+        self.id().to_lowercase().starts_with("main")
+    }
+    fn is_staking_runtime(&self) -> bool {
+        self.id().to_lowercase().starts_with("staking")
+    }
+}
+
 fn main_new_partial(
     config: &Configuration,
 ) -> Result<
