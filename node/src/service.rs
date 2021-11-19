@@ -110,10 +110,10 @@ pub trait IdentifyVariant {
 
 impl IdentifyVariant for Box<dyn ChainSpec> {
     fn is_main_runtime(&self) -> bool {
-        self.name().to_lowercase().starts_with("main")
+        self.id().to_lowercase().starts_with("main")
     }
     fn is_staking_runtime(&self) -> bool {
-        self.name().to_lowercase().starts_with("staking")
+        self.id().to_lowercase().starts_with("staking")
     }
 }
 

@@ -20,10 +20,19 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub mod currency;
+pub mod network;
+pub mod tokens;
+
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
     MultiSignature, OpaqueExtrinsic,
+};
+
+pub use polkadot_parachain::primitives::{
+    DmpMessageHandler, Id as ParaId, UpwardMessage, ValidationParams, XcmpMessageFormat,
+    XcmpMessageHandler,
 };
 
 /// An index to a block.
@@ -56,16 +65,22 @@ pub type Hash = sp_core::H256;
 /// time scale is milliseconds.
 pub type Timestamp = u64;
 
+pub type CurrencyId = u32;
+
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 /// Header type.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
 /// Block type.
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
+
 /// Type for storing the id of an asset.
 pub type AssetId = u32;
+
+pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
 /// App-specific crypto used for reporting equivocation/misbehavior in BABE and
 /// GRANDPA. Any rewards for misbehavior reporting will be paid out to this

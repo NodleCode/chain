@@ -25,6 +25,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
+pub mod cs_eden;
 pub mod cs_main;
 pub mod cs_staking;
 
