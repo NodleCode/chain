@@ -19,7 +19,7 @@
 use crate::chain_spec::{
     build_local_properties, get_account_id_from_seed, get_authority_keys_from_seed,
 };
-use main_runtime::{
+use runtime_main::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig,
     SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
@@ -146,7 +146,7 @@ pub fn testnet_genesis(
         },
         babe: BabeConfig {
             authorities: vec![],
-            epoch_config: Some(main_runtime::constants::BABE_GENESIS_EPOCH_CONFIG),
+            epoch_config: Some(runtime_main::constants::BABE_GENESIS_EPOCH_CONFIG),
         },
         im_online: ImOnlineConfig { keys: vec![] },
         authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },

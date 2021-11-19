@@ -25,7 +25,7 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::sr25519;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use staking_runtime::{
+use runtime_staking::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig, SessionConfig, SessionKeys,
     StakingConfig, SystemConfig,
@@ -126,7 +126,7 @@ pub fn testnet_genesis(
         },
         babe: BabeConfig {
             authorities: vec![],
-            epoch_config: Some(main_runtime::constants::BABE_GENESIS_EPOCH_CONFIG),
+            epoch_config: Some(runtime_main::constants::BABE_GENESIS_EPOCH_CONFIG),
         },
         im_online: ImOnlineConfig { keys: vec![] },
         authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
@@ -171,8 +171,8 @@ fn local_staking_genesis() -> GenesisConfig {
 /// Local testnet config to test the staking pallet
 pub fn local_staking_config() -> ChainSpec {
     ChainSpec::from_genesis(
-        "Local Staking Testnet",
-        "local_staking_testnet",
+        "Staking Local Testnet",
+        "staking_local_testnet",
         ChainType::Local,
         local_staking_genesis,
         vec![],
@@ -200,8 +200,8 @@ fn development_config_genesis() -> GenesisConfig {
 /// Development config (single validator Alice)
 pub fn development_config() -> ChainSpec {
     ChainSpec::from_genesis(
-        "Development Staking Testnet",
-        "dev_staking_testnet",
+        "Staking Development Testnet",
+        "staking_dev_testnet",
         ChainType::Development,
         development_config_genesis,
         vec![],
@@ -220,5 +220,10 @@ pub(crate) mod tests {
     #[test]
     fn test_create_staking_local_chain_spec() {
         local_staking_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_create_staking_dev_chain_spec() {
+        development_config().build_storage().unwrap();
     }
 }

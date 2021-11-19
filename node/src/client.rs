@@ -132,8 +132,8 @@ pub trait ClientHandle {
 /// See [`ExecuteWithClient`] for more information.
 #[derive(Clone)]
 pub enum Client {
-    MainRT(Arc<FullClient<main_runtime::RuntimeApi, MainExecutorDispatch>>),
-    StakingRT(Arc<FullClient<staking_runtime::RuntimeApi, StakingExecutorDispatch>>),
+    MainRT(Arc<FullClient<runtime_main::RuntimeApi, MainExecutorDispatch>>),
+    StakingRT(Arc<FullClient<runtime_staking::RuntimeApi, StakingExecutorDispatch>>),
 }
 
 impl ClientHandle for Client {

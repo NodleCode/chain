@@ -18,10 +18,11 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-pub use crate::client::{
-    AbstractClient, Client, ClientHandle, ExecuteWithClient, RuntimeApiCollection,
-};
 use crate::rpc as node_rpc;
+pub use crate::{
+    client::{AbstractClient, Client, ClientHandle, ExecuteWithClient, RuntimeApiCollection},
+    command::IdentifyChain,
+};
 use futures::prelude::*;
 use primitives::Block;
 use sc_client_api::{ExecutorProvider, RemoteBackend};
@@ -29,9 +30,7 @@ use sc_consensus_babe::{self, SlotProportion};
 use sc_executor::{NativeElseWasmExecutor, NativeExecutionDispatch};
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
 use sc_network::{Event, NetworkService};
-use sc_service::{
-    config::Configuration, error::Error as ServiceError, ChainSpec, RpcHandlers, TaskManager,
-};
+use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_api::ConstructRuntimeApi;
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT};
@@ -39,35 +38,35 @@ use sp_trie::PrefixedMemoryDB;
 use std::sync::Arc;
 
 mod main_executor {
-    pub use main_runtime;
+    pub use runtime_main;
 
     pub struct MainExecutorDispatch;
     impl sc_executor::NativeExecutionDispatch for MainExecutorDispatch {
         type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
         fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-            main_runtime::api::dispatch(method, data)
+            runtime_main::api::dispatch(method, data)
         }
 
         fn native_version() -> sc_executor::NativeVersion {
-            main_runtime::native_version()
+            runtime_main::native_version()
         }
     }
 }
 
 mod staking_executor {
-    pub use staking_runtime;
+    pub use runtime_staking;
 
     pub struct StakingExecutorDispatch;
     impl sc_executor::NativeExecutionDispatch for StakingExecutorDispatch {
         type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
 
         fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-            staking_runtime::api::dispatch(method, data)
+            runtime_staking::api::dispatch(method, data)
         }
 
         fn native_version() -> sc_executor::NativeVersion {
-            staking_runtime::native_version()
+            runtime_staking::native_version()
         }
     }
 }
@@ -99,36 +98,18 @@ pub type FullGrandpaBlockImport<RuntimeApi, ExecutorDispatch> =
 pub type TransactionPool<RuntimeApi, ExecutorDispatch> =
     sc_transaction_pool::FullPool<Block, FullClient<RuntimeApi, ExecutorDispatch>>;
 
-/// Can be called for a `Configuration` to check what node it belongs to.
-pub trait IdentifyVariant {
-    /// Returns if this is a configuration for the `Main` node.
-    fn is_main_runtime(&self) -> bool;
-
-    /// Returns if this is a configuration for the `Staking` node.
-    fn is_staking_runtime(&self) -> bool;
-}
-
-impl IdentifyVariant for Box<dyn ChainSpec> {
-    fn is_main_runtime(&self) -> bool {
-        self.name().to_lowercase().starts_with("main")
-    }
-    fn is_staking_runtime(&self) -> bool {
-        self.name().to_lowercase().starts_with("staking")
-    }
-}
-
 fn main_new_partial(
     config: &Configuration,
 ) -> Result<
     sc_service::PartialComponents<
-        FullClient<main_runtime::RuntimeApi, MainExecutorDispatch>,
+        FullClient<runtime_main::RuntimeApi, MainExecutorDispatch>,
         FullBackend,
         FullSelectChain,
         sc_consensus::DefaultImportQueue<
             Block,
-            FullClient<main_runtime::RuntimeApi, MainExecutorDispatch>,
+            FullClient<runtime_main::RuntimeApi, MainExecutorDispatch>,
         >,
-        TransactionPool<main_runtime::RuntimeApi, MainExecutorDispatch>,
+        TransactionPool<runtime_main::RuntimeApi, MainExecutorDispatch>,
         (
             impl Fn(
                 node_rpc::DenyUnsafe,
@@ -137,12 +118,12 @@ fn main_new_partial(
             (
                 sc_consensus_babe::BabeBlockImport<
                     Block,
-                    FullClient<main_runtime::RuntimeApi, MainExecutorDispatch>,
-                    FullGrandpaBlockImport<main_runtime::RuntimeApi, MainExecutorDispatch>,
+                    FullClient<runtime_main::RuntimeApi, MainExecutorDispatch>,
+                    FullGrandpaBlockImport<runtime_main::RuntimeApi, MainExecutorDispatch>,
                 >,
                 sc_finality_grandpa::LinkHalf<
                     Block,
-                    FullClient<main_runtime::RuntimeApi, MainExecutorDispatch>,
+                    FullClient<runtime_main::RuntimeApi, MainExecutorDispatch>,
                     FullSelectChain,
                 >,
                 sc_consensus_babe::BabeLink<Block>,
@@ -172,7 +153,7 @@ fn main_new_partial(
 
     let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<
         Block,
-        main_runtime::RuntimeApi,
+        runtime_main::RuntimeApi,
         NativeElseWasmExecutor<MainExecutorDispatch>,
     >(
         &config,
@@ -306,7 +287,7 @@ fn main_new_partial(
 fn main_new_full_base(
     mut config: Configuration,
 ) -> Result<
-    NewFullBase<Arc<FullClient<main_runtime::RuntimeApi, MainExecutorDispatch>>>,
+    NewFullBase<Arc<FullClient<runtime_main::RuntimeApi, MainExecutorDispatch>>>,
     ServiceError,
 > {
     let sc_service::PartialComponents {
@@ -966,8 +947,8 @@ impl<C> NewFullBase<C> {
 }
 
 pub fn build_full(config: Configuration) -> Result<NewFullBase<Client>, ServiceError> {
-    if config.chain_spec.is_staking_runtime() {
-        return new_full_base::<staking_runtime::RuntimeApi, StakingExecutorDispatch>(config)
+    if config.chain_spec.is_runtime_staking() {
+        return new_full_base::<runtime_staking::RuntimeApi, StakingExecutorDispatch>(config)
             .map(|full| full.with_client(Client::StakingRT));
     } else {
         return main_new_full_base(config).map(|full| full.with_client(Client::MainRT));
@@ -986,14 +967,14 @@ pub fn new_chain_ops(
     ServiceError,
 > {
     config.keystore = sc_service::config::KeystoreConfig::InMemory;
-    if config.chain_spec.is_staking_runtime() {
+    if config.chain_spec.is_runtime_staking() {
         let sc_service::PartialComponents {
             client,
             backend,
             import_queue,
             task_manager,
             ..
-        } = new_partial::<staking_runtime::RuntimeApi, StakingExecutorDispatch>(config)?;
+        } = new_partial::<runtime_staking::RuntimeApi, StakingExecutorDispatch>(config)?;
         Ok((
             Arc::new(Client::StakingRT(client)),
             backend,
@@ -1007,7 +988,7 @@ pub fn new_chain_ops(
             import_queue,
             task_manager,
             ..
-        } = new_partial::<main_runtime::RuntimeApi, MainExecutorDispatch>(config)?;
+        } = new_partial::<runtime_main::RuntimeApi, MainExecutorDispatch>(config)?;
         Ok((
             Arc::new(Client::MainRT(client)),
             backend,
@@ -1209,11 +1190,11 @@ where
 }
 
 pub fn build_light(config: Configuration) -> Result<TaskManager, ServiceError> {
-    if config.chain_spec.is_staking_runtime() {
-        new_light_base::<staking_runtime::RuntimeApi, StakingExecutorDispatch>(config)
+    if config.chain_spec.is_runtime_staking() {
+        new_light_base::<runtime_staking::RuntimeApi, StakingExecutorDispatch>(config)
             .map(|(task_manager, _, _, _, _)| task_manager)
     } else {
-        new_light_base::<main_runtime::RuntimeApi, MainExecutorDispatch>(config)
+        new_light_base::<runtime_main::RuntimeApi, MainExecutorDispatch>(config)
             .map(|(task_manager, _, _, _, _)| task_manager)
     }
 }

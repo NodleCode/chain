@@ -25,6 +25,48 @@ use crate::{
 use primitives::Block;
 use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
 
+/// Can be called for a `Configuration` to check what node it belongs to.
+pub trait IdentifyChain {
+
+	/// Returns if this is a configuration for the `Staking` node.
+    fn is_runtime_staking(&self) -> bool;
+}
+
+impl IdentifyChain for dyn sc_service::ChainSpec {
+    fn is_runtime_staking(&self) -> bool {
+        self.id().to_lowercase().starts_with("staking")
+    }
+}
+
+impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
+    fn is_runtime_staking(&self) -> bool {
+        <dyn sc_service::ChainSpec>::is_runtime_staking(self)
+    }
+}
+
+fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
+    Ok(match id {
+        "dev" => Box::new(chain_spec::cs_main::development_config()),
+        "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
+        "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
+        "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
+        "" | "main" => Box::new(chain_spec::cs_main::main_config()),
+        "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
+        path => {
+            let chain_spec = chain_spec::cs_main::ChainSpec::from_json_file(path.into())?;
+            if chain_spec.is_runtime_staking() {
+                Box::new(chain_spec::cs_staking::ChainSpec::from_json_file(
+                    std::path::PathBuf::from(path),
+                )?)
+            } else {
+                Box::new(chain_spec::cs_main::ChainSpec::from_json_file(
+                    std::path::PathBuf::from(path),
+                )?)
+            }
+        }
+    })
+}
+
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
         "Nodle Chain Node".into()
@@ -51,29 +93,11 @@ impl SubstrateCli for Cli {
     }
 
     fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-        if self.run.runtime.is_staking_runtime() {
-            Ok(match id {
-                "dev" => Box::new(chain_spec::cs_staking::development_config()),
-                "" | "local" => Box::new(chain_spec::cs_staking::local_staking_config()),
-                path => Box::new(chain_spec::cs_staking::ChainSpec::from_json_file(
-                    std::path::PathBuf::from(path),
-                )?),
-            })
-        } else {
-            Ok(match id {
-                "dev" => Box::new(chain_spec::cs_main::development_config()),
-                "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
-                "" | "main" => Box::new(chain_spec::cs_main::main_config()),
-                "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
-                path => Box::new(chain_spec::cs_staking::ChainSpec::from_json_file(
-                    std::path::PathBuf::from(path),
-                )?),
-            })
-        }
+        load_spec(id)
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        &main_runtime::VERSION
+        &runtime_main::VERSION
     }
 }
 
@@ -83,7 +107,7 @@ pub fn run() -> Result<()> {
 
     match &cli.subcommand {
         None => {
-            let runner = cli.create_runner(&cli.run.base)?;
+            let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| async move {
                 match config.role {
                     Role::Light => service::build_light(config),
