@@ -96,7 +96,7 @@ impl SubstrateCli for Cli {
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        &main_runtime::VERSION
+        &runtime_main::VERSION
     }
 }
 
@@ -106,7 +106,7 @@ pub fn run() -> Result<()> {
 
     match &cli.subcommand {
         None => {
-            let runner = cli.create_runner(&cli.run.base)?;
+            let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| async move {
                 match config.role {
                     Role::Light => service::build_light(config),
