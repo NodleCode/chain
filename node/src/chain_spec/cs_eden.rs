@@ -16,53 +16,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::chain_spec::{
-    build_local_properties, get_account_id_from_seed, get_authority_keys_from_seed,
+use crate::chain_spec::{build_local_properties, get_account_id_from_seed, get_from_seed};
+use primitives::{AccountId, AuraId, Balance, BlockNumber, ParaId};
+use runtime_eden::{
+    constants::*, wasm_binary_unwrap, BalancesConfig, FinancialMembershipConfig, GenesisConfig,
+    ParachainInfoConfig, RootMembershipConfig, SessionConfig, SessionKeys, SudoConfig,
+    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
 };
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use primitives::{AccountId, Balance, BlockNumber};
-use runtime_main::{
-    constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
-    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig,
-    SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
-    VestingConfig,
-};
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
-use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-use sp_consensus_babe::AuthorityId as BabeId;
+use serde::{Deserialize, Serialize};
 use sp_core::sr25519;
-use sp_finality_grandpa::AuthorityId as GrandpaId;
 
-pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 
-fn session_keys(
-    grandpa: GrandpaId,
-    babe: BabeId,
-    im_online: ImOnlineId,
-    authority_discovery: AuthorityDiscoveryId,
-) -> SessionKeys {
-    SessionKeys {
-        grandpa,
-        babe,
-        im_online,
-        authority_discovery,
+fn eden_session_keys(keys: AuraId) -> SessionKeys {
+    SessionKeys { aura: keys }
+}
+
+/// Generate collator keys from seed.
+///
+/// This function's return type must always match the session keys of the chain in tuple format.
+pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
+    get_from_seed::<AuraId>(seed)
+}
+
+/// The extensions for the [`ChainSpec`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
+#[serde(deny_unknown_fields)]
+pub struct Extensions {
+    /// The relay chain of the Parachain.
+    pub relay_chain: String,
+    /// The id of the Parachain.
+    pub para_id: u32,
+}
+
+impl Extensions {
+    /// Try to get the extension from the given `ChainSpec`.
+    pub fn try_get(chain_spec: &dyn sc_service::ChainSpec) -> Option<&Self> {
+        sc_chain_spec::get_extension(chain_spec.extensions())
     }
 }
 
 /// Helper function to create GenesisConfig for testing
-pub fn testnet_genesis(
-    initial_authorities: Vec<(
-        AccountId,
-        AccountId,
-        GrandpaId,
-        BabeId,
-        ImOnlineId,
-        AuthorityDiscoveryId,
-    )>,
+pub fn eden_genesis(
+    root_key: AccountId,
+    invulnerables: Vec<(AccountId, AuraId)>,
     roots: Vec<AccountId>,
     oracles: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
     grants: Option<Vec<(AccountId, Vec<(BlockNumber, BlockNumber, u32, Balance)>)>>,
+    id: ParaId,
 ) -> GenesisConfig {
     let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -106,6 +110,7 @@ pub fn testnet_genesis(
                 .iter()
                 .cloned()
                 .map(|k| (k, ENDOWMENT))
+                .chain([(root_key.clone(), ENDOWMENT)].to_vec())
                 .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
                 .fold(vec![], |mut acc, (account, endowment)| {
@@ -127,34 +132,31 @@ pub fn testnet_genesis(
                     acc
                 }),
         },
+        sudo: SudoConfig { key: root_key },
         vesting: VestingConfig {
             vesting: vested_grants,
         },
 
         // Consensus
         session: SessionConfig {
-            keys: initial_authorities
-                .iter()
-                .map(|x| {
+            keys: invulnerables
+                .clone()
+                .into_iter()
+                .map(|(acc, aura)| {
                     (
-                        x.0.clone(),
-                        x.0.clone(),
-                        session_keys(x.2.clone(), x.3.clone(), x.4.clone(), x.5.clone()),
+                        acc.clone(),             // account id
+                        acc,                     // validator id
+                        eden_session_keys(aura), // session keys
                     )
                 })
-                .collect::<Vec<_>>(),
+                .collect(),
         },
-        babe: BabeConfig {
-            authorities: vec![],
-            epoch_config: Some(runtime_main::constants::BABE_GENESIS_EPOCH_CONFIG),
-        },
-        im_online: ImOnlineConfig { keys: vec![] },
-        authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
-        grandpa: GrandpaConfig {
-            authorities: vec![],
-        },
+        aura: Default::default(),
+        aura_ext: Default::default(),
+        parachain_system: Default::default(),
+        parachain_info: ParachainInfoConfig { parachain_id: id },
         validators_set: ValidatorsSetConfig {
-            members: initial_authorities
+            members: invulnerables
                 .iter()
                 .map(|x| x.0.clone())
                 .collect::<Vec<_>>(),
@@ -190,8 +192,18 @@ pub fn testnet_genesis(
 }
 
 fn development_config_genesis() -> GenesisConfig {
-    testnet_genesis(
-        vec![get_authority_keys_from_seed("Alice")],
+    eden_genesis(
+        get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![
+            (
+                get_account_id_from_seed::<sr25519::Public>("Alice"),
+                get_collator_keys_from_seed("Alice"),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>("Bob"),
+                get_collator_keys_from_seed("Bob"),
+            ),
+        ],
         vec![
             get_account_id_from_seed::<sr25519::Public>("Alice"),
             get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -201,88 +213,39 @@ fn development_config_genesis() -> GenesisConfig {
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
         None,
         None,
+        1000.into(),
     )
 }
 
 /// Development config (single validator Alice)
-pub fn development_config() -> ChainSpec {
+pub fn development_config(id: ParaId) -> ChainSpec {
     ChainSpec::from_genesis(
-        "Development",
-        "dev",
-        ChainType::Development,
+        "ParaChain Eden Development",
+        "para_eden_dev",
+        ChainType::Local,
         development_config_genesis,
         vec![],
         None,
         Some("nodl"),
         Some(build_local_properties()),
-        Default::default(),
+        Extensions {
+            relay_chain: "rococo-local".into(),
+            para_id: id.into(),
+        },
     )
-}
-
-fn local_testnet_genesis() -> GenesisConfig {
-    testnet_genesis(
-        vec![
-            get_authority_keys_from_seed("Alice"),
-            get_authority_keys_from_seed("Bob"),
-        ],
-        vec![
-            get_account_id_from_seed::<sr25519::Public>("Alice"),
-            get_account_id_from_seed::<sr25519::Public>("Bob"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-        ],
-        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
-        None,
-        None,
-    )
-}
-
-/// Local testnet config (multivalidator Alice + Bob)
-pub fn local_testnet_config() -> ChainSpec {
-    ChainSpec::from_genesis(
-        "Local Testnet",
-        "local_testnet",
-        ChainType::Local,
-        local_testnet_genesis,
-        vec![],
-        None,
-        Some("nodl"),
-        Some(build_local_properties()),
-        Default::default(),
-    )
-}
-
-/// Arcadia config, from json chainspec
-pub fn arcadia_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../res/arcadia.json")[..]).unwrap()
-}
-
-// Main config, from json chainspec
-pub fn main_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../res/main.json")[..]).unwrap()
 }
 
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
     use sp_runtime::BuildStorage;
+    // default to the Statemint/Statemine/Westmint id
+    const DEFAULT_PARA_ID: u32 = 1000;
 
     #[test]
     fn test_create_development_chain_spec() {
-        development_config().build_storage().unwrap();
-    }
-
-    #[test]
-    fn test_create_local_testnet_chain_spec() {
-        local_testnet_config().build_storage().unwrap();
-    }
-
-    #[test]
-    fn test_create_arcadia_chain_spec() {
-        arcadia_config().build_storage().unwrap();
-    }
-
-    #[test]
-    fn test_create_main_chain_spec() {
-        main_config().build_storage().unwrap();
+        development_config(ParaId::from(DEFAULT_PARA_ID))
+            .build_storage()
+            .unwrap();
     }
 }
