@@ -33,9 +33,6 @@ pub struct Cli {
     #[structopt(subcommand)]
     pub subcommand: Option<Subcommand>,
 
-    // /// Choose solo or parachain mode
-    // #[structopt(long)]
-    // pub mode_parachain: bool,
     #[structopt(flatten)]
     pub run: cumulus_client_cli::RunCmd,
 
