@@ -27,8 +27,7 @@ use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
 
 /// Can be called for a `Configuration` to check what node it belongs to.
 pub trait IdentifyChain {
-
-	/// Returns if this is a configuration for the `Staking` node.
+    /// Returns if this is a configuration for the `Staking` node.
     fn is_runtime_staking(&self) -> bool;
 }
 

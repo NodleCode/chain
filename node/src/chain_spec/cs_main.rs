@@ -19,14 +19,14 @@
 use crate::chain_spec::{
     build_local_properties, get_account_id_from_seed, get_authority_keys_from_seed,
 };
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use primitives::{AccountId, Balance, BlockNumber};
 use runtime_main::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig,
     SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
     VestingConfig,
 };
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use primitives::{AccountId, Balance, BlockNumber};
 use sc_service::ChainType;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
