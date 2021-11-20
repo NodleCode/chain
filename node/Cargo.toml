@@ -3,7 +3,7 @@ authors = ["Eliott Teissonniere <git.eliott@teissonniere.org>"]
 build = "build.rs"
 edition = "2018"
 name = "nodle-chain"
-version = "2.0.12"
+version = "2.0.13"
 
 [package.metadata.wasm-pack.profile.release]
 # `wasm-opt` has some problems on linux, see
@@ -26,12 +26,32 @@ name = "nodle-chain"
 path = "src/main.rs"
 
 [features]
-default = []
+default = ["cli"]
 runtime-benchmarks = [
 	"runtime-main/runtime-benchmarks",
 	"runtime-staking/runtime-benchmarks",
 	"frame-benchmarking-cli",
 ]
+cli = ["sc-executor/wasmi-errno"]
+
+[package.metadata.wasm-pack.profile.release]
+# `wasm-opt` has some problems on linux, see
+# https://github.com/rustwasm/wasm-pack/issues/781 etc.
+wasm-opt = false
+
+[target.'cfg(target_arch="x86_64")'.dependencies]
+sc-cli = { git = "https://github.com/paritytech/substrate", features = [
+	"wasmtime"
+], branch = "polkadot-v0.9.12" }
+sc-executor = { git = "https://github.com/paritytech/substrate", features = [
+	"wasmtime"
+], branch = "polkadot-v0.9.12" }
+sc-service = { git = "https://github.com/paritytech/substrate", features = [
+	"wasmtime"
+], branch = "polkadot-v0.9.12" }
+sp-trie = { git = "https://github.com/paritytech/substrate", features = [
+	"memory-tracker"
+], branch = "polkadot-v0.9.12" }
 
 [dependencies]
 log = { version = "0.4.14", default-features = false }
@@ -121,9 +141,10 @@ polkadot-cli = { git = "https://github.com/paritytech/polkadot.git", branch = "r
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot.git", branch = "release-v0.9.12" }
 
 [build-dependencies]
+structopt = "0.3.22"
+frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.12" }
+sc-cli = { git = "https://github.com/paritytech/substrate", features = [
+	"wasmtime"
+], branch = "polkadot-v0.9.12" }
 substrate-build-script-utils = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.12" }
-
-[dev-dependencies]
-assert_cmd = "0.12"
-nix = "0.17"
-tempfile = "3.2.0"
+cumulus-client-cli = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v0.9.12" }
