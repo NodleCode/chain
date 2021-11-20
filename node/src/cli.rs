@@ -15,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-use crate::chain_spec;
 use sc_cli::{KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -39,6 +37,44 @@ pub struct Cli {
     /// Relay chain arguments
     #[structopt(raw = true)]
     pub relaychain_args: Vec<String>,
+}
+
+/// Command for exporting the genesis state of the parachain
+#[derive(Debug, StructOpt)]
+pub struct ExportGenesisStateCommand {
+    /// Output file name or stdout if unspecified.
+    #[structopt(parse(from_os_str))]
+    pub output: Option<PathBuf>,
+
+    /// Id of the parachain this state is for.
+    ///
+    /// Default: 100
+    #[structopt(long)]
+    pub parachain_id: Option<u32>,
+
+    /// Write output in binary. Default is to write in hex.
+    #[structopt(short, long)]
+    pub raw: bool,
+
+    /// The name of the chain for that the genesis state should be exported.
+    #[structopt(long)]
+    pub chain: Option<String>,
+}
+
+/// Command for exporting the genesis wasm file.
+#[derive(Debug, StructOpt)]
+pub struct ExportGenesisWasmCommand {
+    /// Output file name or stdout if unspecified.
+    #[structopt(parse(from_os_str))]
+    pub output: Option<PathBuf>,
+
+    /// Write output in binary. Default is to write in hex.
+    #[structopt(short, long)]
+    pub raw: bool,
+
+    /// The name of the chain for that the genesis wasm file should be exported.
+    #[structopt(long)]
+    pub chain: Option<String>,
 }
 
 /// Possible subcommands of the main binary.
@@ -88,74 +124,4 @@ pub enum Subcommand {
     /// Export the genesis wasm of the parachain.
     #[structopt(name = "export-genesis-wasm")]
     ExportGenesisWasm(ExportGenesisWasmCommand),
-}
-
-/// Command for exporting the genesis state of the parachain
-#[derive(Debug, StructOpt)]
-pub struct ExportGenesisStateCommand {
-    /// Output file name or stdout if unspecified.
-    #[structopt(parse(from_os_str))]
-    pub output: Option<PathBuf>,
-
-    /// Id of the parachain this state is for.
-    ///
-    /// Default: 100
-    #[structopt(long)]
-    pub parachain_id: Option<u32>,
-
-    /// Write output in binary. Default is to write in hex.
-    #[structopt(short, long)]
-    pub raw: bool,
-
-    /// The name of the chain for that the genesis state should be exported.
-    #[structopt(long)]
-    pub chain: Option<String>,
-}
-
-/// Command for exporting the genesis wasm file.
-#[derive(Debug, StructOpt)]
-pub struct ExportGenesisWasmCommand {
-    /// Output file name or stdout if unspecified.
-    #[structopt(parse(from_os_str))]
-    pub output: Option<PathBuf>,
-
-    /// Write output in binary. Default is to write in hex.
-    #[structopt(short, long)]
-    pub raw: bool,
-
-    /// The name of the chain for that the genesis wasm file should be exported.
-    #[structopt(long)]
-    pub chain: Option<String>,
-}
-
-#[derive(Debug)]
-pub struct RelayChainCli {
-    /// The actual relay chain cli object.
-    pub base: polkadot_cli::RunCmd,
-
-    /// Optional chain id that should be passed to the relay chain.
-    pub chain_id: Option<String>,
-
-    /// The base path that should be used by the relay chain.
-    pub base_path: Option<PathBuf>,
-}
-
-impl RelayChainCli {
-    /// Parse the relay chain CLI parameters using the para chain `Configuration`.
-    pub fn new<'a>(
-        para_config: &sc_service::Configuration,
-        relay_chain_args: impl Iterator<Item = &'a String>,
-    ) -> Self {
-        let extension = chain_spec::cs_eden::Extensions::try_get(&*para_config.chain_spec);
-        let chain_id = extension.map(|e| e.relay_chain.clone());
-        let base_path = para_config
-            .base_path
-            .as_ref()
-            .map(|x| x.path().join("polkadot"));
-        Self {
-            base_path,
-            chain_id,
-            base: polkadot_cli::RunCmd::from_iter(relay_chain_args),
-        }
-    }
 }

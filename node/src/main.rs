@@ -17,6 +17,7 @@
  */
 
 mod chain_spec;
+mod cli_relaychain;
 #[macro_use]
 mod service;
 mod cli;
