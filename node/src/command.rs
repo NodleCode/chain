@@ -19,8 +19,11 @@
 use crate::service::MainExecutorDispatch;
 use crate::{
     chain_spec,
-    cli::{Cli, RelayChainCli, Subcommand},
+    cli::{Cli, Subcommand},
     service::{self},
+};
+use crate::{
+	cli_relaychain::{RelayChainCli}
 };
 use cumulus_client_service::genesis::generate_genesis_block;
 use parity_scale_codec::Encode;
