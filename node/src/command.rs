@@ -16,15 +16,55 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::service::Executor;
+use crate::service::MainExecutorDispatch;
 use crate::{
     chain_spec,
     cli::{Cli, Subcommand},
-    service::{self, new_partial},
+    service::{self},
 };
 use primitives::Block;
 use sc_cli::{ChainSpec, Result, Role, RuntimeVersion, SubstrateCli};
-use sc_service::PartialComponents;
+
+/// Can be called for a `Configuration` to check what node it belongs to.
+pub trait IdentifyChain {
+    /// Returns if this is a configuration for the `Staking` node.
+    fn is_runtime_staking(&self) -> bool;
+}
+
+impl IdentifyChain for dyn sc_service::ChainSpec {
+    fn is_runtime_staking(&self) -> bool {
+        self.id().to_lowercase().starts_with("staking")
+    }
+}
+
+impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
+    fn is_runtime_staking(&self) -> bool {
+        <dyn sc_service::ChainSpec>::is_runtime_staking(self)
+    }
+}
+
+fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
+    Ok(match id {
+        "dev" => Box::new(chain_spec::cs_main::development_config()),
+        "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
+        "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
+        "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
+        "" | "main" => Box::new(chain_spec::cs_main::main_config()),
+        "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
+        path => {
+            let chain_spec = chain_spec::cs_main::ChainSpec::from_json_file(path.into())?;
+            if chain_spec.is_runtime_staking() {
+                Box::new(chain_spec::cs_staking::ChainSpec::from_json_file(
+                    std::path::PathBuf::from(path),
+                )?)
+            } else {
+                Box::new(chain_spec::cs_main::ChainSpec::from_json_file(
+                    std::path::PathBuf::from(path),
+                )?)
+            }
+        }
+    })
+}
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
@@ -52,16 +92,7 @@ impl SubstrateCli for Cli {
     }
 
     fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-        Ok(match id {
-            "dev" => Box::new(chain_spec::development_config()),
-            "local" => Box::new(chain_spec::local_testnet_config()),
-            "" | "main" => Box::new(chain_spec::main_config()),
-            "arcadia" => Box::new(chain_spec::arcadia_config()),
-            "staking-local" => Box::new(chain_spec::local_staking_config()),
-            path => Box::new(chain_spec::ChainSpec::from_json_file(
-                std::path::PathBuf::from(path),
-            )?),
-        })
+        load_spec(id)
     }
 
     fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
@@ -78,8 +109,8 @@ pub fn run() -> Result<()> {
             let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| async move {
                 match config.role {
-                    Role::Light => service::new_light(config),
-                    _ => service::new_full(config),
+                    Role::Light => service::build_light(config),
+                    _ => service::build_full(config).map(|full| full.task_manager),
                 }
                 .map_err(sc_cli::Error::Service)
             })
@@ -88,7 +119,7 @@ pub fn run() -> Result<()> {
             if cfg!(feature = "runtime-benchmarks") {
                 let runner = cli.create_runner(cmd)?;
 
-                runner.sync_run(|config| cmd.run::<Block, Executor>(config))
+                runner.sync_run(|config| cmd.run::<Block, MainExecutorDispatch>(config))
             } else {
                 Err("Benchmarking wasn't enabled when building the node. \
 				You can enable it with `--features runtime-benchmarks`."
@@ -105,47 +136,29 @@ pub fn run() -> Result<()> {
         }
         Some(Subcommand::CheckBlock(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    import_queue,
-                    ..
-                } = new_partial(&config)?;
+            runner.async_run(|mut config| {
+                let (client, _, import_queue, task_manager) = service::new_chain_ops(&mut config)?;
                 Ok((cmd.run(client, import_queue), task_manager))
             })
         }
         Some(Subcommand::ExportBlocks(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    ..
-                } = new_partial(&config)?;
+            runner.async_run(|mut config| {
+                let (client, _, _, task_manager) = service::new_chain_ops(&mut config)?;
                 Ok((cmd.run(client, config.database), task_manager))
             })
         }
         Some(Subcommand::ExportState(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    ..
-                } = new_partial(&config)?;
+            runner.async_run(|mut config| {
+                let (client, _, _, task_manager) = service::new_chain_ops(&mut config)?;
                 Ok((cmd.run(client, config.chain_spec), task_manager))
             })
         }
         Some(Subcommand::ImportBlocks(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    import_queue,
-                    ..
-                } = new_partial(&config)?;
+            runner.async_run(|mut config| {
+                let (client, _, import_queue, task_manager) = service::new_chain_ops(&mut config)?;
                 Ok((cmd.run(client, import_queue), task_manager))
             })
         }
@@ -155,13 +168,8 @@ pub fn run() -> Result<()> {
         }
         Some(Subcommand::Revert(cmd)) => {
             let runner = cli.create_runner(cmd)?;
-            runner.async_run(|config| {
-                let PartialComponents {
-                    client,
-                    task_manager,
-                    backend,
-                    ..
-                } = new_partial(&config)?;
+            runner.async_run(|mut config| {
+                let (client, backend, _, task_manager) = service::new_chain_ops(&mut config)?;
                 Ok((cmd.run(client, backend), task_manager))
             })
         }

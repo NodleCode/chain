@@ -16,33 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use crate::chain_spec::{
+    build_local_properties, get_account_id_from_seed, get_authority_keys_from_seed,
+};
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
-use primitives::{AccountId, Balance, BlockNumber, Signature};
+use primitives::{AccountId, Balance, BlockNumber};
 use runtime_main::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig,
     SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
     VestingConfig,
 };
-use sc_chain_spec::Properties;
 use sc_service::ChainType;
-use serde_json::json;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_babe::AuthorityId as BabeId;
-use sp_core::{sr25519, Pair, Public};
+use sp_core::sr25519;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use sp_runtime::traits::{IdentifyAccount, Verify};
 
-type AccountPublic = <Signature as Verify>::Signer;
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
-
-fn build_local_properties() -> Properties {
-    let mut props = Properties::new();
-    props.insert("tokenDecimals".to_string(), json!(11));
-    props.insert("tokenSymbol".to_string(), json!("NODL"));
-
-    props
-}
 
 fn session_keys(
     grandpa: GrandpaId,
@@ -56,42 +47,6 @@ fn session_keys(
         im_online,
         authority_discovery,
     }
-}
-
-/// Helper function to generate a crypto pair from seed
-pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-    TPublic::Pair::from_string(&format!("//{}", seed), None)
-        .expect("static values are valid; qed")
-        .public()
-}
-
-/// Helper function to generate an account ID from seed
-pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
-    AccountPublic: From<<TPublic::Pair as Pair>::Public>,
-{
-    AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
-}
-
-/// Helper function to generate stash, controller and session key from seed
-pub fn get_authority_keys_from_seed(
-    seed: &str,
-) -> (
-    AccountId,
-    AccountId,
-    GrandpaId,
-    BabeId,
-    ImOnlineId,
-    AuthorityDiscoveryId,
-) {
-    (
-        get_account_id_from_seed::<sr25519::Public>(&format!("{}//stash", seed)),
-        get_account_id_from_seed::<sr25519::Public>(seed),
-        get_from_seed::<GrandpaId>(seed),
-        get_from_seed::<BabeId>(seed),
-        get_from_seed::<ImOnlineId>(seed),
-        get_from_seed::<AuthorityDiscoveryId>(seed),
-    )
 }
 
 /// Helper function to create GenesisConfig for testing
@@ -175,6 +130,7 @@ pub fn testnet_genesis(
         vesting: VestingConfig {
             vesting: vested_grants,
         },
+
         // Consensus
         session: SessionConfig {
             keys: initial_authorities
@@ -295,44 +251,14 @@ pub fn local_testnet_config() -> ChainSpec {
     )
 }
 
-fn local_staking_genesis() -> GenesisConfig {
-    testnet_genesis(
-        vec![get_authority_keys_from_seed("Alice")],
-        vec![
-            get_account_id_from_seed::<sr25519::Public>("Alice"),
-            get_account_id_from_seed::<sr25519::Public>("Bob"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-            get_account_id_from_seed::<sr25519::Public>("Dave"),
-        ],
-        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
-        None,
-        None,
-    )
-}
-
-/// Local testnet config to test the staking pallet
-pub fn local_staking_config() -> ChainSpec {
-    ChainSpec::from_genesis(
-        "Local Staking Testnet",
-        "local_staking_testnet",
-        ChainType::Local,
-        local_staking_genesis,
-        vec![],
-        None,
-        Some("nodl"),
-        Some(build_local_properties()),
-        Default::default(),
-    )
-}
-
 /// Arcadia config, from json chainspec
 pub fn arcadia_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/arcadia.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../../res/arcadia.json")[..]).unwrap()
 }
 
 // Main config, from json chainspec
 pub fn main_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../res/main.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../../res/main.json")[..]).unwrap()
 }
 
 #[cfg(test)]
@@ -348,11 +274,6 @@ pub(crate) mod tests {
     #[test]
     fn test_create_local_testnet_chain_spec() {
         local_testnet_config().build_storage().unwrap();
-    }
-
-    #[test]
-    fn test_create_staking_local_chain_spec() {
-        local_staking_config().build_storage().unwrap();
     }
 
     #[test]
