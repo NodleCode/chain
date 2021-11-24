@@ -1,8 +1,8 @@
 version: '2'
 
 services:
-  node-polkadot:
-    container_name: node-polkadot
+  node-polkadot-alice:
+    container_name: node-polkadot-alice
     image: parity/polkadot
     ports:
       - 30333:30333 # p2p port
@@ -19,16 +19,42 @@ services:
         "--validator",
         "--alice",
         "--chain",
-        "rococo-dev"
+        "rococo-local",
+        "--node-key",
+        "0000000000000000000000000000000000000000000000000000000000000001"
       ]
 
-  node-nodle:
-    container_name: node-nodle
+  node-polkadot-bob:
+    container_name: node-polkadot-bob
+    image: parity/polkadot
+    ports:
+      - 30343:30333 # p2p port
+      - 9943:9933 # rpc port
+      - 9954:9944 # ws port
+    command:
+      [
+        "--ws-external",
+        "--rpc-external",
+        "--rpc-methods",
+        "unsafe",
+        "--rpc-cors",
+        "all",
+        "--validator",
+        "--bob",
+        "--chain",
+        "rococo-local",
+        "--bootnodes",
+        "/dns4/node-polkadot-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJn\
+          riXwCcXwDDUA2kj6vnc6iDEp"
+      ]
+
+  node-nodle-alice:
+    container_name: node-nodle-alice
     build: .
     ports:
-      - 30334:30333 # p2p port
-      - 9945:9944 # ws port
-      - 9934:9933 # rpc port
+      - 30353:30333 # p2p port
+      - 9953:9944 # ws port
+      - 9963:9933 # rpc port
     command:
       [
         "--ws-external",
@@ -40,16 +66,21 @@ services:
         "--alice",
         "--chain",
         "eden-dev",
+        "--parachain-id",
+        "2000",
         "--",
         "--chain",
-        "rococo-dev"
+        "rococo-local",
+        "--bootnodes",
+        "/dns4/node-polkadot-alice/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJn\
+          riXwCcXwDDUA2kj6vnc6iDEp"
       ]
 
   ui-polkadot:
     container_name: ui-polkadot
     image: jacogr/polkadot-js-apps
     environment:
-      - WS_URL=ws://node-polkadot:9944
+      - WS_URL=ws://node-polkadot-alice:9944
     ports:
       - 8080:80
 
@@ -57,6 +88,6 @@ services:
     container_name: ui-nodle
     image: jacogr/polkadot-js-apps
     environment:
-      - WS_URL=ws://node-nodle:9944
+      - WS_URL=ws://node-nodle-alice:9944
     ports:
       - 8081:80
