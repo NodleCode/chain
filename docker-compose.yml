@@ -1,0 +1,62 @@
+version: '2'
+
+services:
+  node-polkadot:
+    container_name: node-polkadot
+    image: parity/polkadot
+    ports:
+      - 30333:30333 # p2p port
+      - 9933:9933 # rpc port
+      - 9944:9944 # ws port
+    command:
+      [
+        "--ws-external",
+        "--rpc-external",
+        "--rpc-methods",
+        "unsafe",
+        "--rpc-cors",
+        "all",
+        "--validator",
+        "--alice",
+        "--chain",
+        "rococo-dev"
+      ]
+
+  node-nodle:
+    container_name: node-nodle
+    build: .
+    ports:
+      - 30334:30333 # p2p port
+      - 9945:9944 # ws port
+      - 9934:9933 # rpc port
+    command:
+      [
+        "--ws-external",
+        "--rpc-external",
+        "--rpc-methods",
+        "unsafe",
+        "--rpc-cors",
+        "all",
+        "--alice",
+        "--chain",
+        "acala-dev",
+        "--",
+        "--chain",
+        "rococo-dev"
+      ]
+
+  ui-polkadot:
+    container_name: ui-polkadot
+    image: jacogr/polkadot-js-apps
+    environment:
+      - WS_URL=ws://node-polkadot:9944
+    ports:
+      - 8080:80
+
+  ui-nodle:
+    container_name: ui-nodle
+    image: jacogr/polkadot-js-apps
+    environment:
+      - WS_URL=ws://node-nodle:9944
+    ports:
+      - 8080:80

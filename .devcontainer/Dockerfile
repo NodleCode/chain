@@ -7,5 +7,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN useradd -ms /bin/bash codespace
 USER codespace
 WORKDIR /home/codespace
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-        export PATH=$PATH:$HOME/.cargo/bin
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+COPY ./.devcontainer/init.sh .
+ENTRYPOINT [ "./init.sh" ]
