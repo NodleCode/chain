@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["main",""]],"mod":[["chain_spec",""],["cli",""],["command",""],["rpc","RPC APIs instantiation code for the Nodle Chain."],["service","Service and ServiceFactory implementation. Specialized wrapper over substrate service."]]});
+initSidebarItems({"fn":[["main",""]],"mod":[["chain_spec",""],["cli",""],["client","MainRT Client abstractions"],["command",""],["rpc","RPC APIs instantiation code for the Nodle Chain."],["service","Service and ServiceFactory implementation. Specialized wrapper over substrate service."]]});
