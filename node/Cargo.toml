@@ -5,9 +5,18 @@ edition = "2018"
 name = "nodle-chain"
 version = "2.0.14"
 
+[package.metadata.wasm-pack.profile.release]
+# `wasm-opt` has some problems on linux, see
+# https://github.com/rustwasm/wasm-pack/issues/781 etc.
+wasm-opt = false
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
+
 [[bin]]
 name = "nodle-chain"
 path = "src/main.rs"
+required-features = ["cli"]
 
 [features]
 default = ["cli"]
@@ -27,18 +36,15 @@ runtime-benchmarks = [
 ]
 
 [target.'cfg(target_arch="x86_64")'.dependencies]
-sc-cli = { git = "https://github.com/paritytech/substrate", features = [
+sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.12", optional = true, features = [
 	"wasmtime"
-], branch = "polkadot-v0.9.12" }
-sc-executor = { git = "https://github.com/paritytech/substrate", features = [
-	"wasmtime"
-], branch = "polkadot-v0.9.12" }
-sc-service = { git = "https://github.com/paritytech/substrate", features = [
-	"wasmtime"
-], branch = "polkadot-v0.9.12" }
-sp-trie = { git = "https://github.com/paritytech/substrate", features = [
-	"memory-tracker"
-], branch = "polkadot-v0.9.12" }
+] }
+sc-service = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.12", default-features = false, features = [
+	"wasmtime",
+] }
+sp-trie = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.12", default-features = false, features = [
+	"memory-tracker",
+] }
 
 [dependencies]
 log = { version = "0.4.14", default-features = false }
