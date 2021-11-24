@@ -2,7 +2,12 @@ FROM ubuntu
 
 USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends cmake pkg-config libssl-dev git clang build-essential curl ca-certificates
+    && apt-get -y install --no-install-recommends cmake pkg-config libssl-dev git clang build-essential curl ca-certificates gnupg \
+    && curl -L https://deb.nodesource.com/setup_16.x | bash \
+    && apt-get update -y \
+    && apt-get -y install nodejs \
+    && npm install -g yarn \
+    && yarn global add @polkadot/api-cli
 
 RUN useradd -ms /bin/bash codespace
 USER codespace
