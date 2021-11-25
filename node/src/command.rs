@@ -208,7 +208,7 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
     fn impl_name() -> String {
-        "Polkadot collator".into()
+        "nodle collator".into()
     }
 
     fn impl_version() -> String {
