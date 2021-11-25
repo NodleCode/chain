@@ -14,5 +14,8 @@ USER codespace
 WORKDIR /workspace
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
+COPY ./scripts/init.sh /setup.sh
+RUN /setup.sh
+
 COPY ./.devcontainer/init.sh /init.sh
 ENTRYPOINT [ "/init.sh" ]
