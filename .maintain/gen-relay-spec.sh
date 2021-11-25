@@ -1,0 +1,1 @@
+docker run --rm -it parity/polkadot build-spec --raw --chain rococo-local --disable-default-bootnode --log error > .maintain/relay.json
