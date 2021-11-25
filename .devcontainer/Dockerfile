@@ -12,10 +12,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN useradd -ms /bin/bash codespace
 USER codespace
 WORKDIR /workspace
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-
 COPY ./scripts/init.sh /setup.sh
-RUN /setup.sh
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
+    && export PATH=$PATH:$HOME/.cargo/bin \
+    && /setup.sh
 
 COPY ./.devcontainer/init.sh /init.sh
 ENTRYPOINT [ "/init.sh" ]
