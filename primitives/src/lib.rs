@@ -20,10 +20,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub mod currency;
-pub mod network;
-pub mod tokens;
-
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
@@ -64,8 +60,6 @@ pub type Hash = sp_core::H256;
 /// `u64` is enough to represent a duration of half a billion years, when the
 /// time scale is milliseconds.
 pub type Timestamp = u64;
-
-pub type CurrencyId = u32;
 
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;

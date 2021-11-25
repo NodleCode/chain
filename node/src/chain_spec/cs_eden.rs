@@ -17,12 +17,12 @@
  */
 
 use crate::chain_spec::{build_local_properties, get_account_id_from_seed, get_from_seed};
-use eden_runtime::{
-    constants::*, wasm_binary_unwrap, BalancesConfig, FinancialMembershipConfig, GenesisConfig,
-    ParachainInfoConfig, RootMembershipConfig, SessionConfig, SessionKeys, SudoConfig,
-    SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig,
-};
 use primitives::{AccountId, AuraId, Balance, BlockNumber, ParaId};
+use runtime_eden::{
+    constants::*, wasm_binary_unwrap, BalancesConfig, GenesisConfig, ParachainInfoConfig,
+    SessionConfig, SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig,
+    ValidatorsSetConfig, VestingConfig,
+};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -170,21 +170,9 @@ pub fn eden_genesis(
             members: roots.clone(),
             phantom: Default::default(),
         },
-        // Financial Committee
-        financial_committee: Default::default(),
-        financial_membership: FinancialMembershipConfig {
-            members: roots.clone(),
-            phantom: Default::default(),
-        },
         company_reserve: Default::default(),
         international_reserve: Default::default(),
         usa_reserve: Default::default(),
-        // Root Committee
-        root_committee: Default::default(),
-        root_membership: RootMembershipConfig {
-            members: roots.clone(),
-            phantom: Default::default(),
-        },
 
         // Allocations
         allocations_oracles: Default::default(),

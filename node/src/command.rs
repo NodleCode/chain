@@ -16,14 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use crate::cli_relaychain::RelayChainCli;
 use crate::service::MainExecutorDispatch;
 use crate::{
     chain_spec,
     cli::{Cli, Subcommand},
     service::{self},
-};
-use crate::{
-	cli_relaychain::{RelayChainCli}
 };
 use cumulus_client_service::genesis::generate_genesis_block;
 use parity_scale_codec::Encode;
@@ -43,52 +41,41 @@ const DEFAULT_PARA_ID: u32 = 1000;
 
 /// Can be called for a `Configuration` to check what node it belongs to.
 pub trait IdentifyChain {
-    /// Returns if this is a configuration for the `Main` node.
-    fn is_main_runtime(&self) -> bool;
-
     /// Returns if this is a configuration for the `Staking` node.
-    fn is_staking_runtime(&self) -> bool;
+    fn is_runtime_staking(&self) -> bool;
 
     /// Returns if this is a configuration for parachian.
-    fn is_parachain_runtime(&self) -> bool;
+    fn is_runtime_parachain(&self) -> bool;
 
     /// Returns if this is a configuration for the `Eden` runtime.
-    fn is_eden_runtime(&self) -> bool;
+    fn is_runtime_eden(&self) -> bool;
 }
 
 impl IdentifyChain for dyn sc_service::ChainSpec {
-    fn is_main_runtime(&self) -> bool {
-        self.id().to_lowercase().starts_with("main")
-    }
-
-    fn is_staking_runtime(&self) -> bool {
+    fn is_runtime_staking(&self) -> bool {
         self.id().to_lowercase().starts_with("staking")
     }
 
-    fn is_parachain_runtime(&self) -> bool {
+    fn is_runtime_parachain(&self) -> bool {
         self.id().to_lowercase().starts_with("para")
     }
 
-    fn is_eden_runtime(&self) -> bool {
+    fn is_runtime_eden(&self) -> bool {
         self.id().to_lowercase().starts_with("para_eden")
     }
 }
 
 impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
-    fn is_main_runtime(&self) -> bool {
-        <dyn sc_service::ChainSpec>::is_main_runtime(self)
+    fn is_runtime_staking(&self) -> bool {
+        <dyn sc_service::ChainSpec>::is_runtime_staking(self)
     }
 
-    fn is_staking_runtime(&self) -> bool {
-        <dyn sc_service::ChainSpec>::is_staking_runtime(self)
+    fn is_runtime_parachain(&self) -> bool {
+        <dyn sc_service::ChainSpec>::is_runtime_parachain(self)
     }
 
-    fn is_parachain_runtime(&self) -> bool {
-        <dyn sc_service::ChainSpec>::is_parachain_runtime(self)
-    }
-
-    fn is_eden_runtime(&self) -> bool {
-        <dyn sc_service::ChainSpec>::is_eden_runtime(self)
+    fn is_runtime_eden(&self) -> bool {
+        <dyn sc_service::ChainSpec>::is_runtime_eden(self)
     }
 }
 
@@ -107,53 +94,12 @@ fn load_spec(
         "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
         path => {
             let chain_spec = chain_spec::cs_main::ChainSpec::from_json_file(path.into())?;
-            if chain_spec.is_staking_runtime() {
-                Box::new(chain_spec::cs_staking::ChainSpec::from_json_file(
-                    std::path::PathBuf::from(path),
-                )?)
-            } else if chain_spec.is_eden_runtime() {
-                Box::new(chain_spec::cs_eden::ChainSpec::from_json_file(
-                    std::path::PathBuf::from(path),
-                )?)
-            } else {
-                Box::new(chain_spec::cs_main::ChainSpec::from_json_file(
-                    std::path::PathBuf::from(path),
-                )?)
-            }
-        }
-    })
-}
-
-/// Can be called for a `Configuration` to check what node it belongs to.
-pub trait IdentifyChain {
-    /// Returns if this is a configuration for the `Staking` node.
-    fn is_runtime_staking(&self) -> bool;
-}
-
-impl IdentifyChain for dyn sc_service::ChainSpec {
-    fn is_runtime_staking(&self) -> bool {
-        self.id().to_lowercase().starts_with("staking")
-    }
-}
-
-impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
-    fn is_runtime_staking(&self) -> bool {
-        <dyn sc_service::ChainSpec>::is_runtime_staking(self)
-    }
-}
-
-fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-    Ok(match id {
-        "dev" => Box::new(chain_spec::cs_main::development_config()),
-        "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
-        "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
-        "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
-        "" | "main" => Box::new(chain_spec::cs_main::main_config()),
-        "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
-        path => {
-            let chain_spec = chain_spec::cs_main::ChainSpec::from_json_file(path.into())?;
             if chain_spec.is_runtime_staking() {
                 Box::new(chain_spec::cs_staking::ChainSpec::from_json_file(
+                    std::path::PathBuf::from(path),
+                )?)
+            } else if chain_spec.is_runtime_eden() {
+                Box::new(chain_spec::cs_eden::ChainSpec::from_json_file(
                     std::path::PathBuf::from(path),
                 )?)
             } else {
@@ -196,12 +142,12 @@ impl SubstrateCli for Cli {
     }
 
     fn native_runtime_version(chain_spec: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-        if chain_spec.is_staking_runtime() {
-            &staking_runtime::VERSION
-        } else if chain_spec.is_eden_runtime() {
-            &eden_runtime::VERSION
+        if chain_spec.is_runtime_staking() {
+            &runtime_staking::VERSION
+        } else if chain_spec.is_runtime_eden() {
+            &runtime_eden::VERSION
         } else {
-            &main_runtime::VERSION
+            &runtime_main::VERSION
         }
     }
 }
@@ -492,16 +438,14 @@ pub fn run() -> Result<()> {
             let runner = cli.create_runner(&cli.run.normalize())?;
 
             runner.run_node_until_exit(|config| async move {
-                // log::info!("Cli args :: {:#?}", cli);
-
                 log::info!("Chain Spec :: {:#?}", config.chain_spec);
 
                 log::info!(
                     "Is ParaChain :: {:#?}",
-                    config.chain_spec.is_parachain_runtime()
+                    config.chain_spec.is_runtime_parachain()
                 );
 
-                if !config.chain_spec.is_parachain_runtime() {
+                if !config.chain_spec.is_runtime_parachain() {
                     log::info!("Entering Solo Chain");
 
                     match config.role {
