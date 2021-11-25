@@ -89,7 +89,6 @@ construct_runtime! {
 
         // Consensus
         Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 12,
-        ValidatorsSet: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 13,
         Poa: pallet_poa::{Pallet, Storage} = 14,
         Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 15,
         Aura: pallet_aura::{Pallet, Config<T>, Storage} = 16,
