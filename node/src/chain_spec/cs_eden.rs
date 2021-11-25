@@ -20,8 +20,7 @@ use crate::chain_spec::{build_local_properties, get_account_id_from_seed, get_fr
 use primitives::{AccountId, AuraId, Balance, BlockNumber, ParaId};
 use runtime_eden::{
     constants::*, wasm_binary_unwrap, BalancesConfig, GenesisConfig, ParachainInfoConfig,
-    SessionConfig, SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig,
-    ValidatorsSetConfig, VestingConfig,
+    SessionConfig, SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig, VestingConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -155,13 +154,6 @@ pub fn eden_genesis(
         aura_ext: Default::default(),
         parachain_system: Default::default(),
         parachain_info: ParachainInfoConfig { parachain_id: id },
-        validators_set: ValidatorsSetConfig {
-            members: invulnerables
-                .iter()
-                .map(|x| x.0.clone())
-                .collect::<Vec<_>>(),
-            phantom: Default::default(),
-        },
 
         // Governance
         // Technical Committee
