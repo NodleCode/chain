@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use sc_cli::{KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
-use std::{fmt, path::PathBuf};
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 /// An overarching CLI command definition.

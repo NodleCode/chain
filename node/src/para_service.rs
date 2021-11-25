@@ -44,7 +44,7 @@ use std::sync::Arc;
 use substrate_prometheus_endpoint::Registry;
 
 mod eden_executor {
-    pub use eden_runtime;
+    pub use runtime_eden;
 
     /// Native executor instance.
     pub struct EdenParachainRuntimeExecutor;
@@ -53,11 +53,11 @@ mod eden_executor {
         type ExtendHostFunctions = ();
 
         fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-            eden_runtime::api::dispatch(method, data)
+            runtime_eden::api::dispatch(method, data)
         }
 
         fn native_version() -> sc_executor::NativeVersion {
-            eden_runtime::native_version()
+            runtime_eden::native_version()
         }
     }
 }
@@ -372,7 +372,7 @@ pub fn eden_parachain_build_import_queue(
     client: Arc<
         TFullClient<
             Block,
-            eden_runtime::RuntimeApi,
+            runtime_eden::RuntimeApi,
             NativeElseWasmExecutor<EdenParachainRuntimeExecutor>,
         >,
     >,
@@ -384,7 +384,7 @@ pub fn eden_parachain_build_import_queue(
         Block,
         TFullClient<
             Block,
-            eden_runtime::RuntimeApi,
+            runtime_eden::RuntimeApi,
             NativeElseWasmExecutor<EdenParachainRuntimeExecutor>,
         >,
     >,
@@ -432,12 +432,12 @@ pub async fn start_eden_parachain_node(
     Arc<
         TFullClient<
             Block,
-            eden_runtime::RuntimeApi,
+            runtime_eden::RuntimeApi,
             NativeElseWasmExecutor<EdenParachainRuntimeExecutor>,
         >,
     >,
 )> {
-    start_node_impl::<eden_runtime::RuntimeApi, EdenParachainRuntimeExecutor, _, _, _>(
+    start_node_impl::<runtime_eden::RuntimeApi, EdenParachainRuntimeExecutor, _, _, _>(
         parachain_config,
         polkadot_config,
         id,

@@ -16,13 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{
-    constants, Call, Event, FinancialCommittee, Origin, OriginCaller, RootCommittee, Runtime,
-    Scheduler, TechnicalCommittee,
-};
+use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
 use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
-use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 
 // Shared parameters with all collectives / committees
@@ -47,77 +43,13 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 
 impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type AddOrigin = frame_system::EnsureRoot<AccountId>;
+    type RemoveOrigin = frame_system::EnsureRoot<AccountId>;
+    type SwapOrigin = frame_system::EnsureRoot<AccountId>;
+    type ResetOrigin = frame_system::EnsureRoot<AccountId>;
+    type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
-    type MaxMembers = MaxMembers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-}
-
-// --- Financial committee
-pub type FinancialCollective = pallet_collective::Instance3;
-impl pallet_collective::Config<FinancialCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
-    type MotionDuration = MotionDuration;
-    type MaxProposals = MaxProposals;
-    type WeightInfo = ();
-    type MaxMembers = MaxMembers;
-    type DefaultVote = pallet_collective::PrimeDefaultVote;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
-    type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type MembershipInitialized = FinancialCommittee;
-    type MembershipChanged = FinancialCommittee;
-    type MaxMembers = MaxMembers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-}
-
-// --- Root committee
-pub type RootCollective = pallet_collective::Instance4;
-impl pallet_collective::Config<RootCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
-    type MotionDuration = MotionDuration;
-    type MaxProposals = MaxProposals;
-    type WeightInfo = ();
-    type MaxMembers = MaxMembers;
-    type DefaultVote = pallet_collective::PrimeDefaultVote;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance4> for Runtime {
-    type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type MembershipInitialized = RootCommittee;
-    type MembershipChanged = RootCommittee;
     type MaxMembers = MaxMembers;
     type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
@@ -129,8 +61,7 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type ExternalOrigin = frame_system::EnsureRoot<AccountId>;
     type Call = Call;
     type PalletId = CompanyReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -143,8 +74,7 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type ExternalOrigin = frame_system::EnsureRoot<AccountId>;
     type Call = Call;
     type PalletId = InternationalReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -157,28 +87,10 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type ExternalOrigin = frame_system::EnsureRoot<AccountId>;
     type Call = Call;
     type PalletId = UsaReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    pub const AmendmentDelay: BlockNumber = 2 * constants::DAYS;
-}
-
-impl pallet_amendments::Config for Runtime {
-    type Event = Event;
-    type Amendment = Call;
-    type Scheduler = Scheduler;
-    type SubmissionOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type VetoOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type Delay = AmendmentDelay;
-    type PalletsOrigin = OriginCaller;
-    type WeightInfo = pallet_amendments::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_sudo::Config for Runtime {

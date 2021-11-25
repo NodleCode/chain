@@ -36,7 +36,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 
 use frame_support::construct_runtime;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, CertificateId, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Index, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -81,46 +81,39 @@ construct_runtime! {
         // Governance
         TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 5,
         TechnicalMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 6,
-        FinancialCommittee: pallet_collective::<Instance3>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 7,
-        FinancialMembership: pallet_membership::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>} = 8,
-        RootCommittee: pallet_collective::<Instance4>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 9,
-        RootMembership: pallet_membership::<Instance4>::{Pallet, Call, Storage, Event<T>, Config<T>} = 10,
-        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 11,
-        Amendments: pallet_amendments::{Pallet, Call, Storage, Event<T>} = 12,
-        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 14,
-        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 15,
-        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 16,
-        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 17,
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 7,
+        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 8,
+        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 9,
+        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 10,
+        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
 
         // Consensus
-        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 18,
-        ValidatorsSet: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 19,
-        Poa: pallet_poa::{Pallet, Storage} = 20,
-        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 21,
-        Aura: pallet_aura::{Pallet, Config<T>, Storage} = 22,
-        AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 23,
+        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 12,
+        ValidatorsSet: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 13,
+        Poa: pallet_poa::{Pallet, Storage} = 14,
+        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 15,
+        Aura: pallet_aura::{Pallet, Config<T>, Storage} = 16,
+        AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 17,
 
         // Parachain
-        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 24,
-        ParachainInfo: parachain_info::{Pallet, Storage, Config} = 25,
+        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 18,
+        ParachainInfo: parachain_info::{Pallet, Storage, Config} = 19,
         // XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 26,
         // DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 27,
         // PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 28,
-        CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 29,
+        CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 20,
 
         // Neat things
-        Utility: pallet_utility::{Pallet, Call, Event} = 30,
-        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 31,
+        Utility: pallet_utility::{Pallet, Call, Event} = 21,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 22,
 
         // Nodle Stack
-        PkiTcr: pallet_tcr::<Instance1>::{Pallet, Call, Storage, Event<T>} = 33,
-        PkiRootOfTrust: pallet_root_of_trust::{Pallet, Call, Storage, Event<T>} = 34,
-        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 35,
-        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 36,
-        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 37,
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 23,
+        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 24,
+        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 25,
 
         // Maybe not permanent
-        Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 38,
+        Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
     }
 }
 
@@ -258,16 +251,6 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, CertificateId> for Runtime {
-        fn is_root_certificate_valid(cert: &CertificateId) -> bool {
-            PkiRootOfTrust::is_root_certificate_valid(cert)
-        }
-
-        fn is_child_certificate_valid(root: &CertificateId, child: &CertificateId) -> bool {
-            PkiRootOfTrust::is_child_certificate_valid(root, child)
-        }
-    }
-
     impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
         fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
             ParachainSystem::collect_collation_info()
@@ -294,18 +277,12 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
             list_benchmark!(list, extra, pallet_timestamp, Timestamp);
             list_benchmark!(list, extra, pallet_balances, Balances);
-            list_benchmark!(list, extra, pallet_babe, Babe);
-            list_benchmark!(list, extra, pallet_grandpa, Grandpa);
-            list_benchmark!(list, extra, pallet_im_online, ImOnline);
             list_benchmark!(list, extra, pallet_collective, TechnicalCommittee);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
-            list_benchmark!(list, extra, pallet_amendments, Amendments);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
             list_benchmark!(list, extra, pallet_grants, Vesting);
             list_benchmark!(list, extra, pallet_utility, Utility);
-            list_benchmark!(list, extra, pallet_tcr, PkiTcr);
-            list_benchmark!(list, extra, pallet_root_of_trust, PkiRootOfTrust);
             list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
             list_benchmark!(list, extra, pallet_allocations, Allocations);
 
@@ -334,18 +311,12 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_balances, Balances);
-            add_benchmark!(params, batches, pallet_babe, Babe);
-            add_benchmark!(params, batches, pallet_grandpa, Grandpa);
-            add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
-            add_benchmark!(params, batches, pallet_amendments, Amendments);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_utility, Utility);
-            add_benchmark!(params, batches, pallet_tcr, PkiTcr);
-            add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
 

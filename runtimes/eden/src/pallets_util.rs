@@ -15,22 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use crate::{
-    constants, pallets_governance::FinancialCollective, Balances, Call, Event, Origin,
-    OriginCaller, Runtime,
-};
+use crate::{constants, Balances, Call, Event, Origin, OriginCaller, Runtime};
 use frame_support::{parameter_types, weights::Weight};
 use primitives::{AccountId, Balance};
-use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 
 impl pallet_grants::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
-    type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type ForceOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+    type CancelOrigin = frame_system::EnsureRoot<AccountId>;
+    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
     type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
 }
 
