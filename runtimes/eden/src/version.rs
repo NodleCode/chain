@@ -49,7 +49,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
     impl_version: 0,
 
     /// Used for hardware wallets. This typically happens when `SignedExtra` changes.
-    transaction_version: 3,
+    transaction_version: 1,
 
     apis: RUNTIME_API_VERSIONS,
 };
