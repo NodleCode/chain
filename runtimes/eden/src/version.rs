@@ -28,8 +28,8 @@ use sp_version::RuntimeVersion;
 /// In particular: bug fixes should result in an increment of `spec_version` and possibly `authoring_version`,
 /// absolutely not `impl_version` since they change the semantics of the runtime.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("nodle-chain"),
-    impl_name: create_runtime_str!("nodle-chain"),
+    spec_name: create_runtime_str!("nodle-para"),
+    impl_name: create_runtime_str!("nodle-para"),
 
     /// `authoring_version` is the version of the authorship interface. An authoring node
     /// will not attempt to author blocks unless this is equal to its native runtime.
