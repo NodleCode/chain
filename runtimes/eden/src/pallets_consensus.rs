@@ -16,13 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{
-    constants, pallets_governance::MaxMembers, pallets_governance::TechnicalCollective, Aura,
-    Event, Poa, Runtime,
-};
+use crate::{constants, Aura, Event, Poa, Runtime};
 use frame_support::parameter_types;
 use primitives::{AccountId, AuraId};
-use sp_core::u32_trait::{_1, _2};
 use sp_runtime::{impl_opaque_keys, traits::ConvertInto};
 use sp_std::prelude::*;
 
