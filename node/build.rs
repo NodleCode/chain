@@ -41,7 +41,7 @@ fn build_shell_completion() {
     }
 }
 
-// /// Build the shell auto-completion for a given Shell
+/// Build the shell auto-completion for a given Shell
 fn build_completion(shell: &Shell) {
     let outdir = match env::var_os("OUT_DIR") {
         None => return, // undefined, skip
