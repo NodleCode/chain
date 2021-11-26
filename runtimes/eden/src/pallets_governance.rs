@@ -16,43 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
+use crate::{Call, Event, Runtime};
 use frame_support::{parameter_types, PalletId};
-use primitives::{AccountId, BlockNumber};
+use primitives::{AccountId};
 pub use sp_runtime::{Perbill, Perquintill};
-
-// Shared parameters with all collectives / committees
-parameter_types! {
-    pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
-    pub const MaxProposals: u32 = 100;
-    pub const MaxMembers: u32 = 50;
-}
-
-// --- Technical committee
-pub type TechnicalCollective = pallet_collective::Instance2;
-impl pallet_collective::Config<TechnicalCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
-    type MotionDuration = MotionDuration;
-    type MaxProposals = MaxProposals;
-    type WeightInfo = ();
-    type MaxMembers = MaxMembers;
-    type DefaultVote = pallet_collective::PrimeDefaultVote;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
-    type Event = Event;
-    type AddOrigin = frame_system::EnsureRoot<AccountId>;
-    type RemoveOrigin = frame_system::EnsureRoot<AccountId>;
-    type SwapOrigin = frame_system::EnsureRoot<AccountId>;
-    type ResetOrigin = frame_system::EnsureRoot<AccountId>;
-    type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
-    type MembershipInitialized = TechnicalCommittee;
-    type MembershipChanged = TechnicalCommittee;
-    type MaxMembers = MaxMembers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-}
 
 parameter_types! {
     pub const CompanyReservePalletId: PalletId = PalletId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
