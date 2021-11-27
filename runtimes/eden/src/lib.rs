@@ -107,9 +107,9 @@ construct_runtime! {
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 23,
         Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 24,
-		AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 25,
+        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 25,
 
-		// Maybe not permanent
+        // Maybe not permanent
         Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
     }
 }

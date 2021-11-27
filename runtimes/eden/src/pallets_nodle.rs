@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use crate::{
-    Balances, CompanyReserve, Event, Runtime, Allocations,
-};
+use crate::{Allocations, Balances, CompanyReserve, Event, Runtime};
 use frame_support::parameter_types;
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
@@ -54,7 +52,7 @@ impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
     type SwapOrigin = frame_system::EnsureRoot<AccountId>;
     type ResetOrigin = frame_system::EnsureRoot<AccountId>;
     type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
-	type MembershipInitialized = Allocations;
+    type MembershipInitialized = Allocations;
     type MembershipChanged = Allocations;
     type MaxMembers = MaxMembers;
     type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
