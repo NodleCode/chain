@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-    Balances, CompanyReserve, Event, Runtime,
+    Balances, CompanyReserve, Event, Runtime, Allocations,
 };
 use frame_support::parameter_types;
 use primitives::{AccountId, Balance};
@@ -41,4 +41,21 @@ impl pallet_allocations::Config for Runtime {
     type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
     type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
     type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+    pub const MaxMembers: u32 = 50;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
+    type Event = Event;
+    type AddOrigin = frame_system::EnsureRoot<AccountId>;
+    type RemoveOrigin = frame_system::EnsureRoot<AccountId>;
+    type SwapOrigin = frame_system::EnsureRoot<AccountId>;
+    type ResetOrigin = frame_system::EnsureRoot<AccountId>;
+    type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
+	type MembershipInitialized = Allocations;
+    type MembershipChanged = Allocations;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }

@@ -159,6 +159,9 @@ pub fn eden_genesis(
         company_reserve: Default::default(),
         international_reserve: Default::default(),
         usa_reserve: Default::default(),
+
+        // Allocations
+        allocations_oracles: Default::default(),
     }
 }
 
