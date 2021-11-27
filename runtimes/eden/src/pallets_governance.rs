@@ -18,7 +18,7 @@
 
 use crate::{Call, Event, Runtime};
 use frame_support::{parameter_types, PalletId};
-use primitives::{AccountId};
+use primitives::AccountId;
 pub use sp_runtime::{Perbill, Perquintill};
 
 parameter_types! {
