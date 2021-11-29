@@ -11,7 +11,7 @@ done
 
 # register and onboard the parachain on the relay chain
 echo "Registering parachain (should take about 2 minutes)..."
-polkadot-js-api --ws ws://node-polkadot-alice:9944 --seed "//Alice" --sudo tx.parasSudoWrapper.sudoScheduleParaInitialize 2000 '["`cat .maintain/head.hex`", "`cat .maintain/wasm.hex`", true]'
+polkadot-js-api --ws ws://node-polkadot-alice:9944 --seed "//Alice" --sudo tx.parasSudoWrapper.sudoScheduleParaInitialize 2000 "[\"$(cat .maintain/head.hex)\", \"`cat .maintain/wasm.hex`\", true]"
 
 # keep running for vscode
 echo "Ready for battle"
