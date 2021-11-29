@@ -23,7 +23,7 @@ COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
-	apt-get install -y curl netcat
+	DEBIAN_FRONTEND=noninteractive apt-get install -y curl netcat
 
 RUN mv /usr/share/ca* /tmp && \
 	rm -rf /usr/share/*  && \
