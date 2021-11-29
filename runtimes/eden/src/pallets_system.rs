@@ -67,7 +67,6 @@ impl frame_system::Config for Runtime {
     type OnKilledAccount = ();
     type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
     type SS58Prefix = SS58Prefix;
-    /// The set code logic, just the default since we're not a parachain.
     type OnSetCode = cumulus_pallet_parachain_system::ParachainSetCode<Self>;
 }
 
