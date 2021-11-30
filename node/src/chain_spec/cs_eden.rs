@@ -171,7 +171,7 @@ pub fn eden_genesis(
     }
 }
 
-fn development_config_genesis() -> GenesisConfig {
+fn development_config_genesis(id: ParaId) -> GenesisConfig {
     eden_genesis(
         get_account_id_from_seed::<sr25519::Public>("Alice"),
         vec![
@@ -193,7 +193,7 @@ fn development_config_genesis() -> GenesisConfig {
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
         None,
         None,
-        1000.into(),
+        id.into(),
     )
 }
 
@@ -203,7 +203,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
         "ParaChain Eden Development",
         "para_eden_dev",
         ChainType::Local,
-        development_config_genesis,
+        move || development_config_genesis(id),
         vec![],
         None,
         Some("nodl"),
