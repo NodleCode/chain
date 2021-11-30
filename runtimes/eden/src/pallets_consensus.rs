@@ -62,7 +62,7 @@ parameter_types! {
     pub const MaxMembers: u32 = 50;
 }
 
-impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
+impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type Event = Event;
     type AddOrigin = frame_system::EnsureRoot<AccountId>;
     type RemoveOrigin = frame_system::EnsureRoot<AccountId>;

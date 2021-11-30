@@ -87,7 +87,7 @@ construct_runtime! {
 
         // Consensus
         Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 12,
-        ValidatorsSet: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 13,
+        ValidatorsSet: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 13,
         Poa: pallet_poa::{Pallet, Storage} = 14,
         Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 15,
         Aura: pallet_aura::{Pallet, Config<T>, Storage} = 16,
@@ -108,7 +108,7 @@ construct_runtime! {
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 23,
         Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 24,
-        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 25,
+        AllocationsOracles: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 25,
 
         // Maybe not permanent
         Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
