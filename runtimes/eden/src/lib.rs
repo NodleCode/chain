@@ -79,39 +79,39 @@ construct_runtime! {
         RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 4,
 
         // Governance
-        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 7,
-        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 8,
-        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 9,
-        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 10,
-        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 10,
+        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
+        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 12,
+        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
+        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 14,
 
         // Consensus
-        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 12,
-        ValidatorsSet: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 13,
-        Poa: pallet_poa::{Pallet, Storage} = 14,
-        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 15,
-        Aura: pallet_aura::{Pallet, Config<T>, Storage} = 16,
-        AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 17,
+        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 20,
+        ValidatorsSet: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 21,
+        Poa: pallet_poa::{Pallet, Storage} = 22,
+        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
+        Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
+        AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
 
         // Parachain
-        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 18,
-        ParachainInfo: parachain_info::{Pallet, Storage, Config} = 19,
-        // XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 26,
-        // DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 27,
-        // PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 28,
-        CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 20,
+        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 30,
+        ParachainInfo: parachain_info::{Pallet, Storage, Config} = 31,
+        CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 32,
+        // XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
+        // DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
+        // PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
 
         // Neat things
-        Utility: pallet_utility::{Pallet, Call, Event} = 21,
-        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 22,
+        Utility: pallet_utility::{Pallet, Call, Event} = 40,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 41,
 
         // Nodle Stack
-        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 23,
-        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 24,
-        AllocationsOracles: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 25,
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 50,
+        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 51,
+        AllocationsOracles: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 52,
 
-        // Maybe not permanent
-        Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
+        // Temporary
+        Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 60,
     }
 }
 
