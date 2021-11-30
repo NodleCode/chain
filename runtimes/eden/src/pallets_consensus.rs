@@ -59,6 +59,23 @@ impl pallet_session::Config for Runtime {
 impl pallet_poa::Config for Runtime {}
 
 parameter_types! {
+    pub const MaxMembers: u32 = 50;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
+    type Event = Event;
+    type AddOrigin = frame_system::EnsureRoot<AccountId>;
+    type RemoveOrigin = frame_system::EnsureRoot<AccountId>;
+    type SwapOrigin = frame_system::EnsureRoot<AccountId>;
+    type ResetOrigin = frame_system::EnsureRoot<AccountId>;
+    type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
+    type MembershipInitialized = Poa;
+    type MembershipChanged = Poa;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
     pub const MaxAuthorities: u32 = 100_000;
 }
 

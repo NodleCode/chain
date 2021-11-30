@@ -20,7 +20,7 @@ use crate::chain_spec::{build_local_properties, get_account_id_from_seed, get_fr
 use primitives::{AccountId, AuraId, Balance, BlockNumber, ParaId};
 use runtime_eden::{
     constants::*, wasm_binary_unwrap, BalancesConfig, GenesisConfig, ParachainInfoConfig,
-    SessionConfig, SessionKeys, SudoConfig, SystemConfig, VestingConfig,
+    SessionConfig, SessionKeys, SudoConfig, SystemConfig, ValidatorsSetConfig, VestingConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -96,7 +96,6 @@ pub fn eden_genesis(
     });
 
     const ENDOWMENT: Balance = 10_000 * NODL;
-    //const STASH: Balance = ENDOWMENT / 1_000;
 
     GenesisConfig {
         // Core
@@ -137,6 +136,13 @@ pub fn eden_genesis(
         },
 
         // Consensus
+        validators_set: ValidatorsSetConfig {
+            members: invulnerables
+                .iter()
+                .map(|x| x.0.clone())
+                .collect::<Vec<_>>(),
+            phantom: Default::default(),
+        },
         session: SessionConfig {
             keys: invulnerables
                 .clone()
