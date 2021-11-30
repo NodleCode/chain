@@ -29,7 +29,7 @@ pub use sp_runtime::{Perbill, Perquintill};
 use static_assertions::const_assert;
 
 /// Money matters.
-pub const NODL: Balance = 1_000_000_000_000;
+pub const NODL: Balance = 100_000_000_000;
 pub const DOLLARS: Balance = NODL / 100;
 pub const CENTS: Balance = DOLLARS / 100;
 pub const MILLICENTS: Balance = CENTS / 1_000;
