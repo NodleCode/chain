@@ -17,10 +17,10 @@
  */
 
 use crate::chain_spec::{build_local_properties, get_account_id_from_seed, get_from_seed};
-use primitives::{AccountId, AuraId, Balance, BlockNumber, ParaId};
+use primitives::{AccountId, AuraId, Balance, ParaId};
 use runtime_eden::{
     constants::*, wasm_binary_unwrap, BalancesConfig, GenesisConfig, ParachainInfoConfig,
-    SessionConfig, SessionKeys, SudoConfig, SystemConfig, ValidatorsSetConfig, VestingConfig,
+    SessionConfig, SessionKeys, SudoConfig, SystemConfig, ValidatorsSetConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -60,11 +60,8 @@ impl Extensions {
 /// Helper function to create GenesisConfig for testing
 pub fn eden_genesis(
     root_key: AccountId,
-    invulnerables: Vec<(AccountId, AuraId)>,
-    roots: Vec<AccountId>,
-    oracles: Vec<AccountId>,
+    collators: Vec<(AccountId, AuraId)>,
     endowed_accounts: Option<Vec<AccountId>>,
-    grants: Option<Vec<(AccountId, Vec<(BlockNumber, BlockNumber, u32, Balance)>)>>,
     id: ParaId,
 ) -> GenesisConfig {
     let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
@@ -82,19 +79,6 @@ pub fn eden_genesis(
         ]
     });
 
-    let vested_grants = grants.unwrap_or_else(|| {
-        vec![(
-            // Ferdie has a network launch grant:
-            // 1. after 1000 blocks a cliff of 1000 NODL unlocks
-            // 2. for the next 100000 blocks a grant of 100 NODL unlocks every 1000 blocks
-            get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-            vec![
-                (1_000, 1, 1, 1000 * NODL),      // Cliff
-                (2_000, 1_000, 100, 100 * NODL), // Vesting
-            ],
-        )]
-    });
-
     const ENDOWMENT: Balance = 10_000 * NODL;
 
     GenesisConfig {
@@ -108,43 +92,18 @@ pub fn eden_genesis(
                 .iter()
                 .cloned()
                 .map(|k| (k, ENDOWMENT))
-                .chain([(root_key.clone(), ENDOWMENT)].to_vec())
-                .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
-                .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
-                .fold(vec![], |mut acc, (account, endowment)| {
-                    if acc
-                        .iter()
-                        .find(|(who, _endowment)| who == &account)
-                        .is_some()
-                    {
-                        // Increase endowment
-                        acc = acc
-                            .iter()
-                            .cloned()
-                            .map(|(cur_account, cur_endowment)| (cur_account, cur_endowment))
-                            .collect::<Vec<(AccountId, Balance)>>();
-                    } else {
-                        acc.push((account, endowment));
-                    }
-
-                    acc
-                }),
+                .collect(),
         },
         sudo: SudoConfig { key: root_key },
-        vesting: VestingConfig {
-            vesting: vested_grants,
-        },
+        vesting: Default::default(),
 
         // Consensus
         validators_set: ValidatorsSetConfig {
-            members: invulnerables
-                .iter()
-                .map(|x| x.0.clone())
-                .collect::<Vec<_>>(),
+            members: collators.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
             phantom: Default::default(),
         },
         session: SessionConfig {
-            keys: invulnerables
+            keys: collators
                 .clone()
                 .into_iter()
                 .map(|(acc, aura)| {
@@ -184,14 +143,6 @@ fn development_config_genesis(id: ParaId) -> GenesisConfig {
                 get_collator_keys_from_seed("Bob"),
             ),
         ],
-        vec![
-            get_account_id_from_seed::<sr25519::Public>("Alice"),
-            get_account_id_from_seed::<sr25519::Public>("Bob"),
-            get_account_id_from_seed::<sr25519::Public>("Charlie"),
-            get_account_id_from_seed::<sr25519::Public>("Dave"),
-        ],
-        vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
-        None,
         None,
         id.into(),
     )
