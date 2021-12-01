@@ -17,12 +17,16 @@
  */
 
 mod chain_spec;
+mod cli_relaychain;
 #[macro_use]
 mod service;
 mod cli;
 mod client;
 mod command;
 mod rpc;
+#[macro_use]
+mod para_service;
+mod para_rpc;
 
 fn main() -> sc_cli::Result<()> {
     command::run()

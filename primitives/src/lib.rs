@@ -26,6 +26,11 @@ use sp_runtime::{
     MultiSignature, OpaqueExtrinsic,
 };
 
+pub use polkadot_parachain::primitives::{
+    DmpMessageHandler, Id as ParaId, UpwardMessage, ValidationParams, XcmpMessageFormat,
+    XcmpMessageHandler,
+};
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -60,10 +65,13 @@ pub type Timestamp = u64;
 pub type DigestItem = generic::DigestItem<Hash>;
 /// Header type.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+
 /// Block type.
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
+
+pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 
 /// App-specific crypto used for reporting equivocation/misbehavior in BABE and
 /// GRANDPA. Any rewards for misbehavior reporting will be paid out to this
