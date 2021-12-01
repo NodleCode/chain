@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RelayStateSproofBuilder","Builds a sproof (portmanteau of ‘spoof’ and ‘proof’) of the relay chain state."]]});

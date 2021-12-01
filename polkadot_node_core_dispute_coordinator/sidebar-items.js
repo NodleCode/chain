@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["DisputeStatus","The status of dispute. This is a state machine which can be altered by the helper methods."],["Error",""]],"struct":[["Config","Configuration for the dispute coordinator subsystem."],["DisputeCoordinatorSubsystem","An implementation of the dispute coordinator subsystem."]]});

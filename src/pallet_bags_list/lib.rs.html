@@ -1,0 +1,616 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;d76f399&#x2F;frame&#x2F;bags-list&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pallet_bags_list/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+</pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
+
+<span class="comment">// Copyright (C) 2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
+
+<span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="comment">// you may not use this file except in compliance with the License.</span>
+<span class="comment">// You may obtain a copy of the License at</span>
+<span class="comment">//</span>
+<span class="comment">// 	http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="comment">//</span>
+<span class="comment">// Unless required by applicable law or agreed to in writing, software</span>
+<span class="comment">// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="comment">// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="comment">// See the License for the specific language governing permissions and</span>
+<span class="comment">// limitations under the License.</span>
+
+<span class="doccomment">//! # Bags-List Pallet</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! A semi-sorted list, where items hold an `AccountId` based on some `VoteWeight`. The `AccountId`</span>
+<span class="doccomment">//! (`id` for short) might be synonym to a `voter` or `nominator` in some context, and `VoteWeight`</span>
+<span class="doccomment">//! signifies the chance of each id being included in the final [`VoteWeightProvider::iter`].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! It implements [`sp_election_provider_support::SortedListProvider`] to provide a semi-sorted list</span>
+<span class="doccomment">//! of accounts to another pallet. It needs some other pallet to give it some information about the</span>
+<span class="doccomment">//! weights of accounts via [`sp_election_provider_support::VoteWeightProvider`].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This pallet is not configurable at genesis. Whoever uses it should call appropriate functions of</span>
+<span class="doccomment">//! the `SortedListProvider` (e.g. `on_insert`, or `regenerate`) at their genesis.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Goals</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The data structure exposed by this pallet aims to be optimized for:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! - insertions and removals.</span>
+<span class="doccomment">//! - iteration over the top* N items by weight, where the precise ordering of items doesn&#39;t</span>
+<span class="doccomment">//!   particularly matter.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Details</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! - items are kept in bags, which are delineated by their range of weight (See [`BagThresholds`]).</span>
+<span class="doccomment">//! - for iteration, bags are chained together from highest to lowest and elements within the bag</span>
+<span class="doccomment">//!   are iterated from head to tail.</span>
+<span class="doccomment">//! - items within a bag are iterated in order of insertion. Thus removing an item and re-inserting</span>
+<span class="doccomment">//!   it will worsen its position in list iteration; this reduces incentives for some types of spam</span>
+<span class="doccomment">//!   that involve consistently removing and inserting for better position. Further, ordering</span>
+<span class="doccomment">//!   granularity is thus dictated by range between each bag threshold.</span>
+<span class="doccomment">//! - if an item&#39;s weight changes to a value no longer within the range of its current bag the</span>
+<span class="doccomment">//!   item&#39;s position will need to be updated by an external actor with rebag (update), or removal</span>
+<span class="doccomment">//!   and insertion.</span>
+
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
+
+<span class="kw">use</span> <span class="ident">frame_election_provider_support</span>::{<span class="ident">SortedListProvider</span>, <span class="ident">VoteWeight</span>, <span class="ident">VoteWeightProvider</span>};
+<span class="kw">use</span> <span class="ident">frame_system::ensure_signed</span>;
+<span class="kw">use</span> <span class="ident">sp_std::prelude</span>::<span class="kw-2">*</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">mod</span> <span class="ident">benchmarks</span>;
+
+<span class="kw">mod</span> <span class="ident">list</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">mock</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">weights</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">weights::WeightInfo</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">list::Error</span>;
+<span class="kw">use</span> <span class="ident">list::List</span>;
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">LOG_TARGET</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;runtime::bags_list&quot;</span>;
+
+<span class="comment">// syntactic sugar for logging.</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules!</span> <span class="ident">log</span> {
+	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">level</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">patter</span>:<span class="ident">expr</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">values</span>:<span class="ident">expr</span>)<span class="op">*</span> $(,)<span class="question-mark">?</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">log</span>::<span class="macro-nonterminal">$</span><span class="macro">level!</span>(
+			<span class="macro-nonterminal">target</span>: <span class="ident"><span class="kw">crate</span>::LOG_TARGET</span>,
+			<span class="macro">concat!</span>(<span class="string">&quot;[{:?}] 👜&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">patter</span>), <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>() $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">values</span>)<span class="op">*</span>
+		)
+	};
+}
+
+<span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
+	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
+	<span class="attribute">#[<span class="ident">pallet::generate_storage_info</span>]</span>
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">_</span>);
+
+	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
+	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">frame_system::Config</span> {
+		<span class="doccomment">/// The overarching event type.</span>
+		<span class="kw">type</span> <span class="ident">Event</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IsType</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::Event</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// Weight information for extrinsics in this pallet.</span>
+		<span class="kw">type</span> <span class="ident">WeightInfo</span>: <span class="ident">weights::WeightInfo</span>;
+
+		<span class="doccomment">/// Something that provides the weights of ids.</span>
+		<span class="kw">type</span> <span class="ident">VoteWeightProvider</span>: <span class="ident">VoteWeightProvider</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The list of thresholds separating the various bags.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Ids are separated into unsorted bags according to their vote weight. This specifies the</span>
+		<span class="doccomment">/// thresholds separating the bags. An id&#39;s bag is the largest bag for which the id&#39;s weight</span>
+		<span class="doccomment">/// is less than or equal to its upper threshold.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// When ids are iterated, higher bags are iterated completely before lower bags. This means</span>
+		<span class="doccomment">/// that iteration is _semi-sorted_: ids of higher weight tend to come before ids of lower</span>
+		<span class="doccomment">/// weight, but peer ids within a particular bag are sorted in insertion order.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # Expressing the constant</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// This constant must be sorted in strictly increasing order. Duplicate items are not</span>
+		<span class="doccomment">/// permitted.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// There is an implied upper limit of `VoteWeight::MAX`; that value does not need to be</span>
+		<span class="doccomment">/// specified within the bag. For any two threshold lists, if one ends with</span>
+		<span class="doccomment">/// `VoteWeight::MAX`, the other one does not, and they are otherwise equal, the two lists</span>
+		<span class="doccomment">/// will behave identically.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # Calculation</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// It is recommended to generate the set of thresholds in a geometric series, such that</span>
+		<span class="doccomment">/// there exists some constant ratio such that `threshold[k + 1] == (threshold[k] *</span>
+		<span class="doccomment">/// constant_ratio).max(threshold[k] + 1)` for all `k`.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The helpers in the `/utils/frame/generate-bags` module can simplify this calculation.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # Examples</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// - If `BagThresholds::get().is_empty()`, then all ids are put into the same bag, and</span>
+		<span class="doccomment">///   iteration is strictly in insertion order.</span>
+		<span class="doccomment">/// - If `BagThresholds::get().len() == 64`, and the thresholds are determined according to</span>
+		<span class="doccomment">///   the procedure given above, then the constant ratio is equal to 2.</span>
+		<span class="doccomment">/// - If `BagThresholds::get().len() == 200`, and the thresholds are determined according to</span>
+		<span class="doccomment">///   the procedure given above, then the constant ratio is approximately equal to 1.248.</span>
+		<span class="doccomment">/// - If the threshold list begins `[1, 2, 3, ...]`, then an id with weight 0 or 1 will fall</span>
+		<span class="doccomment">///   into bag 0, an id with weight 2 will fall into bag 1, etc.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # Migration</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// In the event that this list ever changes, a copy of the old bags list must be retained.</span>
+		<span class="doccomment">/// With that `List::migrate` can be called, which will perform the appropriate migration.</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">BagThresholds</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">VoteWeight</span>]<span class="op">&gt;</span>;
+	}
+
+	<span class="doccomment">/// How many ids are registered.</span>
+	<span class="comment">// NOTE: This is merely a counter for `ListNodes`. It should someday be replaced by the</span>
+	<span class="comment">// `CountedMaop` storage.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">CounterForListNodes</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">u32</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// A single node, within some bag.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Nodes store links forward and back within their respective bags.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">ListNodes</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Twox64Concat</span>, <span class="ident">T::AccountId</span>, <span class="ident">list::Node</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// A bag stored in storage.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Stores a `Bag` struct, which stores head and tail pointers to itself.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">ListBags</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Twox64Concat</span>, <span class="ident">VoteWeight</span>, <span class="ident">list::Bag</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::event</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::generate_deposit</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">deposit_event</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
+		<span class="doccomment">/// Moved an account from one bag to another. \[who, from, to\].</span>
+		<span class="ident">Rebagged</span>(<span class="ident">T::AccountId</span>, <span class="ident">VoteWeight</span>, <span class="ident">VoteWeight</span>),
+	}
+
+	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="doccomment">/// Declare that some `dislocated` account has, through rewards or penalties, sufficiently</span>
+		<span class="doccomment">/// changed its weight that it should properly fall into a different bag than its current</span>
+		<span class="doccomment">/// one.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Anyone can call this function about any potentially dislocated account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Will never return an error; if `dislocated` does not exist or doesn&#39;t need a rebag, then</span>
+		<span class="doccomment">/// it is a noop and fees are still collected from `origin`.</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::rebag_non_terminal</span>().<span class="ident">max</span>(<span class="ident">T::WeightInfo::rebag_terminal</span>()))]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rebag</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">dislocated</span>: <span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+			<span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="kw">let</span> <span class="ident">current_weight</span> <span class="op">=</span> <span class="ident">T::VoteWeightProvider::vote_weight</span>(<span class="kw-2">&amp;</span><span class="ident">dislocated</span>);
+			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::do_rebag</span>(<span class="kw-2">&amp;</span><span class="ident">dislocated</span>, <span class="ident">current_weight</span>);
+			<span class="prelude-val">Ok</span>(())
+		}
+	}
+
+	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">integrity_test</span>() {
+			<span class="comment">// ensure they are strictly increasing, this also implies that duplicates are detected.</span>
+			<span class="macro">assert!</span>(
+				<span class="ident">T::BagThresholds::get</span>().<span class="ident">windows</span>(<span class="number">2</span>).<span class="ident">all</span>(<span class="op">|</span><span class="ident">window</span><span class="op">|</span> <span class="ident">window</span>[<span class="number">1</span>] <span class="op">&gt;</span> <span class="ident">window</span>[<span class="number">0</span>]),
+				<span class="string">&quot;thresholds must strictly increase, and have no duplicates&quot;</span>,
+			);
+		}
+	}
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="doccomment">/// Move an account from one bag to another, depositing an event on success.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// If the account changed bags, returns `Some((from, to))`.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">do_rebag</span>(
+		<span class="ident">account</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
+		<span class="ident">new_weight</span>: <span class="ident">VoteWeight</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">VoteWeight</span>, <span class="ident">VoteWeight</span>)<span class="op">&gt;</span> {
+		<span class="comment">// if no voter at that node, don&#39;t do anything.</span>
+		<span class="comment">// the caller just wasted the fee to call this.</span>
+		<span class="kw">let</span> <span class="ident">maybe_movement</span> <span class="op">=</span> <span class="ident">list::Node</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>)
+			.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">node</span><span class="op">|</span> <span class="ident">List::update_position_for</span>(<span class="ident">node</span>, <span class="ident">new_weight</span>));
+		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">from</span>, <span class="ident">to</span>)) <span class="op">=</span> <span class="ident">maybe_movement</span> {
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::Rebagged</span>(<span class="ident">account</span>.<span class="ident">clone</span>(), <span class="ident">from</span>, <span class="ident">to</span>));
+		};
+		<span class="ident">maybe_movement</span>
+	}
+
+	<span class="doccomment">/// Equivalent to `ListBags::get`, but public. Useful for tests in outside of this crate.</span>
+	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_bags_get</span>(<span class="ident">weight</span>: <span class="ident">VoteWeight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">list::Bag</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="ident">ListBags::get</span>(<span class="ident">weight</span>)
+	}
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">SortedListProvider</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
+
+	<span class="kw">fn</span> <span class="ident">iter</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="ident">Box::new</span>(<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span>.<span class="ident">id</span>().<span class="ident">clone</span>()))
+	}
+
+	<span class="kw">fn</span> <span class="ident">count</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+		<span class="ident">CounterForListNodes</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>()
+	}
+
+	<span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains</span>(<span class="ident">id</span>)
+	}
+
+	<span class="kw">fn</span> <span class="ident">on_insert</span>(<span class="ident">id</span>: <span class="ident">T::AccountId</span>, <span class="ident">weight</span>: <span class="ident">VoteWeight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">id</span>, <span class="ident">weight</span>)
+	}
+
+	<span class="kw">fn</span> <span class="ident">on_update</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">new_weight</span>: <span class="ident">VoteWeight</span>) {
+		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::do_rebag</span>(<span class="ident">id</span>, <span class="ident">new_weight</span>);
+	}
+
+	<span class="kw">fn</span> <span class="ident">on_remove</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) {
+		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">id</span>)
+	}
+
+	<span class="kw">fn</span> <span class="ident">regenerate</span>(
+		<span class="ident">all</span>: <span class="kw">impl</span> <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T::AccountId</span><span class="op">&gt;</span>,
+		<span class="ident">weight_of</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VoteWeight</span><span class="op">&gt;</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::regenerate</span>(<span class="ident">all</span>, <span class="ident">weight_of</span>)
+	}
+
+	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+	<span class="kw">fn</span> <span class="ident">sanity_check</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::sanity_check</span>()
+	}
+
+	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
+	<span class="kw">fn</span> <span class="ident">sanity_check</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(())
+	}
+
+	<span class="kw">fn</span> <span class="ident">clear</span>(<span class="ident">maybe_count</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::clear</span>(<span class="ident">maybe_count</span>)
+	}
+
+	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
+	<span class="kw">fn</span> <span class="ident">weight_update_worst_case</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">is_increase</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VoteWeight</span> {
+		<span class="kw">use</span> <span class="ident">frame_support::traits::Get</span> <span class="kw">as</span> <span class="kw">_</span>;
+		<span class="kw">let</span> <span class="ident">thresholds</span> <span class="op">=</span> <span class="ident">T::BagThresholds::get</span>();
+		<span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="ident">list::Node</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">current_bag_idx</span> <span class="op">=</span> <span class="ident">thresholds</span>
+			.<span class="ident">iter</span>()
+			.<span class="ident">chain</span>(<span class="ident">sp_std::iter::once</span>(<span class="kw-2">&amp;</span><span class="ident">VoteWeight::MAX</span>))
+			.<span class="ident">position</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">node</span>.<span class="ident">bag_upper</span>())
+			.<span class="ident">unwrap</span>();
+
+		<span class="kw">if</span> <span class="ident">is_increase</span> {
+			<span class="kw">let</span> <span class="ident">next_threshold_idx</span> <span class="op">=</span> <span class="ident">current_bag_idx</span> <span class="op">+</span> <span class="number">1</span>;
+			<span class="macro">assert!</span>(<span class="ident">thresholds</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">next_threshold_idx</span>);
+			<span class="ident">thresholds</span>[<span class="ident">next_threshold_idx</span>]
+		} <span class="kw">else</span> {
+			<span class="macro">assert!</span>(<span class="ident">current_bag_idx</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
+			<span class="kw">let</span> <span class="ident">prev_threshold_idx</span> <span class="op">=</span> <span class="ident">current_bag_idx</span> <span class="op">-</span> <span class="number">1</span>;
+			<span class="ident">thresholds</span>[<span class="ident">prev_threshold_idx</span>]
+		}
+	}
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_bags_list" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

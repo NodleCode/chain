@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["nodle_chain"] = [{"text":"impl <a class=\"trait\" href=\"sc_chain_spec/extension/trait.Group.html\" title=\"trait sc_chain_spec::extension::Group\">Group</a> for <a class=\"struct\" href=\"nodle_chain/chain_spec/cs_eden/struct.Extensions.html\" title=\"struct nodle_chain::chain_spec::cs_eden::Extensions\">Extensions</a>","synthetic":false,"types":["nodle_chain::chain_spec::cs_eden::Extensions"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

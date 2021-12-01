@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpsee-types-0.3.1&#x2F;src&#x2F;traits.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>traits.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpsee_types/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::v2::params::JsonRpcParams</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Error</span>, <span class="ident">Subscription</span>};
+<span class="kw">use</span> <span class="ident">async_trait::async_trait</span>;
+<span class="kw">use</span> <span class="ident">serde::de::DeserializeOwned</span>;
+
+<span class="doccomment">/// [JSON-RPC](https://www.jsonrpc.org/specification) client interface that can make requests and notifications.</span>
+<span class="attribute">#[<span class="ident">async_trait</span>]</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Client</span> {
+	<span class="doccomment">/// Send a [notification request](https://www.jsonrpc.org/specification#notification)</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">notification</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// Send a [method call request](https://www.jsonrpc.org/specification#request_object).</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">request</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">R</span>: <span class="ident">DeserializeOwned</span>;
+
+	<span class="doccomment">/// Send a [batch request](https://www.jsonrpc.org/specification#batch).</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The response to batch are returned in the same order as it was inserted in the batch.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Returns `Ok` if all requests in the batch were answered successfully.</span>
+	<span class="doccomment">/// Returns `Error` if any of the requests in batch fails.</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">batch_request</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">R</span>: <span class="ident">DeserializeOwned</span> <span class="op">+</span> <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Clone</span>;
+}
+
+<span class="doccomment">/// [JSON-RPC](https://www.jsonrpc.org/specification) client interface that can make requests, notifications and subscriptions.</span>
+<span class="attribute">#[<span class="ident">async_trait</span>]</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SubscriptionClient</span>: <span class="ident">Client</span> {
+	<span class="doccomment">/// Initiate a subscription by performing a JSON-RPC method call where the server responds with</span>
+	<span class="doccomment">/// a `Subscription ID` that is used to fetch messages on that subscription,</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The `subscribe_method` and `params` are used to ask for the subscription towards the</span>
+	<span class="doccomment">/// server.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The params may be used as input for the subscription for the server to process.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The `unsubscribe_method` is used to close the subscription</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The `Notif` param is a generic type to receive generic subscriptions, see [`Subscription`] for further documentation.</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">subscribe</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Notif</span><span class="op">&gt;</span>(
+		<span class="kw-2">&amp;</span><span class="self">self</span>,
+		<span class="ident">subscribe_method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+		<span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+		<span class="ident">unsubscribe_method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Subscription</span><span class="op">&lt;</span><span class="ident">Notif</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">Notif</span>: <span class="ident">DeserializeOwned</span>;
+
+	<span class="doccomment">/// Register a method subscription, this is used to filter only server notifications that a user is interested in.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The `Notif` param is a generic type to receive generic subscriptions, see [`Subscription`] for further documentation.</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">subscribe_to_method</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Notif</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Subscription</span><span class="op">&lt;</span><span class="ident">Notif</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">Notif</span>: <span class="ident">DeserializeOwned</span>;
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="jsonrpsee_types" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

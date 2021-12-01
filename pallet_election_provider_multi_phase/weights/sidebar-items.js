@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SubstrateWeight","Weights for pallet_election_provider_multi_phase using the Substrate node and recommended hardware."]],"trait":[["WeightInfo","Weight functions needed for pallet_election_provider_multi_phase."]]});

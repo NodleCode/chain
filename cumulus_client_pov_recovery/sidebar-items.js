@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PoVRecovery","Encapsulates the logic of the pov recovery."]]});

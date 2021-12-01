@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["latest",""],["v0",""],["v1",""],["v2",""]],"type":[["VersionedXcm","The basic `VersionedXcm` type which just uses the `Vec<u8>` as an encoded call."]]});

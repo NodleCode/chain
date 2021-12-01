@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error",""]],"struct":[["ParachainsInherentDataProvider","Provides the parachains inherent data."]]});

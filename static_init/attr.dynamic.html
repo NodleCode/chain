@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Statics initialized with non const functions."><meta name="keywords" content="rust, rustlang, rust-lang, dynamic"><title>dynamic in static_init - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc attr"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../static_init/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><h2 class="location">Other items in<br><a href="index.html">static_init</a></h2><div id="sidebar-vars" data-name="dynamic" data-ty="attr" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Attribute Macro <a href="index.html">static_init</a>::<wbr><a class="attr" href="#">dynamic</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/static_init_macro/lib.rs.html#450" title="goto source code">[src]</a></span></h1><pre class="rust attr"><code>#[dynamic]</code></pre><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Statics initialized with non const functions.</p>
+<p>Statics on which this attribute is applied will be be initialized at run time (optionaly see
+bellow), before main start. This allow statics initialization with non const expressions.</p>
+<p>There are two variants of dynamic statics:</p>
+<h1 id="dynamic-lazy-statics" class="section-header"><a href="#dynamic-lazy-statics">Dynamic lazy statics</a></h1>
+<p>These dynamics are supported on all plateforms and requires std support. Lazy dynamics are
+enabled by the default feature “lazy”.</p>
+<p>Lazy statics are declared with the <code>[dynamic(lazy)]</code> or simply <code>[dynamic]</code> attribute. On unixes and windows plateforms these
+statics are optimized versions of <a href="https://doc.rust-lang.org/1.56.1/std/lazy/struct.SyncLazy.html" title="std::lazy::SyncLazy">std::lazy::SyncLazy</a>. After program initialization phase,
+those statics are guaranteed to be initialized and access to them will be as fast as any access
+to a regular static. On other plateforms, those statics are equivalent to <a href="https://doc.rust-lang.org/1.56.1/std/lazy/struct.SyncLazy.html" title="std::lazy::SyncLazy">std::lazy::SyncLazy</a>.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">struct</span> <span class="ident">A</span>(<span class="ident">i32</span>);
+
+<span class="kw">impl</span> <span class="ident">A</span> {
+  <span class="comment">//new is not const</span>
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+    <span class="ident">A</span>(<span class="ident">v</span>)
+  }
+}
+
+<span class="attribute">#[<span class="ident">dynamic</span>]</span> <span class="comment">//equivalently #[dynamic(lazy)]</span>
+<span class="kw">static</span> <span class="ident">V</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">42</span>);</code></pre></div>
+<p>Optionnaly, if the default feature “atexit” is enabled, lazy dynamic statics declared with
+<code>[dynamic(lazy,drop)]</code> will be dropped at program exit. Dropped lazy dynamic statics ared
+dropped in the reverse order of their initialization. This feature is implemented thanks to
+<code>libc::atexit</code>. See also <code>drop_reverse</code> attribute argument.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">struct</span> <span class="ident">A</span>(<span class="ident">i32</span>);
+
+<span class="kw">impl</span> <span class="ident">A</span> {
+  <span class="comment">//new is not const</span>
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+    <span class="ident">A</span>(<span class="ident">v</span>)
+  }
+}
+
+<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">A</span> {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>){
+        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>,<span class="ident">A</span>.<span class="number">0</span>)
+    }
+}
+
+<span class="comment">// V2 is initialized before V1,</span>
+<span class="comment">// so V1 will be dropped before V2</span>
+<span class="comment">// The program will print:</span>
+<span class="comment">// 33</span>
+<span class="comment">// 42</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">lazy</span>,<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="ident">V1</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="kw">unsafe</span>{<span class="ident">V2</span>.<span class="number">0</span>} <span class="op">-</span> <span class="number">9</span>);
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">drop</span>)]</span> <span class="comment">//implies lazy</span>
+<span class="kw">static</span> <span class="ident">V2</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">42</span>);</code></pre></div>
+<p>Even if V1 is const, access to it must be unsafe because its state may be dropped.
+Internaly the procedural macro change V1 to a mutable statics and wrap it in a type
+that does not implement <code>DerefMut</code>.</p>
+<h2 id="thread-locals" class="section-header"><a href="#thread-locals">Thread locals</a></h2>
+<p><em>lazy statics</em> can be declared for thread local. This feature does not require std support. 
+They also can be dropped with if the <code>thread_local_drop</code> feature is enabled. 
+This last feature does require std support.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="attribute">#[<span class="ident">thread_local</span>]</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">lazy</span>,<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="ident">V1</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="kw">unsafe</span>{<span class="ident">V2</span>.<span class="number">0</span>} <span class="op">-</span> <span class="number">9</span>);
+
+<span class="attribute">#[<span class="ident">thread_local</span>]</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">drop</span>)]</span> <span class="comment">//implies lazy</span>
+<span class="kw">static</span> <span class="ident">V2</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">42</span>);</code></pre></div>
+<h1 id="dynamic-statics" class="section-header"><a href="#dynamic-statics">Dynamic statics</a></h1>
+<p>Those statics will be initialized at program startup, without ordering, accept between those
+that have different priorities on plateform that support priorities. Those statics are
+supported on unixes and windows with priorities and mac without priorities.</p>
+<h2 id="safety" class="section-header"><a href="#safety">Safety</a></h2>
+<p>Initialization expressions must be unsafe blocks. During initialization, any access to other
+“dynamic” statics initialized with a lower priority will cause undefined behavior. Similarly,
+during drop any access to a “dynamic” static dropped with a lower priority will cause undefined
+behavior.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">struct</span> <span class="ident">A</span>(<span class="ident">i32</span>);
+
+<span class="kw">impl</span> <span class="ident">A</span> {
+  <span class="comment">//new is not const</span>
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+    <span class="ident">A</span>(<span class="ident">v</span>)
+  }
+}
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">0</span>)]</span>
+<span class="kw">static</span> <span class="ident">V</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">42</span>);</code></pre></div>
+<h2 id="execution-order" class="section-header"><a href="#execution-order">Execution Order</a></h2>
+<p>The execution order of “dynamic” static initializations is unspecified. Nevertheless on ELF plateform (linux,any unixes but mac) and
+windows plateform a priority can be specified using the syntax <code>dynamic(&lt;num&gt;)</code> where
+<code>&lt;num&gt;</code> is a number included in the range [0 ; 2<sup>16</sup>-1].</p>
+<p>Statics with priority number 65535 are initialized first (in unspecified order), then statics
+with priority number 65534 are initialized …  then statics
+with priority number 0.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">struct</span> <span class="ident">A</span>(<span class="ident">i32</span>);
+
+<span class="kw">impl</span> <span class="ident">A</span> {
+  <span class="comment">//new is not const</span>
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+    <span class="ident">A</span>(<span class="ident">v</span>)
+  }
+}
+
+<span class="comment">//V1 must be initialized first</span>
+<span class="comment">//because V2 uses the value of V1.</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">10</span>)]</span>
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">V1</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">33</span>);
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">20</span>)]</span>
+<span class="kw">static</span> <span class="ident">V2</span> :<span class="ident">A</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">A::new</span>(<span class="ident">V1</span>.<span class="number">0</span> <span class="op">+</span> <span class="number">9</span>)};</code></pre></div>
+<h1 id="full-syntax-and-dropped-statics" class="section-header"><a href="#full-syntax-and-dropped-statics">Full syntax and dropped statics</a></h1>
+<p>Finaly the full syntax is for the attribute is:</p>
+<div class="example-wrap"><pre class="language-text"><code>&quot;dynamic&quot; [ &quot;(&quot; &lt;dyn_opts&gt; &quot;)&quot; ]
+
+dyn_opts:
+  &lt;dyn_opt&gt;
+  &lt;dyn_opt&gt;, &lt;dyn_opts&gt;
+
+dyn_opt:
+  &quot;init&quot; [ &quot;=&quot; &lt;priority&gt; ]
+  &quot;drop&quot; [ &quot;=&quot; &lt;priority&gt; ]
+  &quot;lazy&quot;
+  &quot;drop_only &quot;=&quot; &lt;priority&gt;</code></pre></div>
+<p>The macro attribute <code>dynamic</code> is equivalent to <code>dynamic(lazy)</code>
+and <code>dynamic(&lt;num&gt;)</code> to <code>dynamic(init=&lt;num&gt;)</code>. If a priority
+is given it will be dropped by program destructor. The priority has the
+same semantic as for the <a href="attr.destructor.html" title="destructor">destructor</a> attribute:  statics with priority 0 are dropped first,
+… and finaly statics with priority 65535 are the last dropped.</p>
+<p>The <code>drop_only=&lt;priority&gt;</code> is equivalent to #[dynamic(0,drop=<priority>)] except that the
+static will be const initialized.</p>
+<p>If no priority is given to the drop argument, the drop function will be registered using <code>libc::atexit</code>. All
+dynamic statics registered this way will be dropped in the reverse order of their
+initialization and before any dynamic statics marked for drop using the <code>drop</code> attribute
+argument.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">struct</span> <span class="ident">A</span>(<span class="ident">i32</span>);
+
+<span class="kw">impl</span> <span class="ident">A</span> {
+  <span class="comment">//new is not const</span>
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+    <span class="ident">A</span>(<span class="ident">v</span>)
+  }
+  <span class="comment">//new is not const</span>
+  <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">const_new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+    <span class="ident">A</span>(<span class="ident">v</span>)
+  }
+}
+
+<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">A</span> {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {}
+    }
+
+<span class="comment">//const initialized droped after main exit</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">init</span><span class="op">=</span><span class="number">0</span>, <span class="ident">drop</span><span class="op">=</span><span class="number">0</span>)]</span>
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">V1</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new_const</span>(<span class="number">33</span>);
+
+<span class="comment">//initialized before V1 and droped after V1</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">20</span>,<span class="ident">drop</span><span class="op">=</span><span class="number">10</span>)]</span>
+<span class="kw">static</span> <span class="ident">V2</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">10</span>);
+
+<span class="comment">// not droped, V3, V4 and V5 all have initialization priority 0</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">init</span><span class="op">=</span><span class="number">0</span>)]</span>
+<span class="kw">static</span> <span class="ident">V3</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">10</span>);
+
+<span class="comment">// not droped</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">init</span>)]</span>
+<span class="kw">static</span> <span class="ident">V4</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">10</span>);
+
+<span class="comment">// not droped</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">0</span>)]</span>
+<span class="kw">static</span> <span class="ident">V5</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">10</span>);
+
+<span class="comment">// not droped</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">10</span>)]</span>
+<span class="kw">static</span> <span class="ident">V6</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">10</span>);</code></pre></div>
+<h1 id="actual-type-of-dynamic-statics" class="section-header"><a href="#actual-type-of-dynamic-statics">Actual type of “dynamic” statics</a></h1>
+<p>A thread_local <em>lazy static</em> that is <em>not mutable</em> and that will be dropped is wrapped in a <em>mutable</em> thread_local static
+of type <code>static_init::ThreadLocalConstLazy</code>. Otherwise the mutability is unchanged and the
+static is wrapped in a <code>static_init::ThreadLocalLazy</code>.</p>
+<p>A <em>lazy static</em> that is <em>not mutable</em> and that will be dropped is wrapped in a <em>mutable</em> static
+of type <code>static_init::ConstLazy</code>. Otherwise the mutability is unchanged and the
+static is wrapped in a <code>static_init::Lazy</code>.</p>
+<p>A mutable dynamic static declared to have type <code>T</code> are wrapped in <code>static_init::Static&lt;T&gt;</code>.</p>
+<p>A mutable “dynamic” static declared to have type <code>T</code> are wrapped in a mutable static of type <code>static_init::ConstStatic&lt;T&gt;</code> </p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
+<span class="comment">// V has type static_init::ConstStatic&lt;i32&gt;</span>
+<span class="attribute">#[<span class="ident">dynamic</span>]</span>
+<span class="kw">static</span> <span class="ident">V</span> :<span class="ident">i32</span> <span class="op">=</span> <span class="number">0</span>;
+
+<span class="comment">// W has type static_init::Static&lt;i32&gt;</span>
+<span class="attribute">#[<span class="ident">dynamic</span>]</span>
+<span class="kw">static</span> <span class="ident">W</span> :<span class="ident">i32</span> <span class="op">=</span> <span class="number">0</span>;</code></pre></div>
+</div></details></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="static_init" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>

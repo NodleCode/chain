@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["Result","Alias for the result type of the election data provider."]]});

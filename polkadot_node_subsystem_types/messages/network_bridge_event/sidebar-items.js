@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["NetworkBridgeEvent","Events from network."]],"struct":[["PeerId","Identifier of a peer of the network."],["ReputationChange","Description of a reputation adjustment for a node."]]});

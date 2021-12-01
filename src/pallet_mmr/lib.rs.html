@@ -1,0 +1,552 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;d76f399&#x2F;frame&#x2F;merkle-mountain-range&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pallet_mmr/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+</pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
+
+<span class="comment">// Copyright (C) 2020-2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
+
+<span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="comment">// you may not use this file except in compliance with the License.</span>
+<span class="comment">// You may obtain a copy of the License at</span>
+<span class="comment">//</span>
+<span class="comment">// 	http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="comment">//</span>
+<span class="comment">// Unless required by applicable law or agreed to in writing, software</span>
+<span class="comment">// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="comment">// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="comment">// See the License for the specific language governing permissions and</span>
+<span class="comment">// limitations under the License.</span>
+
+<span class="doccomment">//! # Merkle Mountain Range</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Overview</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Details on Merkle Mountain Ranges (MMRs) can be found here:</span>
+<span class="doccomment">//! &lt;https://github.com/mimblewimble/grin/blob/master/doc/mmr.md&gt;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The MMR pallet constructs a MMR from leaf data obtained on every block from</span>
+<span class="doccomment">//! `LeafDataProvider`. MMR nodes are stored both in:</span>
+<span class="doccomment">//! - on-chain storage - hashes only; not full leaf content)</span>
+<span class="doccomment">//! - off-chain storage - via Indexing API we push full leaf content (and all internal nodes as</span>
+<span class="doccomment">//! well) to the Off-chain DB, so that the data is available for Off-chain workers.</span>
+<span class="doccomment">//! Hashing used for MMR is configurable independently from the rest of the runtime (i.e. not using</span>
+<span class="doccomment">//! `frame_system::Hashing`) so something compatible with external chains can be used (like</span>
+<span class="doccomment">//! Keccak256 for Ethereum compatibility).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Depending on the usage context (off-chain vs on-chain) the pallet is able to:</span>
+<span class="doccomment">//! - verify MMR leaf proofs (on-chain)</span>
+<span class="doccomment">//! - generate leaf proofs (off-chain)</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! See [primitives::Compact] documentation for how you can optimize proof size for leafs that are</span>
+<span class="doccomment">//! composed from multiple elements.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## What for?</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Primary use case for this pallet is to generate MMR root hashes, that can latter on be used by</span>
+<span class="doccomment">//! BEEFY protocol (see &lt;https://github.com/paritytech/grandpa-bridge-gadget&gt;).</span>
+<span class="doccomment">//! MMR root hashes along with BEEFY will make it possible to build Super Light Clients (SLC) of</span>
+<span class="doccomment">//! Substrate-based chains. The SLC will be able to follow finality and can be shown proofs of more</span>
+<span class="doccomment">//! details that happened on the source chain.</span>
+<span class="doccomment">//! In that case the chain which contains the pallet generates the Root Hashes and Proofs, which</span>
+<span class="doccomment">//! are then presented to another chain acting as a light client which can verify them.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Secondary use case is to archive historical data, but still be able to retrieve them on-demand</span>
+<span class="doccomment">//! if needed. For instance if parent block hashes are stored in the MMR it&#39;s possible at any point</span>
+<span class="doccomment">//! in time to provide a MMR proof about some past block hash, while this data can be safely pruned</span>
+<span class="doccomment">//! from on-chain storage.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! NOTE This pallet is experimental and not proven to work in production.</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
+
+<span class="kw">use</span> <span class="ident">codec::Encode</span>;
+<span class="kw">use</span> <span class="ident">frame_support::weights::Weight</span>;
+<span class="kw">use</span> <span class="ident">sp_runtime::traits</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">mod</span> <span class="ident">benchmarking</span>;
+<span class="kw">mod</span> <span class="ident">default_weights</span>;
+<span class="kw">mod</span> <span class="ident">mmr</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">mock</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet_mmr_primitives</span> <span class="kw">as</span> <span class="ident">primitives</span>;
+
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WeightInfo</span> {
+	<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">peaks</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span>;
+}
+
+<span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
+	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span> <span class="op">=</span> ()<span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">I</span>)<span class="op">&gt;</span>);
+
+	<span class="doccomment">/// This pallet&#39;s configuration trait</span>
+	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
+	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="lifetime">&#39;static</span> <span class="op">=</span> ()<span class="op">&gt;</span>: <span class="ident">frame_system::Config</span> {
+		<span class="doccomment">/// Prefix for elements stored in the Off-chain DB via Indexing API.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Each node of the MMR is inserted both on-chain and off-chain via Indexing API.</span>
+		<span class="doccomment">/// The former does not store full leaf content, just it&#39;s compact version (hash),</span>
+		<span class="doccomment">/// and some of the inner mmr nodes might be pruned from on-chain storage.</span>
+		<span class="doccomment">/// The latter will contain all the entries in their full form.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Each node is stored in the Off-chain DB under key derived from the</span>
+		<span class="doccomment">/// [`Self::INDEXING_PREFIX`] and it&#39;s in-tree index (MMR position).</span>
+		<span class="kw">const</span> <span class="ident">INDEXING_PREFIX</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>];
+
+		<span class="doccomment">/// A hasher type for MMR.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// To construct trie nodes that result in merging (bagging) two peaks, depending on the</span>
+		<span class="doccomment">/// node kind we take either:</span>
+		<span class="doccomment">/// - The node (hash) itself if it&#39;s an inner node.</span>
+		<span class="doccomment">/// - The hash of SCALE-encoding of the leaf data if it&#39;s a leaf node.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Then we create a tuple of these two hashes, SCALE-encode it (concatenate) and</span>
+		<span class="doccomment">/// hash, to obtain a new MMR inner node - the new peak.</span>
+		<span class="kw">type</span> <span class="ident">Hashing</span>: <span class="ident">traits::Hash</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The hashing output type.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// This type is actually going to be stored in the MMR.</span>
+		<span class="doccomment">/// Required to be provided again, to satisfy trait bounds for storage items.</span>
+		<span class="kw">type</span> <span class="ident">Hash</span>: <span class="ident">traits::Member</span>
+			<span class="op">+</span> <span class="ident">traits::MaybeSerializeDeserialize</span>
+			<span class="op">+</span> <span class="ident">sp_std::fmt::Debug</span>
+			<span class="op">+</span> <span class="ident">sp_std::hash::Hash</span>
+			<span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">Copy</span>
+			<span class="op">+</span> <span class="ident">Default</span>
+			<span class="op">+</span> <span class="ident">codec::Codec</span>
+			<span class="op">+</span> <span class="ident">codec::EncodeLike</span>
+			<span class="op">+</span> <span class="ident">scale_info::TypeInfo</span>;
+
+		<span class="doccomment">/// Data stored in the leaf nodes.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The [LeafData](primitives::LeafDataProvider) is responsible for returning the entire</span>
+		<span class="doccomment">/// leaf data that will be inserted to the MMR.</span>
+		<span class="doccomment">/// [LeafDataProvider](primitives::LeafDataProvider)s can be composed into tuples to put</span>
+		<span class="doccomment">/// multiple elements into the tree. In such a case it might be worth using</span>
+		<span class="doccomment">/// [primitives::Compact] to make MMR proof for one element of the tuple leaner.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Note that the leaf at each block MUST be unique. You may want to include a block hash or</span>
+		<span class="doccomment">/// block number as an easiest way to ensure that.</span>
+		<span class="kw">type</span> <span class="ident">LeafData</span>: <span class="ident">primitives::LeafDataProvider</span>;
+
+		<span class="doccomment">/// A hook to act on the new MMR root.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// For some applications it might be beneficial to make the MMR root available externally</span>
+		<span class="doccomment">/// apart from having it in the storage. For instance you might output it in the header</span>
+		<span class="doccomment">/// digest (see [`frame_system::Pallet::deposit_log`]) to make it available for Light</span>
+		<span class="doccomment">/// Clients. Hook complexity should be `O(1)`.</span>
+		<span class="kw">type</span> <span class="ident">OnNewRoot</span>: <span class="ident">primitives::OnNewRoot</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// Weights for this pallet.</span>
+		<span class="kw">type</span> <span class="ident">WeightInfo</span>: <span class="ident">WeightInfo</span>;
+	}
+
+	<span class="doccomment">/// Latest MMR Root hash.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">mmr_root_hash</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">RootHash</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">=</span>
+		<span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// Current size of the MMR (number of leaves).</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">mmr_leaves</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">NumberOfLeaves</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">u64</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// Hashes of the nodes in the MMR.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Note this collection only contains MMR peaks, the inner nodes (and leaves)</span>
+	<span class="doccomment">/// are pruned and only stored in the Offchain DB.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">mmr_peak</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Nodes</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">=</span>
+		<span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Identity</span>, <span class="ident">u64</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span>, <span class="ident">OptionQuery</span><span class="op">&gt;</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">_n</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+			<span class="kw">use</span> <span class="ident">primitives::LeafDataProvider</span>;
+			<span class="kw">let</span> <span class="ident">leaves</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::mmr_leaves</span>();
+			<span class="kw">let</span> <span class="ident">peaks_before</span> <span class="op">=</span> <span class="ident">mmr::utils::NodesUtils::new</span>(<span class="ident">leaves</span>).<span class="ident">number_of_peaks</span>();
+			<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">T::LeafData::leaf_data</span>();
+			<span class="comment">// append new leaf to MMR</span>
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mmr</span>: <span class="ident">ModuleMmr</span><span class="op">&lt;</span><span class="ident">mmr::storage::RuntimeStorage</span>, <span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mmr::Mmr::new</span>(<span class="ident">leaves</span>);
+			<span class="ident">mmr</span>.<span class="ident">push</span>(<span class="ident">data</span>).<span class="ident">expect</span>(<span class="string">&quot;MMR push never fails.&quot;</span>);
+
+			<span class="comment">// update the size</span>
+			<span class="kw">let</span> (<span class="ident">leaves</span>, <span class="ident">root</span>) <span class="op">=</span> <span class="ident">mmr</span>.<span class="ident">finalize</span>().<span class="ident">expect</span>(<span class="string">&quot;MMR finalize never fails.&quot;</span>);
+			<span class="op">&lt;</span><span class="ident">T::OnNewRoot</span> <span class="kw">as</span> <span class="ident">primitives::OnNewRoot</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::on_new_root</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>);
+
+			<span class="op">&lt;</span><span class="ident">NumberOfLeaves</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">leaves</span>);
+			<span class="op">&lt;</span><span class="ident">RootHash</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">root</span>);
+
+			<span class="kw">let</span> <span class="ident">peaks_after</span> <span class="op">=</span> <span class="ident">mmr::utils::NodesUtils::new</span>(<span class="ident">leaves</span>).<span class="ident">number_of_peaks</span>();
+			<span class="ident">T::WeightInfo::on_initialize</span>(<span class="ident">peaks_before</span>.<span class="ident">max</span>(<span class="ident">peaks_after</span>))
+		}
+	}
+}
+
+<span class="doccomment">/// A MMR specific to the pallet.</span>
+<span class="kw">type</span> <span class="ident">ModuleMmr</span><span class="op">&lt;</span><span class="ident">StorageType</span>, <span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mmr::Mmr</span><span class="op">&lt;</span><span class="ident">StorageType</span>, <span class="ident">T</span>, <span class="ident">I</span>, <span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Leaf data.</span>
+<span class="kw">type</span> <span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::LeafData</span> <span class="kw">as</span> <span class="ident">primitives::LeafDataProvider</span><span class="op">&gt;</span><span class="ident">::LeafData</span>;
+
+<span class="doccomment">/// Hashing used for the pallet.</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">HashingOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hashing</span>;
+
+<span class="doccomment">/// Stateless MMR proof verification.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This function can be used to verify received MMR proof (`proof`)</span>
+<span class="doccomment">/// for given leaf data (`leaf`) against a known MMR root hash (`root`).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The verification does not require any storage access.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify_leaf_proof</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">L</span><span class="op">&gt;</span>(
+	<span class="ident">root</span>: <span class="ident">H::Output</span>,
+	<span class="ident">leaf</span>: <span class="ident">mmr::Node</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">L</span><span class="op">&gt;</span>,
+	<span class="ident">proof</span>: <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="ident">H::Output</span><span class="op">&gt;</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">primitives::Error</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+	<span class="ident">H</span>: <span class="ident">traits::Hash</span>,
+	<span class="ident">L</span>: <span class="ident">primitives::FullLeaf</span>,
+{
+	<span class="kw">let</span> <span class="ident">is_valid</span> <span class="op">=</span> <span class="ident">mmr::verify_leaf_proof</span>::<span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">L</span><span class="op">&gt;</span>(<span class="ident">root</span>, <span class="ident">leaf</span>, <span class="ident">proof</span>)<span class="question-mark">?</span>;
+	<span class="kw">if</span> <span class="ident">is_valid</span> {
+		<span class="prelude-val">Ok</span>(())
+	} <span class="kw">else</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">primitives::Error::Verify</span>.<span class="ident">log_debug</span>((<span class="string">&quot;The proof is incorrect.&quot;</span>, <span class="ident">root</span>)))
+	}
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">offchain_key</span>(<span class="ident">pos</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_std::prelude::Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+		(<span class="ident">T::INDEXING_PREFIX</span>, <span class="ident">pos</span>).<span class="ident">encode</span>()
+	}
+
+	<span class="doccomment">/// Generate a MMR proof for the given `leaf_index`.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Note this method can only be used from an off-chain context</span>
+	<span class="doccomment">/// (Offchain Worker or Runtime API call), since it requires</span>
+	<span class="doccomment">/// all the leaves to be present.</span>
+	<span class="doccomment">/// It may return an error or panic if used incorrectly.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_proof</span>(
+		<span class="ident">leaf_index</span>: <span class="ident">u64</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>), <span class="ident">primitives::Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">mmr</span>: <span class="ident">ModuleMmr</span><span class="op">&lt;</span><span class="ident">mmr::storage::OffchainStorage</span>, <span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mmr::Mmr::new</span>(<span class="ident"><span class="self">Self</span>::mmr_leaves</span>());
+		<span class="ident">mmr</span>.<span class="ident">generate_proof</span>(<span class="ident">leaf_index</span>)
+	}
+
+	<span class="doccomment">/// Verify MMR proof for given `leaf`.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This method is safe to use within the runtime code.</span>
+	<span class="doccomment">/// It will return `Ok(())` if the proof is valid</span>
+	<span class="doccomment">/// and an `Err(..)` if MMR is inconsistent (some leaves are missing)</span>
+	<span class="doccomment">/// or the proof is invalid.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify_leaf</span>(
+		<span class="ident">leaf</span>: <span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span>,
+		<span class="ident">proof</span>: <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>,
+	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">primitives::Error</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="ident">proof</span>.<span class="ident">leaf_count</span> <span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::mmr_leaves</span>() <span class="op">|</span><span class="op">|</span>
+			<span class="ident">proof</span>.<span class="ident">leaf_count</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span>
+			<span class="ident">proof</span>.<span class="ident">items</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span> <span class="op">&gt;</span> <span class="ident">mmr::utils::NodesUtils::new</span>(<span class="ident">proof</span>.<span class="ident">leaf_count</span>).<span class="ident">depth</span>()
+		{
+			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">primitives::Error::Verify</span>
+				.<span class="ident">log_debug</span>(<span class="string">&quot;The proof has incorrect number of leaves or proof items.&quot;</span>))
+		}
+
+		<span class="kw">let</span> <span class="ident">mmr</span>: <span class="ident">ModuleMmr</span><span class="op">&lt;</span><span class="ident">mmr::storage::RuntimeStorage</span>, <span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mmr::Mmr::new</span>(<span class="ident">proof</span>.<span class="ident">leaf_count</span>);
+		<span class="kw">let</span> <span class="ident">is_valid</span> <span class="op">=</span> <span class="ident">mmr</span>.<span class="ident">verify_leaf_proof</span>(<span class="ident">leaf</span>, <span class="ident">proof</span>)<span class="question-mark">?</span>;
+		<span class="kw">if</span> <span class="ident">is_valid</span> {
+			<span class="prelude-val">Ok</span>(())
+		} <span class="kw">else</span> {
+			<span class="prelude-val">Err</span>(<span class="ident">primitives::Error::Verify</span>.<span class="ident">log_debug</span>(<span class="string">&quot;The proof is incorrect.&quot;</span>))
+		}
+	}
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_mmr" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

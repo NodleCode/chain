@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Phragmén Election Module."><meta name="keywords" content="rust, rustlang, rust-lang, pallet_elections_phragmen"><title>pallet_elections_phragmen - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../pallet_elections_phragmen/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate pallet_elections_phragmen</h2><div class="block version"><div class="narrow-helper"></div><p>Version 5.0.0-dev</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all pallet_elections_phragmen's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li></ul></div><div id="sidebar-vars" data-name="pallet_elections_phragmen" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">pallet_elections_phragmen</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/pallet_elections_phragmen/lib.rs.html#18-3153" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h1 id="phragmén-election-module" class="section-header"><a href="#phragmén-election-module">Phragmén Election Module.</a></h1>
+<p>An election module based on sequential phragmen.</p>
+<h3 id="term-and-round" class="section-header"><a href="#term-and-round">Term and Round</a></h3>
+<p>The election happens in <em>rounds</em>: every <code>N</code> blocks, all previous members are retired and a new
+set is elected (which may or may not have an intersection with the previous set). Each round
+lasts for some number of blocks defined by <a href="pallet/trait.Config.html#associatedtype.TermDuration" title="Config::TermDuration"><code>Config::TermDuration</code></a>. The words <em>term</em> and
+<em>round</em> can be used interchangeably in this context.</p>
+<p><a href="pallet/trait.Config.html#associatedtype.TermDuration" title="Config::TermDuration"><code>Config::TermDuration</code></a> might change during a round. This can shorten or extend the length of
+the round. The next election round’s block number is never stored but rather always checked on
+the fly. Based on the current block number and <a href="pallet/trait.Config.html#associatedtype.TermDuration" title="Config::TermDuration"><code>Config::TermDuration</code></a>, the condition
+<code>BlockNumber % TermDuration == 0</code> being satisfied will always trigger a new election round.</p>
+<h3 id="bonds-and-deposits" class="section-header"><a href="#bonds-and-deposits">Bonds and Deposits</a></h3>
+<p>Both voting and being a candidate requires deposits to be taken, in exchange for the data that
+needs to be kept on-chain. The terms <em>bond</em> and <em>deposit</em> can be used interchangeably in this
+context.</p>
+<p>Bonds will be unreserved only upon adhering to the protocol laws. Failing to do so will cause in
+the bond to slashed.</p>
+<h3 id="voting" class="section-header"><a href="#voting">Voting</a></h3>
+<p>Voters can vote for a limited number of the candidates by providing a list of account ids,
+bounded by <a href="constant.MAXIMUM_VOTE.html" title="MAXIMUM_VOTE"><code>MAXIMUM_VOTE</code></a>. Invalid votes (voting for non-candidates) and duplicate votes are
+ignored during election. Yet, a voter <em>might</em> vote for a future candidate. Voters reserve a bond
+as they vote. Each vote defines a <code>value</code>. This amount is locked from the account of the voter
+and indicates the weight of the vote. Voters can update their votes at any time by calling
+<code>vote()</code> again. This can update the vote targets (which might update the deposit) or update the
+vote’s stake (<a href="struct.Voter.html#structfield.stake" title="Voter::stake"><code>Voter::stake</code></a>). After a round, votes are kept and might still be valid for
+further rounds. A voter is responsible for calling <code>remove_voter</code> once they are done to have
+their bond back and remove the lock.</p>
+<p>See <a href="pallet/enum.Call.html#variant.vote" title="Call::vote"><code>Call::vote</code></a>, <a href="pallet/enum.Call.html#variant.remove_voter" title="Call::remove_voter"><code>Call::remove_voter</code></a>.</p>
+<h3 id="defunct-voter" class="section-header"><a href="#defunct-voter">Defunct Voter</a></h3>
+<p>A voter is defunct once all of the candidates that they have voted for are not a valid candidate
+(as seen further below, members and runners-up are also always candidates). Defunct voters can
+be removed via a root call (<a href="pallet/enum.Call.html#variant.clean_defunct_voters" title="Call::clean_defunct_voters"><code>Call::clean_defunct_voters</code></a>). Upon being removed, their bond is
+returned. This is an administrative operation and can be called only by the root origin in the
+case of state bloat.</p>
+<h3 id="candidacy-and-members" class="section-header"><a href="#candidacy-and-members">Candidacy and Members</a></h3>
+<p>Candidates also reserve a bond as they submit candidacy. A candidate can end up in one of the
+below situations:</p>
+<ul>
+<li><strong>Members</strong>: A winner is kept as a <em>member</em>. They must still have a bond in reserve and they
+are automatically counted as a candidate for the next election. The number of desired
+members is set by <a href="pallet/trait.Config.html#associatedtype.DesiredMembers" title="Config::DesiredMembers"><code>Config::DesiredMembers</code></a>.</li>
+<li><strong>Runner-up</strong>: Runners-up are the best candidates immediately after the winners. The number
+of runners up to keep is set by <a href="pallet/trait.Config.html#associatedtype.DesiredRunnersUp" title="Config::DesiredRunnersUp"><code>Config::DesiredRunnersUp</code></a>. Runners-up are used, in the
+same order as they are elected, as replacements when a candidate is kicked by
+<a href="pallet/enum.Call.html#variant.remove_member" title="Call::remove_member"><code>Call::remove_member</code></a>, or when an active member renounces their candidacy. Runners are
+automatically counted as a candidate for the next election.</li>
+<li><strong>Loser</strong>: Any of the candidate who are not member/runner-up are left as losers. A loser
+might be an <em>outgoing member or runner-up</em>, meaning that they are an active member who
+failed to keep their spot. <strong>An outgoing candidate/member/runner-up will always lose their
+bond</strong>.</li>
+</ul>
+<h4 id="renouncing-candidacy" class="section-header"><a href="#renouncing-candidacy">Renouncing candidacy.</a></h4>
+<p>All candidates, elected or not, can renounce their candidacy. A call to
+<a href="pallet/enum.Call.html#variant.renounce_candidacy" title="Call::renounce_candidacy"><code>Call::renounce_candidacy</code></a> will always cause the candidacy bond to be refunded.</p>
+<p>Note that with the members being the default candidates for the next round and votes persisting
+in storage, the election system is entirely stable given no further input. This means that if
+the system has a particular set of candidates <code>C</code> and voters <code>V</code> that lead to a set of members
+<code>M</code> being elected, as long as <code>V</code> and <code>C</code> don’t remove their candidacy and votes, <code>M</code> will keep
+being re-elected at the end of each round.</p>
+<h3 id="module-information" class="section-header"><a href="#module-information">Module Information</a></h3>
+<ul>
+<li><a href="pallet/trait.Config.html" title="Config"><code>Config</code></a></li>
+<li><a href="pallet/enum.Call.html" title="Call"><code>Call</code></a></li>
+<li><a href="pallet/type.Module.html" title="Module"><code>Module</code></a></li>
+</ul>
+</div></details><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<div class="item-table"><div class="item-left import-item"><code>pub use weights::<a class="trait" href="weights/trait.WeightInfo.html" title="trait pallet_elections_phragmen::weights::WeightInfo">WeightInfo</a>;</code></div><div class="item-right docblock-short"></div><div class="item-left import-item"><code>pub use <a class="mod" href="pallet/index.html" title="mod pallet_elections_phragmen::pallet">pallet</a>::*;</code></div><div class="item-right docblock-short"></div></div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="mod" href="migrations/index.html" title="pallet_elections_phragmen::migrations mod">migrations</a></div><div class="item-right docblock-short"><p>All migrations.
+All migrations of this pallet.</p>
+</div><div class="item-left module-item"><a class="mod" href="pallet/index.html" title="pallet_elections_phragmen::pallet mod">pallet</a></div><div class="item-right docblock-short"><p>The module that hosts all the
+<a href="https://docs.substrate.io/v3/runtime/frame">FRAME</a>
+types needed to add this pallet to a
+runtime.</p>
+</div><div class="item-left module-item"><a class="mod" href="weights/index.html" title="pallet_elections_phragmen::weights mod">weights</a></div><div class="item-right docblock-short"><p>Autogenerated weights for pallet_elections_phragmen</p>
+</div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.SeatHolder.html" title="pallet_elections_phragmen::SeatHolder struct">SeatHolder</a></div><div class="item-right docblock-short"><p>A holder of a seat as either a member or a runner-up.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.Voter.html" title="pallet_elections_phragmen::Voter struct">Voter</a></div><div class="item-right docblock-short"><p>An active voter.</p>
+</div></div><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="enum" href="enum.Renouncing.html" title="pallet_elections_phragmen::Renouncing enum">Renouncing</a></div><div class="item-right docblock-short"><p>An indication that the renouncing account currently has which of the below roles.</p>
+</div></div><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="constant" href="constant.MAXIMUM_VOTE.html" title="pallet_elections_phragmen::MAXIMUM_VOTE constant">MAXIMUM_VOTE</a></div><div class="item-right docblock-short"><p>The maximum votes allowed per voter.</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="pallet_elections_phragmen" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>

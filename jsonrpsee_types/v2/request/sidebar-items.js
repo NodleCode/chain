@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["JsonRpcCallSer","Serializable JSON-RPC object"],["JsonRpcInvalidRequest","Invalid request with known request ID."],["JsonRpcNotification","JSON-RPC notification (a request object without a request ID)."],["JsonRpcNotificationSer","Serializable JSON-RPC notification object"],["JsonRpcRequest","JSON-RPC request object"]]});

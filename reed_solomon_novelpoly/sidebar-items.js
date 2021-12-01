@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["encode",""],["reconstruct","each shard contains one symbol of one run of erasure coding"]],"mod":[["errors",""],["field",""],["shard",""],["util",""],["wrapped_shard",""]],"struct":[["CodeParams","Params for the encoder / decoder derived from a target validator count."],["ReedSolomon",""]]});

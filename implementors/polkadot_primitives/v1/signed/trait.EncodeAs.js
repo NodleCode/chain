@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["polkadot_node_primitives"] = [{"text":"impl <a class=\"trait\" href=\"polkadot_primitives/v1/signed/trait.EncodeAs.html\" title=\"trait polkadot_primitives::v1::signed::EncodeAs\">EncodeAs</a>&lt;<a class=\"enum\" href=\"polkadot_primitives/v0/enum.CompactStatement.html\" title=\"enum polkadot_primitives::v0::CompactStatement\">CompactStatement</a>&gt; for <a class=\"enum\" href=\"polkadot_node_primitives/enum.Statement.html\" title=\"enum polkadot_node_primitives::Statement\">Statement</a>","synthetic":false,"types":["polkadot_node_primitives::Statement"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

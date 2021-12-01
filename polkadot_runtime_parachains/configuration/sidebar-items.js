@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["migration","A module that is responsible for migration of storage."],["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]],"struct":[["HostConfiguration","All configuration of the runtime with respect to parachains and parathreads."],["TestWeightInfo",""]],"trait":[["WeightInfo",""]]});

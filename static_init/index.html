@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Non const static initialization, and program constructor&#x2F;destructor code."><meta name="keywords" content="rust, rustlang, rust-lang, static_init"><title>static_init - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../static_init/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate static_init</h2><div class="block version"><div class="narrow-helper"></div><p>Version 0.5.2</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all static_init's items</p></a><div class="block items"><ul><li><a href="#structs">Structs</a></li></ul></div><div id="sidebar-vars" data-name="static_init" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">static_init</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/static_init/lib.rs.html#8-608" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Non const static initialization, and program constructor/destructor code.</p>
+<h1 id="lesser-lazy-statics" class="section-header"><a href="#lesser-lazy-statics">Lesser Lazy Statics</a></h1>
+<p>This crate provides <em>lazy statics</em> on all plateforms.</p>
+<p>On unixes and windows <em>lesser lazy statics</em> are <em>lazy</em> during program startup phase
+(before <code>main</code> is called). Once main is called, those statics are all guaranteed to be
+initialized and any access to them is as fast as any access to regular const initialized
+statics. Benches sho that usual lazy statics, as those provided by <code>std::lazy::*</code> or from
+<a href="https://crates.io/crates/lazy_static">lazy_static</a> crate, suffer from a 2ns access penalty.</p>
+<p><em>Lesser lazy statics</em> can optionaly be dropped at program destruction
+(after main exit but before the program stops).</p>
+<p><em>Lesser lazy statics</em> require the standard library and are enabled by default
+crate features <code>lazy</code> and <code>atexit</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">dynamic</span>};
+
+<span class="attribute">#[<span class="ident">dynamic</span>]</span> <span class="comment">//equivalent to #[dynamic(lazy)]</span>
+<span class="kw">static</span> <span class="ident">L1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">L0</span>.<span class="ident">clone</span>()};
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">drop</span>)]</span> <span class="comment">//equivalent to #[dynamic(lazy,drop)]</span>
+<span class="kw">static</span> <span class="ident">L0</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">L2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">L1</span>.<span class="ident">clone</span>();</code></pre></div>
+<p>As can be seen above accesses to <em>lazy static</em> that are dropped must be within unsafe
+blocks. The reason is that it is possible at program destruction to access already dropped
+lazy statics.</p>
+<h1 id="dynamic-statics-statics-initialized-at-program-startup" class="section-header"><a href="#dynamic-statics-statics-initialized-at-program-startup">Dynamic statics: statics initialized at program startup</a></h1>
+<p>On plateforms that support it (unixes, mac, windows), this crate provides <em>dynamic statics</em>: statics that are
+initialized at program startup. This feature is <code>no_std</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">dynamic</span>};
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">0</span>)]</span>
+<span class="comment">//equivalent to #[dynamic(init=0)]</span>
+<span class="kw">static</span> <span class="ident">D1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];
+ 
+<span class="macro">assert_eq!</span>(<span class="kw">unsafe</span>{<span class="ident">D1</span>[<span class="number">0</span>]}, <span class="number">1</span>);</code></pre></div>
+<p>As can be seen above, even if D1 is not mutable, access to it must be performed in unsafe
+blocks. The reason is that during startup phase, accesses to <em>dynamic statics</em> may cause
+<em>undefined behavior</em>: <em>dynamic statics</em> may be in a zero initialized state.</p>
+<p>To prevent such hazardeous accesses, on unixes and window plateforms, a priority can be
+specified. Dynamic static initializations with higher priority are sequenced before dynamic
+static initializations with lower priority. Dynamic static initializations with the same
+priority are underterminately sequenced.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">dynamic</span>};
+
+<span class="comment">// D2 initialization is sequenced before D1 initialization</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">0</span>)]</span>
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">D1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">D2</span>.<span class="ident">clone</span>()};
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">10</span>)]</span>
+<span class="kw">static</span> <span class="ident">D2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</code></pre></div>
+<p><em>Dynamic statics</em> can be dropped at program destruction phase: they are dropped after main
+exit:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">dynamic</span>};
+
+<span class="comment">// D2 initialization is sequenced before D1 initialization</span>
+<span class="comment">// D1 drop is sequenced before D2 drop.</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">init</span><span class="op">=</span><span class="number">0</span>,<span class="ident">drop</span><span class="op">=</span><span class="number">0</span>)]</span>
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">D1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span> {<span class="ident">D2</span>.<span class="ident">clone</span>()};
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">init</span><span class="op">=</span><span class="number">10</span>,<span class="ident">drop</span><span class="op">=</span><span class="number">10</span>)]</span>
+<span class="kw">static</span> <span class="ident">D2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</code></pre></div>
+<p>The priority act on drop in reverse order. <em>Dynamic statics</em> drops with a lower priority are
+sequenced before <em>dynamic statics</em> drops with higher priority.</p>
+<p>Finally, if the feature <code>atexit</code> is enabled, <em>dynamic statics</em> drop can be registered with
+<code>libc::atexit</code>. <em>lazy dynamic statics</em> and <em>dynamic statics</em> with <code>drop_reverse</code> attribute
+argument are destroyed in the reverse order of their construction. Functions registered with
+<code>atexit</code> are executed before program destructors and drop of <em>dynamic statics</em> that use the
+<code>drop</code> attribute argument. Drop is registered with at <code>atexit</code> if no priority if given to the
+<code>drop</code> attribute argument.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">dynamic</span>};
+
+<span class="comment">//D1 is dropped before D2 because</span>
+<span class="comment">//it is initialized before D2</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">lazy</span>,<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="ident">D1</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>];
+
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">10</span>,<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="ident">D2</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">D1</span>.<span class="ident">clone</span>()};
+
+<span class="comment">//D3 is initilized after D1 and D2 initializations</span>
+<span class="comment">//and it is dropped after D1 and D2 drops</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">5</span>,<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="ident">D3</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">D1</span>.<span class="ident">clone</span>()};</code></pre></div>
+<h1 id="constructor-and-destructor" class="section-header"><a href="#constructor-and-destructor">Constructor and Destructor</a></h1>
+<p>On plateforms that support it (unixes, mac, windows), this crate provides a way to declare
+<em>constructors</em>: a function called before main is called. This feature is <code>no_std</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">constructor</span>};
+
+<span class="comment">//called before main</span>
+<span class="attribute">#[<span class="ident">constructor</span>]</span> <span class="comment">//equivalent to #[constructor(0)]</span>
+<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">some_init</span>() {}</code></pre></div>
+<p>Constructors also support priorities. Sequencement rules applies also between constructor calls and
+between <em>dynamic statics</em> initialization and <em>constructor</em> calls.</p>
+<p><em>destructors</em> are called at program destruction. They also support priorities.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">static_init</span>::{<span class="ident">constructor</span>, <span class="ident">destructor</span>};
+
+<span class="comment">//called before some_init</span>
+<span class="attribute">#[<span class="ident">constructor</span>(<span class="number">10</span>)]</span>
+<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">pre_init</span>() {}
+
+<span class="comment">//called before main</span>
+<span class="attribute">#[<span class="ident">constructor</span>]</span>
+<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">some_init</span>() {}
+
+<span class="comment">//called after main</span>
+<span class="attribute">#[<span class="ident">destructor</span>]</span>
+<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">first_destructor</span>() {}
+
+<span class="comment">//called after first_destructor</span>
+<span class="attribute">#[<span class="ident">destructor</span>(<span class="number">10</span>)]</span>
+<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">last_destructor</span>() {}</code></pre></div>
+<h1 id="thread-local-support" class="section-header"><a href="#thread-local-support">Thread Local Support</a></h1>
+<p>Variable declared with <code>#[dynamic(lazy)]</code> can also be declared <code>#[thread_local]</code>. These
+variable will behave as regular <em>lazy statics</em>.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="attribute">#[<span class="ident">thread_local</span>]</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">lazy</span>)]</span>
+<span class="kw">static</span> <span class="kw-2">mut</span> <span class="ident">X</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</code></pre></div>
+<p>These variables can also be droped on thread exit.</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="attribute">#[<span class="ident">thread_local</span>]</span>
+<span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">lazy</span>,<span class="ident">drop</span>)]</span>
+<span class="kw">static</span> <span class="ident">X</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];
+
+<span class="macro">assert!</span>(<span class="kw">unsafe</span>{<span class="ident">X</span>[<span class="number">1</span>] <span class="op">=</span><span class="op">=</span> <span class="number">2</span>});</code></pre></div>
+<p>Accessing a thread local <em>lazy statics</em> that should drop during the phase where thread_locals are
+droped may cause <em>undefined behavior</em>. For this reason any access to a thread local lazy static
+that is dropped will require an unsafe block, even if the static is const.</p>
+<h1 id="debuging-initialization-order" class="section-header"><a href="#debuging-initialization-order">Debuging initialization order</a></h1>
+<p>If the feature <code>debug_order</code> is enabled, attempts to access <code>dynamic statics</code> that are
+uninitialized or whose initialization is undeterminately sequenced with the access will cause
+a panic with a message specifying which statics was tentatively accessed and how to change this
+<em>dynamic static</em> priority to fix this issue.</p>
+<p>Run <code>cargo test</code> in this crate directory to see message examples.</p>
+<p>All implementations of lazy statics may suffer from circular initialization dependencies. Those
+circular dependencies will cause either a dead lock or an infinite loop. If the feature <code>debug_order</code> is
+enabled, atemp are made to detect those circular dependencies. In most case they will be detected.</p>
+</div></details><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.ConstLazy.html" title="static_init::ConstLazy struct">ConstLazy</a></div><div class="item-right docblock-short"><p>The type of const <em>lesser lazy statics</em>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.ConstStatic.html" title="static_init::ConstStatic struct">ConstStatic</a></div><div class="item-right docblock-short"><p>The actual type of non mutable <em>dynamic statics</em>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.Lazy.html" title="static_init::Lazy struct">Lazy</a></div><div class="item-right docblock-short"><p>The type of <em>lesser lazy statics</em>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.Static.html" title="static_init::Static struct">Static</a></div><div class="item-right docblock-short"><p>The actual type of mutable <em>dynamic statics</em>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.ThreadLocalConstLazy.html" title="static_init::ThreadLocalConstLazy struct">ThreadLocalConstLazy</a></div><div class="item-right docblock-short"><p>The type of const thread local lazy that will be dropped.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.ThreadLocalLazy.html" title="static_init::ThreadLocalLazy struct">ThreadLocalLazy</a></div><div class="item-right docblock-short"><p>The type of thread local lazy.</p>
+</div></div><h2 id="attributes" class="section-header"><a href="#attributes">Attribute Macros</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="attr" href="attr.constructor.html" title="static_init::constructor attr">constructor</a></div><div class="item-right docblock-short"><p>Attribute for functions run at program initialization (before main).</p>
+</div><div class="item-left module-item"><a class="attr" href="attr.destructor.html" title="static_init::destructor attr">destructor</a></div><div class="item-right docblock-short"><p>Attribute for functions run at program termination (after main)</p>
+</div><div class="item-left module-item"><a class="attr" href="attr.dynamic.html" title="static_init::dynamic attr">dynamic</a></div><div class="item-right docblock-short"><p>Statics initialized with non const functions.</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="static_init" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>

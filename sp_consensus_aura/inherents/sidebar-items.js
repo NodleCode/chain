@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["INHERENT_IDENTIFIER","The Aura inherent identifier."]],"struct":[["InherentDataProvider","Provides the slot duration inherent data for `Aura`."]],"trait":[["AuraInherentData","Auxiliary trait to extract Aura inherent data."]],"type":[["InherentType","The type of the Aura inherent."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["load_spec",""],["run","Parse command line arguments into service configuration."]],"trait":[["IdentifyChain","Can be called for a `Configuration` to check what node it belongs to."]]});
+initSidebarItems({"constant":[["DEFAULT_PARA_ID",""]],"fn":[["extract_genesis_wasm",""],["load_spec",""],["run","Parse command line arguments into service configuration."]],"trait":[["IdentifyChain","Can be called for a `Configuration` to check what node it belongs to."]]});

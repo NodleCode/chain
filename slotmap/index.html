@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="slotmap"><meta name="keywords" content="rust, rustlang, rust-lang, slotmap"><title>slotmap - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../slotmap/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate slotmap</h2><div class="block version"><div class="narrow-helper"></div><p>Version 1.0.6</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all slotmap's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><div id="sidebar-vars" data-name="slotmap" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">slotmap</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/slotmap/lib.rs.html#1-606" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h1 id="slotmap" class="section-header"><a href="#slotmap">slotmap</a></h1>
+<p>This library provides a container with persistent unique keys to access
+stored values, <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a>. Upon insertion a key is returned that can be
+used to later access or remove the values. Insertion, removal and access all
+take O(1) time with low overhead. Great for storing collections of objects
+that need stable, safe references but have no clear ownership otherwise,
+such as game entities or graph nodes.</p>
+<p>The difference between a <a href="https://doc.rust-lang.org/1.56.1/alloc/collections/btree/map/struct.BTreeMap.html"><code>BTreeMap</code></a> or <a href="https://doc.rust-lang.org/1.56.1/std/collections/hash/map/struct.HashMap.html"><code>HashMap</code></a> and a slot map is
+that the slot map generates and returns the key when inserting a value. A
+key is always unique and will only refer to the value that was inserted.
+A slot map’s main purpose is to simply own things in a safe and efficient
+manner.</p>
+<p>You can also create (multiple) secondary maps that can map the keys returned
+by <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> to other values, to associate arbitrary data with objects
+stored in slot maps, without hashing required - it’s direct indexing under
+the hood.</p>
+<p>The minimum required stable Rust version for this crate is 1.49.</p>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sm</span> <span class="op">=</span> <span class="ident">SlotMap::new</span>();
+<span class="kw">let</span> <span class="ident">foo</span> <span class="op">=</span> <span class="ident">sm</span>.<span class="ident">insert</span>(<span class="string">&quot;foo&quot;</span>);  <span class="comment">// Key generated on insert.</span>
+<span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="ident">sm</span>.<span class="ident">insert</span>(<span class="string">&quot;bar&quot;</span>);
+<span class="macro">assert_eq!</span>(<span class="ident">sm</span>[<span class="ident">foo</span>], <span class="string">&quot;foo&quot;</span>);
+<span class="macro">assert_eq!</span>(<span class="ident">sm</span>[<span class="ident">bar</span>], <span class="string">&quot;bar&quot;</span>);
+
+<span class="ident">sm</span>.<span class="ident">remove</span>(<span class="ident">bar</span>);
+<span class="kw">let</span> <span class="ident">reuse</span> <span class="op">=</span> <span class="ident">sm</span>.<span class="ident">insert</span>(<span class="string">&quot;reuse&quot;</span>);  <span class="comment">// Space from bar reused.</span>
+<span class="macro">assert_eq!</span>(<span class="ident">sm</span>.<span class="ident">contains_key</span>(<span class="ident">bar</span>), <span class="bool-val">false</span>);  <span class="comment">// After deletion a key stays invalid.</span>
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sec</span> <span class="op">=</span> <span class="ident">SecondaryMap::new</span>();
+<span class="ident">sec</span>.<span class="ident">insert</span>(<span class="ident">foo</span>, <span class="string">&quot;noun&quot;</span>);  <span class="comment">// We provide the key for secondary maps.</span>
+<span class="ident">sec</span>.<span class="ident">insert</span>(<span class="ident">reuse</span>, <span class="string">&quot;verb&quot;</span>);
+
+<span class="kw">for</span> (<span class="ident">key</span>, <span class="ident">val</span>) <span class="kw">in</span> <span class="ident">sm</span> {
+    <span class="macro">println!</span>(<span class="string">&quot;{} is a {}&quot;</span>, <span class="ident">val</span>, <span class="ident">sec</span>[<span class="ident">key</span>]);
+}</code></pre></div>
+<h1 id="serialization-through-serde-no_std-support-and-unstable-features" class="section-header"><a href="#serialization-through-serde-no_std-support-and-unstable-features">Serialization through <code>serde</code>, <code>no_std</code> support and unstable features</a></h1>
+<p>Both keys and the slot maps have full (de)seralization support through
+the <a href="https://github.com/serde-rs/serde"><code>serde</code></a> library. A key remains valid for a slot map even after one or
+both have been serialized and deserialized! This makes storing or
+transferring complicated referential structures and graphs a breeze. Care has
+been taken such that deserializing keys and slot maps from untrusted sources
+is safe. If you wish to use these features you must enable the <code>serde</code>
+feature flag for <code>slotmap</code> in your <code>Cargo.toml</code>.</p>
+<div class="example-wrap"><pre class="language-text"><code>slotmap = { version = &quot;1.0&quot;, features = [&quot;serde&quot;] }</code></pre></div>
+<p>This crate also supports <a href="https://doc.rust-lang.org/1.7.0/book/no-stdlib.html"><code>no_std</code></a> environments, but does require the
+<a href="https://doc.rust-lang.org/1.56.1/alloc/index.html" title="alloc"><code>alloc</code></a> crate to be available. To enable this you have to disable the
+<code>std</code> feature that is enabled by default:</p>
+<div class="example-wrap"><pre class="language-text"><code>slotmap = { version = &quot;1.0&quot;, default-features = false }</code></pre></div>
+<p>Unfortunately <a href="struct.SparseSecondaryMap.html" title="SparseSecondaryMap"><code>SparseSecondaryMap</code></a> is not available in <a href="https://doc.rust-lang.org/1.7.0/book/no-stdlib.html"><code>no_std</code></a>, because
+it relies on <a href="https://doc.rust-lang.org/1.56.1/std/collections/hash/map/struct.HashMap.html"><code>HashMap</code></a>. Finally the <code>unstable</code> feature can be defined to
+enable the parts of <code>slotmap</code> that only work on nightly Rust.</p>
+<h1 id="why-not-index-a-vec-or-use-slab-stable-vec-etc" class="section-header"><a href="#why-not-index-a-vec-or-use-slab-stable-vec-etc">Why not index a <code>Vec</code>, or use <code>slab</code>, <code>stable-vec</code>, etc?</a></h1>
+<p>Those solutions either can not reclaim memory from deleted elements or
+suffer from the ABA problem. The keys returned by <code>slotmap</code> are versioned.
+This means that once a key is removed, it stays removed, even if the
+physical storage inside the slotmap is reused for new elements. The key is a
+permanently unique<sup>*</sup> reference to the inserted value. Despite
+supporting versioning, a <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> is often not (much) slower than the
+alternative, by internally using carefully checked unsafe code. Finally,
+<code>slotmap</code> simply has a lot of features that make your life easy.</p>
+<h1 id="performance-characteristics-and-implementation-details" class="section-header"><a href="#performance-characteristics-and-implementation-details">Performance characteristics and implementation details</a></h1>
+<p>Insertion, access and deletion is all O(1) with low overhead by storing the
+elements inside a <a href="https://doc.rust-lang.org/1.56.1/alloc/vec/struct.Vec.html"><code>Vec</code></a>. Unlike references or indices into a vector,
+unless you remove a key it is never invalidated. Behind the scenes each
+slot in the vector is a <code>(value, version)</code> tuple. After insertion the
+returned key also contains a version. Only when the stored version and
+version in a key match is a key valid. This allows us to reuse space in the
+vector after deletion without letting removed keys point to spurious new
+elements. <sup>*</sup>After 2<sup>31</sup> deletions and insertions to the
+same underlying slot the version wraps around and such a spurious reference
+could potentially occur. It is incredibly unlikely however, and in all
+circumstances is the behavior safe. A slot map can hold up to
+2<sup>32</sup> - 2 elements at a time.</p>
+<p>The memory usage for each slot in <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> is <code>4 + max(sizeof(T), 4)</code>
+rounded up to the alignment of <code>T</code>. Similarly it is <code>4 + max(sizeof(T), 12)</code>
+for <a href="struct.HopSlotMap.html" title="HopSlotMap"><code>HopSlotMap</code></a>. <a href="struct.DenseSlotMap.html" title="DenseSlotMap"><code>DenseSlotMap</code></a> has an overhead of 8 bytes per element
+and 8 bytes per slot.</p>
+<h1 id="choosing-slotmap-hopslotmap-or-denseslotmap" class="section-header"><a href="#choosing-slotmap-hopslotmap-or-denseslotmap">Choosing <code>SlotMap</code>, <code>HopSlotMap</code> or <code>DenseSlotMap</code></a></h1>
+<p>A <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> is the fastest for most operations, except iteration. It can
+never shrink the size of its underlying storage, because it must remember
+for each storage slot what the latest stored version was, even if the slot
+is empty now. This means that iteration can be slow as it must iterate over
+potentially a lot of empty slots.</p>
+<p><a href="struct.HopSlotMap.html" title="HopSlotMap"><code>HopSlotMap</code></a> solves this by maintaining more information on
+insertion/removal, allowing it to iterate only over filled slots by ‘hopping
+over’ contiguous blocks of vacant slots. This can give it significantly
+better iteration speed.  If you expect to iterate over all elements in a
+<a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> a lot, and potentially have a lot of deleted elements, choose
+<a href="struct.HopSlotMap.html" title="HopSlotMap"><code>HopSlotMap</code></a>. The downside is that insertion and removal is roughly twice
+as slow. Random access is the same speed for both.</p>
+<p><a href="struct.DenseSlotMap.html" title="DenseSlotMap"><code>DenseSlotMap</code></a> goes even further and stores all elements on a contiguous
+block of memory. It uses two indirections per random access; the slots
+contain indices used to access the contiguous memory. This means random
+access is slower than both <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> and <a href="struct.HopSlotMap.html" title="HopSlotMap"><code>HopSlotMap</code></a>, but iteration is
+significantly faster, as fast as a normal <a href="https://doc.rust-lang.org/1.56.1/alloc/vec/struct.Vec.html"><code>Vec</code></a>.</p>
+<h1 id="choosing-secondarymap-or-sparsesecondarymap" class="section-header"><a href="#choosing-secondarymap-or-sparsesecondarymap">Choosing <code>SecondaryMap</code> or <code>SparseSecondaryMap</code></a></h1>
+<p>You want to associate extra data with objects stored in a slot map, so you
+use (multiple) secondary maps to map keys to that data.</p>
+<p>A <a href="struct.SecondaryMap.html" title="SecondaryMap"><code>SecondaryMap</code></a> is simply a <a href="https://doc.rust-lang.org/1.56.1/alloc/vec/struct.Vec.html"><code>Vec</code></a> of slots like slot map is, and
+essentially provides all the same guarantees as <a href="struct.SlotMap.html" title="SlotMap"><code>SlotMap</code></a> does for its
+operations (with the exception that you provide the keys as produced by the
+primary slot map). This does mean that even if you associate data to only
+a single element from the primary slot map, you could need and have to
+initialize as much memory as the original.</p>
+<p>A <a href="struct.SparseSecondaryMap.html" title="SparseSecondaryMap"><code>SparseSecondaryMap</code></a> is like a <a href="https://doc.rust-lang.org/1.56.1/std/collections/hash/map/struct.HashMap.html"><code>HashMap</code></a> from keys to objects, however
+it automatically removes outdated keys for slots that had their space
+reused. You should use this variant if you expect to store some associated
+data for only a small portion of the primary slot map.</p>
+<h1 id="custom-key-types" class="section-header"><a href="#custom-key-types">Custom key types</a></h1>
+<p>If you have multiple slot maps it’s an error to use the key of one slot map
+on another slot map. The result is safe, but unspecified, and can not be
+detected at runtime, so it can lead to a hard to find bug.</p>
+<p>To prevent this, slot maps allow you to specify what the type is of the key
+they return. You can construct new key types using the <a href="macro.new_key_type.html" title="new_key_type!"><code>new_key_type!</code></a>
+macro. The resulting type behaves exactly like <a href="struct.DefaultKey.html" title="DefaultKey"><code>DefaultKey</code></a>, but is a
+distinct type. So instead of simply using <code>SlotMap&lt;DefaultKey, Player&gt;</code> you
+would use:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">new_key_type!</span> { <span class="kw">struct</span> <span class="ident">PlayerKey</span>; }
+<span class="kw">let</span> <span class="ident">sm</span>: <span class="ident">SlotMap</span><span class="op">&lt;</span><span class="ident">PlayerKey</span>, <span class="ident">Player</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">SlotMap::with_key</span>();</code></pre></div>
+<p>You can write code generic over any key type using the <a href="trait.Key.html" title="Key"><code>Key</code></a> trait.</p>
+</div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="mod" href="basic/index.html" title="slotmap::basic mod">basic</a></div><div class="item-right docblock-short"><p>Contains the slot map implementation.</p>
+</div><div class="item-left module-item"><a class="mod" href="dense/index.html" title="slotmap::dense mod">dense</a></div><div class="item-right docblock-short"><p>Contains the dense slot map implementation.</p>
+</div><div class="item-left module-item"><a class="mod" href="hop/index.html" title="slotmap::hop mod">hop</a></div><div class="item-right docblock-short"><p>Contains the faster iteration, slower insertion/removal slot map
+implementation.</p>
+</div><div class="item-left module-item"><a class="mod" href="secondary/index.html" title="slotmap::secondary mod">secondary</a></div><div class="item-right docblock-short"><p>Contains the secondary map implementation.</p>
+</div><div class="item-left module-item"><a class="mod" href="sparse_secondary/index.html" title="slotmap::sparse_secondary mod">sparse_secondary</a></div><div class="item-right docblock-short"><p>Contains the sparse secondary map implementation.</p>
+</div></div><h2 id="macros" class="section-header"><a href="#macros">Macros</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="macro" href="macro.new_key_type.html" title="slotmap::new_key_type macro">new_key_type</a></div><div class="item-right docblock-short"><p>A helper macro to create new key types. If you use a new key type for each
+slot map you create you can entirely prevent using the wrong key on the
+wrong slot map.</p>
+</div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.DefaultKey.html" title="slotmap::DefaultKey struct">DefaultKey</a></div><div class="item-right docblock-short"><p>The default slot map key type.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.DenseSlotMap.html" title="slotmap::DenseSlotMap struct">DenseSlotMap</a></div><div class="item-right docblock-short"><p>Dense slot map, storage with stable unique keys.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.HopSlotMap.html" title="slotmap::HopSlotMap struct">HopSlotMap</a></div><div class="item-right docblock-short"><p>Hop slot map, storage with stable unique keys.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.KeyData.html" title="slotmap::KeyData struct">KeyData</a></div><div class="item-right docblock-short"><p>The actual data stored in a <a href="trait.Key.html" title="Key"><code>Key</code></a>.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.SecondaryMap.html" title="slotmap::SecondaryMap struct">SecondaryMap</a></div><div class="item-right docblock-short"><p>Secondary map, associate data with previously stored elements in a slot map.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.SlotMap.html" title="slotmap::SlotMap struct">SlotMap</a></div><div class="item-right docblock-short"><p>Slot map, storage with stable unique keys.</p>
+</div><div class="item-left module-item"><a class="struct" href="struct.SparseSecondaryMap.html" title="slotmap::SparseSecondaryMap struct">SparseSecondaryMap</a></div><div class="item-right docblock-short"><p>Sparse secondary map, associate data with previously stored elements in a
+slot map.</p>
+</div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.Key.html" title="slotmap::Key trait">Key</a></div><div class="item-right docblock-short"><p>Key used to access stored values in a slot map.</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="slotmap" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>

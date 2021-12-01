@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BeefyNextAuthoritySet","Details of the next BEEFY authority set."],["MmrLeaf","A standard leaf that gets added every block to the MMR constructed by Substrate’s `pallet_mmr`."],["MmrLeafVersion","A MMR leaf versioning scheme."]]});

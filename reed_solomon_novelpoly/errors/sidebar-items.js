@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Error type for interfacing with the novel poly basis"]],"type":[["Result","Result alias to simplify API."]]});

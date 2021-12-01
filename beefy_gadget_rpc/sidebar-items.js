@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["gen_client","The generated client module."]],"struct":[["BeefyApiClient","The Client."],["BeefyRpcHandler","Implements the BeefyApi RPC trait for interacting with BEEFY."]],"trait":[["BeefyApi","Provides RPC methods for interacting with BEEFY."]]});

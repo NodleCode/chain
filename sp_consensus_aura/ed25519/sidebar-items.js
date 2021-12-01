@@ -1,0 +1,1 @@
+initSidebarItems({"type":[["AuthorityId","An Aura authority identifier using Ed25519 as its crypto."],["AuthorityPair","An Aura authority keypair using Ed25519 as its crypto."],["AuthoritySignature","An Aura authority signature using Ed25519 as its crypto."]]});

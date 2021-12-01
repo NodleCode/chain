@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["client","WebSocket Client."],["helpers","Helpers."],["manager","Request manager. Handles and monitors JSONRPC v2 method calls and subscriptions"],["stream","Stream. Convenience wrapper for a stream (AsyncRead + AsyncWrite) which can either be plain TCP or TLS."],["transport","WebSocket transport."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["start_collator","Start the collator."]],"struct":[["Collator","The implementation of the Cumulus `Collator`."],["StartCollatorParams","Parameters for [`start_collator`]."]]});

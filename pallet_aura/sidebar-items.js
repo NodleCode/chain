@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["migrations","Migrations for the AURA pallet."],["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]],"type":[["AuraAuthorId","Find the authority ID of the Aura authority who authored the current block."]]});

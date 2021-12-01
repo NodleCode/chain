@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["remove_last_timestamp","Remove the `LastTimestamp` storage value."]],"trait":[["RemoveLastTimestamp",""]]});

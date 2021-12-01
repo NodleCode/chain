@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ChildParachainRouter","XCM sender for relay chain. It only sends downward message."]]});

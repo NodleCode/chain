@@ -1,0 +1,1758 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;polkadot-4038f27d5e4ea2e8&#x2F;5feed98&#x2F;node&#x2F;subsystem-types&#x2F;src&#x2F;messages.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>messages.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../polkadot_node_subsystem_types/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2017-2020 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// This file is part of Polkadot.</span>
+
+<span class="comment">// Polkadot is free software: you can redistribute it and/or modify</span>
+<span class="comment">// it under the terms of the GNU General Public License as published by</span>
+<span class="comment">// the Free Software Foundation, either version 3 of the License, or</span>
+<span class="comment">// (at your option) any later version.</span>
+
+<span class="comment">// Polkadot is distributed in the hope that it will be useful,</span>
+<span class="comment">// but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="comment">// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="comment">// GNU General Public License for more details.</span>
+
+<span class="comment">// You should have received a copy of the GNU General Public License</span>
+<span class="comment">// along with Polkadot.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="doccomment">//! Message types for the overseer and subsystems.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! These messages are intended to define the protocol by which different subsystems communicate with each</span>
+<span class="doccomment">//! other and signals that they receive from an overseer to coordinate their work.</span>
+<span class="doccomment">//! This is intended for use with the `polkadot-overseer` crate.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Subsystems&#39; APIs are defined separately from their implementation, leading to easier mocking.</span>
+
+<span class="kw">use</span> <span class="ident">futures::channel::oneshot</span>;
+<span class="kw">use</span> <span class="ident">sc_network::Multiaddr</span>;
+<span class="kw">use</span> <span class="ident">thiserror::Error</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sc_network::IfDisconnected</span>;
+
+<span class="kw">use</span> <span class="ident">polkadot_node_network_protocol</span>::{
+	<span class="ident">peer_set::PeerSet</span>, <span class="ident">request_response::Requests</span>, <span class="ident">v1</span> <span class="kw">as</span> <span class="ident">protocol_v1</span>, <span class="ident">PeerId</span>,
+	<span class="ident">UnifiedReputationChange</span>,
+};
+<span class="kw">use</span> <span class="ident">polkadot_node_primitives</span>::{
+	<span class="ident">approval</span>::{<span class="ident">BlockApprovalMeta</span>, <span class="ident">IndirectAssignmentCert</span>, <span class="ident">IndirectSignedApprovalVote</span>},
+	<span class="ident">AvailableData</span>, <span class="ident">BabeEpoch</span>, <span class="ident">BlockWeight</span>, <span class="ident">CandidateVotes</span>, <span class="ident">CollationGenerationConfig</span>,
+	<span class="ident">CollationSecondedSignal</span>, <span class="ident">DisputeMessage</span>, <span class="ident">ErasureChunk</span>, <span class="ident">PoV</span>, <span class="ident">SignedDisputeStatement</span>,
+	<span class="ident">SignedFullStatement</span>, <span class="ident">ValidationResult</span>,
+};
+<span class="kw">use</span> <span class="ident">polkadot_primitives::v1</span>::{
+	<span class="ident">AuthorityDiscoveryId</span>, <span class="ident">BackedCandidate</span>, <span class="ident">BlockNumber</span>, <span class="ident">CandidateDescriptor</span>, <span class="ident">CandidateEvent</span>,
+	<span class="ident">CandidateHash</span>, <span class="ident">CandidateIndex</span>, <span class="ident">CandidateReceipt</span>, <span class="ident">CollatorId</span>, <span class="ident">CommittedCandidateReceipt</span>,
+	<span class="ident">CoreState</span>, <span class="ident">GroupIndex</span>, <span class="ident">GroupRotationInfo</span>, <span class="ident">Hash</span>, <span class="ident">Header</span> <span class="kw">as</span> <span class="ident">BlockHeader</span>, <span class="ident">Id</span> <span class="kw">as</span> <span class="ident">ParaId</span>,
+	<span class="ident">InboundDownwardMessage</span>, <span class="ident">InboundHrmpMessage</span>, <span class="ident">MultiDisputeStatementSet</span>, <span class="ident">OccupiedCoreAssumption</span>,
+	<span class="ident">PersistedValidationData</span>, <span class="ident">SessionIndex</span>, <span class="ident">SessionInfo</span>, <span class="ident">SignedAvailabilityBitfield</span>,
+	<span class="ident">SignedAvailabilityBitfields</span>, <span class="ident">ValidationCode</span>, <span class="ident">ValidationCodeHash</span>, <span class="ident">ValidatorId</span>, <span class="ident">ValidatorIndex</span>,
+	<span class="ident">ValidatorSignature</span>,
+};
+<span class="kw">use</span> <span class="ident">polkadot_statement_table::v1::Misbehavior</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+	<span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashSet</span>},
+	<span class="ident">sync::Arc</span>,
+	<span class="ident">time::Duration</span>,
+};
+
+<span class="doccomment">/// Network events as transmitted to other subsystems, wrapped in their message types.</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">network_bridge_event</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">network_bridge_event::NetworkBridgeEvent</span>;
+
+<span class="doccomment">/// Subsystem messages where each message is always bound to a relay parent.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BoundToRelayParent</span> {
+	<span class="doccomment">/// Returns the relay parent this message is bound to.</span>
+	<span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hash</span>;
+}
+
+<span class="doccomment">/// Messages received by the Candidate Backing subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CandidateBackingMessage</span> {
+	<span class="doccomment">/// Requests a set of backable candidates that could be backed in a child of the given</span>
+	<span class="doccomment">/// relay-parent, referenced by its hash.</span>
+	<span class="ident">GetBackedCandidates</span>(<span class="ident">Hash</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateHash</span><span class="op">&gt;</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Note that the Candidate Backing subsystem should second the given candidate in the context of the</span>
+	<span class="doccomment">/// given relay-parent (ref. by hash). This candidate must be validated.</span>
+	<span class="ident">Second</span>(<span class="ident">Hash</span>, <span class="ident">CandidateReceipt</span>, <span class="ident">PoV</span>),
+	<span class="doccomment">/// Note a validator&#39;s statement about a particular candidate. Disagreements about validity must be escalated</span>
+	<span class="doccomment">/// to a broader check by Misbehavior Arbitration. Agreements are simply tallied until a quorum is reached.</span>
+	<span class="ident">Statement</span>(<span class="ident">Hash</span>, <span class="ident">SignedFullStatement</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">BoundToRelayParent</span> <span class="kw">for</span> <span class="ident">CandidateBackingMessage</span> {
+	<span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hash</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="ident"><span class="self">Self</span>::GetBackedCandidates</span>(<span class="ident">hash</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">hash</span>,
+			<span class="ident"><span class="self">Self</span>::Second</span>(<span class="ident">hash</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">hash</span>,
+			<span class="ident"><span class="self">Self</span>::Statement</span>(<span class="ident">hash</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">hash</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// Blanket error for validation failing for internal reasons.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Error</span>)]</span>
+<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Validation failed with {0:?}&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ValidationFailed</span>(<span class="kw">pub</span> <span class="ident">String</span>);
+
+<span class="doccomment">/// Messages received by the Validation subsystem.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Validation Requests</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Validation requests made to the subsystem should return an error only on internal error.</span>
+<span class="doccomment">/// Otherwise, they should return either `Ok(ValidationResult::Valid(_))`</span>
+<span class="doccomment">/// or `Ok(ValidationResult::Invalid)`.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CandidateValidationMessage</span> {
+	<span class="doccomment">/// Validate a candidate with provided parameters using relay-chain state.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This will implicitly attempt to gather the `PersistedValidationData` and `ValidationCode`</span>
+	<span class="doccomment">/// from the runtime API of the chain, based on the `relay_parent`</span>
+	<span class="doccomment">/// of the `CandidateDescriptor`.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This will also perform checking of validation outputs against the acceptance criteria.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// If there is no state available which can provide this data or the core for</span>
+	<span class="doccomment">/// the para is not free at the relay-parent, an error is returned.</span>
+	<span class="ident">ValidateFromChainState</span>(
+		<span class="ident">CandidateDescriptor</span>,
+		<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
+		<span class="doccomment">/// Execution timeout</span>
+		<span class="ident">Duration</span>,
+		<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	),
+	<span class="doccomment">/// Validate a candidate with provided, exhaustive parameters for validation.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Explicitly provide the `PersistedValidationData` and `ValidationCode` so this can do full</span>
+	<span class="doccomment">/// validation without needing to access the state of the relay-chain.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This request doesn&#39;t involve acceptance criteria checking, therefore only useful for the</span>
+	<span class="doccomment">/// cases where the validity of the candidate is established. This is the case for the typical</span>
+	<span class="doccomment">/// use-case: secondary checkers would use this request relying on the full prior checks</span>
+	<span class="doccomment">/// performed by the relay-chain.</span>
+	<span class="ident">ValidateFromExhaustive</span>(
+		<span class="ident">PersistedValidationData</span>,
+		<span class="ident">ValidationCode</span>,
+		<span class="ident">CandidateDescriptor</span>,
+		<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
+		<span class="doccomment">/// Execution timeout</span>
+		<span class="ident">Duration</span>,
+		<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	),
+}
+
+<span class="kw">impl</span> <span class="ident">CandidateValidationMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="ident"><span class="self">Self</span>::ValidateFromChainState</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::ValidateFromExhaustive</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// Messages received by the Collator Protocol subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">derive_more::From</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CollatorProtocolMessage</span> {
+	<span class="doccomment">/// Signal to the collator protocol that it should connect to validators with the expectation</span>
+	<span class="doccomment">/// of collating on the given para. This is only expected to be called once, early on, if at all,</span>
+	<span class="doccomment">/// and only by the Collation Generation subsystem. As such, it will overwrite the value of</span>
+	<span class="doccomment">/// the previous signal.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This should be sent before any `DistributeCollation` message.</span>
+	<span class="ident">CollateOn</span>(<span class="ident">ParaId</span>),
+	<span class="doccomment">/// Provide a collation to distribute to validators with an optional result sender.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The result sender should be informed when at least one parachain validator seconded the collation. It is also</span>
+	<span class="doccomment">/// completely okay to just drop the sender.</span>
+	<span class="ident">DistributeCollation</span>(<span class="ident">CandidateReceipt</span>, <span class="ident">PoV</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">CollationSecondedSignal</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Report a collator as having provided an invalid collation. This should lead to disconnect</span>
+	<span class="doccomment">/// and blacklist of the collator.</span>
+	<span class="ident">ReportCollator</span>(<span class="ident">CollatorId</span>),
+	<span class="doccomment">/// Get a network bridge update.</span>
+	<span class="attribute">#[<span class="ident">from</span>]</span>
+	<span class="ident">NetworkBridgeUpdateV1</span>(<span class="ident">NetworkBridgeEvent</span><span class="op">&lt;</span><span class="ident">protocol_v1::CollatorProtocolMessage</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// We recommended a particular candidate to be seconded, but it was invalid; penalize the collator.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The hash is the relay parent.</span>
+	<span class="ident">Invalid</span>(<span class="ident">Hash</span>, <span class="ident">CandidateReceipt</span>),
+	<span class="doccomment">/// The candidate we recommended to be seconded was validated successfully.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The hash is the relay parent.</span>
+	<span class="ident">Seconded</span>(<span class="ident">Hash</span>, <span class="ident">SignedFullStatement</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">CollatorProtocolMessage</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="ident"><span class="self">Self</span>::CollateOn</span>(<span class="ident">Default::default</span>())
+	}
+}
+
+<span class="kw">impl</span> <span class="ident">BoundToRelayParent</span> <span class="kw">for</span> <span class="ident">CollatorProtocolMessage</span> {
+	<span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hash</span> {
+		<span class="ident">Default::default</span>()
+	}
+}
+
+<span class="doccomment">/// Messages received by the dispute coordinator subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DisputeCoordinatorMessage</span> {
+	<span class="doccomment">/// Import statements by validators about a candidate.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The subsystem will silently discard ancient statements or sets of only dispute-specific statements for</span>
+	<span class="doccomment">/// candidates that are previously unknown to the subsystem. The former is simply because ancient</span>
+	<span class="doccomment">/// data is not relevant and the latter is as a DoS prevention mechanism. Both backing and approval</span>
+	<span class="doccomment">/// statements already undergo anti-DoS procedures in their respective subsystems, but statements</span>
+	<span class="doccomment">/// cast specifically for disputes are not necessarily relevant to any candidate the system is</span>
+	<span class="doccomment">/// already aware of and thus present a DoS vector. Our expectation is that nodes will notify each</span>
+	<span class="doccomment">/// other of disputes over the network by providing (at least) 2 conflicting statements, of which one is either</span>
+	<span class="doccomment">/// a backing or validation statement.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This does not do any checking of the message signature.</span>
+	<span class="ident">ImportStatements</span> {
+		<span class="doccomment">/// The hash of the candidate.</span>
+		<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
+		<span class="doccomment">/// The candidate receipt itself.</span>
+		<span class="ident">candidate_receipt</span>: <span class="ident">CandidateReceipt</span>,
+		<span class="doccomment">/// The session the candidate appears in.</span>
+		<span class="ident">session</span>: <span class="ident">SessionIndex</span>,
+		<span class="doccomment">/// Statements, with signatures checked, by validators participating in disputes.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The validator index passed alongside each statement should correspond to the index</span>
+		<span class="doccomment">/// of the validator in the set.</span>
+		<span class="ident">statements</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SignedDisputeStatement</span>, <span class="ident">ValidatorIndex</span>)<span class="op">&gt;</span>,
+		<span class="doccomment">/// Inform the requester once we finished importing.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// This is:</span>
+		<span class="doccomment">/// - we discarded the votes because</span>
+		<span class="doccomment">///		- they were ancient or otherwise invalid (result: `InvalidImport`)</span>
+		<span class="doccomment">///		- or we were not able to recover availability for an unknown candidate (result:</span>
+		<span class="doccomment">///		`InvalidImport`)</span>
+		<span class="doccomment">///		- or were known already (in that case the result will still be `ValidImport`)</span>
+		<span class="doccomment">/// - or we recorded them because (`ValidImport`)</span>
+		<span class="doccomment">///		- we cast our own vote already on that dispute</span>
+		<span class="doccomment">///		- or we have approval votes on that candidate</span>
+		<span class="doccomment">///		- or other explicit votes on that candidate already recorded</span>
+		<span class="doccomment">///		- or recovered availability for the candidate</span>
+		<span class="doccomment">///		- or the imported statements are backing/approval votes, which are always accepted.</span>
+		<span class="ident">pending_confirmation</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">ImportStatementsResult</span><span class="op">&gt;</span>,
+	},
+	<span class="doccomment">/// Fetch a list of all recent disputes the co-ordinator is aware of.</span>
+	<span class="doccomment">/// These are disputes which have occurred any time in recent sessions,</span>
+	<span class="doccomment">/// and which may have already concluded.</span>
+	<span class="ident">RecentDisputes</span>(<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SessionIndex</span>, <span class="ident">CandidateHash</span>)<span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Fetch a list of all active disputes that the coordinator is aware of.</span>
+	<span class="doccomment">/// These disputes are either unconcluded or recently concluded.</span>
+	<span class="ident">ActiveDisputes</span>(<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SessionIndex</span>, <span class="ident">CandidateHash</span>)<span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get candidate votes for a candidate.</span>
+	<span class="ident">QueryCandidateVotes</span>(
+		<span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SessionIndex</span>, <span class="ident">CandidateHash</span>)<span class="op">&gt;</span>,
+		<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SessionIndex</span>, <span class="ident">CandidateHash</span>, <span class="ident">CandidateVotes</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
+	),
+	<span class="doccomment">/// Sign and issue local dispute votes. A value of `true` indicates validity, and `false` invalidity.</span>
+	<span class="ident">IssueLocalStatement</span>(<span class="ident">SessionIndex</span>, <span class="ident">CandidateHash</span>, <span class="ident">CandidateReceipt</span>, <span class="ident">bool</span>),
+	<span class="doccomment">/// Determine the highest undisputed block within the given chain, based on where candidates</span>
+	<span class="doccomment">/// were included. If even the base block should not be finalized due to a dispute,</span>
+	<span class="doccomment">/// then `None` should be returned on the channel.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The block descriptions begin counting upwards from the block after the given `base_number`. The `base_number`</span>
+	<span class="doccomment">/// is typically the number of the last finalized block but may be slightly higher. This block</span>
+	<span class="doccomment">/// is inevitably going to be finalized so it is not accounted for by this function.</span>
+	<span class="ident">DetermineUndisputedChain</span> {
+		<span class="doccomment">/// The lowest possible block to vote on.</span>
+		<span class="ident">base</span>: (<span class="ident">BlockNumber</span>, <span class="ident">Hash</span>),
+		<span class="doccomment">/// Descriptions of all the blocks counting upwards from the block after the base number</span>
+		<span class="ident">block_descriptions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BlockDescription</span><span class="op">&gt;</span>,
+		<span class="doccomment">/// The block to vote on, might be base in case there is no better.</span>
+		<span class="ident">tx</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span>(<span class="ident">BlockNumber</span>, <span class="ident">Hash</span>)<span class="op">&gt;</span>,
+	},
+}
+
+<span class="doccomment">/// The result of `DisputeCoordinatorMessage::ImportStatements`.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ImportStatementsResult</span> {
+	<span class="doccomment">/// Import was invalid (candidate was not available)  and the sending peer should get banned.</span>
+	<span class="ident">InvalidImport</span>,
+	<span class="doccomment">/// Import was valid and can be confirmed to peer.</span>
+	<span class="ident">ValidImport</span>,
+}
+
+<span class="doccomment">/// Messages received by the dispute participation subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DisputeParticipationMessage</span> {
+	<span class="doccomment">/// Validate a candidate for the purposes of participating in a dispute.</span>
+	<span class="ident">Participate</span> {
+		<span class="doccomment">/// The hash of the candidate</span>
+		<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
+		<span class="doccomment">/// The candidate receipt itself.</span>
+		<span class="ident">candidate_receipt</span>: <span class="ident">CandidateReceipt</span>,
+		<span class="doccomment">/// The session the candidate appears in.</span>
+		<span class="ident">session</span>: <span class="ident">SessionIndex</span>,
+		<span class="doccomment">/// The number of validators in the session.</span>
+		<span class="ident">n_validators</span>: <span class="ident">u32</span>,
+		<span class="doccomment">/// Give immediate feedback on whether the candidate was available or</span>
+		<span class="doccomment">/// not.</span>
+		<span class="ident">report_availability</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>,
+	},
+}
+
+<span class="doccomment">/// Messages going to the dispute distribution subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DisputeDistributionMessage</span> {
+	<span class="doccomment">/// Tell dispute distribution to distribute an explicit dispute statement to</span>
+	<span class="doccomment">/// validators.</span>
+	<span class="ident">SendDispute</span>(<span class="ident">DisputeMessage</span>),
+}
+
+<span class="doccomment">/// Messages received by the network bridge subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">NetworkBridgeMessage</span> {
+	<span class="doccomment">/// Report a peer for their actions.</span>
+	<span class="ident">ReportPeer</span>(<span class="ident">PeerId</span>, <span class="ident">UnifiedReputationChange</span>),
+
+	<span class="doccomment">/// Disconnect a peer from the given peer-set without affecting their reputation.</span>
+	<span class="ident">DisconnectPeer</span>(<span class="ident">PeerId</span>, <span class="ident">PeerSet</span>),
+
+	<span class="doccomment">/// Send a message to one or more peers on the validation peer-set.</span>
+	<span class="ident">SendValidationMessage</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>, <span class="ident">protocol_v1::ValidationProtocol</span>),
+
+	<span class="doccomment">/// Send a message to one or more peers on the collation peer-set.</span>
+	<span class="ident">SendCollationMessage</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>, <span class="ident">protocol_v1::CollationProtocol</span>),
+
+	<span class="doccomment">/// Send a batch of validation messages.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// NOTE: Messages will be processed in order (at least statement distribution relies on this).</span>
+	<span class="ident">SendValidationMessages</span>(<span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>, <span class="ident">protocol_v1::ValidationProtocol</span>)<span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Send a batch of collation messages.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// NOTE: Messages will be processed in order.</span>
+	<span class="ident">SendCollationMessages</span>(<span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>, <span class="ident">protocol_v1::CollationProtocol</span>)<span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Send requests via substrate request/response.</span>
+	<span class="doccomment">/// Second parameter, tells what to do if we are not yet connected to the peer.</span>
+	<span class="ident">SendRequests</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Requests</span><span class="op">&gt;</span>, <span class="ident">IfDisconnected</span>),
+
+	<span class="doccomment">/// Connect to peers who represent the given `validator_ids`.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Also ask the network to stay connected to these peers at least</span>
+	<span class="doccomment">/// until a new request is issued.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Because it overrides the previous request, it must be ensured</span>
+	<span class="doccomment">/// that `validator_ids` include all peers the subsystems</span>
+	<span class="doccomment">/// are interested in (per `PeerSet`).</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// A caller can learn about validator connections by listening to the</span>
+	<span class="doccomment">/// `PeerConnected` events from the network bridge.</span>
+	<span class="ident">ConnectToValidators</span> {
+		<span class="doccomment">/// Ids of the validators to connect to.</span>
+		<span class="ident">validator_ids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AuthorityDiscoveryId</span><span class="op">&gt;</span>,
+		<span class="doccomment">/// The underlying protocol to use for this request.</span>
+		<span class="ident">peer_set</span>: <span class="ident">PeerSet</span>,
+		<span class="doccomment">/// Sends back the number of `AuthorityDiscoveryId`s which</span>
+		<span class="doccomment">/// authority discovery has failed to resolve.</span>
+		<span class="ident">failed</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+	},
+	<span class="doccomment">/// Alternative to `ConnectToValidators` in case you already know the `Multiaddrs` you want to be</span>
+	<span class="doccomment">/// connected to.</span>
+	<span class="ident">ConnectToResolvedValidators</span> {
+		<span class="doccomment">/// Each entry corresponds to the addresses of an already resolved validator.</span>
+		<span class="ident">validator_addrs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="doccomment">/// The peer set we want the connection on.</span>
+		<span class="ident">peer_set</span>: <span class="ident">PeerSet</span>,
+	},
+	<span class="doccomment">/// Inform the distribution subsystems about the new</span>
+	<span class="doccomment">/// gossip network topology formed.</span>
+	<span class="ident">NewGossipTopology</span> {
+		<span class="doccomment">/// Ids of our neighbors in the new gossip topology.</span>
+		<span class="doccomment">/// We&#39;re not necessarily connected to all of them, but we should.</span>
+		<span class="ident">our_neighbors</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">AuthorityDiscoveryId</span><span class="op">&gt;</span>,
+	},
+}
+
+<span class="kw">impl</span> <span class="ident">NetworkBridgeMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="ident"><span class="self">Self</span>::ReportPeer</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::DisconnectPeer</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::SendValidationMessage</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::SendCollationMessage</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::SendValidationMessages</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::SendCollationMessages</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::ConnectToValidators</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::ConnectToResolvedValidators</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::SendRequests</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::NewGossipTopology</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// Availability Distribution Message.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AvailabilityDistributionMessage</span> {
+	<span class="doccomment">/// Instruct availability distribution to fetch a remote PoV.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// NOTE: The result of this fetch is not yet locally validated and could be bogus.</span>
+	<span class="ident">FetchPoV</span> {
+		<span class="doccomment">/// The relay parent giving the necessary context.</span>
+		<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
+		<span class="doccomment">/// Validator to fetch the PoV from.</span>
+		<span class="ident">from_validator</span>: <span class="ident">ValidatorIndex</span>,
+		<span class="doccomment">/// Candidate hash to fetch the PoV for.</span>
+		<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
+		<span class="doccomment">/// Expected hash of the PoV, a PoV not matching this hash will be rejected.</span>
+		<span class="ident">pov_hash</span>: <span class="ident">Hash</span>,
+		<span class="doccomment">/// Sender for getting back the result of this fetch.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The sender will be canceled if the fetching failed for some reason.</span>
+		<span class="ident">tx</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
+	},
+}
+
+<span class="doccomment">/// Availability Recovery Message.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">derive_more::From</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AvailabilityRecoveryMessage</span> {
+	<span class="doccomment">/// Recover available data from validators on the network.</span>
+	<span class="ident">RecoverAvailableData</span>(
+		<span class="ident">CandidateReceipt</span>,
+		<span class="ident">SessionIndex</span>,
+		<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GroupIndex</span><span class="op">&gt;</span>, <span class="comment">// Optional backing group to request from first.</span>
+		<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AvailableData</span>, <span class="ident"><span class="kw">crate</span>::errors::RecoveryError</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	),
+}
+
+<span class="doccomment">/// Bitfield distribution message.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">derive_more::From</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">BitfieldDistributionMessage</span> {
+	<span class="doccomment">/// Distribute a bitfield via gossip to other validators.</span>
+	<span class="ident">DistributeBitfield</span>(<span class="ident">Hash</span>, <span class="ident">SignedAvailabilityBitfield</span>),
+
+	<span class="doccomment">/// Event from the network bridge.</span>
+	<span class="attribute">#[<span class="ident">from</span>]</span>
+	<span class="ident">NetworkBridgeUpdateV1</span>(<span class="ident">NetworkBridgeEvent</span><span class="op">&lt;</span><span class="ident">protocol_v1::BitfieldDistributionMessage</span><span class="op">&gt;</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">BitfieldDistributionMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="ident"><span class="self">Self</span>::DistributeBitfield</span>(<span class="ident">hash</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">hash</span>),
+			<span class="ident"><span class="self">Self</span>::NetworkBridgeUpdateV1</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// Bitfield signing message.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Currently non-instantiable.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">BitfieldSigningMessage</span> {}
+
+<span class="kw">impl</span> <span class="ident">BoundToRelayParent</span> <span class="kw">for</span> <span class="ident">BitfieldSigningMessage</span> {
+	<span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hash</span> {
+		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {}
+	}
+}
+
+<span class="doccomment">/// Availability store subsystem message.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AvailabilityStoreMessage</span> {
+	<span class="doccomment">/// Query a `AvailableData` from the AV store.</span>
+	<span class="ident">QueryAvailableData</span>(<span class="ident">CandidateHash</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AvailableData</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Query whether a `AvailableData` exists within the AV Store.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This is useful in cases when existence</span>
+	<span class="doccomment">/// matters, but we don&#39;t want to necessarily pass around multiple</span>
+	<span class="doccomment">/// megabytes of data to get a single bit of information.</span>
+	<span class="ident">QueryDataAvailability</span>(<span class="ident">CandidateHash</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Query an `ErasureChunk` from the AV store by the candidate hash and validator index.</span>
+	<span class="ident">QueryChunk</span>(<span class="ident">CandidateHash</span>, <span class="ident">ValidatorIndex</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ErasureChunk</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Query all chunks that we have for the given candidate hash.</span>
+	<span class="ident">QueryAllChunks</span>(<span class="ident">CandidateHash</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ErasureChunk</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Query whether an `ErasureChunk` exists within the AV Store.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This is useful in cases like bitfield signing, when existence</span>
+	<span class="doccomment">/// matters, but we don&#39;t want to necessarily pass around large</span>
+	<span class="doccomment">/// quantities of data to get a single bit of information.</span>
+	<span class="ident">QueryChunkAvailability</span>(<span class="ident">CandidateHash</span>, <span class="ident">ValidatorIndex</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>),
+
+	<span class="doccomment">/// Store an `ErasureChunk` in the AV store.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Return `Ok(())` if the store operation succeeded, `Err(())` if it failed.</span>
+	<span class="ident">StoreChunk</span> {
+		<span class="doccomment">/// A hash of the candidate this chunk belongs to.</span>
+		<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
+		<span class="doccomment">/// The chunk itself.</span>
+		<span class="ident">chunk</span>: <span class="ident">ErasureChunk</span>,
+		<span class="doccomment">/// Sending side of the channel to send result to.</span>
+		<span class="ident">tx</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span><span class="op">&gt;</span>,
+	},
+
+	<span class="doccomment">/// Store a `AvailableData` and all of its chunks in the AV store.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Return `Ok(())` if the store operation succeeded, `Err(())` if it failed.</span>
+	<span class="ident">StoreAvailableData</span> {
+		<span class="doccomment">/// A hash of the candidate this `available_data` belongs to.</span>
+		<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
+		<span class="doccomment">/// The number of validators in the session.</span>
+		<span class="ident">n_validators</span>: <span class="ident">u32</span>,
+		<span class="doccomment">/// The `AvailableData` itself.</span>
+		<span class="ident">available_data</span>: <span class="ident">AvailableData</span>,
+		<span class="doccomment">/// Sending side of the channel to send result to.</span>
+		<span class="ident">tx</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span><span class="op">&gt;</span>,
+	},
+}
+
+<span class="kw">impl</span> <span class="ident">AvailabilityStoreMessage</span> {
+	<span class="doccomment">/// In fact, none of the `AvailabilityStore` messages assume a particular relay parent.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// A response channel for the result of a chain API request.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident"><span class="kw">crate</span>::errors::ChainApiError</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Chain API request subsystem message.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ChainApiMessage</span> {
+	<span class="doccomment">/// Request the block number by hash.</span>
+	<span class="doccomment">/// Returns `None` if a block with the given hash is not present in the db.</span>
+	<span class="ident">BlockNumber</span>(<span class="ident">Hash</span>, <span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Request the block header by hash.</span>
+	<span class="doccomment">/// Returns `None` if a block with the given hash is not present in the db.</span>
+	<span class="ident">BlockHeader</span>(<span class="ident">Hash</span>, <span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockHeader</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the cumulative weight of the given block, by hash.</span>
+	<span class="doccomment">/// If the block or weight is unknown, this returns `None`.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Note: this is the weight within the low-level fork-choice rule,</span>
+	<span class="doccomment">/// not the high-level one implemented in the chain-selection subsystem.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Weight is used for comparing blocks in a fork-choice rule.</span>
+	<span class="ident">BlockWeight</span>(<span class="ident">Hash</span>, <span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockWeight</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Request the finalized block hash by number.</span>
+	<span class="doccomment">/// Returns `None` if a block with the given number is not present in the db.</span>
+	<span class="doccomment">/// Note: the caller must ensure the block is finalized.</span>
+	<span class="ident">FinalizedBlockHash</span>(<span class="ident">BlockNumber</span>, <span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Request the last finalized block number.</span>
+	<span class="doccomment">/// This request always succeeds.</span>
+	<span class="ident">FinalizedBlockNumber</span>(<span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Request the `k` ancestors block hashes of a block with the given hash.</span>
+	<span class="doccomment">/// The response channel may return a `Vec` of size up to `k`</span>
+	<span class="doccomment">/// filled with ancestors hashes with the following order:</span>
+	<span class="doccomment">/// `parent`, `grandparent`, ...</span>
+	<span class="ident">Ancestors</span> {
+		<span class="doccomment">/// The hash of the block in question.</span>
+		<span class="ident">hash</span>: <span class="ident">Hash</span>,
+		<span class="doccomment">/// The number of ancestors to request.</span>
+		<span class="ident">k</span>: <span class="ident">usize</span>,
+		<span class="doccomment">/// The response channel.</span>
+		<span class="ident">response_channel</span>: <span class="ident">ChainApiResponseChannel</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	},
+}
+
+<span class="kw">impl</span> <span class="ident">ChainApiMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="prelude-val">None</span>
+	}
+}
+
+<span class="doccomment">/// Chain selection subsystem messages</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ChainSelectionMessage</span> {
+	<span class="doccomment">/// Signal to the chain selection subsystem that a specific block has been approved.</span>
+	<span class="ident">Approved</span>(<span class="ident">Hash</span>),
+	<span class="doccomment">/// Request the leaves in descending order by score.</span>
+	<span class="ident">Leaves</span>(<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Request the best leaf containing the given block in its ancestry. Return `None` if</span>
+	<span class="doccomment">/// there is no such leaf.</span>
+	<span class="ident">BestLeafContaining</span>(<span class="ident">Hash</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">ChainSelectionMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="comment">// None of the messages, even the ones containing specific</span>
+		<span class="comment">// block hashes, can be considered to have those blocks as</span>
+		<span class="comment">// a relay parent.</span>
+		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+			<span class="ident">ChainSelectionMessage::Approved</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">ChainSelectionMessage::Leaves</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">ChainSelectionMessage::BestLeafContaining</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// A sender for the result of a runtime API request.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident"><span class="kw">crate</span>::errors::RuntimeApiError</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// A request to the Runtime API subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RuntimeApiRequest</span> {
+	<span class="doccomment">/// Get the next, current and some previous authority discovery set deduplicated.</span>
+	<span class="ident">Authorities</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AuthorityDiscoveryId</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the current validator set.</span>
+	<span class="ident">Validators</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the validator groups and group rotation info.</span>
+	<span class="ident">ValidatorGroups</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">GroupRotationInfo</span>)<span class="op">&gt;</span>),
+	<span class="doccomment">/// Get information on all availability cores.</span>
+	<span class="ident">AvailabilityCores</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CoreState</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the persisted validation data for a particular para, taking the given</span>
+	<span class="doccomment">/// `OccupiedCoreAssumption`, which will inform on how the validation data should be computed</span>
+	<span class="doccomment">/// if the para currently occupies a core.</span>
+	<span class="ident">PersistedValidationData</span>(
+		<span class="ident">ParaId</span>,
+		<span class="ident">OccupiedCoreAssumption</span>,
+		<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PersistedValidationData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	),
+	<span class="doccomment">/// Sends back `true` if the validation outputs pass all acceptance criteria checks.</span>
+	<span class="ident">CheckValidationOutputs</span>(
+		<span class="ident">ParaId</span>,
+		<span class="ident">polkadot_primitives::v1::CandidateCommitments</span>,
+		<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>,
+	),
+	<span class="doccomment">/// Get the session index that a child of the block will have.</span>
+	<span class="ident">SessionIndexForChild</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the validation code for a para, taking the given `OccupiedCoreAssumption`, which</span>
+	<span class="doccomment">/// will inform on how the validation data should be computed if the para currently</span>
+	<span class="doccomment">/// occupies a core.</span>
+	<span class="ident">ValidationCode</span>(<span class="ident">ParaId</span>, <span class="ident">OccupiedCoreAssumption</span>, <span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidationCode</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get validation code by its hash, either past, current or future code can be returned, as long as state is still</span>
+	<span class="doccomment">/// available.</span>
+	<span class="ident">ValidationCodeByHash</span>(<span class="ident">ValidationCodeHash</span>, <span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidationCode</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get a the candidate pending availability for a particular parachain by parachain / core index</span>
+	<span class="ident">CandidatePendingAvailability</span>(<span class="ident">ParaId</span>, <span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CommittedCandidateReceipt</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get all events concerning candidates (backing, inclusion, time-out) in the parent of</span>
+	<span class="doccomment">/// the block in whose state this request is executed.</span>
+	<span class="ident">CandidateEvents</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateEvent</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the session info for the given session, if stored.</span>
+	<span class="ident">SessionInfo</span>(<span class="ident">SessionIndex</span>, <span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get all the pending inbound messages in the downward message queue for a para.</span>
+	<span class="ident">DmqContents</span>(<span class="ident">ParaId</span>, <span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">InboundDownwardMessage</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get the contents of all channels addressed to the given recipient. Channels that have no</span>
+	<span class="doccomment">/// messages in them are also included.</span>
+	<span class="ident">InboundHrmpChannelsContents</span>(
+		<span class="ident">ParaId</span>,
+		<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">ParaId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">InboundHrmpMessage</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	),
+	<span class="doccomment">/// Get information about the BABE epoch the block was included in.</span>
+	<span class="ident">CurrentBabeEpoch</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">BabeEpoch</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Get all disputes in relation to a relay parent.</span>
+	<span class="ident">FetchOnChainVotes</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">polkadot_primitives::v1::ScrapedOnChainVotes</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+}
+
+<span class="doccomment">/// A message to the Runtime API subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RuntimeApiMessage</span> {
+	<span class="doccomment">/// Make a request of the runtime API against the post-state of the given relay-parent.</span>
+	<span class="ident">Request</span>(<span class="ident">Hash</span>, <span class="ident">RuntimeApiRequest</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">RuntimeApiMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="ident"><span class="self">Self</span>::Request</span>(<span class="ident">hash</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">hash</span>),
+		}
+	}
+}
+
+<span class="doccomment">/// Statement distribution message.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">derive_more::From</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">StatementDistributionMessage</span> {
+	<span class="doccomment">/// We have originated a signed statement in the context of</span>
+	<span class="doccomment">/// given relay-parent hash and it should be distributed to other validators.</span>
+	<span class="ident">Share</span>(<span class="ident">Hash</span>, <span class="ident">SignedFullStatement</span>),
+	<span class="doccomment">/// Event from the network bridge.</span>
+	<span class="attribute">#[<span class="ident">from</span>]</span>
+	<span class="ident">NetworkBridgeUpdateV1</span>(<span class="ident">NetworkBridgeEvent</span><span class="op">&lt;</span><span class="ident">protocol_v1::StatementDistributionMessage</span><span class="op">&gt;</span>),
+}
+
+<span class="doccomment">/// This data becomes intrinsics or extrinsics which should be included in a future relay chain block.</span>
+<span class="comment">// It needs to be cloneable because multiple potential block authors can request copies.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ProvisionableData</span> {
+	<span class="doccomment">/// This bitfield indicates the availability of various candidate blocks.</span>
+	<span class="ident">Bitfield</span>(<span class="ident">Hash</span>, <span class="ident">SignedAvailabilityBitfield</span>),
+	<span class="doccomment">/// The Candidate Backing subsystem believes that this candidate is valid, pending availability.</span>
+	<span class="ident">BackedCandidate</span>(<span class="ident">CandidateReceipt</span>),
+	<span class="doccomment">/// Misbehavior reports are self-contained proofs of validator misbehavior.</span>
+	<span class="ident">MisbehaviorReport</span>(<span class="ident">Hash</span>, <span class="ident">ValidatorIndex</span>, <span class="ident">Misbehavior</span>),
+	<span class="doccomment">/// Disputes trigger a broad dispute resolution process.</span>
+	<span class="ident">Dispute</span>(<span class="ident">Hash</span>, <span class="ident">ValidatorSignature</span>),
+}
+
+<span class="doccomment">/// Inherent data returned by the provisioner</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ProvisionerInherentData</span> {
+	<span class="doccomment">/// Signed bitfields.</span>
+	<span class="kw">pub</span> <span class="ident">bitfields</span>: <span class="ident">SignedAvailabilityBitfields</span>,
+	<span class="doccomment">/// Backed candidates.</span>
+	<span class="kw">pub</span> <span class="ident">backed_candidates</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&gt;</span>,
+	<span class="doccomment">/// Dispute statement sets.</span>
+	<span class="kw">pub</span> <span class="ident">disputes</span>: <span class="ident">MultiDisputeStatementSet</span>,
+}
+
+<span class="doccomment">/// Message to the Provisioner.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// In all cases, the Hash is that of the relay parent.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ProvisionerMessage</span> {
+	<span class="doccomment">/// This message allows external subsystems to request the set of bitfields and backed candidates</span>
+	<span class="doccomment">/// associated with a particular potential block hash.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// This is expected to be used by a proposer, to inject that information into the `InherentData`</span>
+	<span class="doccomment">/// where it can be assembled into the `ParaInherent`.</span>
+	<span class="ident">RequestInherentData</span>(<span class="ident">Hash</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">ProvisionerInherentData</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// This data should become part of a relay chain block</span>
+	<span class="ident">ProvisionableData</span>(<span class="ident">Hash</span>, <span class="ident">ProvisionableData</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">BoundToRelayParent</span> <span class="kw">for</span> <span class="ident">ProvisionerMessage</span> {
+	<span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hash</span> {
+		<span class="kw">match</span> <span class="self">self</span> {
+			<span class="ident"><span class="self">Self</span>::RequestInherentData</span>(<span class="ident">hash</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">hash</span>,
+			<span class="ident"><span class="self">Self</span>::ProvisionableData</span>(<span class="ident">hash</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">hash</span>,
+		}
+	}
+}
+
+<span class="doccomment">/// Message to the Collation Generation subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CollationGenerationMessage</span> {
+	<span class="doccomment">/// Initialize the collation generation subsystem</span>
+	<span class="ident">Initialize</span>(<span class="ident">CollationGenerationConfig</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">CollationGenerationMessage</span> {
+	<span class="doccomment">/// If the current variant contains the relay parent hash, return it.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">relay_parent</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="prelude-val">None</span>
+	}
+}
+
+<span class="doccomment">/// The result type of [`ApprovalVotingMessage::CheckAndImportAssignment`] request.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AssignmentCheckResult</span> {
+	<span class="doccomment">/// The vote was accepted and should be propagated onwards.</span>
+	<span class="ident">Accepted</span>,
+	<span class="doccomment">/// The vote was valid but duplicate and should not be propagated onwards.</span>
+	<span class="ident">AcceptedDuplicate</span>,
+	<span class="doccomment">/// The vote was valid but too far in the future to accept right now.</span>
+	<span class="ident">TooFarInFuture</span>,
+	<span class="doccomment">/// The vote was bad and should be ignored, reporting the peer who propagated it.</span>
+	<span class="ident">Bad</span>(<span class="ident">AssignmentCheckError</span>),
+}
+
+<span class="doccomment">/// The error result type of [`ApprovalVotingMessage::CheckAndImportAssignment`] request.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AssignmentCheckError</span> {
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Unknown block: {0:?}&quot;</span>)]</span>
+	<span class="ident">UnknownBlock</span>(<span class="ident">Hash</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Unknown session index: {0}&quot;</span>)]</span>
+	<span class="ident">UnknownSessionIndex</span>(<span class="ident">SessionIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid candidate index: {0}&quot;</span>)]</span>
+	<span class="ident">InvalidCandidateIndex</span>(<span class="ident">CandidateIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid candidate {0}: {1:?}&quot;</span>)]</span>
+	<span class="ident">InvalidCandidate</span>(<span class="ident">CandidateIndex</span>, <span class="ident">CandidateHash</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid cert: {0:?}&quot;</span>)]</span>
+	<span class="ident">InvalidCert</span>(<span class="ident">ValidatorIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Internal state mismatch: {0:?}, {1:?}&quot;</span>)]</span>
+	<span class="ident">Internal</span>(<span class="ident">Hash</span>, <span class="ident">CandidateHash</span>),
+}
+
+<span class="doccomment">/// The result type of [`ApprovalVotingMessage::CheckAndImportApproval`] request.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ApprovalCheckResult</span> {
+	<span class="doccomment">/// The vote was accepted and should be propagated onwards.</span>
+	<span class="ident">Accepted</span>,
+	<span class="doccomment">/// The vote was bad and should be ignored, reporting the peer who propagated it.</span>
+	<span class="ident">Bad</span>(<span class="ident">ApprovalCheckError</span>),
+}
+
+<span class="doccomment">/// The error result type of [`ApprovalVotingMessage::CheckAndImportApproval`] request.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ApprovalCheckError</span> {
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Unknown block: {0:?}&quot;</span>)]</span>
+	<span class="ident">UnknownBlock</span>(<span class="ident">Hash</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Unknown session index: {0}&quot;</span>)]</span>
+	<span class="ident">UnknownSessionIndex</span>(<span class="ident">SessionIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid candidate index: {0}&quot;</span>)]</span>
+	<span class="ident">InvalidCandidateIndex</span>(<span class="ident">CandidateIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid validator index: {0:?}&quot;</span>)]</span>
+	<span class="ident">InvalidValidatorIndex</span>(<span class="ident">ValidatorIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid candidate {0}: {1:?}&quot;</span>)]</span>
+	<span class="ident">InvalidCandidate</span>(<span class="ident">CandidateIndex</span>, <span class="ident">CandidateHash</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid signature: {0:?}&quot;</span>)]</span>
+	<span class="ident">InvalidSignature</span>(<span class="ident">ValidatorIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;No assignment for {0:?}&quot;</span>)]</span>
+	<span class="ident">NoAssignment</span>(<span class="ident">ValidatorIndex</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Internal state mismatch: {0:?}, {1:?}&quot;</span>)]</span>
+	<span class="ident">Internal</span>(<span class="ident">Hash</span>, <span class="ident">CandidateHash</span>),
+}
+
+<span class="doccomment">/// Describes a relay-chain block by the para-chain candidates</span>
+<span class="doccomment">/// it includes.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlockDescription</span> {
+	<span class="doccomment">/// The relay-chain block hash.</span>
+	<span class="kw">pub</span> <span class="ident">block_hash</span>: <span class="ident">Hash</span>,
+	<span class="doccomment">/// The session index of this block.</span>
+	<span class="kw">pub</span> <span class="ident">session</span>: <span class="ident">SessionIndex</span>,
+	<span class="doccomment">/// The set of para-chain candidates.</span>
+	<span class="kw">pub</span> <span class="ident">candidates</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateHash</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Response type to `ApprovalVotingMessage::ApprovedAncestor`.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HighestApprovedAncestorBlock</span> {
+	<span class="doccomment">/// The block hash of the highest viable ancestor.</span>
+	<span class="kw">pub</span> <span class="ident">hash</span>: <span class="ident">Hash</span>,
+	<span class="doccomment">/// The block number of the highest viable ancestor.</span>
+	<span class="kw">pub</span> <span class="ident">number</span>: <span class="ident">BlockNumber</span>,
+	<span class="doccomment">/// Block descriptions in the direct path between the</span>
+	<span class="doccomment">/// initially provided hash and the highest viable ancestor.</span>
+	<span class="doccomment">/// Primarily for use with `DetermineUndisputedChain`.</span>
+	<span class="doccomment">/// Must be sorted from lowest to highest block number.</span>
+	<span class="kw">pub</span> <span class="ident">descriptions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BlockDescription</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Message to the Approval Voting subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ApprovalVotingMessage</span> {
+	<span class="doccomment">/// Check if the assignment is valid and can be accepted by our view of the protocol.</span>
+	<span class="doccomment">/// Should not be sent unless the block hash is known.</span>
+	<span class="ident">CheckAndImportAssignment</span>(
+		<span class="ident">IndirectAssignmentCert</span>,
+		<span class="ident">CandidateIndex</span>,
+		<span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">AssignmentCheckResult</span><span class="op">&gt;</span>,
+	),
+	<span class="doccomment">/// Check if the approval vote is valid and can be accepted by our view of the</span>
+	<span class="doccomment">/// protocol.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Should not be sent unless the block hash within the indirect vote is known.</span>
+	<span class="ident">CheckAndImportApproval</span>(<span class="ident">IndirectSignedApprovalVote</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">ApprovalCheckResult</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Returns the highest possible ancestor hash of the provided block hash which is</span>
+	<span class="doccomment">/// acceptable to vote on finality for.</span>
+	<span class="doccomment">/// The `BlockNumber` provided is the number of the block&#39;s ancestor which is the</span>
+	<span class="doccomment">/// earliest possible vote.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// It can also return the same block hash, if that is acceptable to vote upon.</span>
+	<span class="doccomment">/// Return `None` if the input hash is unrecognized.</span>
+	<span class="ident">ApprovedAncestor</span>(<span class="ident">Hash</span>, <span class="ident">BlockNumber</span>, <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HighestApprovedAncestorBlock</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+}
+
+<span class="doccomment">/// Message to the Approval Distribution subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">derive_more::From</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ApprovalDistributionMessage</span> {
+	<span class="doccomment">/// Notify the `ApprovalDistribution` subsystem about new blocks</span>
+	<span class="doccomment">/// and the candidates contained within them.</span>
+	<span class="ident">NewBlocks</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BlockApprovalMeta</span><span class="op">&gt;</span>),
+	<span class="doccomment">/// Distribute an assignment cert from the local validator. The cert is assumed</span>
+	<span class="doccomment">/// to be valid, relevant, and for the given relay-parent and validator index.</span>
+	<span class="ident">DistributeAssignment</span>(<span class="ident">IndirectAssignmentCert</span>, <span class="ident">CandidateIndex</span>),
+	<span class="doccomment">/// Distribute an approval vote for the local validator. The approval vote is assumed to be</span>
+	<span class="doccomment">/// valid, relevant, and the corresponding approval already issued.</span>
+	<span class="doccomment">/// If not, the subsystem is free to drop the message.</span>
+	<span class="ident">DistributeApproval</span>(<span class="ident">IndirectSignedApprovalVote</span>),
+	<span class="doccomment">/// An update from the network bridge.</span>
+	<span class="attribute">#[<span class="ident">from</span>]</span>
+	<span class="ident">NetworkBridgeUpdateV1</span>(<span class="ident">NetworkBridgeEvent</span><span class="op">&lt;</span><span class="ident">protocol_v1::ApprovalDistributionMessage</span><span class="op">&gt;</span>),
+}
+
+<span class="doccomment">/// Message to the Gossip Support subsystem.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">derive_more::From</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GossipSupportMessage</span> {
+	<span class="doccomment">/// Dummy constructor, so we can receive networking events.</span>
+	<span class="attribute">#[<span class="ident">from</span>]</span>
+	<span class="ident">NetworkBridgeUpdateV1</span>(<span class="ident">NetworkBridgeEvent</span><span class="op">&lt;</span><span class="ident">protocol_v1::GossipSuppportNetworkMessage</span><span class="op">&gt;</span>),
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="polkadot_node_subsystem_types" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
+</body></html>

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["INHERENT_IDENTIFIER","The identifier for the parachain inherent."]],"struct":[["MockValidationDataInherentDataProvider","Inherent data provider that supplies mocked validation data."],["ParachainInherentData","The inherent data that is passed by the collator to the parachain runtime."]]});

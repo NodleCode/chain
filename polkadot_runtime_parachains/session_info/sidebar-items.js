@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]],"trait":[["AuthorityDiscoveryConfig","An abstraction for the authority discovery pallet to help with mock testing."]]});

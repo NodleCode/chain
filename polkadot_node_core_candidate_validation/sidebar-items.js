@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CandidateValidationSubsystem","The candidate validation subsystem."],["Config","Configuration for the candidate validation subsystem"],["Metrics","Candidate validation metrics."]]});

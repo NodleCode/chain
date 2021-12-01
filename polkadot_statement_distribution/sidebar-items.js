@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Errors for statement distribution."],["Fatal","Fatal errors."],["NonFatal","Errors for fetching of runtime information."]],"struct":[["Metrics","Statement Distribution metrics."],["StatementDistribution","The statement distribution subsystem."]],"type":[["Result","General result."]]});

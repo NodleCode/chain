@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Merkle Mountain Range"><meta name="keywords" content="rust, rustlang, rust-lang, pallet_mmr"><title>pallet_mmr - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../pallet_mmr/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate pallet_mmr</h2><div class="block version"><div class="narrow-helper"></div><p>Version 4.0.0-dev</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all pallet_mmr's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li></ul></div><div id="sidebar-vars" data-name="pallet_mmr" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">pallet_mmr</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/pallet_mmr/lib.rs.html#18-274" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h1 id="merkle-mountain-range" class="section-header"><a href="#merkle-mountain-range">Merkle Mountain Range</a></h1><h2 id="overview" class="section-header"><a href="#overview">Overview</a></h2>
+<p>Details on Merkle Mountain Ranges (MMRs) can be found here:
+<a href="https://github.com/mimblewimble/grin/blob/master/doc/mmr.md">https://github.com/mimblewimble/grin/blob/master/doc/mmr.md</a></p>
+<p>The MMR pallet constructs a MMR from leaf data obtained on every block from
+<code>LeafDataProvider</code>. MMR nodes are stored both in:</p>
+<ul>
+<li>on-chain storage - hashes only; not full leaf content)</li>
+<li>off-chain storage - via Indexing API we push full leaf content (and all internal nodes as
+well) to the Off-chain DB, so that the data is available for Off-chain workers.
+Hashing used for MMR is configurable independently from the rest of the runtime (i.e. not using
+<code>frame_system::Hashing</code>) so something compatible with external chains can be used (like
+Keccak256 for Ethereum compatibility).</li>
+</ul>
+<p>Depending on the usage context (off-chain vs on-chain) the pallet is able to:</p>
+<ul>
+<li>verify MMR leaf proofs (on-chain)</li>
+<li>generate leaf proofs (off-chain)</li>
+</ul>
+<p>See <a href="../pallet_mmr_primitives/struct.Compact.html" title="primitives::Compact">primitives::Compact</a> documentation for how you can optimize proof size for leafs that are
+composed from multiple elements.</p>
+<h2 id="what-for" class="section-header"><a href="#what-for">What for?</a></h2>
+<p>Primary use case for this pallet is to generate MMR root hashes, that can latter on be used by
+BEEFY protocol (see <a href="https://github.com/paritytech/grandpa-bridge-gadget">https://github.com/paritytech/grandpa-bridge-gadget</a>).
+MMR root hashes along with BEEFY will make it possible to build Super Light Clients (SLC) of
+Substrate-based chains. The SLC will be able to follow finality and can be shown proofs of more
+details that happened on the source chain.
+In that case the chain which contains the pallet generates the Root Hashes and Proofs, which
+are then presented to another chain acting as a light client which can verify them.</p>
+<p>Secondary use case is to archive historical data, but still be able to retrieve them on-demand
+if needed. For instance if parent block hashes are stored in the MMR it’s possible at any point
+in time to provide a MMR proof about some past block hash, while this data can be safely pruned
+from on-chain storage.</p>
+<p>NOTE This pallet is experimental and not proven to work in production.</p>
+</div></details><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
+<div class="item-table"><div class="item-left import-item"><code>pub use <a class="mod" href="pallet/index.html" title="mod pallet_mmr::pallet">pallet</a>::*;</code></div><div class="item-right docblock-short"></div><div class="item-left import-item"><code>pub use <a class="mod" href="../pallet_mmr_primitives/index.html" title="mod pallet_mmr_primitives">pallet_mmr_primitives</a> as primitives;</code></div><div class="item-right docblock-short"></div></div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="mod" href="pallet/index.html" title="pallet_mmr::pallet mod">pallet</a></div><div class="item-right docblock-short"><p>The module that hosts all the
+<a href="https://docs.substrate.io/v3/runtime/frame">FRAME</a>
+types needed to add this pallet to a
+runtime.</p>
+</div></div><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.WeightInfo.html" title="pallet_mmr::WeightInfo trait">WeightInfo</a></div><div class="item-right docblock-short"></div></div><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-left module-item"><a class="fn" href="fn.verify_leaf_proof.html" title="pallet_mmr::verify_leaf_proof fn">verify_leaf_proof</a></div><div class="item-right docblock-short"><p>Stateless MMR proof verification.</p>
+</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="pallet_mmr" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script>
+</body></html>
