@@ -37,6 +37,7 @@ impl pallet_grants::Config for Runtime {
     type ForceOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
     type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
+    type BlockNumberProvider = frame_system::Pallet<Runtime>;
 }
 
 impl pallet_utility::Config for Runtime {

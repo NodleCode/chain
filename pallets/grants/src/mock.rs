@@ -86,6 +86,7 @@ impl Config for Test {
     type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
     type ForceOrigin = EnsureSignedBy<ForceOrigin, AccountId>;
     type WeightInfo = ();
+    type BlockNumberProvider = frame_system::Pallet<Test>;
 }
 
 pub const ALICE: AccountId = 1;

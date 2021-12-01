@@ -21,7 +21,8 @@
 
 use crate::{Authorship, Balances, CompanyReserve};
 use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
-use primitives::AccountId;
+use primitives::{AccountId, BlockNumber};
+use sp_runtime::traits::BlockNumberProvider;
 
 /// Logic for the author to get a portion of fees.
 pub struct Author;
@@ -47,5 +48,19 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
             CompanyReserve::on_unbalanced(split.0);
             Author::on_unbalanced(split.1);
         }
+    }
+}
+
+pub struct RelayChainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
+
+impl<T: cumulus_pallet_parachain_system::Config> BlockNumberProvider
+    for RelayChainBlockNumberProvider<T>
+{
+    type BlockNumber = BlockNumber;
+
+    fn current_block_number() -> Self::BlockNumber {
+        cumulus_pallet_parachain_system::Pallet::<T>::validation_data()
+            .map(|d| d.relay_parent_number)
+            .unwrap_or_default()
     }
 }

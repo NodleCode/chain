@@ -32,7 +32,7 @@ use frame_support::{
 };
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{AtLeast32Bit, CheckedAdd, Saturating, StaticLookup, Zero},
+    traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
     DispatchResult, RuntimeDebug,
 };
 use sp_std::{
@@ -123,6 +123,8 @@ pub mod pallet {
         type ForceOrigin: EnsureOrigin<Self::Origin>;
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
+        // The block number provider
+        type BlockNumberProvider: BlockNumberProvider<BlockNumber = Self::BlockNumber>;
     }
 
     #[pallet::pallet]
@@ -231,7 +233,7 @@ pub mod pallet {
             let target = T::Lookup::lookup(who)?;
             VestingSchedules::<T>::insert(target.clone(), new_schedules.clone());
 
-            let now = <frame_system::Pallet<T>>::block_number();
+            let now = T::BlockNumberProvider::current_block_number();
             let new_lock: BalanceOf<T> = new_schedules
                 .iter()
                 .fold(Zero::zero(), |acc, s| {
@@ -374,7 +376,7 @@ impl<T: Config> Pallet<T> {
 
     /// Returns locked balance based on current block number.
     fn locked_balance(who: &T::AccountId) -> BalanceOf<T> {
-        let now = <frame_system::Pallet<T>>::block_number();
+        let now = T::BlockNumberProvider::current_block_number();
         Self::vesting_schedules(who)
             .iter()
             .fold(Zero::zero(), |acc, s| {
