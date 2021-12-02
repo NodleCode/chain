@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::chain_spec::{build_local_properties, get_account_id_from_seed, get_from_seed};
+use crate::chain_spec::{
+    build_local_properties, get_account_id_from_seed, get_from_seed, Extensions,
+};
 use primitives::{AccountId, AuraId, Balance, ParaId};
 use runtime_eden::{
     constants::*, wasm_binary_unwrap, BalancesConfig, GenesisConfig, ParachainInfoConfig,
     SessionConfig, SessionKeys, SudoConfig, SystemConfig, ValidatorsSetConfig,
 };
-use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
-use serde::{Deserialize, Serialize};
 use sp_core::sr25519;
 
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
@@ -38,23 +38,6 @@ fn eden_session_keys(keys: AuraId) -> SessionKeys {
 /// This function's return type must always match the session keys of the chain in tuple format.
 pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
     get_from_seed::<AuraId>(seed)
-}
-
-/// The extensions for the [`ChainSpec`].
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
-#[serde(deny_unknown_fields)]
-pub struct Extensions {
-    /// The relay chain of the Parachain.
-    pub relay_chain: String,
-    /// The id of the Parachain.
-    pub para_id: u32,
-}
-
-impl Extensions {
-    /// Try to get the extension from the given `ChainSpec`.
-    pub fn try_get(chain_spec: &dyn sc_service::ChainSpec) -> Option<&Self> {
-        sc_chain_spec::get_extension(chain_spec.extensions())
-    }
 }
 
 /// Helper function to create GenesisConfig for testing
@@ -214,6 +197,66 @@ pub fn local_config(id: ParaId) -> ChainSpec {
     )
 }
 
+fn valid_config_genesis(id: ParaId) -> GenesisConfig {
+    let valid_01_seed =
+        "castle fiscal easy grief horse include alley next youth deny engine response";
+    let valid_02_seed =
+        "giggle august whisper someone zoo trend evolve response bird board gaze pull";
+    let valid_03_seed =
+        "ramp clever visit pottery thunder fatal crawl already syrup gaze pride cabin";
+    let valid_04_seed =
+        "budget shock sudden axis predict soldier elder valve fame theme deliver slow";
+    let valid_05_seed = "party history head few eye bird exit axis flavor coconut kick robust";
+
+    eden_genesis(
+        get_account_id_from_seed::<sr25519::Public>(valid_01_seed),
+        vec![
+            (
+                get_account_id_from_seed::<sr25519::Public>(valid_01_seed),
+                get_collator_keys_from_seed(valid_01_seed),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>(valid_02_seed),
+                get_collator_keys_from_seed(valid_02_seed),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>(valid_03_seed),
+                get_collator_keys_from_seed(valid_03_seed),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>(valid_04_seed),
+                get_collator_keys_from_seed(valid_04_seed),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>(valid_05_seed),
+                get_collator_keys_from_seed(valid_05_seed),
+            ),
+        ],
+        Some(vec![get_account_id_from_seed::<sr25519::Public>(
+            valid_01_seed,
+        )]),
+        id.into(),
+    )
+}
+
+/// Local config, as close as possible to production (5 collators, no balances)
+pub fn valid_config(id: ParaId) -> ChainSpec {
+    ChainSpec::from_genesis(
+        "ParaChain Local Development",
+        "para_eden_local",
+        ChainType::Local,
+        move || valid_config_genesis(id),
+        vec![],
+        None,
+        Some("nodl"),
+        Some(build_local_properties()),
+        Extensions {
+            relay_chain: "westend".into(),
+            para_id: id.into(),
+        },
+    )
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -231,6 +274,13 @@ pub(crate) mod tests {
     #[test]
     fn test_create_local_chain_spec() {
         local_config(ParaId::from(DEFAULT_PARA_ID))
+            .build_storage()
+            .unwrap();
+    }
+
+    #[test]
+    fn test_create_valid_chain_spec() {
+        valid_config(ParaId::from(DEFAULT_PARA_ID))
             .build_storage()
             .unwrap();
     }

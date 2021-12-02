@@ -83,14 +83,18 @@ fn load_spec(
     id: &str,
     para_id: ParaId,
 ) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-    log::info!("KOM=> id-{}, para_id-{}", id, para_id);
+    log::info!("load_spec()=> id-{}, para_id-{}", id, para_id);
     Ok(match id {
         "dev" => Box::new(chain_spec::cs_main::development_config()),
         "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
         "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
         "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
+        "eden" => Box::new(chain_spec::cs_eden::ChainSpec::from_json_bytes(
+            &include_bytes!("../res/eden.json")[..],
+        )?),
         "eden-dev" => Box::new(chain_spec::cs_eden::development_config(para_id)),
         "eden-local" => Box::new(chain_spec::cs_eden::local_config(para_id)),
+        "eden-valid" => Box::new(chain_spec::cs_eden::valid_config(para_id)),
         "" | "main" => Box::new(chain_spec::cs_main::main_config()),
         "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
         path => {
@@ -457,7 +461,7 @@ pub fn run() -> Result<()> {
                 } else {
                     log::info!("Entering Para Chain");
 
-                    let para_id = chain_spec::cs_eden::Extensions::try_get(&*config.chain_spec)
+                    let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
                         .map(|e| e.para_id)
                         .ok_or_else(|| "Could not find parachain extension in chain-spec.")?;
 
