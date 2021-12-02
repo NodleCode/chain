@@ -229,6 +229,12 @@
 <span id="229">229</span>
 <span id="230">230</span>
 <span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -248,10 +254,10 @@
  */</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::chain_spec</span>::{<span class="ident">build_local_properties</span>, <span class="ident">get_account_id_from_seed</span>, <span class="ident">get_from_seed</span>};
-<span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">AuraId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span>, <span class="ident">ParaId</span>};
+<span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">AuraId</span>, <span class="ident">Balance</span>, <span class="ident">ParaId</span>};
 <span class="kw">use</span> <span class="ident">runtime_eden</span>::{
     <span class="ident">constants</span>::<span class="kw-2">*</span>, <span class="ident">wasm_binary_unwrap</span>, <span class="ident">BalancesConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">ParachainInfoConfig</span>,
-    <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SudoConfig</span>, <span class="ident">SystemConfig</span>, <span class="ident">ValidatorsSetConfig</span>, <span class="ident">VestingConfig</span>,
+    <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SudoConfig</span>, <span class="ident">SystemConfig</span>, <span class="ident">ValidatorsSetConfig</span>,
 };
 <span class="kw">use</span> <span class="ident">sc_chain_spec</span>::{<span class="ident">ChainSpecExtension</span>, <span class="ident">ChainSpecGroup</span>};
 <span class="kw">use</span> <span class="ident">sc_service::ChainType</span>;
@@ -291,11 +297,8 @@
 <span class="doccomment">/// Helper function to create GenesisConfig for testing</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eden_genesis</span>(
     <span class="ident">root_key</span>: <span class="ident">AccountId</span>,
-    <span class="ident">invulnerables</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">AccountId</span>, <span class="ident">AuraId</span>)<span class="op">&gt;</span>,
-    <span class="ident">roots</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>,
-    <span class="ident">oracles</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>,
+    <span class="ident">collators</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">AccountId</span>, <span class="ident">AuraId</span>)<span class="op">&gt;</span>,
     <span class="ident">endowed_accounts</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">grants</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">AccountId</span>, <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">BlockNumber</span>, <span class="ident">BlockNumber</span>, <span class="ident">u32</span>, <span class="ident">Balance</span>)<span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">id</span>: <span class="ident">ParaId</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GenesisConfig</span> {
     <span class="kw">let</span> <span class="ident">endowed_accounts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">endowed_accounts</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
@@ -313,19 +316,6 @@
         ]
     });
 
-    <span class="kw">let</span> <span class="ident">vested_grants</span> <span class="op">=</span> <span class="ident">grants</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-        <span class="macro">vec!</span>[(
-            <span class="comment">// Ferdie has a network launch grant:</span>
-            <span class="comment">// 1. after 1000 blocks a cliff of 1000 NODL unlocks</span>
-            <span class="comment">// 2. for the next 100000 blocks a grant of 100 NODL unlocks every 1000 blocks</span>
-            <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Ferdie&quot;</span>),
-            <span class="macro">vec!</span>[
-                (<span class="number">1_000</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1000</span> <span class="op">*</span> <span class="ident">NODL</span>),      <span class="comment">// Cliff</span>
-                (<span class="number">2_000</span>, <span class="number">1_000</span>, <span class="number">100</span>, <span class="number">100</span> <span class="op">*</span> <span class="ident">NODL</span>), <span class="comment">// Vesting</span>
-            ],
-        )]
-    });
-
     <span class="kw">const</span> <span class="ident">ENDOWMENT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">10_000</span> <span class="op">*</span> <span class="ident">NODL</span>;
 
     <span class="ident">GenesisConfig</span> {
@@ -339,43 +329,18 @@
                 .<span class="ident">iter</span>()
                 .<span class="ident">cloned</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> (<span class="ident">k</span>, <span class="ident">ENDOWMENT</span>))
-                .<span class="ident">chain</span>([(<span class="ident">root_key</span>.<span class="ident">clone</span>(), <span class="ident">ENDOWMENT</span>)].<span class="ident">to_vec</span>())
-                .<span class="ident">chain</span>(<span class="ident">oracles</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> (<span class="ident">x</span>.<span class="ident">clone</span>(), <span class="ident">ENDOWMENT</span>)))
-                .<span class="ident">chain</span>(<span class="ident">roots</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> (<span class="ident">x</span>.<span class="ident">clone</span>(), <span class="ident">ENDOWMENT</span>)))
-                .<span class="ident">fold</span>(<span class="macro">vec!</span>[], <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">acc</span>, (<span class="ident">account</span>, <span class="ident">endowment</span>)<span class="op">|</span> {
-                    <span class="kw">if</span> <span class="ident">acc</span>
-                        .<span class="ident">iter</span>()
-                        .<span class="ident">find</span>(<span class="op">|</span>(<span class="ident">who</span>, <span class="ident">_endowment</span>)<span class="op">|</span> <span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">account</span>)
-                        .<span class="ident">is_some</span>()
-                    {
-                        <span class="comment">// Increase endowment</span>
-                        <span class="ident">acc</span> <span class="op">=</span> <span class="ident">acc</span>
-                            .<span class="ident">iter</span>()
-                            .<span class="ident">cloned</span>()
-                            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">cur_account</span>, <span class="ident">cur_endowment</span>)<span class="op">|</span> (<span class="ident">cur_account</span>, <span class="ident">cur_endowment</span>))
-                            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">AccountId</span>, <span class="ident">Balance</span>)<span class="op">&gt;</span><span class="op">&gt;</span>();
-                    } <span class="kw">else</span> {
-                        <span class="ident">acc</span>.<span class="ident">push</span>((<span class="ident">account</span>, <span class="ident">endowment</span>));
-                    }
-
-                    <span class="ident">acc</span>
-                }),
+                .<span class="ident">collect</span>(),
         },
         <span class="ident">sudo</span>: <span class="ident">SudoConfig</span> { <span class="ident">key</span>: <span class="ident">root_key</span> },
-        <span class="ident">vesting</span>: <span class="ident">VestingConfig</span> {
-            <span class="ident">vesting</span>: <span class="ident">vested_grants</span>,
-        },
+        <span class="ident">vesting</span>: <span class="ident">Default::default</span>(),
 
         <span class="comment">// Consensus</span>
         <span class="ident">validators_set</span>: <span class="ident">ValidatorsSetConfig</span> {
-            <span class="ident">members</span>: <span class="ident">invulnerables</span>
-                .<span class="ident">iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">clone</span>())
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
+            <span class="ident">members</span>: <span class="ident">collators</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
             <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
         },
         <span class="ident">session</span>: <span class="ident">SessionConfig</span> {
-            <span class="ident">keys</span>: <span class="ident">invulnerables</span>
+            <span class="ident">keys</span>: <span class="ident">collators</span>
                 .<span class="ident">clone</span>()
                 .<span class="ident">into_iter</span>()
                 .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">acc</span>, <span class="ident">aura</span>)<span class="op">|</span> {
@@ -415,25 +380,17 @@
                 <span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Bob&quot;</span>),
             ),
         ],
-        <span class="macro">vec!</span>[
-            <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
-            <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Bob&quot;</span>),
-            <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Charlie&quot;</span>),
-            <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Dave&quot;</span>),
-        ],
-        <span class="macro">vec!</span>[<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Ferdie&quot;</span>)],
-        <span class="prelude-val">None</span>,
         <span class="prelude-val">None</span>,
         <span class="ident">id</span>.<span class="ident">into</span>(),
     )
 }
 
-<span class="doccomment">/// Development config (single validator Alice)</span>
+<span class="doccomment">/// Development config (Alice and Bob as collators)</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">development_config</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChainSpec</span> {
     <span class="ident">ChainSpec::from_genesis</span>(
         <span class="string">&quot;ParaChain Eden Development&quot;</span>,
         <span class="string">&quot;para_eden_dev&quot;</span>,
-        <span class="ident">ChainType::Local</span>,
+        <span class="ident">ChainType::Development</span>,
         <span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="ident">development_config_genesis</span>(<span class="ident">id</span>),
         <span class="macro">vec!</span>[],
         <span class="prelude-val">None</span>,
@@ -441,6 +398,54 @@
         <span class="prelude-val">Some</span>(<span class="ident">build_local_properties</span>()),
         <span class="ident">Extensions</span> {
             <span class="ident">relay_chain</span>: <span class="string">&quot;rococo-local&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>(),
+        },
+    )
+}
+
+<span class="kw">fn</span> <span class="ident">local_config_genesis</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GenesisConfig</span> {
+    <span class="ident">eden_genesis</span>(
+        <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
+        <span class="macro">vec!</span>[
+            (
+                <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
+                <span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Alice&quot;</span>),
+            ),
+            (
+                <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Bob&quot;</span>),
+                <span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Bob&quot;</span>),
+            ),
+            (
+                <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Charlie&quot;</span>),
+                <span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Charlie&quot;</span>),
+            ),
+            (
+                <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Dave&quot;</span>),
+                <span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Dave&quot;</span>),
+            ),
+            (
+                <span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Eve&quot;</span>),
+                <span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Eve&quot;</span>),
+            ),
+        ],
+        <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[]), <span class="comment">// disable endowed accounts</span>
+        <span class="ident">id</span>.<span class="ident">into</span>(),
+    )
+}
+
+<span class="doccomment">/// Local config, as close as possible to production (5 collators, no balances)</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_config</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChainSpec</span> {
+    <span class="ident">ChainSpec::from_genesis</span>(
+        <span class="string">&quot;ParaChain Local Development&quot;</span>,
+        <span class="string">&quot;para_eden_local&quot;</span>,
+        <span class="ident">ChainType::Local</span>,
+        <span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="ident">local_config_genesis</span>(<span class="ident">id</span>),
+        <span class="macro">vec!</span>[],
+        <span class="prelude-val">None</span>,
+        <span class="prelude-val">Some</span>(<span class="string">&quot;nodl&quot;</span>),
+        <span class="prelude-val">Some</span>(<span class="ident">build_local_properties</span>()),
+        <span class="ident">Extensions</span> {
+            <span class="ident">relay_chain</span>: <span class="string">&quot;westend&quot;</span>.<span class="ident">into</span>(),
             <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>(),
         },
     )
@@ -456,6 +461,13 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_create_development_chain_spec</span>() {
         <span class="ident">development_config</span>(<span class="ident">ParaId::from</span>(<span class="ident">DEFAULT_PARA_ID</span>))
+            .<span class="ident">build_storage</span>()
+            .<span class="ident">unwrap</span>();
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_create_local_chain_spec</span>() {
+        <span class="ident">local_config</span>(<span class="ident">ParaId::from</span>(<span class="ident">DEFAULT_PARA_ID</span>))
             .<span class="ident">build_storage</span>()
             .<span class="ident">unwrap</span>();
     }
