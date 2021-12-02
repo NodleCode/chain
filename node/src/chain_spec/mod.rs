@@ -77,9 +77,6 @@ pub(crate) fn get_authority_keys_from_seed(
     )
 }
 
-// #[serde(deny_unknown_fields)]
-// #[serde(rename_all = "camelCase")]
-
 /// The extensions for the [`ChainSpec`].
 #[derive(Default, Clone, Serialize, Deserialize, ChainSpecExtension)]
 #[serde(rename_all = "camelCase")]
