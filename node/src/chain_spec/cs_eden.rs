@@ -148,12 +148,12 @@ fn development_config_genesis(id: ParaId) -> GenesisConfig {
     )
 }
 
-/// Development config (single validator Alice)
+/// Development config (Alice and Bob as collators)
 pub fn development_config(id: ParaId) -> ChainSpec {
     ChainSpec::from_genesis(
         "ParaChain Eden Development",
         "para_eden_dev",
-        ChainType::Local,
+        ChainType::Development,
         move || development_config_genesis(id),
         vec![],
         None,
@@ -161,6 +161,54 @@ pub fn development_config(id: ParaId) -> ChainSpec {
         Some(build_local_properties()),
         Extensions {
             relay_chain: "rococo-local".into(),
+            para_id: id.into(),
+        },
+    )
+}
+
+fn local_config_genesis(id: ParaId) -> GenesisConfig {
+    eden_genesis(
+        get_account_id_from_seed::<sr25519::Public>("Alice"),
+        vec![
+            (
+                get_account_id_from_seed::<sr25519::Public>("Alice"),
+                get_collator_keys_from_seed("Alice"),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>("Bob"),
+                get_collator_keys_from_seed("Bob"),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>("Charlie"),
+                get_collator_keys_from_seed("Charlie"),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>("Dave"),
+                get_collator_keys_from_seed("Dave"),
+            ),
+            (
+                get_account_id_from_seed::<sr25519::Public>("Eve"),
+                get_collator_keys_from_seed("Eve"),
+            ),
+        ],
+        Some(vec![]), // disable endowed accounts
+        id.into(),
+    )
+}
+
+/// Local config, as close as possible to production (5 collators, no balances)
+pub fn local_config(id: ParaId) -> ChainSpec {
+    ChainSpec::from_genesis(
+        "ParaChain Local Development",
+        "para_eden_local",
+        ChainType::Local,
+        move || local_config_genesis(id),
+        vec![],
+        None,
+        Some("nodl"),
+        Some(build_local_properties()),
+        Extensions {
+            relay_chain: "westend".into(),
             para_id: id.into(),
         },
     )
@@ -176,6 +224,13 @@ pub(crate) mod tests {
     #[test]
     fn test_create_development_chain_spec() {
         development_config(ParaId::from(DEFAULT_PARA_ID))
+            .build_storage()
+            .unwrap();
+    }
+
+    #[test]
+    fn test_create_local_chain_spec() {
+        local_config(ParaId::from(DEFAULT_PARA_ID))
             .build_storage()
             .unwrap();
     }

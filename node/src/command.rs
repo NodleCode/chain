@@ -90,6 +90,7 @@ fn load_spec(
         "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
         "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
         "eden-dev" => Box::new(chain_spec::cs_eden::development_config(para_id)),
+        "eden-local" => Box::new(chain_spec::cs_eden::local_config(para_id)),
         "" | "main" => Box::new(chain_spec::cs_main::main_config()),
         "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
         path => {
