@@ -281,8 +281,8 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn test_create_valid_chain_spec() {
-        valid_config(ParaId::from(DEFAULT_PARA_ID))
+    fn test_create_eden_util_config() {
+        eden_util_config(ParaId::from(DEFAULT_PARA_ID))
             .build_storage()
             .unwrap();
     }
