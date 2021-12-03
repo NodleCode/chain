@@ -197,7 +197,7 @@ pub fn local_config(id: ParaId) -> ChainSpec {
     )
 }
 
-fn valid_config_genesis(id: ParaId) -> GenesisConfig {
+fn eden_util_config_genesis(id: ParaId) -> GenesisConfig {
     let valid_01_seed =
         "castle fiscal easy grief horse include alley next youth deny engine response";
     let valid_02_seed =
@@ -239,13 +239,15 @@ fn valid_config_genesis(id: ParaId) -> GenesisConfig {
     )
 }
 
-/// Local config, as close as possible to production (5 collators, no balances)
-pub fn valid_config(id: ParaId) -> ChainSpec {
+/// Util config to get used with sub-command build-spec
+/// to generate the chain spec for production.
+/// use it to generate the template chain-spec using build-spec subcommand.
+pub fn eden_util_config(id: ParaId) -> ChainSpec {
     ChainSpec::from_genesis(
-        "ParaChain Local Development",
-        "para_eden_local",
-        ChainType::Local,
-        move || valid_config_genesis(id),
+        "ParaChain Eden Live",
+        "para_eden_live",
+        ChainType::Live,
+        move || eden_util_config_genesis(id),
         vec![],
         None,
         Some("nodl"),
