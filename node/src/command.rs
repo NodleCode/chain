@@ -457,7 +457,7 @@ pub fn run() -> Result<()> {
                 } else {
                     log::info!("Entering Para Chain");
 
-                    let para_id = chain_spec::cs_eden::Extensions::try_get(&*config.chain_spec)
+                    let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
                         .map(|e| e.para_id)
                         .ok_or_else(|| "Could not find parachain extension in chain-spec.")?;
 

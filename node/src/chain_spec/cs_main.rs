@@ -17,7 +17,7 @@
  */
 
 use crate::chain_spec::{
-    build_local_properties, get_account_id_from_seed, get_authority_keys_from_seed,
+    build_local_properties, get_account_id_from_seed, get_authority_keys_from_seed, Extensions,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Balance, BlockNumber};
@@ -33,7 +33,7 @@ use sp_consensus_babe::AuthorityId as BabeId;
 use sp_core::sr25519;
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 
-pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 
 fn session_keys(
     grandpa: GrandpaId,
